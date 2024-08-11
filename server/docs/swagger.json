@@ -1,0 +1,85 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "grocerycompare",
+        "title": "grocerycompare",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "host": "localhost:1323",
+    "basePath": "/v1",
+    "paths": {
+        "/item/": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "player"
+                ],
+                "summary": "Create new player with defaults",
+                "parameters": [
+                    {
+                        "description": "Item Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Item"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Item"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.Item": {
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "cost": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    }
+}

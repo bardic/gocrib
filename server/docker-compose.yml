@@ -1,0 +1,31 @@
+version: '3'
+services:
+  server:
+    image: grocit
+    build: ./
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 80:1323 
+  db: 
+    image: postgres:16.2-bullseye
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=example
+      - POSTGRES_DB=grocit
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5432:5432
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

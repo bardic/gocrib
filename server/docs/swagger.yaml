@@ -1,0 +1,56 @@
+basePath: /v1
+definitions:
+  model.Item:
+    properties:
+      barcode:
+        type: string
+      cost:
+        type: integer
+      date:
+        type: string
+      name:
+        type: string
+      weight:
+        type: string
+    type: object
+host: localhost:1323
+info:
+  contact: {}
+  description: grocerycompare
+  title: grocerycompare
+  version: 0.0.1
+paths:
+  /item/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.Item'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Item'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new player with defaults
+      tags:
+      - player
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
