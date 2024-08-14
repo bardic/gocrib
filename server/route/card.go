@@ -16,7 +16,7 @@ import (
 // @Tags         cards
 // @Accept       json
 // @Produce      json
-// @Param details body model.card true "card Object to save"
+// @Param details body model.Card true "card Object to save"
 // @Success      200  {object}  model.Card
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
@@ -52,8 +52,8 @@ func NewCard(c echo.Context) error {
 // @Tags         cards
 // @Accept       json
 // @Produce      json
-// @Param details body model.card true "card Object to save"
-// @Success      200  {object}  model.card
+// @Param details body model.Card true "card Object to save"
+// @Success      200  {object}  model.Card
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -91,7 +91,7 @@ func UpdateCard(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for card by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.card
+// @Success      200  {object}  model.Card
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -134,7 +134,7 @@ func GetCard(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for card by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.card
+// @Success      200  {object}  model.Card
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error

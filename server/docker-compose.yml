@@ -1,14 +1,12 @@
-version: '3'
 services:
-  server:
-    image: grocit
+  cribbage-server:
     build: ./
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - 80:1323 
-  db: 
+      - 80:1323
+  db:
     image: postgres:16.2-bullseye
     restart: always
     # set shared memory limit when using docker-compose

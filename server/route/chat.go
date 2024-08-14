@@ -17,7 +17,7 @@ import (
 // @Tags         chats
 // @Accept       json
 // @Produce      json
-// @Param details body model.chat true "chat Object to save"
+// @Param details body model.Chat true "chat Object to save"
 // @Success      200  {object}  model.Chat
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
@@ -66,8 +66,8 @@ func NewChat(c echo.Context) error {
 // @Tags         chats
 // @Accept       json
 // @Produce      json
-// @Param details body model.chat true "chat Object to save"
-// @Success      200  {object}  model.chat
+// @Param details body model.Chat true "chat Object to save"
+// @Success      200  {object}  model.Chat
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -105,7 +105,7 @@ func UpdateChat(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for chat by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.chat
+// @Success      200  {object}  model.Chat
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -148,7 +148,7 @@ func GetChat(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for chat by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.chat
+// @Success      200  {object}  model.Chat
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error

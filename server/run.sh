@@ -1,3 +1,5 @@
 #!/bin/sh 
 
-docker compose down && docker image rm grocit -f &&  docker compose up --force-recreate
+docker compose down 
+docker image rm cribbage-server -f
+docker compose up --force-recreate

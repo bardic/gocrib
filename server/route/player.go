@@ -17,7 +17,7 @@ import (
 // @Tags         players
 // @Accept       json
 // @Produce      json
-// @Param details body model.player true "player Object to save"
+// @Param details body model.Player true "player Object to save"
 // @Success      200  {object}  model.Player
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
@@ -54,8 +54,8 @@ func NewPlayer(c echo.Context) error {
 // @Tags         players
 // @Accept       json
 // @Produce      json
-// @Param details body model.player true "player Object to save"
-// @Success      200  {object}  model.player
+// @Param details body model.Player true "player Object to save"
+// @Success      200  {object}  model.Player
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -93,7 +93,7 @@ func UpdatePlayer(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for player by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.player
+// @Success      200  {object}  model.Player
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -137,7 +137,7 @@ func GetPlayer(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for player by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.player
+// @Success      200  {object}  model.Player
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error

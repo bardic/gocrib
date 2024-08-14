@@ -11,7 +11,7 @@ COPY *.go ./
 
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 RUN swag init --parseDependency --parseInternal
-RUN CGO_ENABLED=0 GOOS=linux go build -o ./grocit
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./cribbage-server
 COPY up.sh ./
 COPY migrations/ ./migrations
 

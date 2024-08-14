@@ -17,7 +17,7 @@ import (
 // @Tags         lobbys
 // @Accept       json
 // @Produce      json
-// @Param details body model.lobby true "lobby Object to save"
+// @Param details body model.Lobby true "lobby Object to save"
 // @Success      200  {object}  model.Lobby
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
@@ -54,8 +54,8 @@ func NewLobby(c echo.Context) error {
 // @Tags         lobbys
 // @Accept       json
 // @Produce      json
-// @Param details body model.lobby true "lobby Object to save"
-// @Success      200  {object}  model.lobby
+// @Param details body model.Lobby true "lobby Object to save"
+// @Success      200  {object}  model.Lobby
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -93,7 +93,7 @@ func UpdateLobby(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for lobby by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.lobby
+// @Success      200  {object}  model.Lobby
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -137,7 +137,7 @@ func GetLobby(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for lobby by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.lobby
+// @Success      200  {object}  model.Lobby
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error

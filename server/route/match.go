@@ -18,7 +18,7 @@ import (
 // @Tags         matchs
 // @Accept       json
 // @Produce      json
-// @Param details body model.match true "match Object to save"
+// @Param details body model.Match true "match Object to save"
 // @Success      200  {object}  model.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
@@ -55,8 +55,8 @@ func NewMatch(c echo.Context) error {
 // @Tags         matchs
 // @Accept       json
 // @Produce      json
-// @Param details body model.match true "match Object to save"
-// @Success      200  {object}  model.match
+// @Param details body model.Match true "match Object to save"
+// @Success      200  {object}  model.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -94,7 +94,7 @@ func UpdateMatch(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for match by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.match
+// @Success      200  {object}  model.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -139,7 +139,7 @@ func GetMatch(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for match by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.match
+// @Success      200  {object}  model.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error

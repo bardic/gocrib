@@ -17,7 +17,7 @@ import (
 // @Tags         historys
 // @Accept       json
 // @Produce      json
-// @Param details body model.history true "history Object to save"
+// @Param details body model.History true "history Object to save"
 // @Success      200  {object}  model.History
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
@@ -61,8 +61,8 @@ func NewHistory(c echo.Context) error {
 // @Tags         historys
 // @Accept       json
 // @Produce      json
-// @Param details body model.history true "history Object to save"
-// @Success      200  {object}  model.history
+// @Param details body model.History true "history Object to save"
+// @Success      200  {object}  model.History
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -100,7 +100,7 @@ func UpdateHistory(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for history by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.history
+// @Success      200  {object}  model.History
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -144,7 +144,7 @@ func GetHistory(c echo.Context) error {
 // @Produce      json
 // @Param        barcode    query     string  true  "search for history by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.history
+// @Success      200  {object}  model.History
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
