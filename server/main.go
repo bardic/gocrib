@@ -1,8 +1,8 @@
 package main
 
-// @title grocerycompare
+// @title cribbage server
 // @version 0.0.2
-// @description grocerycompare
+// @description cribbage rest server
 
 // @host localhost
 // @securityDefinitions.basic BasicAuth
