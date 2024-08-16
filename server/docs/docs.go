@@ -15,7 +15,52 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/item/": {
+        "/admin/card/": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Create new card",
+                "parameters": [
+                    {
+                        "description": "card Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Card"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/card/": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -24,13 +69,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "items"
+                    "cards"
                 ],
-                "summary": "Get item by barcode",
+                "summary": "Get card by barcode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for item by barcode",
+                        "description": "search for card by barcode",
                         "name": "barcode",
                         "in": "query",
                         "required": true
@@ -47,7 +92,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Item"
+                            "$ref": "#/definitions/model.Card"
                         }
                     },
                     "400": {
@@ -72,17 +117,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "items"
+                    "cards"
                 ],
-                "summary": "Update item by barcode",
+                "summary": "Update card by barcode",
                 "parameters": [
                     {
-                        "description": "Item Object to save",
+                        "description": "card Object to save",
                         "name": "details",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Item"
+                            "$ref": "#/definitions/model.Card"
                         }
                     }
                 ],
@@ -90,7 +135,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Item"
+                            "$ref": "#/definitions/model.Card"
                         }
                     },
                     "400": {
@@ -107,7 +152,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
+            "delete": {
                 "consumes": [
                     "application/json"
                 ],
@@ -115,101 +160,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "items"
+                    "cards"
                 ],
-                "summary": "Create new item",
-                "parameters": [
-                    {
-                        "description": "Item Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Item"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Item"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/items/fromStore": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "summary": "Get items from store",
+                "summary": "Get card by barcode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Store which to get items from",
-                        "name": "storeId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Items"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/items/related": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "items"
-                ],
-                "summary": "Get items related to barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "barcode to get related items to",
+                        "description": "search for card by barcode",
                         "name": "barcode",
                         "in": "query",
                         "required": true
@@ -226,7 +183,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Item"
+                            "$ref": "#/definitions/model.Card"
                         }
                     },
                     "400": {
@@ -244,7 +201,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/store/": {
+        "/chat/": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -253,13 +210,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "storePosition"
+                    "chats"
                 ],
-                "summary": "Get store by storeId",
+                "summary": "Get chat by barcode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "StorePosition for storeID",
+                        "description": "search for chat by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
                         "name": "storeId",
                         "in": "query",
                         "required": true
@@ -269,7 +233,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.StorePosition"
+                            "$ref": "#/definitions/model.Chat"
                         }
                     },
                     "400": {
@@ -294,17 +258,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "storePosition"
+                    "chats"
                 ],
-                "summary": "Update storePosition by storeID",
+                "summary": "Update chat by barcode",
                 "parameters": [
                     {
-                        "description": "Update storePosition for storeId",
+                        "description": "chat Object to save",
                         "name": "details",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.StorePosition"
+                            "$ref": "#/definitions/model.Chat"
                         }
                     }
                 ],
@@ -312,7 +276,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.StorePosition"
+                            "$ref": "#/definitions/model.Chat"
                         }
                     },
                     "400": {
@@ -337,17 +301,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "storePosition"
+                    "chats"
                 ],
-                "summary": "Create new store position",
+                "summary": "Create new chat",
                 "parameters": [
                     {
-                        "description": "StorePosition to save",
+                        "description": "chat Object to save",
                         "name": "details",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.StorePosition"
+                            "$ref": "#/definitions/model.Chat"
                         }
                     }
                 ],
@@ -355,7 +319,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.StorePosition"
+                            "$ref": "#/definitions/model.Chat"
                         }
                     },
                     "400": {
@@ -371,10 +335,8 @@ const docTemplate = `{
                         "schema": {}
                     }
                 }
-            }
-        },
-        "/store/byPosition": {
-            "get": {
+            },
+            "delete": {
                 "consumes": [
                     "application/json"
                 ],
@@ -382,64 +344,21 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "storePosition"
+                    "chats"
                 ],
-                "summary": "Get store by storeId",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "StorePosition for storeID",
-                        "name": "lat",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "StorePosition for storeID",
-                        "name": "long",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.StorePosition"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/tag/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tags"
-                ],
-                "summary": "Get item by barcode",
+                "summary": "Get chat by barcode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for tag by id",
-                        "name": "tagid",
+                        "description": "search for chat by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
                         "in": "query",
                         "required": true
                     }
@@ -448,7 +367,57 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Tag"
+                            "$ref": "#/definitions/model.Chat"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/history/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "historys"
+                ],
+                "summary": "Get history by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for history by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.History"
                         }
                     },
                     "400": {
@@ -473,17 +442,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tags"
+                    "historys"
                 ],
-                "summary": "Update tag by id",
+                "summary": "Update history by barcode",
                 "parameters": [
                     {
-                        "description": "Item Object to save",
+                        "description": "history Object to save",
                         "name": "details",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Tag"
+                            "$ref": "#/definitions/model.History"
                         }
                     }
                 ],
@@ -491,7 +460,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Tag"
+                            "$ref": "#/definitions/model.History"
                         }
                     },
                     "400": {
@@ -516,17 +485,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tags"
+                    "historys"
                 ],
-                "summary": "Create new tag",
+                "summary": "Create new history",
                 "parameters": [
                     {
-                        "description": "New tag to save",
+                        "description": "history Object to save",
                         "name": "details",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Tag"
+                            "$ref": "#/definitions/model.History"
                         }
                     }
                 ],
@@ -534,7 +503,607 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Tag"
+                            "$ref": "#/definitions/model.History"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "historys"
+                ],
+                "summary": "Get history by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for history by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.History"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/lobby/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lobbys"
+                ],
+                "summary": "Get lobby by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for lobby by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Lobby"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lobbys"
+                ],
+                "summary": "Update lobby by barcode",
+                "parameters": [
+                    {
+                        "description": "lobby Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Lobby"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Lobby"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lobbys"
+                ],
+                "summary": "Create new lobby",
+                "parameters": [
+                    {
+                        "description": "lobby Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Lobby"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Lobby"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lobbys"
+                ],
+                "summary": "Get lobby by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for lobby by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Lobby"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matchs"
+                ],
+                "summary": "Get match by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for match by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matchs"
+                ],
+                "summary": "Update match by barcode",
+                "parameters": [
+                    {
+                        "description": "match Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matchs"
+                ],
+                "summary": "Create new match",
+                "parameters": [
+                    {
+                        "description": "match Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "matchs"
+                ],
+                "summary": "Get match by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for match by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/player/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Get player by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for player by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Player"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Update player by barcode",
+                "parameters": [
+                    {
+                        "description": "player Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Player"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Player"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Create new player",
+                "parameters": [
+                    {
+                        "description": "player Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Player"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Player"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Get player by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for player by barcode",
+                        "name": "barcode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Store in which the barcode was found",
+                        "name": "storeId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Player"
                         }
                     },
                     "400": {
@@ -554,76 +1123,226 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.Item": {
+        "model.Card": {
             "type": "object",
             "properties": {
-                "barcode": {
+                "art": {
                     "type": "string"
                 },
-                "cost": {
-                    "type": "number"
+                "currOwner": {
+                    "type": "integer"
                 },
-                "name": {
-                    "type": "string"
+                "origOwner": {
+                    "type": "integer"
                 },
-                "storeId": {
-                    "type": "string"
+                "state": {
+                    "$ref": "#/definitions/model.CardState"
                 },
-                "storeName": {
-                    "type": "string"
+                "suit": {
+                    "$ref": "#/definitions/model.Suit"
                 },
-                "storeNeighborhood": {
-                    "type": "string"
-                },
-                "tags": {
+                "value": {
+                    "$ref": "#/definitions/model.CardValue"
+                }
+            }
+        },
+        "model.CardState": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-varnames": [
+                "Deck",
+                "Hand",
+                "Play",
+                "Kitty",
+                "Cut"
+            ]
+        },
+        "model.CardValue": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12
+            ],
+            "x-enum-varnames": [
+                "Ace",
+                "Two",
+                "Three",
+                "Four",
+                "Five",
+                "Six",
+                "Seven",
+                "Eight",
+                "Nine",
+                "Ten",
+                "Jack",
+                "Queen",
+                "King"
+            ]
+        },
+        "model.Chat": {
+            "type": "object",
+            "properties": {
+                "members": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "unit": {
-                    "type": "string"
-                },
-                "weight": {
-                    "type": "number"
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ChatMessage"
+                    }
                 }
             }
         },
-        "model.Items": {
+        "model.ChatMessage": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.History": {
+            "type": "object",
+            "properties": {
+                "matchCompletetionDate": {
+                    "type": "string"
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "matchOutcome": {
+                    "$ref": "#/definitions/model.MatchOutcome"
+                }
+            }
+        },
+        "model.Lobby": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "creatationDate": {
+                    "type": "string"
+                },
+                "eloRangeMax": {
+                    "type": "integer"
+                },
+                "eloRangeMin": {
+                    "type": "integer"
+                },
+                "privateMatch": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.Match": {
+            "type": "object",
+            "properties": {
+                "boardId": {
+                    "type": "integer"
+                },
+                "currentPlayerTurn": {
+                    "type": "integer"
+                },
+                "lobbyId": {
+                    "type": "integer"
+                },
+                "turnPassTimestamps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.MatchOutcome": {
+            "type": "object",
+            "properties": {
+                "losers": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "winners": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "model.Player": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "hand": {
+                    "$ref": "#/definitions/model.PlayerHand"
+                },
+                "kitty": {
+                    "$ref": "#/definitions/model.PlayerHand"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.PlayerHand": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Item"
+                        "$ref": "#/definitions/model.Card"
                     }
+                },
+                "size": {
+                    "type": "integer"
                 }
             }
         },
-        "model.StorePosition": {
-            "type": "object",
-            "properties": {
-                "distance": {
-                    "type": "number"
-                },
-                "lat": {
-                    "type": "number"
-                },
-                "long": {
-                    "type": "number"
-                },
-                "storeId": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.Tag": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
+        "model.Suit": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "Spades",
+                "Clubs",
+                "Hearts",
+                "Diamonds"
+            ]
         }
     },
     "securityDefinitions": {
@@ -636,11 +1355,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.0.2",
-	Host:             "localhost",
+	Host:             "localhost:1323",
 	BasePath:         "/v1",
 	Schemes:          []string{},
-	Title:            "grocerycompare",
-	Description:      "grocerycompare",
+	Title:            "cribbage server",
+	Description:      "cribbage rest server",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

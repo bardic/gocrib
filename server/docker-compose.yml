@@ -1,5 +1,6 @@
 services:
   cribbage-server:
+    profiles: [game]
     build: ./
     depends_on:
       db:
@@ -7,6 +8,7 @@ services:
     ports:
       - 80:1323
   db:
+    profiles: [db]
     image: postgres:16.2-bullseye
     restart: always
     # set shared memory limit when using docker-compose
@@ -23,6 +25,7 @@ services:
     ports:
       - 5432:5432
   adminer:
+    profiles: [db]
     image: adminer
     restart: always
     ports:

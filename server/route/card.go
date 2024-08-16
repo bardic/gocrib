@@ -21,7 +21,7 @@ import (
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router       /card/ [post]
+// @Router       /admin/card/ [post]
 func NewCard(c echo.Context) error {
 	details := new(model.Card)
 	if err := c.Bind(details); err != nil {
