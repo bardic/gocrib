@@ -7,17 +7,10 @@
   - curr_owner
   - state
   - art
-- hand
-  - maxSize
-  - []Cards
 - players
-  - hand
-  - kitty
+  - hand []Card
+  - kitty []Card
   - score
-  - art
-- board
-  - id
-  - []players
   - art
 - lobby
   - []accounts
@@ -30,7 +23,8 @@
   - lobbyId
   - currentPlayerTurn
   - []TurnPassTimestamps
-  - boardId
+  - []players
+  - art
 
 # Server/DB Structs
 

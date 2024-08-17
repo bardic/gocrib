@@ -66,7 +66,7 @@ func UpdateCard(c echo.Context) error {
 
 	args := parseCard(*details)
 
-	query := "UPDATE cards SET value=@value, suit=@suit, currentOwner=@currentOwner, originalOwner=@originalOwner, state=@state, art=@art"
+	query := "UPDATE cards SET value=@value, suit=@suit, art=@art"
 
 	db := model.Pool()
 	defer db.Close()
@@ -89,13 +89,12 @@ func UpdateCard(c echo.Context) error {
 // @Tags         cards
 // @Accept       json
 // @Produce      json
-// @Param        barcode    query     string  true  "search for card by barcode"'
-// @Param        storeId    query     string  true  "Store in which the barcode was found"'
+// @Param        id    query     string  true  "search for card by id"'
 // @Success      200  {object}  model.Card
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router       /card/ [get]
+// @Router       /player/card/ [get]
 func GetCard(c echo.Context) error {
 	id := c.Request().URL.Query().Get("id")
 
@@ -109,7 +108,7 @@ func GetCard(c echo.Context) error {
 	for rows.Next() {
 		var card model.Card
 
-		err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.CurrOwner, &card.OrigOwner, &card.State, &card.Art)
+		err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.Art)
 		if err != nil {
 			return err
 		}
@@ -146,11 +145,8 @@ func DeleteCard(c echo.Context) error {
 
 func parseCard(details model.Card) pgx.NamedArgs {
 	return pgx.NamedArgs{
-		"value":         details.Value,
-		"suit":          details.Suit,
-		"currentOwner":  details.CurrOwner,
-		"originalOwner": details.OrigOwner,
-		"state":         details.State,
-		"art":           details.Art,
+		"value": details.Value,
+		"suit":  details.Suit,
+		"art":   details.Art,
 	}
 }

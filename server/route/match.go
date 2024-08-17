@@ -69,7 +69,7 @@ func UpdateMatch(c echo.Context) error {
 
 	args := parseMatch(*details)
 
-	query := "UPDATE matchs SET name = @name, cost = @cost, weight = @weight, unit=@unit, storename=@storeName, storeNeighborhood=@storeNeighborhood, tags=@tags where barcode = @barcode AND storeId = @storeId"
+	query := "UPDATE matchs SET lobbyId = @lobbyId, currentPlayerTurn = @currentPlayerTurn, turnPassTimestamps=@turnPassTimestamps, players=@players, art=@art where id=@id"
 
 	db := model.Pool()
 	defer db.Close()
@@ -112,7 +112,7 @@ func GetMatch(c echo.Context) error {
 	for rows.Next() {
 		var match model.Match
 
-		err := rows.Scan(&match.Id, &match.LobbyId, &match.BoardId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps)
+		err := rows.Scan(&match.Id, &match.LobbyId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Players, &match.Art)
 		if err != nil {
 			fmt.Println(err)
 			return err
@@ -155,9 +155,11 @@ func DeleteMatch(c echo.Context) error {
 
 func parseMatch(details model.Match) pgx.NamedArgs {
 	return pgx.NamedArgs{
+		"id":                 details.Id,
 		"lobbyId":            details.LobbyId,
-		"boardId":            details.BoardId,
 		"currentPlayerTurn":  details.CurrentPlayerTurn,
 		"turnPassTimestamps": details.TurnPassTimestamps,
+		"players":            details.Players,
+		"art":                details.Art,
 	}
 }

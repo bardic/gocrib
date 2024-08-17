@@ -31,7 +31,7 @@ func NewLobby(c echo.Context) error {
 
 	args := parseLobby(*details)
 
-	query := "INSERT INTO lobbys(value, suit, currentOwner, originalOwner, state, art) VALUES (@value, @suit, @currentOwner, @originalOwner, @state, @art)"
+	query := "INSERT INTO lobbys(players, privateMatch, eloRangeMin, eloRangeMax, creatationDate) VALUES (@players, @privateMatch, @eloRangeMin, @eloRangeMax, @creatationDate)"
 
 	db := model.Pool()
 	defer db.Close()
@@ -68,7 +68,7 @@ func UpdateLobby(c echo.Context) error {
 
 	args := parseLobby(*details)
 
-	query := "UPDATE lobbys SET name = @name, cost = @cost, weight = @weight, unit=@unit, storename=@storeName, storeNeighborhood=@storeNeighborhood, tags=@tags where barcode = @barcode AND storeId = @storeId"
+	query := "UPDATE lobbys SET players=@players, privateMatch=@privateMatch, eloRangeMin=@eloRangeMin, eloRangeMax=@eloRangeMax, creatationDate=@creatationDate id = @id"
 
 	db := model.Pool()
 	defer db.Close()
@@ -111,7 +111,7 @@ func GetLobby(c echo.Context) error {
 	for rows.Next() {
 		var lobby model.Lobby
 
-		err := rows.Scan(&lobby.Id, &lobby.Accounts, &lobby.CreatationDate, &lobby.PrivateMatch, &lobby.EloRangeMin, &lobby.EloRangeMax)
+		err := rows.Scan(&lobby.Id, &lobby.Players, &lobby.PrivateMatch, &lobby.EloRangeMin, &lobby.EloRangeMax, &lobby.CreatationDate)
 		if err != nil {
 			fmt.Println(err)
 			return err
@@ -153,10 +153,10 @@ func DeleteLobby(c echo.Context) error {
 
 func parseLobby(details model.Lobby) pgx.NamedArgs {
 	return pgx.NamedArgs{
-		"Accounts":       details.Accounts,
-		"CreatationDate": details.CreatationDate,
+		"Accounts":       details.Players,
 		"PrivateMatch":   details.PrivateMatch,
 		"EloRangeMin":    details.EloRangeMin,
 		"EloRangeMax":    details.EloRangeMax,
+		"CreatationDate": details.CreatationDate,
 	}
 }

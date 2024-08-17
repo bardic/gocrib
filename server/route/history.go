@@ -30,15 +30,7 @@ func NewHistory(c echo.Context) error {
 	}
 
 	args := parseHistory(*details)
-
-	// "value":         details.Value,
-	// 		"suit":          details.Suit,
-	// 		"currentOwner":  details.Curr_owner,
-	// 		"originalOwner": details.Orig_owner,
-	// 		"state":         details.State,
-	// 		"art":           details.Art,
-
-	query := "INSERT INTO historys(value, suit, currentOwner, originalOwner, state, art) VALUES (@value, @suit, @currentOwner, @originalOwner, @state, @art)"
+	query := "INSERT INTO historys(matchId, matchCompletetionDate, winners, losers) VALUES (@matchId, @matchCompletetionDate, @currentOwner, @originalOwner, @winners, @losers)"
 
 	db := model.Pool()
 	defer db.Close()
@@ -75,7 +67,7 @@ func UpdateHistory(c echo.Context) error {
 
 	args := parseHistory(*details)
 
-	query := "UPDATE historys SET name = @name, cost = @cost, weight = @weight, unit=@unit, storename=@storeName, storeNeighborhood=@storeNeighborhood, tags=@tags where barcode = @barcode AND storeId = @storeId"
+	query := "UPDATE historys SET matchId = @matchId, matchCompletetionDate = @matchCompletetionDate, winners = @winners, losers=@losers, storename=@storeName, storeNeighborhood=@storeNeighborhood, tags=@tags where barcode = @barcode AND storeId = @storeId"
 
 	db := model.Pool()
 	defer db.Close()
@@ -118,7 +110,7 @@ func GetHistory(c echo.Context) error {
 	for rows.Next() {
 		var history model.History
 
-		err := rows.Scan(&history.MatchId, &history.MatchCompletetionDate, &history.MatchOutcome)
+		err := rows.Scan(&history.MatchId, &history.MatchCompletetionDate, &history.Winners, &history.Losers)
 		if err != nil {
 			fmt.Println(err)
 			return &echo.BindingError{}
@@ -162,6 +154,7 @@ func parseHistory(details model.History) pgx.NamedArgs {
 	return pgx.NamedArgs{
 		"matchId":               details.MatchId,
 		"matchCompletetionDate": details.MatchCompletetionDate,
-		"matchOutcome":          details.MatchOutcome,
+		"winners":               details.Winners,
+		"losers":                details.Losers,
 	}
 }

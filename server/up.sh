@@ -1,4 +1,4 @@
 #!/bin/sh
 
-# migrate -database "postgres://postgres:example@db:5432/grocit?sslmode=disable" -path migrations up
+migrate -database "postgres://postgres:example@db:5432/cribbage?sslmode=disable" -path migrations up
 ./cribbage-server
