@@ -63,8 +63,7 @@ func v1Routes(g *echo.Group) {
 	adminGroup.DELETE("/player", route.DeletePlayer)
 	//Match
 	adminGroup.DELETE("/match", route.DeleteMatch)
-	//Lobby
-	adminGroup.DELETE("/lobby", route.DeleteLobby)
+
 	//History
 	adminGroup.DELETE("/history", route.DeleteHistory)
 	//Chat
@@ -86,6 +85,7 @@ func v1Routes(g *echo.Group) {
 	playerGroup.GET("/lobby", route.GetLobby)
 	playerGroup.POST("/lobby", route.NewLobby)
 	playerGroup.PUT("/lobby", route.UpdateLobby)
+	playerGroup.DELETE("/lobby", route.DeleteLobby)
 	// History
 	playerGroup.GET("/history", route.GetHistory)
 	playerGroup.POST("/history", route.NewHistory)

@@ -6,7 +6,7 @@ package main
 
 // @host localhost
 // @securityDefinitions.basic BasicAuth
-// @host localhost
+// @host localhost:1323
 // @BasePath /v1
 func main() {
 	r := &Router{}

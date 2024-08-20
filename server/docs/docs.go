@@ -16,6 +16,45 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/admin/card/": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Update card by id",
+                "parameters": [
+                    {
+                        "description": "card Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Card"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -49,6 +88,45 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {}
                     },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/admin/match/": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Get match by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for match by barcode",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {}
@@ -61,97 +139,6 @@ const docTemplate = `{
             }
         },
         "/card/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Get card by barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for card by barcode",
-                        "name": "barcode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Store in which the barcode was found",
-                        "name": "storeId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Card"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Update card by barcode",
-                "parameters": [
-                    {
-                        "description": "card Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Card"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Card"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
             "delete": {
                 "consumes": [
                     "application/json"
@@ -569,7 +556,46 @@ const docTemplate = `{
                 }
             }
         },
-        "/lobby/": {
+        "/player/card/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get card by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for card by id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Card"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/player/lobby/": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -580,19 +606,12 @@ const docTemplate = `{
                 "tags": [
                     "lobbys"
                 ],
-                "summary": "Get lobby by barcode",
+                "summary": "Get lobby by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for lobby by barcode",
-                        "name": "barcode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Store in which the barcode was found",
-                        "name": "storeId",
+                        "description": "search for id by barcode",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     }
@@ -628,7 +647,7 @@ const docTemplate = `{
                 "tags": [
                     "lobbys"
                 ],
-                "summary": "Update lobby by barcode",
+                "summary": "Update lobby by id",
                 "parameters": [
                     {
                         "description": "lobby Object to save",
@@ -714,19 +733,12 @@ const docTemplate = `{
                 "tags": [
                     "lobbys"
                 ],
-                "summary": "Get lobby by barcode",
+                "summary": "delete lobby by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for lobby by barcode",
-                        "name": "barcode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Store in which the barcode was found",
-                        "name": "storeId",
+                        "description": "delete for lobby by id",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     }
@@ -753,7 +765,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/match/": {
+        "/player/match/": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -762,21 +774,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "matchs"
+                    "match"
                 ],
                 "summary": "Get match by barcode",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "search for match by barcode",
-                        "name": "barcode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Store in which the barcode was found",
-                        "name": "storeId",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     }
@@ -810,7 +815,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "matchs"
+                    "match"
                 ],
                 "summary": "Update match by barcode",
                 "parameters": [
@@ -853,7 +858,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "matchs"
+                    "match"
                 ],
                 "summary": "Create new match",
                 "parameters": [
@@ -887,57 +892,9 @@ const docTemplate = `{
                         "schema": {}
                     }
                 }
-            },
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "matchs"
-                ],
-                "summary": "Get match by barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for match by barcode",
-                        "name": "barcode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Store in which the barcode was found",
-                        "name": "storeId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
             }
         },
-        "/player/": {
+        "/player/player/": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -952,15 +909,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for player by barcode",
-                        "name": "barcode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Store in which the barcode was found",
-                        "name": "storeId",
+                        "description": "search for match by barcode",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     }
@@ -1086,15 +1036,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for player by barcode",
-                        "name": "barcode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Store in which the barcode was found",
-                        "name": "storeId",
+                        "description": "search for match by barcode",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     }
@@ -1129,14 +1072,8 @@ const docTemplate = `{
                 "art": {
                     "type": "string"
                 },
-                "currOwner": {
+                "id": {
                     "type": "integer"
-                },
-                "origOwner": {
-                    "type": "integer"
-                },
-                "state": {
-                    "$ref": "#/definitions/model.CardState"
                 },
                 "suit": {
                     "$ref": "#/definitions/model.Suit"
@@ -1145,23 +1082,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/model.CardValue"
                 }
             }
-        },
-        "model.CardState": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-varnames": [
-                "Deck",
-                "Hand",
-                "Play",
-                "Kitty",
-                "Cut"
-            ]
         },
         "model.CardValue": {
             "type": "integer",
@@ -1178,7 +1098,8 @@ const docTemplate = `{
                 9,
                 10,
                 11,
-                12
+                12,
+                13
             ],
             "x-enum-varnames": [
                 "Ace",
@@ -1193,7 +1114,8 @@ const docTemplate = `{
                 "Ten",
                 "Jack",
                 "Queen",
-                "King"
+                "King",
+                "Joker"
             ]
         },
         "model.Chat": {
@@ -1219,6 +1141,9 @@ const docTemplate = `{
                 "message": {
                     "type": "string"
                 },
+                "sender": {
+                    "type": "integer"
+                },
                 "timestamp": {
                     "type": "string"
                 }
@@ -1227,26 +1152,29 @@ const docTemplate = `{
         "model.History": {
             "type": "object",
             "properties": {
+                "losers": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "matchCompletetionDate": {
                     "type": "string"
                 },
                 "matchId": {
                     "type": "integer"
                 },
-                "matchOutcome": {
-                    "$ref": "#/definitions/model.MatchOutcome"
+                "winners": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
         "model.Lobby": {
             "type": "object",
             "properties": {
-                "accounts": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "creatationDate": {
                     "type": "string"
                 },
@@ -1256,6 +1184,15 @@ const docTemplate = `{
                 "eloRangeMin": {
                     "type": "integer"
                 },
+                "id": {
+                    "type": "integer"
+                },
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "privateMatch": {
                     "type": "boolean"
                 }
@@ -1264,37 +1201,23 @@ const docTemplate = `{
         "model.Match": {
             "type": "object",
             "properties": {
-                "boardId": {
-                    "type": "integer"
+                "art": {
+                    "type": "string"
                 },
                 "currentPlayerTurn": {
                     "type": "integer"
                 },
-                "lobbyId": {
-                    "type": "integer"
-                },
-                "turnPassTimestamps": {
+                "date": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "model.MatchOutcome": {
-            "type": "object",
-            "properties": {
-                "losers": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
-                "winners": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                "id": {
+                    "type": "integer"
+                },
+                "lobbyId": {
+                    "type": "integer"
                 }
             }
         },
@@ -1305,26 +1228,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "hand": {
-                    "$ref": "#/definitions/model.PlayerHand"
-                },
-                "kitty": {
-                    "$ref": "#/definitions/model.PlayerHand"
-                },
-                "score": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.PlayerHand": {
-            "type": "object",
-            "properties": {
-                "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Card"
+                        "type": "integer"
                     }
                 },
-                "size": {
+                "id": {
+                    "type": "integer"
+                },
+                "kitty": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "score": {
                     "type": "integer"
                 }
             }

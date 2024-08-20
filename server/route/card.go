@@ -19,17 +19,16 @@ import (
 // @Param details body model.Card true "card Object to save"
 // @Success      200  {object}  model.Card
 // @Failure      400  {object}  error
-// @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /admin/card/ [post]
 func NewCard(c echo.Context) error {
 	details := new(model.Card)
 	if err := c.Bind(details); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
 	args := parseCard(*details)
-	query := "INSERT INTO cards(value, suit, currentOwner, originalOwner, state, art) VALUES (@value, @suit, @currentOwner, @originalOwner, @state, @art)"
+	query := "INSERT INTO cards(value, suit, art) VALUES (@value, @suit, @art)"
 
 	db := model.Pool()
 	defer db.Close()
@@ -40,14 +39,14 @@ func NewCard(c echo.Context) error {
 		args)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, "meow")
+	return c.JSON(http.StatusOK, "Success")
 }
 
 // Create godoc
-// @Summary      Update card by barcode
+// @Summary      Update card by id
 // @Description
 // @Tags         cards
 // @Accept       json
@@ -55,18 +54,17 @@ func NewCard(c echo.Context) error {
 // @Param details body model.Card true "card Object to save"
 // @Success      200  {object}  model.Card
 // @Failure      400  {object}  error
-// @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router       /card/ [put]
+// @Router       /admin/card/ [put]
 func UpdateCard(c echo.Context) error {
 	details := new(model.Card)
 	if err := c.Bind(details); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	args := parseCard(*details)
 
-	query := "UPDATE cards SET value=@value, suit=@suit, art=@art"
+	query := "UPDATE cards SET value=@value, suit=@suit, art=@art where id = @id"
 
 	db := model.Pool()
 	defer db.Close()
@@ -77,10 +75,10 @@ func UpdateCard(c echo.Context) error {
 		args)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, "meow")
+	return c.JSON(http.StatusOK, "Card updated")
 }
 
 // Create godoc
@@ -91,7 +89,6 @@ func UpdateCard(c echo.Context) error {
 // @Produce      json
 // @Param        id    query     string  true  "search for card by id"'
 // @Success      200  {object}  model.Card
-// @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/card/ [get]
@@ -103,6 +100,10 @@ func GetCard(c echo.Context) error {
 
 	rows, err := db.Query(context.Background(), "SELECT * FROM cards WHERE id=$1", id)
 
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
+
 	v := []model.Card{}
 
 	for rows.Next() {
@@ -110,17 +111,21 @@ func GetCard(c echo.Context) error {
 
 		err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.Art)
 		if err != nil {
-			return err
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 
 		v = append(v, card)
 	}
 
-	if err != nil {
-		return err
+	if len(v) > 1 {
+		return c.JSON(http.StatusInternalServerError, "Too many cards with the same id found")
 	}
 
-	r, _ := json.Marshal(v)
+	if len(v) == 0 {
+		return c.JSON(http.StatusNotFound, "No card with ID found")
+	}
+
+	r, _ := json.Marshal(v[0])
 
 	return c.JSON(http.StatusOK, string(r))
 }
@@ -145,6 +150,7 @@ func DeleteCard(c echo.Context) error {
 
 func parseCard(details model.Card) pgx.NamedArgs {
 	return pgx.NamedArgs{
+		"id":    details.Id,
 		"value": details.Value,
 		"suit":  details.Suit,
 		"art":   details.Art,

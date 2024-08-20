@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/bardic/cribbage/server/model"
 	"github.com/jackc/pgx/v5"
@@ -15,7 +16,7 @@ import (
 // Create godoc
 // @Summary      Create new match
 // @Description
-// @Tags         matchs
+// @Tags         match
 // @Accept       json
 // @Produce      json
 // @Param details body model.Match true "match Object to save"
@@ -23,16 +24,17 @@ import (
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router       /match/ [post]
+// @Router       /player/match/ [post]
 func NewMatch(c echo.Context) error {
 	details := new(model.Match)
+	fmt.Print(time.Now())
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	args := parseMatch(*details)
 
-	query := "INSERT INTO matchs(value, suit, currentOwner, originalOwner, state, art) VALUES (@value, @suit, @currentOwner, @originalOwner, @state, @art)"
+	query := "INSERT INTO match(lobbyId, currentPlayerTurn, turnPassTimestamps, art) VALUES (@lobbyId, @currentPlayerTurn, @turnPassTimestamps, @art)"
 
 	db := model.Pool()
 	defer db.Close()
@@ -43,7 +45,7 @@ func NewMatch(c echo.Context) error {
 		args)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, "meow")
@@ -52,7 +54,7 @@ func NewMatch(c echo.Context) error {
 // Create godoc
 // @Summary      Update match by barcode
 // @Description
-// @Tags         matchs
+// @Tags         match
 // @Accept       json
 // @Produce      json
 // @Param details body model.Match true "match Object to save"
@@ -60,7 +62,7 @@ func NewMatch(c echo.Context) error {
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router       /match/ [put]
+// @Router       /player/match/ [put]
 func UpdateMatch(c echo.Context) error {
 	details := new(model.Match)
 	if err := c.Bind(details); err != nil {
@@ -69,7 +71,7 @@ func UpdateMatch(c echo.Context) error {
 
 	args := parseMatch(*details)
 
-	query := "UPDATE matchs SET lobbyId = @lobbyId, currentPlayerTurn = @currentPlayerTurn, turnPassTimestamps=@turnPassTimestamps, players=@players, art=@art where id=@id"
+	query := "UPDATE match SET lobbyId = @lobbyId, currentPlayerTurn = @currentPlayerTurn, turnPassTimestamps=@turnPassTimestamps, art=@art where id=@id"
 
 	db := model.Pool()
 	defer db.Close()
@@ -89,30 +91,29 @@ func UpdateMatch(c echo.Context) error {
 // Create godoc
 // @Summary      Get match by barcode
 // @Description
-// @Tags         matchs
+// @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param        barcode    query     string  true  "search for match by barcode"'
-// @Param        storeId    query     string  true  "Store in which the barcode was found"'
+// @Param        id    query     string  true  "search for match by barcode"'
 // @Success      200  {object}  model.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router       /match/ [get]
+// @Router       /player/match/ [get]
 func GetMatch(c echo.Context) error {
 	id := c.Request().URL.Query().Get("id")
 
 	db := model.Pool()
 	defer db.Close()
 
-	rows, err := db.Query(context.Background(), "SELECT * FROM matchs WHERE id=$1", id)
+	rows, err := db.Query(context.Background(), "SELECT * FROM match WHERE id=$1", id)
 
 	v := []model.Match{}
 
 	for rows.Next() {
 		var match model.Match
 
-		err := rows.Scan(&match.Id, &match.LobbyId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Players, &match.Art)
+		err := rows.Scan(&match.Id, &match.LobbyId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Art)
 		if err != nil {
 			fmt.Println(err)
 			return err
@@ -128,22 +129,21 @@ func GetMatch(c echo.Context) error {
 
 	r, _ := json.Marshal(v)
 
-	return c.JSON(http.StatusOK, r)
+	return c.JSON(http.StatusOK, string(r))
 }
 
 // Create godoc
 // @Summary      Get match by barcode
 // @Description
-// @Tags         matchs
+// @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param        barcode    query     string  true  "search for match by barcode"'
-// @Param        storeId    query     string  true  "Store in which the barcode was found"'
+// @Param        id    query     string  true  "search for match by barcode"'
 // @Success      200  {object}  model.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router       /match/ [delete]
+// @Router       /admin/match/ [delete]
 func DeleteMatch(c echo.Context) error {
 	// b := c.Request().URL.Query().Get("barcode")
 	// s := c.Request().URL.Query().Get("storeId")
@@ -159,7 +159,6 @@ func parseMatch(details model.Match) pgx.NamedArgs {
 		"lobbyId":            details.LobbyId,
 		"currentPlayerTurn":  details.CurrentPlayerTurn,
 		"turnPassTimestamps": details.TurnPassTimestamps,
-		"players":            details.Players,
 		"art":                details.Art,
 	}
 }

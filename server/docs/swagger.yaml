@@ -4,31 +4,13 @@ definitions:
     properties:
       art:
         type: string
-      currOwner:
+      id:
         type: integer
-      origOwner:
-        type: integer
-      state:
-        $ref: '#/definitions/model.CardState'
       suit:
         $ref: '#/definitions/model.Suit'
       value:
         $ref: '#/definitions/model.CardValue'
     type: object
-  model.CardState:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-varnames:
-    - Deck
-    - Hand
-    - Play
-    - Kitty
-    - Cut
   model.CardValue:
     enum:
     - 0
@@ -44,6 +26,7 @@ definitions:
     - 10
     - 11
     - 12
+    - 13
     type: integer
     x-enum-varnames:
     - Ace
@@ -59,6 +42,7 @@ definitions:
     - Jack
     - Queen
     - King
+    - Joker
   model.Chat:
     properties:
       members:
@@ -74,75 +58,73 @@ definitions:
     properties:
       message:
         type: string
+      sender:
+        type: integer
       timestamp:
         type: string
     type: object
   model.History:
     properties:
+      losers:
+        items:
+          type: integer
+        type: array
       matchCompletetionDate:
         type: string
       matchId:
         type: integer
-      matchOutcome:
-        $ref: '#/definitions/model.MatchOutcome'
-    type: object
-  model.Lobby:
-    properties:
-      accounts:
+      winners:
         items:
           type: integer
         type: array
+    type: object
+  model.Lobby:
+    properties:
       creatationDate:
         type: string
       eloRangeMax:
         type: integer
       eloRangeMin:
         type: integer
+      id:
+        type: integer
+      players:
+        items:
+          type: integer
+        type: array
       privateMatch:
         type: boolean
     type: object
   model.Match:
     properties:
-      boardId:
-        type: integer
+      art:
+        type: string
       currentPlayerTurn:
         type: integer
-      lobbyId:
-        type: integer
-      turnPassTimestamps:
+      date:
         items:
           type: string
         type: array
-    type: object
-  model.MatchOutcome:
-    properties:
-      losers:
-        items:
-          type: integer
-        type: array
-      winners:
-        items:
-          type: integer
-        type: array
+      id:
+        type: integer
+      lobbyId:
+        type: integer
     type: object
   model.Player:
     properties:
       art:
         type: string
       hand:
-        $ref: '#/definitions/model.PlayerHand'
-      kitty:
-        $ref: '#/definitions/model.PlayerHand'
-      score:
-        type: integer
-    type: object
-  model.PlayerHand:
-    properties:
-      items:
         items:
-          $ref: '#/definitions/model.Card'
+          type: integer
         type: array
-      size:
+      id:
+        type: integer
+      kitty:
+        items:
+          type: integer
+        type: array
+      score:
         type: integer
     type: object
   model.Suit:
@@ -185,15 +167,67 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-        "404":
-          description: Not Found
-          schema: {}
         "500":
           description: Internal Server Error
           schema: {}
       summary: Create new card
       tags:
       - cards
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: card Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.Card'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Card'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update card by id
+      tags:
+      - cards
+  /admin/match/:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by barcode
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get match by barcode
+      tags:
+      - match
   /card/:
     delete:
       consumes:
@@ -226,68 +260,6 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: Get card by barcode
-      tags:
-      - cards
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for card by barcode
-        in: query
-        name: barcode
-        required: true
-        type: string
-      - description: Store in which the barcode was found
-        in: query
-        name: storeId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Card'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get card by barcode
-      tags:
-      - cards
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: card Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/model.Card'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Card'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update card by barcode
       tags:
       - cards
   /chat/:
@@ -540,19 +512,40 @@ paths:
       summary: Update history by barcode
       tags:
       - historys
-  /lobby/:
+  /player/card/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for card by id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Card'
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get card by barcode
+      tags:
+      - cards
+  /player/lobby/:
     delete:
       consumes:
       - application/json
       parameters:
-      - description: search for lobby by barcode
+      - description: delete for lobby by id
         in: query
-        name: barcode
-        required: true
-        type: string
-      - description: Store in which the barcode was found
-        in: query
-        name: storeId
+        name: id
         required: true
         type: string
       produces:
@@ -571,21 +564,16 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Get lobby by barcode
+      summary: delete lobby by id
       tags:
       - lobbys
     get:
       consumes:
       - application/json
       parameters:
-      - description: search for lobby by barcode
+      - description: search for id by barcode
         in: query
-        name: barcode
-        required: true
-        type: string
-      - description: Store in which the barcode was found
-        in: query
-        name: storeId
+        name: id
         required: true
         type: string
       produces:
@@ -604,7 +592,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Get lobby by barcode
+      summary: Get lobby by id
       tags:
       - lobbys
     post:
@@ -662,55 +650,17 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Update lobby by barcode
+      summary: Update lobby by id
       tags:
       - lobbys
-  /match/:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for match by barcode
-        in: query
-        name: barcode
-        required: true
-        type: string
-      - description: Store in which the barcode was found
-        in: query
-        name: storeId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Match'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get match by barcode
-      tags:
-      - matchs
+  /player/match/:
     get:
       consumes:
       - application/json
       parameters:
       - description: search for match by barcode
         in: query
-        name: barcode
-        required: true
-        type: string
-      - description: Store in which the barcode was found
-        in: query
-        name: storeId
+        name: id
         required: true
         type: string
       produces:
@@ -731,7 +681,7 @@ paths:
           schema: {}
       summary: Get match by barcode
       tags:
-      - matchs
+      - match
     post:
       consumes:
       - application/json
@@ -760,7 +710,7 @@ paths:
           schema: {}
       summary: Create new match
       tags:
-      - matchs
+      - match
     put:
       consumes:
       - application/json
@@ -789,20 +739,15 @@ paths:
           schema: {}
       summary: Update match by barcode
       tags:
-      - matchs
-  /player/:
+      - match
+  /player/player/:
     delete:
       consumes:
       - application/json
       parameters:
-      - description: search for player by barcode
+      - description: search for match by barcode
         in: query
-        name: barcode
-        required: true
-        type: string
-      - description: Store in which the barcode was found
-        in: query
-        name: storeId
+        name: id
         required: true
         type: string
       produces:
@@ -828,14 +773,9 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: search for player by barcode
+      - description: search for match by barcode
         in: query
-        name: barcode
-        required: true
-        type: string
-      - description: Store in which the barcode was found
-        in: query
-        name: storeId
+        name: id
         required: true
         type: string
       produces:

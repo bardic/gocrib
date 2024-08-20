@@ -1,5 +1,9 @@
 package model
 
+import (
+	"time"
+)
+
 type CardValue int
 
 const (
@@ -39,7 +43,7 @@ const (
 )
 
 type Card struct {
-	Id    int `json:"-"`
+	Id    int
 	Value CardValue
 	Suit  Suit
 	Art   string
@@ -53,9 +57,9 @@ type GameplayCard struct {
 }
 
 type Player struct {
-	Id    int `json:"-"`
-	Hand  []Card
-	Kitty []Card
+	Id    int
+	Hand  []int
+	Kitty []int
 	Score int
 	Art   string
 }
@@ -80,19 +84,18 @@ type ChatMessage struct {
 }
 
 type Lobby struct {
-	Id             int `json:"-"`
-	Players       []int
+	Id             int
+	Players        []int
 	PrivateMatch   bool
 	EloRangeMin    int
 	EloRangeMax    int
-	CreatationDate string
+	CreatationDate time.Time
 }
 
 type Match struct {
-	Id                 int `json:"-"`
+	Id                 int
 	LobbyId            int
 	CurrentPlayerTurn  int
-	TurnPassTimestamps []string
-	Players            []Player
+	TurnPassTimestamps []string `json:"date"`
 	Art                string
 }
