@@ -39,7 +39,6 @@ const (
 	Hand
 	Play
 	Kitty
-	Cut
 )
 
 type Card struct {
@@ -50,7 +49,7 @@ type Card struct {
 }
 
 type GameplayCard struct {
-	Id        int `json:"-"`
+	Id        int
 	OrigOwner int
 	CurrOwner int
 	State     CardState
@@ -95,7 +94,33 @@ type Lobby struct {
 type Match struct {
 	Id                 int
 	LobbyId            int
+	CardsInPlay        []int
+	CutGameCardId      int
 	CurrentPlayerTurn  int
-	TurnPassTimestamps []string `json:"date"`
+	TurnPassTimestamps []string
 	Art                string
+}
+
+type GameActionType int
+
+const (
+	Cut GameActionType = iota
+	Discard
+	Peg
+	Tally
+)
+
+type GameAction struct {
+	MatchId int
+	Type    GameActionType
+	Card    GameplayCard
+}
+
+type ScoreResults struct {
+	Results []Scores
+}
+
+type Scores struct {
+	Cards []int
+	Point int
 }

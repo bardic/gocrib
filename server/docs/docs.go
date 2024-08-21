@@ -372,6 +372,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/game/playCard/": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "Play a card",
+                "parameters": [
+                    {
+                        "description": "Action to perform",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.GameAction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.ScoreResults"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/history/": {
             "get": {
                 "consumes": [
@@ -1083,6 +1128,21 @@ const docTemplate = `{
                 }
             }
         },
+        "model.CardState": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "Deck",
+                "Hand",
+                "Play",
+                "Kitty"
+            ]
+        },
         "model.CardValue": {
             "type": "integer",
             "enum": [
@@ -1149,6 +1209,52 @@ const docTemplate = `{
                 }
             }
         },
+        "model.GameAction": {
+            "type": "object",
+            "properties": {
+                "card": {
+                    "$ref": "#/definitions/model.GameplayCard"
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.GameActionType"
+                }
+            }
+        },
+        "model.GameActionType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "Cut",
+                "Discard",
+                "Peg",
+                "Tally"
+            ]
+        },
+        "model.GameplayCard": {
+            "type": "object",
+            "properties": {
+                "currOwner": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "origOwner": {
+                    "type": "integer"
+                },
+                "state": {
+                    "$ref": "#/definitions/model.CardState"
+                }
+            }
+        },
         "model.History": {
             "type": "object",
             "properties": {
@@ -1204,20 +1310,29 @@ const docTemplate = `{
                 "art": {
                     "type": "string"
                 },
+                "cardsInPlay": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "currentPlayerTurn": {
                     "type": "integer"
                 },
-                "date": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "cutGameCardId": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "lobbyId": {
                     "type": "integer"
+                },
+                "turnPassTimestamps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1243,6 +1358,31 @@ const docTemplate = `{
                     }
                 },
                 "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.ScoreResults": {
+            "type": "object",
+            "properties": {
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Scores"
+                    }
+                }
+            }
+        },
+        "model.Scores": {
+            "type": "object",
+            "properties": {
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "point": {
                     "type": "integer"
                 }
             }

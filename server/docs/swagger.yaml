@@ -11,6 +11,18 @@ definitions:
       value:
         $ref: '#/definitions/model.CardValue'
     type: object
+  model.CardState:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - Deck
+    - Hand
+    - Play
+    - Kitty
   model.CardValue:
     enum:
     - 0
@@ -63,6 +75,38 @@ definitions:
       timestamp:
         type: string
     type: object
+  model.GameAction:
+    properties:
+      card:
+        $ref: '#/definitions/model.GameplayCard'
+      matchId:
+        type: integer
+      type:
+        $ref: '#/definitions/model.GameActionType'
+    type: object
+  model.GameActionType:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - Cut
+    - Discard
+    - Peg
+    - Tally
+  model.GameplayCard:
+    properties:
+      currOwner:
+        type: integer
+      id:
+        type: integer
+      origOwner:
+        type: integer
+      state:
+        $ref: '#/definitions/model.CardState'
+    type: object
   model.History:
     properties:
       losers:
@@ -99,16 +143,22 @@ definitions:
     properties:
       art:
         type: string
+      cardsInPlay:
+        items:
+          type: integer
+        type: array
       currentPlayerTurn:
         type: integer
-      date:
-        items:
-          type: string
-        type: array
+      cutGameCardId:
+        type: integer
       id:
         type: integer
       lobbyId:
         type: integer
+      turnPassTimestamps:
+        items:
+          type: string
+        type: array
     type: object
   model.Player:
     properties:
@@ -125,6 +175,22 @@ definitions:
           type: integer
         type: array
       score:
+        type: integer
+    type: object
+  model.ScoreResults:
+    properties:
+      results:
+        items:
+          $ref: '#/definitions/model.Scores'
+        type: array
+    type: object
+  model.Scores:
+    properties:
+      cards:
+        items:
+          type: integer
+        type: array
+      point:
         type: integer
     type: object
   model.Suit:
@@ -387,6 +453,36 @@ paths:
       summary: Update chat by barcode
       tags:
       - chats
+  /game/playCard/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Action to perform
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.GameAction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ScoreResults'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Play a card
+      tags:
+      - game
   /history/:
     delete:
       consumes:

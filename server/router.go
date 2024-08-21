@@ -95,4 +95,6 @@ func v1Routes(g *echo.Group) {
 	playerGroup.POST("/chat", route.NewChat)
 	playerGroup.PUT("/chat", route.UpdateChat)
 
+	gameGroup := g.Group("/game")
+	gameGroup.POST("/playCard", route.PlayCard)
 }

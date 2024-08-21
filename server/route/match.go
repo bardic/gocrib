@@ -34,7 +34,7 @@ func NewMatch(c echo.Context) error {
 
 	args := parseMatch(*details)
 
-	query := "INSERT INTO match(lobbyId, currentPlayerTurn, turnPassTimestamps, art) VALUES (@lobbyId, @currentPlayerTurn, @turnPassTimestamps, @art)"
+	query := "INSERT INTO match(lobbyId, currentPlayerTurn, art) VALUES (@lobbyId, @currentPlayerTurn, @art)"
 
 	db := model.Pool()
 	defer db.Close()
@@ -71,7 +71,15 @@ func UpdateMatch(c echo.Context) error {
 
 	args := parseMatch(*details)
 
-	query := "UPDATE match SET lobbyId = @lobbyId, currentPlayerTurn = @currentPlayerTurn, turnPassTimestamps=@turnPassTimestamps, art=@art where id=@id"
+	if err := updateMatchQuery(args); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, "meow")
+}
+
+func updateMatchQuery(args pgx.NamedArgs) error {
+	query := "UPDATE match SET lobbyId = @lobbyId, cardsInPlay = @cardsInPlay, cutGameCardId = @cutGameCardId,currentPlayerTurn = @currentPlayerTurn, turnPassTimestamps=@turnPassTimestamps, art=@art where id=@id"
 
 	db := model.Pool()
 	defer db.Close()
@@ -85,7 +93,7 @@ func UpdateMatch(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, "meow")
+	return nil
 }
 
 // Create godoc
@@ -113,7 +121,7 @@ func GetMatch(c echo.Context) error {
 	for rows.Next() {
 		var match model.Match
 
-		err := rows.Scan(&match.Id, &match.LobbyId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Art)
+		err := rows.Scan(&match.Id, &match.LobbyId, &match.CardsInPlay, &match.CutGameCardId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Art)
 		if err != nil {
 			fmt.Println(err)
 			return err
@@ -153,10 +161,63 @@ func DeleteMatch(c echo.Context) error {
 	return c.JSON(http.StatusOK, nil)
 }
 
+func UpdateCut(matchId int, card model.GameplayCard) error {
+	args := pgx.NamedArgs{"id": matchId, "cardId": card.Id}
+
+	query := "UPDATE match SET cutGameCardId = @cardId where id=@id"
+
+	db := model.Pool()
+	defer db.Close()
+
+	_, err := db.Exec(
+		context.Background(),
+		query,
+		args)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateCardsInPlay(matchId int, card model.GameplayCard) error {
+	args := pgx.NamedArgs{"id": matchId, "cardId": card.Id}
+
+	query := "UPDATE match SET cardsInPlay = array_append(cardsInPlay, @cardId)	where id=@id RETURNING *"
+
+	db := model.Pool()
+	defer db.Close()
+
+	row := db.QueryRow(
+		context.Background(),
+		query,
+		args)
+
+	var match model.Match
+	err := row.Scan(
+		&match.Id,
+		&match.LobbyId,
+		&match.CardsInPlay,
+		&match.CutGameCardId,
+		&match.CurrentPlayerTurn,
+		&match.TurnPassTimestamps,
+		&match.Art
+	)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 func parseMatch(details model.Match) pgx.NamedArgs {
 	return pgx.NamedArgs{
 		"id":                 details.Id,
 		"lobbyId":            details.LobbyId,
+		"cardsInPlay":        details.CardsInPlay,
+		"cutGameCardId":      details.CutGameCardId,
 		"currentPlayerTurn":  details.CurrentPlayerTurn,
 		"turnPassTimestamps": details.TurnPassTimestamps,
 		"art":                details.Art,
