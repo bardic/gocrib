@@ -50,6 +50,7 @@ type Card struct {
 
 type GameplayCard struct {
 	Id        int
+	CardId    int
 	OrigOwner int
 	CurrOwner int
 	State     CardState

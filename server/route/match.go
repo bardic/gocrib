@@ -181,7 +181,7 @@ func UpdateCut(matchId int, card model.GameplayCard) error {
 	return nil
 }
 
-func UpdateCardsInPlay(matchId int, card model.GameplayCard) error {
+func UpdateCardsInPlay(matchId int, card model.GameplayCard) (model.Match, error) {
 	args := pgx.NamedArgs{"id": matchId, "cardId": card.Id}
 
 	query := "UPDATE match SET cardsInPlay = array_append(cardsInPlay, @cardId)	where id=@id RETURNING *"
@@ -202,14 +202,14 @@ func UpdateCardsInPlay(matchId int, card model.GameplayCard) error {
 		&match.CutGameCardId,
 		&match.CurrentPlayerTurn,
 		&match.TurnPassTimestamps,
-		&match.Art
+		&match.Art,
 	)
 	if err != nil {
 		fmt.Println(err)
-		return err
+		return model.Match{}, err
 	}
 
-	return nil
+	return match, nil
 }
 
 func parseMatch(details model.Match) pgx.NamedArgs {

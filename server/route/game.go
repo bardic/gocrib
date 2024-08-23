@@ -2,6 +2,7 @@ package route
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/bardic/cribbage/server/model"
 	"github.com/labstack/echo/v4"
@@ -43,11 +44,11 @@ func PlayCard(c echo.Context) error {
 }
 
 func pegCard(matchId int, card model.GameplayCard) (model.ScoreResults, error) {
-	UpdateCardsInPlay(matchId, card)
+	match, err := UpdateCardsInPlay(matchId, card)
 
 	res := model.ScoreResults{}
 
-	r, err := scanForThirtyOne()
+	r, err := scanForThirtyOne(match.CardsInPlay)
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
@@ -76,13 +77,13 @@ func pegCard(matchId int, card model.GameplayCard) (model.ScoreResults, error) {
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForMatchingKinds()
+	r, err = scanForMatchingKinds(match.CardsInPlay, []model.Scores{})
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForRuns()
+	r, err = scanForRuns(match.CardsInPlay)
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
@@ -117,12 +118,61 @@ func cutDeck(matchId int, card model.GameplayCard) (model.ScoreResults, error) {
 	}}, nil
 }
 
-func scanForRuns() ([]model.Scores, error) {
-	return []model.Scores{}, nil
+func scanForRuns(cardsInPlay []int) ([]model.Scores, error) {
+
+	slices.Sort(cardsInPlay)
+	var plays []int
+	pointsFound := []model.Scores{}
+	if cardsInPlay[0]+1 == cardsInPlay[1] &&
+		cardsInPlay[1]+1 == cardsInPlay[2] {
+		plays = []int{cardsInPlay[0], cardsInPlay[1], cardsInPlay[2]}
+		pointsFound = append(pointsFound, model.Scores{
+			Cards: plays,
+			Point: 3,
+		})
+
+		if cardsInPlay[2]+1 == cardsInPlay[3] {
+			plays = append(cardsInPlay, cardsInPlay[3])
+			pointsFound = append(pointsFound, model.Scores{
+				Cards: plays,
+				Point: 4,
+			})
+		}
+	}
+
+	return pointsFound, nil
 }
 
-func scanForMatchingKinds() ([]model.Scores, error) {
-	return []model.Scores{}, nil
+func scanForMatchingKinds(cardsInPlay []int, pointsFound []model.Scores) ([]model.Scores, error) {
+	slices.Sort(cardsInPlay)
+
+	if len(cardsInPlay) > 0 && cardsInPlay[0] == cardsInPlay[1] {
+		plays := []int{cardsInPlay[0], cardsInPlay[1]}
+		pointsFound = append(pointsFound, model.Scores{
+			Cards: plays,
+			Point: 2,
+		})
+		if len(cardsInPlay) > 1 && cardsInPlay[1] == cardsInPlay[2] {
+			plays = append(plays, cardsInPlay[2])
+			pointsFound = append(pointsFound, model.Scores{
+				Cards: plays,
+				Point: 6,
+			})
+			if len(cardsInPlay) > 2 && cardsInPlay[2] == cardsInPlay[3] {
+				plays = append(plays, cardsInPlay[3])
+				pointsFound = append(pointsFound, model.Scores{
+					Cards: plays,
+					Point: 12,
+				})
+			}
+		}
+	}
+
+	if len(cardsInPlay) > 2 {
+		scanForMatchingKinds(cardsInPlay[1:], pointsFound)
+	}
+
+	return pointsFound, nil
 }
 
 func scanForFifthteens() ([]model.Scores, error) {
@@ -133,8 +183,27 @@ func scanDeckCut() ([]model.Scores, error) {
 	return []model.Scores{}, nil
 }
 
-func scanForThirtyOne() ([]model.Scores, error) {
-	return []model.Scores{}, nil
+func scanForThirtyOne(cardsInPlay []int) ([]model.Scores, error) {
+	count := 0
+	plays := []int{}
+	pointsFound := []model.Scores{}
+
+	for _, card := range cardsInPlay {
+		count += card //todo fix this
+		plays = append(plays, card)
+		if count == 31 {
+			pointsFound = append(pointsFound, model.Scores{
+				Cards: plays,
+				Point: 2,
+			})
+
+			if len(plays) < len(cardsInPlay) {
+				scanForThirtyOne(cardsInPlay[1:])
+			}
+		}
+	}
+
+	return pointsFound, nil
 }
 
 func scanForLastCard() ([]model.Scores, error) {
