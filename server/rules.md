@@ -4,23 +4,19 @@
 
 ## 1 v 1
 
-Hand Size : 6
-    - Two thrown into the kitty
+Hand Size : 6 - Two thrown into the kitty
 
 Kitty SIze: 4
 
 ## 1v1v1
 
-Hand Size : 5
-    - One thown to kitty
+Hand Size : 5 - One thown to kitty
 
-Kitty Size 3
-    - One taken from deck
+Kitty Size 3 - One taken from deck
 
 ## 2v2
 
-Hand Size : 5
-    - One thown to kitty
+Hand Size : 5 - One thown to kitty
 
 Kitty Size 4
 
@@ -32,6 +28,7 @@ Kitty Size 4
 - 15 - 2 points
 - Run >= 3 : 1 point per card
 - Right Jack: 1 point
+- Flush
 
 # Pegging
 

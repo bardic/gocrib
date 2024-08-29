@@ -34,7 +34,7 @@ func NewMatch(c echo.Context) error {
 
 	args := parseMatch(*details)
 
-	query := "INSERT INTO match(lobbyId, currentPlayerTurn, art) VALUES (@lobbyId, @currentPlayerTurn, @art)"
+	query := "INSERT INTO match(lobbyId, deckId, currentPlayerTurn, art) VALUES (@lobbyId, @deckId, @currentPlayerTurn, @art)"
 
 	db := model.Pool()
 	defer db.Close()
@@ -79,7 +79,7 @@ func UpdateMatch(c echo.Context) error {
 }
 
 func updateMatchQuery(args pgx.NamedArgs) error {
-	query := "UPDATE match SET lobbyId = @lobbyId, cardsInPlay = @cardsInPlay, cutGameCardId = @cutGameCardId,currentPlayerTurn = @currentPlayerTurn, turnPassTimestamps=@turnPassTimestamps, art=@art where id=@id"
+	query := "UPDATE match SET lobbyId = @lobbyId, deckId = @deckId, cardsInPlay = @cardsInPlay, cutGameCardId = @cutGameCardId,currentPlayerTurn = @currentPlayerTurn, turnPassTimestamps=@turnPassTimestamps, art=@art where id=@id"
 
 	db := model.Pool()
 	defer db.Close()
@@ -114,25 +114,24 @@ func GetMatch(c echo.Context) error {
 	db := model.Pool()
 	defer db.Close()
 
-	rows, err := db.Query(context.Background(), "SELECT * FROM match WHERE id=$1", id)
+	rows, err := db.Query(context.Background(), "SELECT json_agg( json_build_object('lobbyid', lobbyid, 'players', (SELECT json_agg(json_build_object( 'item_id', p.id,'product_id', p.hand, 'quantity', p.kitty )) FROM player as p WHERE p.id = ANY(m.playerids)))) FROM match as m WHERE m.lobbyId = $1", id)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		os.Exit(1)
+	}
 
 	v := []model.Match{}
 
 	for rows.Next() {
-		var match model.Match
+		var match []model.Match
 
-		err := rows.Scan(&match.Id, &match.LobbyId, &match.CardsInPlay, &match.CutGameCardId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Art)
+		err := rows.Scan(&match) //.Id, &match.LobbyId, &match.DeckId, &match.CardsInPlay, &match.CutGameCardId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Art, &match.Players
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
 
-		v = append(v, match)
-	}
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		os.Exit(1)
+		v = append(v, match...)
 	}
 
 	r, _ := json.Marshal(v)
@@ -198,6 +197,7 @@ func UpdateCardsInPlay(matchId int, card model.GameplayCard) (model.Match, error
 	err := row.Scan(
 		&match.Id,
 		&match.LobbyId,
+		&match.DeckId,
 		&match.CardsInPlay,
 		&match.CutGameCardId,
 		&match.CurrentPlayerTurn,
@@ -216,6 +216,7 @@ func parseMatch(details model.Match) pgx.NamedArgs {
 	return pgx.NamedArgs{
 		"id":                 details.Id,
 		"lobbyId":            details.LobbyId,
+		"deckId":             details.DeckId,
 		"cardsInPlay":        details.CardsInPlay,
 		"cutGameCardId":      details.CutGameCardId,
 		"currentPlayerTurn":  details.CurrentPlayerTurn,

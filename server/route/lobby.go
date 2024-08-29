@@ -117,7 +117,7 @@ func GetLobby(c echo.Context) error {
 	for rows.Next() {
 		var lobby model.Lobby
 
-		err := rows.Scan(&lobby.Id, &lobby.Players, &lobby.CreatationDate, &lobby.PrivateMatch, &lobby.EloRangeMin, &lobby.EloRangeMax)
+		err := rows.Scan(&lobby.Id, &lobby.AccountIds, &lobby.CreatationDate, &lobby.PrivateMatch, &lobby.EloRangeMin, &lobby.EloRangeMax)
 		if err != nil {
 			fmt.Println(err)
 			return err
@@ -165,7 +165,7 @@ func DeleteLobby(c echo.Context) error {
 
 func parseLobby(details model.Lobby) pgx.NamedArgs {
 	return pgx.NamedArgs{
-		"players":        details.Players,
+		"players":        details.AccountIds,
 		"privateMatch":   details.PrivateMatch,
 		"eloRangeMin":    details.EloRangeMin,
 		"eloRangeMax":    details.EloRangeMax,

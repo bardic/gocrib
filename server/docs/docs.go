@@ -138,6 +138,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/match/card": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Get match by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for match by barcode",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/card/": {
             "delete": {
                 "consumes": [
@@ -601,6 +644,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/player/allcards/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get all cards",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameplayCard"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/player/card/": {
             "get": {
                 "consumes": [
@@ -627,6 +703,48 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Card"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/player/gameplaycards/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get cards by ids",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "csv of ids",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameplayCard"
+                            }
                         }
                     },
                     "404": {
@@ -906,6 +1024,135 @@ const docTemplate = `{
                     "match"
                 ],
                 "summary": "Create new match",
+                "parameters": [
+                    {
+                        "description": "match Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/player/match/card": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Get match by barcode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for match by barcode",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Update match by barcode",
+                "parameters": [
+                    {
+                        "description": "match Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match_card"
+                ],
+                "summary": "Create new match card",
                 "parameters": [
                     {
                         "description": "match Object to save",
@@ -1241,6 +1488,12 @@ const docTemplate = `{
         "model.GameplayCard": {
             "type": "object",
             "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "cardId": {
+                    "type": "integer"
+                },
                 "currOwner": {
                     "type": "integer"
                 },
@@ -1252,6 +1505,12 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/model.CardState"
+                },
+                "suit": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "integer"
                 }
             }
         },
@@ -1281,6 +1540,12 @@ const docTemplate = `{
         "model.Lobby": {
             "type": "object",
             "properties": {
+                "accountIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "creatationDate": {
                     "type": "string"
                 },
@@ -1292,12 +1557,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "players": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "privateMatch": {
                     "type": "boolean"
@@ -1320,6 +1579,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "cutGameCardId": {
+                    "type": "integer"
+                },
+                "deckId": {
                     "type": "integer"
                 },
                 "id": {
@@ -1379,7 +1641,7 @@ const docTemplate = `{
                 "cards": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/model.GameplayCard"
                     }
                 },
                 "point": {

@@ -98,6 +98,10 @@ definitions:
     - Tally
   model.GameplayCard:
     properties:
+      art:
+        type: string
+      cardId:
+        type: integer
       currOwner:
         type: integer
       id:
@@ -106,6 +110,10 @@ definitions:
         type: integer
       state:
         $ref: '#/definitions/model.CardState'
+      suit:
+        type: string
+      value:
+        type: integer
     type: object
   model.History:
     properties:
@@ -124,6 +132,10 @@ definitions:
     type: object
   model.Lobby:
     properties:
+      accountIds:
+        items:
+          type: integer
+        type: array
       creatationDate:
         type: string
       eloRangeMax:
@@ -132,10 +144,6 @@ definitions:
         type: integer
       id:
         type: integer
-      players:
-        items:
-          type: integer
-        type: array
       privateMatch:
         type: boolean
     type: object
@@ -150,6 +158,8 @@ definitions:
       currentPlayerTurn:
         type: integer
       cutGameCardId:
+        type: integer
+      deckId:
         type: integer
       id:
         type: integer
@@ -188,7 +198,7 @@ definitions:
     properties:
       cards:
         items:
-          type: integer
+          $ref: '#/definitions/model.GameplayCard'
         type: array
       point:
         type: integer
@@ -266,6 +276,35 @@ paths:
       tags:
       - cards
   /admin/match/:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by barcode
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get match by barcode
+      tags:
+      - match
+  /admin/match/card:
     delete:
       consumes:
       - application/json
@@ -608,6 +647,28 @@ paths:
       summary: Update history by barcode
       tags:
       - historys
+  /player/allcards/:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.GameplayCard'
+            type: array
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get all cards
+      tags:
+      - cards
   /player/card/:
     get:
       consumes:
@@ -632,6 +693,34 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: Get card by barcode
+      tags:
+      - cards
+  /player/gameplaycards/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: csv of ids
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.GameplayCard'
+            type: array
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get cards by ids
       tags:
       - cards
   /player/lobby/:
@@ -807,6 +896,93 @@ paths:
       summary: Create new match
       tags:
       - match
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.Match'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update match by barcode
+      tags:
+      - match
+  /player/match/card:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by barcode
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get match by barcode
+      tags:
+      - match
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: match Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.Match'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new match card
+      tags:
+      - match_card
     put:
       consumes:
       - application/json

@@ -3,6 +3,7 @@ package route
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/bardic/cribbage/server/model"
@@ -128,6 +129,100 @@ func GetCard(c echo.Context) error {
 	r, _ := json.Marshal(v[0])
 
 	return c.JSON(http.StatusOK, string(r))
+}
+
+// Create godoc
+// @Summary      Get all cards
+// @Description
+// @Tags         cards
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  []model.GameplayCard{}
+// @Failure      404  {object}  error
+// @Failure      500  {object}  error
+// @Router       /player/allcards/ [get]
+func GetAllCards(c echo.Context) error {
+	db := model.Pool()
+	defer db.Close()
+
+	rows, err := db.Query(context.Background(), "SELECT * FROM cards")
+
+	if err != nil {
+		return c.JSON(http.StatusNotFound, err)
+	}
+
+	v := []model.Card{}
+
+	for rows.Next() {
+		var card model.Card
+
+		err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.Art)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		v = append(v, card)
+	}
+
+	if len(v) == 0 {
+		return c.JSON(http.StatusNotFound, "No cards found. Something is very wrong")
+	}
+
+	r, _ := json.Marshal(v)
+
+	return c.JSON(http.StatusOK, string(r))
+}
+
+// Create godoc
+// @Summary      Get cards by ids
+// @Description
+// @Tags         cards
+// @Accept       json
+// @Produce      json
+// @Param        ids    query     string  true  "csv of ids"'
+// @Success      200  {object}  []model.GameplayCard{}
+// @Failure      404  {object}  error
+// @Failure      500  {object}  error
+// @Router       /player/gameplaycards/ [get]
+func GetGameplayCards(c echo.Context) error {
+	ids := c.Request().URL.Query().Get("ids")
+	v, err := QueryForCards(ids)
+	if err != nil {
+		return err
+	}
+
+	r, _ := json.Marshal(v)
+	return c.JSON(http.StatusOK, string(r))
+}
+
+func QueryForCards(ids string) ([]model.GameplayCard, error) {
+	db := model.Pool()
+	defer db.Close()
+
+	rows, err := db.Query(context.Background(), "SELECT * FROM gameplaycards NATURAL JOIN cards WHERE gameplaycards.id IN ("+ids+")")
+
+	if err != nil {
+		return []model.GameplayCard{}, err
+	}
+
+	v := []model.GameplayCard{}
+
+	for rows.Next() {
+		var card model.GameplayCard
+
+		err := rows.Scan(&card.Id, &card.CardId, &card.OrigOwner, &card.CurrOwner, &card.State, &card.Value, &card.Suit, &card.Art)
+		if err != nil {
+			return []model.GameplayCard{}, err
+		}
+
+		v = append(v, card)
+	}
+
+	if len(v) == 0 {
+		return []model.GameplayCard{}, errors.New("No cards found.")
+	}
+
+	return v, nil
 }
 
 // Create godoc

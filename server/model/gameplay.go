@@ -54,6 +54,9 @@ type GameplayCard struct {
 	OrigOwner int
 	CurrOwner int
 	State     CardState
+	Value     int    `json:"-"`
+	Suit      string `json:"-"`
+	Art       string `json:"-"`
 }
 
 type Player struct {
@@ -85,7 +88,7 @@ type ChatMessage struct {
 
 type Lobby struct {
 	Id             int
-	Players        []int
+	AccountIds     []int
 	PrivateMatch   bool
 	EloRangeMin    int
 	EloRangeMax    int
@@ -95,11 +98,14 @@ type Lobby struct {
 type Match struct {
 	Id                 int
 	LobbyId            int
+	DeckId             int
+	PlayerId           []int
 	CardsInPlay        []int
 	CutGameCardId      int
 	CurrentPlayerTurn  int
 	TurnPassTimestamps []string
 	Art                string
+	Players            []Player `json:"-"`
 }
 
 type GameActionType int
@@ -122,6 +128,12 @@ type ScoreResults struct {
 }
 
 type Scores struct {
-	Cards []int
+	Cards []GameplayCard
 	Point int
+}
+
+type GameDeck struct {
+	Id      int
+	MatchId int
+	Cards   []int //GameplayCardId
 }
