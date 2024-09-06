@@ -77,8 +77,8 @@ definitions:
     type: object
   model.GameAction:
     properties:
-      card:
-        $ref: '#/definitions/model.GameplayCard'
+      gameplayCardId:
+        type: integer
       matchId:
         type: integer
       type:
@@ -98,8 +98,6 @@ definitions:
     - Tally
   model.GameplayCard:
     properties:
-      art:
-        type: string
       cardId:
         type: integer
       currOwner:
@@ -110,10 +108,6 @@ definitions:
         type: integer
       state:
         $ref: '#/definitions/model.CardState'
-      suit:
-        type: string
-      value:
-        type: integer
     type: object
   model.History:
     properties:
@@ -165,6 +159,14 @@ definitions:
         type: integer
       lobbyId:
         type: integer
+      playerIds:
+        items:
+          type: integer
+        type: array
+      players:
+        items:
+          $ref: '#/definitions/model.Player'
+        type: array
       turnPassTimestamps:
         items:
           type: string
@@ -855,14 +857,11 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Match'
-        "400":
-          description: Bad Request
-          schema: {}
         "404":
           description: Not Found
           schema: {}
-        "500":
-          description: Internal Server Error
+        "422":
+          description: Unprocessable Entity
           schema: {}
       summary: Get match by barcode
       tags:

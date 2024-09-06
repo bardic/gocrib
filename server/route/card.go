@@ -3,7 +3,6 @@ package route
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/bardic/cribbage/server/model"
@@ -216,10 +215,6 @@ func QueryForCards(ids string) ([]model.GameplayCard, error) {
 		}
 
 		v = append(v, card)
-	}
-
-	if len(v) == 0 {
-		return []model.GameplayCard{}, errors.New("No cards found.")
 	}
 
 	return v, nil

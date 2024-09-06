@@ -956,16 +956,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/model.Match"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {}
                     },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {}
                     }
                 }
@@ -1459,8 +1455,8 @@ const docTemplate = `{
         "model.GameAction": {
             "type": "object",
             "properties": {
-                "card": {
-                    "$ref": "#/definitions/model.GameplayCard"
+                "gameplayCardId": {
+                    "type": "integer"
                 },
                 "matchId": {
                     "type": "integer"
@@ -1488,9 +1484,6 @@ const docTemplate = `{
         "model.GameplayCard": {
             "type": "object",
             "properties": {
-                "art": {
-                    "type": "string"
-                },
                 "cardId": {
                     "type": "integer"
                 },
@@ -1505,12 +1498,6 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/model.CardState"
-                },
-                "suit": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "integer"
                 }
             }
         },
@@ -1589,6 +1576,18 @@ const docTemplate = `{
                 },
                 "lobbyId": {
                     "type": "integer"
+                },
+                "playerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Player"
+                    }
                 },
                 "turnPassTimestamps": {
                     "type": "array",

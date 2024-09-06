@@ -14,16 +14,25 @@ func TestThirtyOne(t *testing.T) {
 
 	scores, err := scanForThirtyOne(hand)
 	if len(scores) != 2 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q`, scores, err, 2)
 	}
 }
 
-func TestRunOfFour(t *testing.T) { //error: found two runs. one contains the other
+func TestNoThirtyOne(t *testing.T) {
+	hand := []int{1, 2, 3, 4}
+
+	scores, err := scanForThirtyOne(hand)
+	if len(scores) != 0 || err != nil {
+		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestRunOfFour(t *testing.T) {
 	hand := []int{9, 10, 11, 12}
 
 	scores, err := scanForRuns(hand)
 	if scores[0].Point != 4 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForRuns(hand) = %q, %v, want match for %#q`, scores, err, 4)
 	}
 }
 
@@ -32,7 +41,7 @@ func TestRunOfThree(t *testing.T) {
 
 	scores, err := scanForRuns(hand)
 	if scores[0].Point != 3 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForRuns(hand) = %q, %v, want match for %#q`, scores, err, 3)
 	}
 }
 
@@ -41,15 +50,15 @@ func TestTwoRunsOfThree(t *testing.T) {
 
 	scores, err := scanForRuns(hand)
 	if len(scores) != 2 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForRuns(hand) = %q, %v, want match for %#q`, scores, err, 2)
 	}
 
 	if scores[0].Point != 3 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForRuns(hand).points = %q, %v, want match for %#q`, scores[0].Point, err, 3)
 	}
 
 	if scores[1].Point != 3 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForRuns(hand).points = %q, %v, want match for %#q`, scores[1].Point, err, 3)
 	}
 }
 
@@ -59,7 +68,7 @@ func TestPair(t *testing.T) {
 	scores, err := scanForMatchingKinds(hand)
 	fmt.Println(scores[0])
 	if scores[0].Point != 2 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForMatchingKinds(hand) = %q, %v, want match for %#q`, scores, err, 2)
 	}
 }
 
@@ -68,12 +77,8 @@ func TestPairThree(t *testing.T) {
 
 	scores, err := scanForMatchingKinds(hand)
 	if len(scores) != 3 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForMatchingKinds(hand) = %q, %v, want match for %#q`, scores, err, 3)
 	}
-}
-
-func TestFlush(t *testing.T) {
-
 }
 
 func TestOneFifthteens(t *testing.T) {
@@ -81,7 +86,7 @@ func TestOneFifthteens(t *testing.T) {
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 1 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForFifthteens(hand) = %q, %v, want match for %#q`, scores, err, 1)
 	}
 }
 
@@ -90,7 +95,7 @@ func TestTwoFifthteens(t *testing.T) {
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 2 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForFifthteens(hand) = %q, %v, want match for %#q`, scores, err, 2)
 	}
 }
 
@@ -99,7 +104,7 @@ func TestThreeFifthteens(t *testing.T) {
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 3 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForFifthteens(hand) = %q, %v, want match for %#q`, scores, err, 3)
 	}
 }
 
@@ -108,7 +113,7 @@ func TestFourFifthteens(t *testing.T) {
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 4 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForFifthteens(hand) = %q, %v, want match for %#q`, scores, err, 4)
 	}
 }
 
@@ -117,7 +122,7 @@ func TestTwoFifthteensOfThree(t *testing.T) {
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 2 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForFifthteens(hand) = %q, %v, want match for %#q`, scores, err, 2)
 	}
 }
 
@@ -126,7 +131,7 @@ func TestThreeFifthteensOfMix(t *testing.T) {
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 3 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanForFifthteens(hand) = %q, %v, want match for %#q`, scores, err, 3)
 	}
 }
 
@@ -138,7 +143,7 @@ func TestRightJack(t *testing.T) {
 
 	scores, err := scanRightJackCut(hand, match)
 	if len(scores) != 1 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanRightJackCut(hand) = %q, %v, want match for %#q`, scores, err, 1)
 	}
 }
 
@@ -149,6 +154,327 @@ func TestJackOnCut(t *testing.T) {
 
 	scores, err := scanJackOnCut(match)
 	if len(scores) != 1 || err != nil {
-		t.Fatalf(`scanForThirtyOne(hand) = %q, %v, want match for %#q, nil`, scores, err, 2)
+		t.Fatalf(`scanJackOnCut(hand) = %q, %v, want match for %#q`, scores, err, 1)
+	}
+}
+
+func TestLastCard(t *testing.T) {
+	match := model.Match{
+		CardsInPlay:       []int{11, 24, 37, 2},
+		CurrentPlayerTurn: 0,
+		Players: []model.Player{
+			{
+				Id:   0,
+				Hand: []int{2, 3, 4, 5},
+			},
+			{
+				Id:   1,
+				Hand: []int{2, 3, 4, 5},
+			},
+		},
+	}
+
+	scores, err := scanForLastCard(match)
+	if len(scores) != 1 || err != nil {
+		t.Fatalf(`scanForLastCard(hand) = %q, %v, want match for %#q`, scores, err, 1)
+	}
+}
+
+func TestIsNotLastCard(t *testing.T) {
+	match := model.Match{
+		CardsInPlay:       []int{10, 24, 37, 2},
+		CurrentPlayerTurn: 0,
+		Players: []model.Player{
+			{
+				Id:   0,
+				Hand: []int{2, 3, 4, 5},
+			},
+			{
+				Id:   1,
+				Hand: []int{2, 3, 4, 5},
+			},
+		},
+	}
+
+	scores, err := scanForLastCard(match)
+	if len(scores) != 0 || err != nil {
+		t.Fatalf(`scanForLastCard(hand) = %q, %v, want match for %#q`, scores, err, 1)
+	}
+}
+
+func TestFlush(t *testing.T) {
+	match := model.Match{
+		CardsInPlay:       []int{11, 24, 37, 2},
+		CurrentPlayerTurn: 0,
+		Players: []model.Player{
+			{
+				Id:   0,
+				Hand: []int{2, 3, 4, 5},
+			},
+			{
+				Id:   1,
+				Hand: []int{2, 3, 4, 5},
+			},
+		},
+	}
+
+	scores, err := scanForFlush(match.Players[0].Hand)
+	if len(scores) != 1 || err != nil {
+		t.Fatalf(`scanForFlush(hand) = %q, %v, want match for %#q`, scores, err, 1)
+	}
+}
+
+func TestNoFlush(t *testing.T) {
+	match := model.Match{
+		CardsInPlay:       []int{11, 24, 37, 2},
+		CurrentPlayerTurn: 0,
+		Players: []model.Player{
+			{
+				Id:   0,
+				Hand: []int{2, 3, 4, 25},
+			},
+			{
+				Id:   1,
+				Hand: []int{2, 3, 4, 5},
+			},
+		},
+	}
+
+	scores, err := scanForFlush(match.Players[0].Hand)
+	if len(scores) != 0 || err != nil {
+		t.Fatalf(`scanForFlush(hand) = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingWithFithteens(t *testing.T) {
+	match := model.Match{
+		CardsInPlay: []int{
+			11,
+			6,
+		},
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{1, 2, 3, 4},
+			},
+			{
+				Id:   2,
+				Hand: []int{5, 6, 7, 8},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	if len(scores.Results) != 1 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingWithRunAndFithteens(t *testing.T) {
+	match := model.Match{
+		CardsInPlay: []int{
+			5,
+			6,
+			7,
+		},
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{1, 2, 3, 4},
+			},
+			{
+				Id:   2,
+				Hand: []int{5, 6, 7, 8},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	if len(scores.Results) != 2 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingLastCard(t *testing.T) {
+	match := model.Match{
+		CardsInPlay: []int{
+			9,
+			11,
+			13,
+		},
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{11, 12, 13, 24},
+			},
+			{
+				Id:   2,
+				Hand: []int{25, 26, 37, 38},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	if len(scores.Results) != 1 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingLastCardAndThirtyOne(t *testing.T) {
+	match := model.Match{
+		CardsInPlay: []int{
+			9,
+			12,
+			13,
+		},
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{11, 12, 13, 24},
+			},
+			{
+				Id:   2,
+				Hand: []int{25, 26, 37, 38},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	if len(scores.Results) != 2 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingMakingKinds(t *testing.T) {
+	match := model.Match{
+		CardsInPlay: []int{
+			11,
+			37,
+		},
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{11, 12, 13, 24},
+			},
+			{
+				Id:   2,
+				Hand: []int{25, 26, 37, 38},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	if len(scores.Results) != 1 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingNoRun(t *testing.T) {
+	match := model.Match{
+		CardsInPlay: []int{
+			6,
+			7,
+			8,
+			2,
+		},
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{11, 12, 13, 24},
+			},
+			{
+				Id:   2,
+				Hand: []int{25, 26, 37, 38},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	if len(scores.Results) != 0 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingRun(t *testing.T) {
+	match := model.Match{
+		CardsInPlay: []int{
+			6,
+			8,
+			7,
+		},
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{11, 12, 13, 24},
+			},
+			{
+				Id:   2,
+				Hand: []int{25, 26, 37, 38},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	if len(scores.Results) != 1 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingRunOfFour(t *testing.T) {
+	match := model.Match{
+		CardsInPlay: []int{
+			10,
+			11,
+			12,
+			9,
+		},
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{11, 12, 13, 24},
+			},
+			{
+				Id:   2,
+				Hand: []int{25, 26, 37, 38},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	//Score includes a last card point
+	if len(scores.Results) != 2 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
+	}
+}
+
+func TestPeggingJackOnCut(t *testing.T) {
+	match := model.Match{
+		CardsInPlay:   []int{},
+		CutGameCardId: 12,
+		Players: []model.Player{
+			{
+				Id:   1,
+				Hand: []int{11, 12, 13, 24},
+			},
+			{
+				Id:   2,
+				Hand: []int{25, 26, 37, 38},
+			},
+		},
+	}
+
+	//test pegging
+	scores, err := countPegs(match)
+	//Score includes a last card point
+	if len(scores.Results) != 1 || err != nil {
+		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
 	}
 }

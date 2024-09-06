@@ -3,9 +3,10 @@ package route
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
-	"os"
+	"strconv"
 	"time"
 
 	"github.com/bardic/cribbage/server/model"
@@ -104,20 +105,34 @@ func updateMatchQuery(args pgx.NamedArgs) error {
 // @Produce      json
 // @Param        id    query     string  true  "search for match by barcode"'
 // @Success      200  {object}  model.Match
-// @Failure      400  {object}  error
 // @Failure      404  {object}  error
-// @Failure      500  {object}  error
+// @Failure      422  {object}  error
 // @Router       /player/match/ [get]
 func GetMatch(c echo.Context) error {
-	id := c.Request().URL.Query().Get("id")
+	p := c.Request().URL.Query().Get("id")
+	id, err := strconv.Atoi(p)
 
+	if err != nil {
+		return err
+	}
+
+	v, err := GetMatchQuery(id)
+	if err != nil {
+		return err
+	}
+
+	r, _ := json.Marshal(v)
+
+	return c.JSON(http.StatusOK, string(r))
+}
+
+func GetMatchQuery(id int) (model.Match, error) {
 	db := model.Pool()
 	defer db.Close()
 
-	rows, err := db.Query(context.Background(), "SELECT json_agg( json_build_object('lobbyid', lobbyid, 'players', (SELECT json_agg(json_build_object( 'item_id', p.id,'product_id', p.hand, 'quantity', p.kitty )) FROM player as p WHERE p.id = ANY(m.playerids)))) FROM match as m WHERE m.lobbyId = $1", id)
+	rows, err := db.Query(context.Background(), "SELECT json_agg( json_build_object('lobbyid', lobbyid, 'deckid', deckid, 'cardsinplay', cardsinplay, 'playerids', playerids, 'cutgamecardid', cutgamecardid, 'currentplayerturn', currentplayerturn, 'turnpasstimestamps', turnpasstimestamps, 'art', art,  'players', (SELECT json_agg(json_build_object( 'id', p.id,'hand', p.hand, 'kitty', p.kitty, 'score', p.score, 'art', p.art )) FROM player as p WHERE p.id = ANY(m.playerids)))) FROM match as m WHERE m.lobbyId = $1", id)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		os.Exit(1)
+		return model.Match{}, err
 	}
 
 	v := []model.Match{}
@@ -125,18 +140,19 @@ func GetMatch(c echo.Context) error {
 	for rows.Next() {
 		var match []model.Match
 
-		err := rows.Scan(&match) //.Id, &match.LobbyId, &match.DeckId, &match.CardsInPlay, &match.CutGameCardId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Art, &match.Players
+		err := rows.Scan(&match)
 		if err != nil {
-			fmt.Println(err)
-			return err
+			return model.Match{}, err
 		}
 
 		v = append(v, match...)
 	}
 
-	r, _ := json.Marshal(v)
+	if len(v) == 0 {
+		return model.Match{}, errors.New("no match found")
+	}
 
-	return c.JSON(http.StatusOK, string(r))
+	return v[0], nil
 }
 
 // Create godoc
@@ -160,8 +176,8 @@ func DeleteMatch(c echo.Context) error {
 	return c.JSON(http.StatusOK, nil)
 }
 
-func UpdateCut(matchId int, card model.GameplayCard) error {
-	args := pgx.NamedArgs{"id": matchId, "cardId": card.Id}
+func UpdateCut(matchId int, cutCardId int) error {
+	args := pgx.NamedArgs{"id": matchId, "cardId": cutCardId}
 
 	query := "UPDATE match SET cutGameCardId = @cardId where id=@id"
 
@@ -180,8 +196,8 @@ func UpdateCut(matchId int, card model.GameplayCard) error {
 	return nil
 }
 
-func UpdateCardsInPlay(matchId int, card model.GameplayCard) (model.Match, error) {
-	args := pgx.NamedArgs{"id": matchId, "cardId": card.Id}
+func UpdateCardsInPlay(matchId int, gameplayCardId int) (model.Match, error) {
+	args := pgx.NamedArgs{"id": matchId, "cardId": gameplayCardId}
 
 	query := "UPDATE match SET cardsInPlay = array_append(cardsInPlay, @cardId)	where id=@id RETURNING *"
 
@@ -199,6 +215,7 @@ func UpdateCardsInPlay(matchId int, card model.GameplayCard) (model.Match, error
 		&match.LobbyId,
 		&match.DeckId,
 		&match.CardsInPlay,
+		&match.PlayerIds,
 		&match.CutGameCardId,
 		&match.CurrentPlayerTurn,
 		&match.TurnPassTimestamps,

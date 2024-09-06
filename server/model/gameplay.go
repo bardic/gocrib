@@ -99,13 +99,13 @@ type Match struct {
 	Id                 int
 	LobbyId            int
 	DeckId             int
-	PlayerId           []int
+	PlayerIds          []int
 	CardsInPlay        []int
 	CutGameCardId      int
 	CurrentPlayerTurn  int
 	TurnPassTimestamps []string
 	Art                string
-	Players            []Player `json:"-"`
+	Players            []Player
 }
 
 type GameActionType int
@@ -118,9 +118,9 @@ const (
 )
 
 type GameAction struct {
-	MatchId int
-	Type    GameActionType
-	Card    GameplayCard
+	MatchId        int
+	Type           GameActionType
+	GameplayCardId int
 }
 
 type ScoreResults struct {
