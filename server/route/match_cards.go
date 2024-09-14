@@ -31,21 +31,28 @@ func NewMatchCard(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	args := parseMatch(*details)
+	// args := parseMatch(*details)
 
-	query := "INSERT INTO match(lobbyId, currentPlayerTurn, art) VALUES (@lobbyId, @currentPlayerTurn, @art)"
+	// query := `INSERT INTO match(
+	// 		lobbyId,
+	// 		currentPlayerTurn,
+	// 		art)
+	// 	VALUES (
+	// 		@lobbyId,
+	// 		@currentPlayerTurn,
+	// 		@art)`
 
-	db := model.Pool()
-	defer db.Close()
+	// db := model.Pool()
+	// defer db.Close()
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	// _, err := db.Exec(
+	// 	context.Background(),
+	// 	query,
+	// 	args)
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err)
+	// }
 
 	return c.JSON(http.StatusOK, "meow")
 }
@@ -102,7 +109,19 @@ func GetMatchCard(c echo.Context) error {
 	for rows.Next() {
 		var match model.Match
 
-		err := rows.Scan(&match.Id, &match.LobbyId, &match.CardsInPlay, &match.CutGameCardId, &match.CurrentPlayerTurn, &match.TurnPassTimestamps, &match.Art)
+		err := rows.Scan(&match.Id,
+			&match.AccountIds,
+			&match.PrivateMatch,
+			&match.EloRangeMin,
+			&match.EloRangeMax,
+			&match.CreationDate,
+			&match.DeckId,
+			&match.PlayerIds,
+			&match.CardsInPlay,
+			&match.CutGameCardId,
+			&match.CurrentPlayerTurn,
+			&match.TurnPassTimestamps,
+			&match.Art)
 		if err != nil {
 			fmt.Println(err)
 			return err

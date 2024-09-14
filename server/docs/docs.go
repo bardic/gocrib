@@ -758,176 +758,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/player/lobby/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "lobbys"
-                ],
-                "summary": "Get lobby by id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for id by barcode",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Lobby"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "lobbys"
-                ],
-                "summary": "Update lobby by id",
-                "parameters": [
-                    {
-                        "description": "lobby Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Lobby"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Lobby"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "lobbys"
-                ],
-                "summary": "Create new lobby",
-                "parameters": [
-                    {
-                        "description": "lobby Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Lobby"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Lobby"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "lobbys"
-                ],
-                "summary": "delete lobby by id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "delete for lobby by id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Lobby"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/player/match/": {
             "get": {
                 "consumes": [
@@ -1357,16 +1187,16 @@ const docTemplate = `{
         "model.Card": {
             "type": "object",
             "properties": {
-                "art": {
+                "Art": {
                     "type": "string"
                 },
-                "id": {
+                "Id": {
                     "type": "integer"
                 },
-                "suit": {
+                "Suit": {
                     "$ref": "#/definitions/model.Suit"
                 },
-                "value": {
+                "Value": {
                     "$ref": "#/definitions/model.CardValue"
                 }
             }
@@ -1481,6 +1311,31 @@ const docTemplate = `{
                 "Tally"
             ]
         },
+        "model.GameState": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8
+            ],
+            "x-enum-varnames": [
+                "WaitingState",
+                "DealState",
+                "CutState",
+                "DiscardState",
+                "PlayState",
+                "OpponentState",
+                "KittyState",
+                "GameWonState",
+                "GameLostState"
+            ]
+        },
         "model.GameplayCard": {
             "type": "object",
             "properties": {
@@ -1491,6 +1346,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "matchId": {
                     "type": "integer"
                 },
                 "origOwner": {
@@ -1524,7 +1382,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Lobby": {
+        "model.Match": {
             "type": "object",
             "properties": {
                 "accountIds": {
@@ -1533,26 +1391,6 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
-                "creatationDate": {
-                    "type": "string"
-                },
-                "eloRangeMax": {
-                    "type": "integer"
-                },
-                "eloRangeMin": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "privateMatch": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "model.Match": {
-            "type": "object",
-            "properties": {
                 "art": {
                     "type": "string"
                 },
@@ -1561,6 +1399,9 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                },
+                "creationDate": {
+                    "type": "string"
                 },
                 "currentPlayerTurn": {
                     "type": "integer"
@@ -1571,10 +1412,16 @@ const docTemplate = `{
                 "deckId": {
                     "type": "integer"
                 },
-                "id": {
+                "eloRangeMax": {
                     "type": "integer"
                 },
-                "lobbyId": {
+                "eloRangeMin": {
+                    "type": "integer"
+                },
+                "gameState": {
+                    "$ref": "#/definitions/model.GameState"
+                },
+                "id": {
                     "type": "integer"
                 },
                 "playerIds": {
@@ -1588,6 +1435,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/model.Player"
                     }
+                },
+                "privateMatch": {
+                    "type": "boolean"
                 },
                 "turnPassTimestamps": {
                     "type": "array",

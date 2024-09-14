@@ -35,21 +35,42 @@ func NewMatch(c echo.Context) error {
 
 	args := parseMatch(*details)
 
-	query := "INSERT INTO match(lobbyId, deckId, currentPlayerTurn, art) VALUES (@lobbyId, @deckId, @currentPlayerTurn, @art)"
+	query := `INSERT INTO match(
+				accountIds, 	
+				privateMatch,
+				eloRangeMin,
+				eloRangeMax,
+				deckId,
+				currentPlayerTurn,
+				gameState, 
+				art) 
+			VALUES (
+				@accountIds,  
+				@privateMatch,
+				@eloRangeMin,
+				@eloRangeMax,
+				@deckId,
+				@currentPlayerTurn, 
+				@gameState,
+				@art) 
+			RETURNING id`
 
 	db := model.Pool()
 	defer db.Close()
 
-	_, err := db.Exec(
+	row := db.QueryRow(
 		context.Background(),
 		query,
 		args)
 
+	var matchId int
+	err := row.Scan(&matchId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		fmt.Println(err)
+		return err
 	}
 
-	return c.JSON(http.StatusOK, "meow")
+	return c.JSON(http.StatusOK, matchId)
 }
 
 // Create godoc
@@ -80,7 +101,21 @@ func UpdateMatch(c echo.Context) error {
 }
 
 func updateMatchQuery(args pgx.NamedArgs) error {
-	query := "UPDATE match SET lobbyId = @lobbyId, deckId = @deckId, cardsInPlay = @cardsInPlay, cutGameCardId = @cutGameCardId,currentPlayerTurn = @currentPlayerTurn, turnPassTimestamps=@turnPassTimestamps, art=@art where id=@id"
+	query := `UPDATE match SET  
+				accountIds = @accountIds,
+				creationDate = @creationDate,
+				privateMatch = @privateMatch,
+				eloRangeMin = @eloRangeMin,
+				eloRangeMax = @eloRangeMax,
+				deckId = @deckId,
+				cardsInPlay = @cardsInPlay,
+				playerIds = @playerIds,
+				cutGameCardId = @cutGameCardId,
+				currentPlayerTurn = @currentPlayerTurn,
+				turnPassTimestamps = @turnPassTimestamps,
+				gameState= @gameState,
+				art = @art
+			where id=@id`
 
 	db := model.Pool()
 	defer db.Close()
@@ -130,7 +165,30 @@ func GetMatchQuery(id int) (model.Match, error) {
 	db := model.Pool()
 	defer db.Close()
 
-	rows, err := db.Query(context.Background(), "SELECT json_agg( json_build_object('lobbyid', lobbyid, 'deckid', deckid, 'cardsinplay', cardsinplay, 'playerids', playerids, 'cutgamecardid', cutgamecardid, 'currentplayerturn', currentplayerturn, 'turnpasstimestamps', turnpasstimestamps, 'art', art,  'players', (SELECT json_agg(json_build_object( 'id', p.id,'hand', p.hand, 'kitty', p.kitty, 'score', p.score, 'art', p.art )) FROM player as p WHERE p.id = ANY(m.playerids)))) FROM match as m WHERE m.lobbyId = $1", id)
+	rows, err := db.Query(context.Background(), `SELECT 
+		json_agg( 
+			json_build_object(
+				'accountIds', accountIds, 
+				'creationDate', creationDate,
+				'privateMatch', privateMatch,
+				'eloRangeMin', eloRangeMin,
+				'eloRangeMax', eloRangeMax,
+				'deckid', deckid, 
+				'cardsinplay', cardsinplay, 
+				'playerids', playerids, 
+				'cutgamecardid', cutgamecardid, 
+				'currentplayerturn', currentplayerturn, 
+				'turnpasstimestamps', turnpasstimestamps, 
+				'art', art,  
+				'players', (SELECT json_agg(
+					json_build_object( 
+						'id', p.id,
+						'hand', p.hand, 
+						'kitty', p.kitty, 
+						'score', p.score, 
+						'art', p.art )) 
+				FROM player as p WHERE p.id = ANY(m.playerids)))) 
+			FROM match as m WHERE m.id = $1`, id)
 	if err != nil {
 		return model.Match{}, err
 	}
@@ -212,7 +270,11 @@ func UpdateCardsInPlay(matchId int, gameplayCardId int) (model.Match, error) {
 	var match model.Match
 	err := row.Scan(
 		&match.Id,
-		&match.LobbyId,
+		&match.GameState,
+		&match.AccountIds,
+		&match.PrivateMatch,
+		&match.EloRangeMin,
+		&match.EloRangeMax,
 		&match.DeckId,
 		&match.CardsInPlay,
 		&match.PlayerIds,
@@ -232,9 +294,15 @@ func UpdateCardsInPlay(matchId int, gameplayCardId int) (model.Match, error) {
 func parseMatch(details model.Match) pgx.NamedArgs {
 	return pgx.NamedArgs{
 		"id":                 details.Id,
-		"lobbyId":            details.LobbyId,
+		"gameState":          details.GameState,
+		"accountIds":         details.AccountIds,
+		"privateMatch":       details.PrivateMatch,
+		"eloRangeMin":        details.EloRangeMin,
+		"eloRangeMax":        details.EloRangeMax,
 		"deckId":             details.DeckId,
 		"cardsInPlay":        details.CardsInPlay,
+		"playerIds":          details.PlayerIds,
+		"creationDate":       details.CreationDate,
 		"cutGameCardId":      details.CutGameCardId,
 		"currentPlayerTurn":  details.CurrentPlayerTurn,
 		"turnPassTimestamps": details.TurnPassTimestamps,

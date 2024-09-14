@@ -149,7 +149,6 @@ type Scores struct {
 
 type GameDeck struct {
 	Id      int
-	MatchId int
 	Cards   []int //GameplayCardId
 }
 

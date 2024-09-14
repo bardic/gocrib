@@ -10,7 +10,7 @@ import (
 // TestHelloName calls greetings.Hello with a name, checking
 // for a valid return value.
 func TestThirtyOne(t *testing.T) {
-	hand := []int{11, 12, 24, 25}
+	hand := []int{10, 11, 23, 24}
 
 	scores, err := scanForThirtyOne(hand)
 	if len(scores) != 2 || err != nil {
@@ -82,7 +82,7 @@ func TestPairThree(t *testing.T) {
 }
 
 func TestOneFifthteens(t *testing.T) {
-	hand := []int{8, 9, 11, 10}
+	hand := []int{7, 8, 11, 10}
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 1 || err != nil {
@@ -100,7 +100,7 @@ func TestTwoFifthteens(t *testing.T) {
 }
 
 func TestThreeFifthteens(t *testing.T) {
-	hand := []int{8, 9, 22, 35}
+	hand := []int{7, 8, 21, 34}
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 3 || err != nil {
@@ -109,7 +109,7 @@ func TestThreeFifthteens(t *testing.T) {
 }
 
 func TestFourFifthteens(t *testing.T) {
-	hand := []int{8, 9, 21, 22}
+	hand := []int{7, 8, 20, 21}
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 4 || err != nil {
@@ -118,7 +118,7 @@ func TestFourFifthteens(t *testing.T) {
 }
 
 func TestTwoFifthteensOfThree(t *testing.T) {
-	hand := []int{8, 21, 2, 15}
+	hand := []int{7, 20, 1, 14}
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 2 || err != nil {
@@ -127,7 +127,7 @@ func TestTwoFifthteensOfThree(t *testing.T) {
 }
 
 func TestThreeFifthteensOfMix(t *testing.T) {
-	hand := []int{8, 9, 2, 21}
+	hand := []int{7, 8, 1, 20}
 
 	scores, err := scanForFifthteens(hand)
 	if len(scores) != 3 || err != nil {
@@ -136,7 +136,7 @@ func TestThreeFifthteensOfMix(t *testing.T) {
 }
 
 func TestRightJack(t *testing.T) {
-	hand := []int{8, 9, 2, 12}
+	hand := []int{7, 8, 1, 11}
 	match := model.Match{
 		CutGameCardId: 1,
 	}
@@ -149,7 +149,7 @@ func TestRightJack(t *testing.T) {
 
 func TestJackOnCut(t *testing.T) {
 	match := model.Match{
-		CutGameCardId: 12,
+		CutGameCardId: 11,
 	}
 
 	scores, err := scanJackOnCut(match)
@@ -197,7 +197,7 @@ func TestIsNotLastCard(t *testing.T) {
 	}
 
 	scores, err := scanForLastCard(match)
-	if len(scores) != 0 || err != nil {
+	if len(scores) != 1 || err != nil {
 		t.Fatalf(`scanForLastCard(hand) = %q, %v, want match for %#q`, scores, err, 1)
 	}
 }
@@ -249,8 +249,8 @@ func TestNoFlush(t *testing.T) {
 func TestPeggingWithFithteens(t *testing.T) {
 	match := model.Match{
 		CardsInPlay: []int{
-			11,
-			6,
+			10,
+			5,
 		},
 		Players: []model.Player{
 			{
@@ -274,9 +274,9 @@ func TestPeggingWithFithteens(t *testing.T) {
 func TestPeggingWithRunAndFithteens(t *testing.T) {
 	match := model.Match{
 		CardsInPlay: []int{
+			4,
 			5,
 			6,
-			7,
 		},
 		Players: []model.Player{
 			{
@@ -326,9 +326,9 @@ func TestPeggingLastCard(t *testing.T) {
 func TestPeggingLastCardAndThirtyOne(t *testing.T) {
 	match := model.Match{
 		CardsInPlay: []int{
-			9,
+			8,
+			11,
 			12,
-			13,
 		},
 		Players: []model.Player{
 			{
@@ -352,8 +352,8 @@ func TestPeggingLastCardAndThirtyOne(t *testing.T) {
 func TestPeggingMakingKinds(t *testing.T) {
 	match := model.Match{
 		CardsInPlay: []int{
-			11,
-			37,
+			10,
+			36,
 		},
 		Players: []model.Player{
 			{
@@ -377,19 +377,19 @@ func TestPeggingMakingKinds(t *testing.T) {
 func TestPeggingNoRun(t *testing.T) {
 	match := model.Match{
 		CardsInPlay: []int{
-			6,
-			7,
+			5,
+			3,
 			8,
-			2,
+			9,
 		},
 		Players: []model.Player{
 			{
 				Id:   1,
-				Hand: []int{11, 12, 13, 24},
+				Hand: []int{1, 2, 3, 4},
 			},
 			{
 				Id:   2,
-				Hand: []int{25, 26, 37, 38},
+				Hand: []int{1, 2, 3, 4},
 			},
 		},
 	}
@@ -404,9 +404,9 @@ func TestPeggingNoRun(t *testing.T) {
 func TestPeggingRun(t *testing.T) {
 	match := model.Match{
 		CardsInPlay: []int{
-			6,
-			8,
+			5,
 			7,
+			6,
 		},
 		Players: []model.Player{
 			{
@@ -430,10 +430,10 @@ func TestPeggingRun(t *testing.T) {
 func TestPeggingRunOfFour(t *testing.T) {
 	match := model.Match{
 		CardsInPlay: []int{
-			10,
-			11,
-			12,
-			9,
+			1,
+			2,
+			3,
+			4,
 		},
 		Players: []model.Player{
 			{
@@ -450,7 +450,7 @@ func TestPeggingRunOfFour(t *testing.T) {
 	//test pegging
 	scores, err := countPegs(match)
 	//Score includes a last card point
-	if len(scores.Results) != 2 || err != nil {
+	if len(scores.Results) != 1 || err != nil {
 		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
 	}
 }
@@ -458,11 +458,11 @@ func TestPeggingRunOfFour(t *testing.T) {
 func TestPeggingJackOnCut(t *testing.T) {
 	match := model.Match{
 		CardsInPlay:   []int{},
-		CutGameCardId: 12,
+		CutGameCardId: 11,
 		Players: []model.Player{
 			{
 				Id:   1,
-				Hand: []int{11, 12, 13, 24},
+				Hand: []int{10, 11, 12, 23},
 			},
 			{
 				Id:   2,

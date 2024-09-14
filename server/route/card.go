@@ -209,7 +209,7 @@ func QueryForCards(ids string) ([]model.GameplayCard, error) {
 	for rows.Next() {
 		var card model.GameplayCard
 
-		err := rows.Scan(&card.Id, &card.CardId, &card.OrigOwner, &card.CurrOwner, &card.State, &card.Value, &card.Suit, &card.Art)
+		err := rows.Scan(&card.Id, &card.CardId, &card.MatchId, &card.OrigOwner, &card.CurrOwner, &card.State, &card.Value, &card.Suit, &card.Art)
 		if err != nil {
 			return []model.GameplayCard{}, err
 		}

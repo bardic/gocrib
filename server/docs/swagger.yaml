@@ -2,13 +2,13 @@ basePath: /v1
 definitions:
   model.Card:
     properties:
-      art:
+      Art:
         type: string
-      id:
+      Id:
         type: integer
-      suit:
+      Suit:
         $ref: '#/definitions/model.Suit'
-      value:
+      Value:
         $ref: '#/definitions/model.CardValue'
     type: object
   model.CardState:
@@ -96,6 +96,28 @@ definitions:
     - Discard
     - Peg
     - Tally
+  model.GameState:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    type: integer
+    x-enum-varnames:
+    - WaitingState
+    - DealState
+    - CutState
+    - DiscardState
+    - PlayState
+    - OpponentState
+    - KittyState
+    - GameWonState
+    - GameLostState
   model.GameplayCard:
     properties:
       cardId:
@@ -103,6 +125,8 @@ definitions:
       currOwner:
         type: integer
       id:
+        type: integer
+      matchId:
         type: integer
       origOwner:
         type: integer
@@ -124,40 +148,33 @@ definitions:
           type: integer
         type: array
     type: object
-  model.Lobby:
+  model.Match:
     properties:
       accountIds:
         items:
           type: integer
         type: array
-      creatationDate:
-        type: string
-      eloRangeMax:
-        type: integer
-      eloRangeMin:
-        type: integer
-      id:
-        type: integer
-      privateMatch:
-        type: boolean
-    type: object
-  model.Match:
-    properties:
       art:
         type: string
       cardsInPlay:
         items:
           type: integer
         type: array
+      creationDate:
+        type: string
       currentPlayerTurn:
         type: integer
       cutGameCardId:
         type: integer
       deckId:
         type: integer
-      id:
+      eloRangeMax:
         type: integer
-      lobbyId:
+      eloRangeMin:
+        type: integer
+      gameState:
+        $ref: '#/definitions/model.GameState'
+      id:
         type: integer
       playerIds:
         items:
@@ -167,6 +184,8 @@ definitions:
         items:
           $ref: '#/definitions/model.Player'
         type: array
+      privateMatch:
+        type: boolean
       turnPassTimestamps:
         items:
           type: string
@@ -725,121 +744,6 @@ paths:
       summary: Get cards by ids
       tags:
       - cards
-  /player/lobby/:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: delete for lobby by id
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Lobby'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: delete lobby by id
-      tags:
-      - lobbys
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for id by barcode
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Lobby'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get lobby by id
-      tags:
-      - lobbys
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: lobby Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/model.Lobby'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Lobby'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Create new lobby
-      tags:
-      - lobbys
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: lobby Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/model.Lobby'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Lobby'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update lobby by id
-      tags:
-      - lobbys
   /player/match/:
     get:
       consumes:

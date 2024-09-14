@@ -32,33 +32,33 @@ func PlayCard(c echo.Context) error {
 	//todo confirm the player has the card in question
 
 	// insert card into db
-	m, err := UpdateCardsInPlay(details.MatchId, details.GameplayCardId)
+	_, err := UpdateCardsInPlay(details.MatchId, details.GameplayCardId)
 	if err != nil {
 		return err
 	}
 
 	//Get all match details
-	match, err := GetMatchQuery(m.LobbyId)
-	if err != nil {
-		return err
-	}
+	// match, err := GetMatchQuery(m.LobbyId)
+	// if err != nil {
+	// 	return err
+	// }
 
 	var scores model.ScoreResults
 
-	switch details.Type {
-	case model.Cut:
-		scores, err = cutDeck(match, details.GameplayCardId)
-	case model.Discard:
-		scores, err = discardCard(match)
-	case model.Peg:
-		scores, err = countPegs(match)
-	case model.Tally:
-		scores, err = countHand(match)
-	}
+	// switch details.Type {
+	// case model.Cut:
+	// 	scores, err = cutDeck(match, details.GameplayCardId)
+	// case model.Discard:
+	// 	scores, err = discardCard(match)
+	// case model.Peg:
+	// 	scores, err = countPegs(match)
+	// case model.Tally:
+	// 	scores, err = countHand(match)
+	// }
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
 	return c.JSON(http.StatusOK, scores)
 }
