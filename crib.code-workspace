@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "cli"
+    },
+    {
+      "path": "server"
+    },
+    {
+      "path": "model"
+    }
+  ],
+  "settings": {}
+}

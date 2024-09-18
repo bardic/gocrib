@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bardic/cribbage/server/model"
+	conn "github.com/bardic/cribbage/server/db"
+	"github.com/bardic/cribbagev2/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -33,7 +34,7 @@ func NewPlayer(c echo.Context) error {
 
 	query := "INSERT INTO player(hand, kitty, score, art) VALUES (@hand, @kitty, @score, @art)"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -70,7 +71,7 @@ func UpdatePlayer(c echo.Context) error {
 
 	query := "UPDATE player SET hand = @hand, kitty = @kitty, score = @score, art = @art where id = @id"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -100,7 +101,7 @@ func UpdatePlayer(c echo.Context) error {
 func GetPlayer(c echo.Context) error {
 	id := c.Request().URL.Query().Get("id")
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	rows, err := db.Query(context.Background(), "SELECT * FROM player WHERE id=$1", id)

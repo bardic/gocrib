@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bardic/cribbage/server/model"
+	conn "github.com/bardic/cribbage/server/db"
+	"github.com/bardic/cribbagev2/model"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -45,7 +47,7 @@ func NewChat(c echo.Context) error {
 	fmt.Println("What the hell is happening")
 	fmt.Println(query)
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -82,7 +84,7 @@ func UpdateChat(c echo.Context) error {
 
 	query := "UPDATE chats SET name = @name, cost = @cost, weight = @weight, unit=@unit, storename=@storeName, storeNeighborhood=@storeNeighborhood, tags=@tags where barcode = @barcode AND storeId = @storeId"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -113,7 +115,7 @@ func UpdateChat(c echo.Context) error {
 func GetChat(c echo.Context) error {
 	id := c.Request().URL.Query().Get("id")
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	rows, err := db.Query(context.Background(), "SELECT * FROM chat WHERE id=$1", id)

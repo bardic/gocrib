@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bardic/cribbage/server/model"
+	"github.com/bardic/cribbagev2/model"
 	"github.com/labstack/echo/v4"
 )
 

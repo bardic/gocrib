@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bardic/cribbage/server/model"
+	"github.com/bardic/cribbagev2/model"
 )
 
 // TestHelloName calls greetings.Hello with a name, checking

@@ -8,7 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/bardic/cribbage/server/model"
+	conn "github.com/bardic/cribbage/server/db"
+	"github.com/bardic/cribbagev2/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -42,7 +43,7 @@ func NewMatchCard(c echo.Context) error {
 	// 		@currentPlayerTurn,
 	// 		@art)`
 
-	// db := model.Pool()
+	// db := conn.Pool()
 	// defer db.Close()
 
 	// _, err := db.Exec(
@@ -77,7 +78,7 @@ func UpdateMatchCard(c echo.Context) error {
 
 	args := parseMatch(*details)
 
-	if err := updateMatchQuery(args); err != nil {
+	if err := updateMatch(args); err != nil {
 		return err
 	}
 
@@ -99,7 +100,7 @@ func UpdateMatchCard(c echo.Context) error {
 func GetMatchCard(c echo.Context) error {
 	id := c.Request().URL.Query().Get("id")
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	rows, err := db.Query(context.Background(), "SELECT * FROM match WHERE id=$1", id)
@@ -110,13 +111,12 @@ func GetMatchCard(c echo.Context) error {
 		var match model.Match
 
 		err := rows.Scan(&match.Id,
-			&match.AccountIds,
+			&match.PlayerIds,
 			&match.PrivateMatch,
 			&match.EloRangeMin,
 			&match.EloRangeMax,
 			&match.CreationDate,
 			&match.DeckId,
-			&match.PlayerIds,
 			&match.CardsInPlay,
 			&match.CutGameCardId,
 			&match.CurrentPlayerTurn,

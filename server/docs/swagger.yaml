@@ -126,8 +126,6 @@ definitions:
         type: integer
       id:
         type: integer
-      matchId:
-        type: integer
       origOwner:
         type: integer
       state:
@@ -150,10 +148,6 @@ definitions:
     type: object
   model.Match:
     properties:
-      accountIds:
-        items:
-          type: integer
-        type: array
       art:
         type: string
       cardsInPlay:
@@ -193,6 +187,8 @@ definitions:
     type: object
   model.Player:
     properties:
+      accountId:
+        type: integer
       art:
         type: string
       hand:
@@ -773,13 +769,6 @@ paths:
     post:
       consumes:
       - application/json
-      parameters:
-      - description: match Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/model.Match'
       produces:
       - application/json
       responses:

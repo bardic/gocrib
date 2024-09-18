@@ -850,17 +850,6 @@ const docTemplate = `{
                     "match"
                 ],
                 "summary": "Create new match",
-                "parameters": [
-                    {
-                        "description": "match Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1348,9 +1337,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "matchId": {
-                    "type": "integer"
-                },
                 "origOwner": {
                     "type": "integer"
                 },
@@ -1385,12 +1371,6 @@ const docTemplate = `{
         "model.Match": {
             "type": "object",
             "properties": {
-                "accountIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "art": {
                     "type": "string"
                 },
@@ -1450,6 +1430,9 @@ const docTemplate = `{
         "model.Player": {
             "type": "object",
             "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
                 "art": {
                     "type": "string"
                 },

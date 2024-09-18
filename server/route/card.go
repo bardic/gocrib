@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bardic/cribbage/server/model"
+	conn "github.com/bardic/cribbage/server/db"
+	"github.com/bardic/cribbagev2/model"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -30,7 +32,7 @@ func NewCard(c echo.Context) error {
 	args := parseCard(*details)
 	query := "INSERT INTO cards(value, suit, art) VALUES (@value, @suit, @art)"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -66,7 +68,7 @@ func UpdateCard(c echo.Context) error {
 
 	query := "UPDATE cards SET value=@value, suit=@suit, art=@art where id = @id"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -95,7 +97,7 @@ func UpdateCard(c echo.Context) error {
 func GetCard(c echo.Context) error {
 	id := c.Request().URL.Query().Get("id")
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	rows, err := db.Query(context.Background(), "SELECT * FROM cards WHERE id=$1", id)
@@ -141,7 +143,7 @@ func GetCard(c echo.Context) error {
 // @Failure      500  {object}  error
 // @Router       /player/allcards/ [get]
 func GetAllCards(c echo.Context) error {
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	rows, err := db.Query(context.Background(), "SELECT * FROM cards")
@@ -195,7 +197,7 @@ func GetGameplayCards(c echo.Context) error {
 }
 
 func QueryForCards(ids string) ([]model.GameplayCard, error) {
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	rows, err := db.Query(context.Background(), "SELECT * FROM gameplaycards NATURAL JOIN cards WHERE gameplaycards.id IN ("+ids+")")
@@ -209,7 +211,7 @@ func QueryForCards(ids string) ([]model.GameplayCard, error) {
 	for rows.Next() {
 		var card model.GameplayCard
 
-		err := rows.Scan(&card.Id, &card.CardId, &card.MatchId, &card.OrigOwner, &card.CurrOwner, &card.State, &card.Value, &card.Suit, &card.Art)
+		err := rows.Scan(&card.Id, &card.CardId, &card.OrigOwner, &card.CurrOwner, &card.State, &card.Value, &card.Suit, &card.Art)
 		if err != nil {
 			return []model.GameplayCard{}, err
 		}

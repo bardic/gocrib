@@ -3,13 +3,11 @@ package route
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
-	"github.com/bardic/cribbage/server/model"
+	conn "github.com/bardic/cribbage/server/db"
+	"github.com/bardic/cribbagev2/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -20,23 +18,83 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param details body model.Match true "match Object to save"
+// @Param details body model.MatchRequirements true "MatchRequirements"
 // @Success      200  {object}  model.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/match/ [post]
 func NewMatch(c echo.Context) error {
-	details := new(model.Match)
-	fmt.Print(time.Now())
+	details := new(model.MatchRequirements)
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	args := parseMatch(*details)
+	db := conn.Pool()
+	defer db.Close()
 
-	query := `INSERT INTO match(
-				accountIds, 	
+	args := pgx.NamedArgs{"eloMin": details.EloRangeMin, "eloMax": details.EloRangeMax}
+	q := `SELECT 
+			json_build_object(
+				'playerIds', playerIds, 
+				'creationDate', creationDate,
+				'privateMatch', privateMatch,
+				'eloRangeMin', eloRangeMin,
+				'eloRangeMax', eloRangeMax,
+				'deckid', deckid, 
+				'cardsinplay', cardsinplay, 
+				'cutgamecardid', cutgamecardid, 
+				'currentplayerturn', currentplayerturn, 
+				'turnpasstimestamps', turnpasstimestamps, 
+				'art', art,  
+				'players', (SELECT json_agg(
+					json_build_object( 
+						'id', p.id,
+						'hand', p.hand, 
+						'kitty', p.kitty, 
+						'score', p.score, 
+						'art', p.art )) 
+				FROM player as p WHERE p.id = ANY(m.playerIds))) 
+			FROM match as m WHERE m.eloRangeMin BETWEEN @eloMin AND @eloMax OR m.eloRangeMax BETWEEN @eloMin AND @eloMax`
+
+	var match model.Match
+	err := db.QueryRow(
+		context.Background(),
+		q,
+		args).Scan(&match)
+
+	if err != nil && err != pgx.ErrNoRows {
+		return err
+	}
+
+	match.EloRangeMin = details.EloRangeMin
+	match.EloRangeMax = details.EloRangeMax
+	match.PrivateMatch = details.IsPrivate
+
+	p1, err := newPlayer()
+	if err != nil {
+		return err
+	}
+
+	p2, err := newPlayer()
+
+	if err != nil {
+		return err
+	}
+
+	d, err := newDeck()
+
+	if err != nil {
+		return err
+	}
+
+	match.DeckId = d.Id
+	match.PlayerIds = []int{p1, p2}
+
+	args = parseMatch(match)
+
+	query := `INSERT INTO match( 	
+				playerIds,
 				privateMatch,
 				eloRangeMin,
 				eloRangeMax,
@@ -44,8 +102,8 @@ func NewMatch(c echo.Context) error {
 				currentPlayerTurn,
 				gameState, 
 				art) 
-			VALUES (
-				@accountIds,  
+			VALUES ( 
+				@playerIds,
 				@privateMatch,
 				@eloRangeMin,
 				@eloRangeMax,
@@ -55,31 +113,28 @@ func NewMatch(c echo.Context) error {
 				@art) 
 			RETURNING id`
 
-	db := model.Pool()
-	defer db.Close()
-
-	row := db.QueryRow(
+	var matchId int
+	err = db.QueryRow(
 		context.Background(),
 		query,
-		args)
+		args).Scan(&matchId)
 
-	var matchId int
-	err := row.Scan(&matchId)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
-	return c.JSON(http.StatusOK, matchId)
+	match.Id = matchId
+
+	return c.JSON(http.StatusOK, match)
 }
 
 // Create godoc
-// @Summary      Update match by barcode
+// @Summary      Update match by id
 // @Description
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param details body model.Match true "match Object to save"
+// @Param details body model.Match true "match Object to update"
 // @Success      200  {object}  model.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
@@ -93,23 +148,22 @@ func UpdateMatch(c echo.Context) error {
 
 	args := parseMatch(*details)
 
-	if err := updateMatchQuery(args); err != nil {
+	if err := updateMatch(args); err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusOK, "meow")
 }
 
-func updateMatchQuery(args pgx.NamedArgs) error {
+func updateMatch(args pgx.NamedArgs) error {
 	query := `UPDATE match SET  
-				accountIds = @accountIds,
+				playerIds = @playerIds
 				creationDate = @creationDate,
 				privateMatch = @privateMatch,
 				eloRangeMin = @eloRangeMin,
 				eloRangeMax = @eloRangeMax,
 				deckId = @deckId,
 				cardsInPlay = @cardsInPlay,
-				playerIds = @playerIds,
 				cutGameCardId = @cutGameCardId,
 				currentPlayerTurn = @currentPlayerTurn,
 				turnPassTimestamps = @turnPassTimestamps,
@@ -117,7 +171,7 @@ func updateMatchQuery(args pgx.NamedArgs) error {
 				art = @art
 			where id=@id`
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -133,12 +187,12 @@ func updateMatchQuery(args pgx.NamedArgs) error {
 }
 
 // Create godoc
-// @Summary      Get match by barcode
+// @Summary      Get match by id
 // @Description
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param        id    query     string  true  "search for match by barcode"'
+// @Param        id    query     string  true  "search for match by id"'
 // @Success      200  {object}  model.Match
 // @Failure      404  {object}  error
 // @Failure      422  {object}  error
@@ -151,7 +205,7 @@ func GetMatch(c echo.Context) error {
 		return err
 	}
 
-	v, err := GetMatchQuery(id)
+	v, err := getMatch(id)
 	if err != nil {
 		return err
 	}
@@ -161,21 +215,58 @@ func GetMatch(c echo.Context) error {
 	return c.JSON(http.StatusOK, string(r))
 }
 
-func GetMatchQuery(id int) (model.Match, error) {
-	db := model.Pool()
+// Create godoc
+// @Summary      Get deck by id
+// @Description
+// @Tags         deck
+// @Accept       json
+// @Produce      json
+// @Param        id    query     string  true  "search for deck by id"'
+// @Success      200  {object}  model.GameDeck
+// @Failure      404  {object}  error
+// @Failure      422  {object}  error
+// @Router       /match/deck/ [get]
+func GetDeck(c echo.Context) error {
+	p := c.Request().URL.Query().Get("id")
+	id, err := strconv.Atoi(p)
+
+	if err != nil {
+		return err
+	}
+
+	db := conn.Pool()
+	defer db.Close()
+	var deckId int
+	var cards []model.GameplayCard
+	err = db.QueryRow(context.Background(), "SELECT * FROM deck WHERE id=$1", id).Scan(&deckId, &cards)
+
+	if err != nil {
+		return err
+	}
+
+	r, err := json.Marshal(cards)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, string(r))
+}
+
+func getMatch(id int) (model.Match, error) {
+	db := conn.Pool()
 	defer db.Close()
 
-	rows, err := db.Query(context.Background(), `SELECT 
-		json_agg( 
+	var match model.Match
+	err := db.QueryRow(context.Background(), `SELECT 
 			json_build_object(
-				'accountIds', accountIds, 
+				'playerIds', playerIds, 
 				'creationDate', creationDate,
 				'privateMatch', privateMatch,
 				'eloRangeMin', eloRangeMin,
 				'eloRangeMax', eloRangeMax,
 				'deckid', deckid, 
 				'cardsinplay', cardsinplay, 
-				'playerids', playerids, 
 				'cutgamecardid', cutgamecardid, 
 				'currentplayerturn', currentplayerturn, 
 				'turnpasstimestamps', turnpasstimestamps, 
@@ -187,30 +278,16 @@ func GetMatchQuery(id int) (model.Match, error) {
 						'kitty', p.kitty, 
 						'score', p.score, 
 						'art', p.art )) 
-				FROM player as p WHERE p.id = ANY(m.playerids)))) 
-			FROM match as m WHERE m.id = $1`, id)
+				FROM player as p WHERE p.id = ANY(m.playerIds))) 
+			FROM match as m WHERE m.id = $1`, id).Scan(
+		&match,
+	)
+
 	if err != nil {
 		return model.Match{}, err
 	}
 
-	v := []model.Match{}
-
-	for rows.Next() {
-		var match []model.Match
-
-		err := rows.Scan(&match)
-		if err != nil {
-			return model.Match{}, err
-		}
-
-		v = append(v, match...)
-	}
-
-	if len(v) == 0 {
-		return model.Match{}, errors.New("no match found")
-	}
-
-	return v[0], nil
+	return match, nil
 }
 
 // Create godoc
@@ -239,7 +316,7 @@ func UpdateCut(matchId int, cutCardId int) error {
 
 	query := "UPDATE match SET cutGameCardId = @cardId where id=@id"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -259,32 +336,29 @@ func UpdateCardsInPlay(matchId int, gameplayCardId int) (model.Match, error) {
 
 	query := "UPDATE match SET cardsInPlay = array_append(cardsInPlay, @cardId)	where id=@id RETURNING *"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
-	row := db.QueryRow(
+	var match model.Match
+	err := db.QueryRow(
 		context.Background(),
 		query,
-		args)
-
-	var match model.Match
-	err := row.Scan(
+		args).Scan(
 		&match.Id,
 		&match.GameState,
-		&match.AccountIds,
+		&match.PlayerIds,
 		&match.PrivateMatch,
 		&match.EloRangeMin,
 		&match.EloRangeMax,
 		&match.DeckId,
 		&match.CardsInPlay,
-		&match.PlayerIds,
 		&match.CutGameCardId,
 		&match.CurrentPlayerTurn,
 		&match.TurnPassTimestamps,
 		&match.Art,
 	)
+
 	if err != nil {
-		fmt.Println(err)
 		return model.Match{}, err
 	}
 
@@ -295,17 +369,95 @@ func parseMatch(details model.Match) pgx.NamedArgs {
 	return pgx.NamedArgs{
 		"id":                 details.Id,
 		"gameState":          details.GameState,
-		"accountIds":         details.AccountIds,
+		"playerIds":          details.PlayerIds,
 		"privateMatch":       details.PrivateMatch,
 		"eloRangeMin":        details.EloRangeMin,
 		"eloRangeMax":        details.EloRangeMax,
 		"deckId":             details.DeckId,
 		"cardsInPlay":        details.CardsInPlay,
-		"playerIds":          details.PlayerIds,
 		"creationDate":       details.CreationDate,
 		"cutGameCardId":      details.CutGameCardId,
 		"currentPlayerTurn":  details.CurrentPlayerTurn,
 		"turnPassTimestamps": details.TurnPassTimestamps,
 		"art":                details.Art,
 	}
+}
+
+func newPlayer() (int, error) {
+	args := pgx.NamedArgs{"art": "default.png"}
+	query := "INSERT INTO player (art) VALUES (@art) RETURNING id"
+
+	db := conn.Pool()
+	defer db.Close()
+
+	var playerId int
+	err := db.QueryRow(
+		context.Background(),
+		query,
+		args).Scan(&playerId)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return playerId, nil
+}
+
+func newDeck() (model.GameDeck, error) {
+	db := conn.Pool()
+	defer db.Close()
+
+	rows, err := db.Query(context.Background(), "SELECT * FROM cards")
+
+	v := []model.Card{}
+
+	for rows.Next() {
+		var card model.Card
+
+		err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.Art)
+		if err != nil {
+			return model.GameDeck{}, err
+		}
+
+		v = append(v, card)
+	}
+
+	if err != nil {
+		return model.GameDeck{}, err
+	}
+
+	deck := model.GameDeck{
+		Cards: []model.GameplayCard{},
+	}
+
+	for _, c := range v {
+		deck.Cards = append(deck.Cards, model.GameplayCard{
+			CardId: c.Id,
+			State:  0,
+		})
+	}
+
+	b, err := json.Marshal(deck.Cards)
+
+	if err != nil {
+		return model.GameDeck{}, err
+	}
+
+	args := pgx.NamedArgs{"cards": string(b)}
+
+	query := "INSERT INTO deck(cards) VALUES (@cards) RETURNING id"
+
+	var deckId int
+	err = db.QueryRow(
+		context.Background(),
+		query,
+		args).Scan(&deckId)
+
+	if err != nil {
+		return model.GameDeck{}, err
+	}
+
+	deck.Id = deckId
+
+	return deck, nil
 }

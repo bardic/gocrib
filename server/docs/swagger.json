@@ -844,17 +844,6 @@
                     "match"
                 ],
                 "summary": "Create new match",
-                "parameters": [
-                    {
-                        "description": "match Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1342,9 +1331,6 @@
                 "id": {
                     "type": "integer"
                 },
-                "matchId": {
-                    "type": "integer"
-                },
                 "origOwner": {
                     "type": "integer"
                 },
@@ -1379,12 +1365,6 @@
         "model.Match": {
             "type": "object",
             "properties": {
-                "accountIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "art": {
                     "type": "string"
                 },
@@ -1444,6 +1424,9 @@
         "model.Player": {
             "type": "object",
             "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
                 "art": {
                     "type": "string"
                 },

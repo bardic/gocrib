@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bardic/cribbage/server/model"
+	conn "github.com/bardic/cribbage/server/db"
+	"github.com/bardic/cribbagev2/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -32,7 +33,7 @@ func NewHistory(c echo.Context) error {
 	args := parseHistory(*details)
 	query := "INSERT INTO historys(matchId, matchCompletetionDate, winners, losers) VALUES (@matchId, @matchCompletetionDate, @currentOwner, @originalOwner, @winners, @losers)"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -69,7 +70,7 @@ func UpdateHistory(c echo.Context) error {
 
 	query := "UPDATE historys SET matchId = @matchId, matchCompletetionDate = @matchCompletetionDate, winners = @winners, losers=@losers, storename=@storeName, storeNeighborhood=@storeNeighborhood, tags=@tags where barcode = @barcode AND storeId = @storeId"
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	_, err := db.Exec(
@@ -100,7 +101,7 @@ func UpdateHistory(c echo.Context) error {
 func GetHistory(c echo.Context) error {
 	matchId := c.Request().URL.Query().Get("matchId")
 
-	db := model.Pool()
+	db := conn.Pool()
 	defer db.Close()
 
 	rows, err := db.Query(context.Background(), "SELECT * FROM historys WHERE matchId=$1", matchId)
