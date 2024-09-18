@@ -55,7 +55,6 @@ type Cards struct {
 type GameplayCard struct {
 	Id        int
 	CardId    int
-	MatchId   int
 	OrigOwner int
 	CurrOwner int
 	State     CardState
@@ -64,12 +63,18 @@ type GameplayCard struct {
 	Art       string `json:"-"`
 }
 
-type Player struct {
+type GameDeck struct {
 	Id    int
-	Hand  []int
-	Kitty []int
-	Score int
-	Art   string
+	Cards []GameplayCard `json:"cards"`
+}
+
+type Player struct {
+	Id        int
+	AccountId int
+	Hand      []int
+	Kitty     []int
+	Score     int
+	Art       string
 }
 
 type History struct {
@@ -91,15 +96,20 @@ type ChatMessage struct {
 	Timestamp string
 }
 
+type MatchRequirements struct {
+	IsPrivate   bool
+	EloRangeMin int
+	EloRangeMax int
+}
+
 type Match struct {
 	Id                 int
-	AccountIds         []int
+	PlayerIds          []int
 	PrivateMatch       bool
 	EloRangeMin        int
 	EloRangeMax        int
 	CreationDate       time.Time
 	DeckId             int
-	PlayerIds          []int
 	CardsInPlay        []int
 	CutGameCardId      int
 	CurrentPlayerTurn  int
@@ -145,11 +155,6 @@ type ScoreResults struct {
 type Scores struct {
 	Cards []GameplayCard
 	Point int
-}
-
-type GameDeck struct {
-	Id      int
-	Cards   []int //GameplayCardId
 }
 
 type ViewState uint

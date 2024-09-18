@@ -7,8 +7,8 @@ import (
 	"slices"
 	"strings"
 
-	"ca.openbracket.cribbage_cli/model"
-	"ca.openbracket.cribbage_cli/services"
+	"github.com/bardic/cribbagev2/cli/services"
+	"github.com/bardic/cribbagev2/model"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -105,44 +105,60 @@ func newModel() mainModel {
 	return m
 }
 
-func createDeck() model.GameDeck {
-	deck := model.GameDeck{
-		Cards: []int{
-			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
-		},
-	}
+// func createDeck() model.GameDeck {
+// 	deck := model.GameDeck{
+// 		Cards: []int{
+// 			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
+// 		},
+// 	}
 
-	newDeck := services.PostDeck(deck).([]byte)
-	var deckId int
-	json.Unmarshal(newDeck, &deckId)
-	deck.Id = deckId
+// 	newDeck := services.PostDeck(deck).([]byte)
+// 	var deckId int
+// 	json.Unmarshal(newDeck, &deckId)
+// 	deck.Id = deckId
 
-	return deck
-}
+// 	return deck
+// }
 
-func createMatch(deckId int) model.Match {
-	match := model.Match{
-		AccountIds:  []int{1},
-		Art:         "meow",
-		CardsInPlay: []int{},
-		DeckId:      deckId,
-		GameState:   1,
-		PlayerIds:   []int{1},
-	}
+func createMatch() model.Match {
 
-	newMatch := services.PostPlayerMatch(match).([]byte)
-	fmt.Println(string(newMatch))
+	newMatch := services.PostPlayerMatch().([]byte)
 
-	var matchId int
-	json.Unmarshal(newMatch, &matchId)
-	match.Id = matchId
+	var match model.Match
+	json.Unmarshal(newMatch, &match)
 
 	return match
 }
 
+func createPlayerForMatch(matchId int, accountId int) model.Player {
+	player := model.Player{
+		AccountId: accountId,
+	}
+
+	newPlayer := services.PostPlayer(player).([]byte)
+
+	fmt.Println(string(newPlayer))
+
+	var playerId int
+	json.Unmarshal(newPlayer, &playerId)
+	player.Id = matchId
+
+	return player
+}
+
 func createGame() tea.Msg {
-	deck := createDeck()
-	match := createMatch(deck.Id)
+	// deck := createDeck()
+	createMatch()
+	match := createMatch()
+
+	fmt.Println(match)
+
+	player1 := createPlayerForMatch(match.Id, 1)
+	player2 := createPlayerForMatch(match.Id, 2)
+
+	fmt.Println(player1)
+
+	match.PlayerIds = []int{player1.Id, player2.Id}
 
 	return match
 }
@@ -210,7 +226,6 @@ func handleErr(r tea.Msg) error {
 }
 
 func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	fmt.Println(msg)
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:

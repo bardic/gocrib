@@ -2,7 +2,6 @@ package services
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -18,7 +17,7 @@ const (
 	//Game
 	EndPointGame = BaseUrl + "/game/playCard"
 	//Player
-	EndPointPlayer = BaseUrl + "/player/"
+	EndPointPlayer = BaseUrl + "/player/player"
 	//History
 	EndPointHistory = BaseUrl + "/history"
 	//Match
@@ -34,11 +33,6 @@ const (
 )
 
 func url(url string, method string, json string) tea.Msg {
-
-	fmt.Println(url)
-	fmt.Println(method)
-	fmt.Println(json)
-
 	var buf *bytes.Buffer
 	buf = bytes.NewBuffer([]byte(json))
 

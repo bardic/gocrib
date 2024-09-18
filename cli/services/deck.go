@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"ca.openbracket.cribbage_cli/model"
+	"github.com/bardic/cribbagev2/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

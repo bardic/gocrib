@@ -1,10 +1,8 @@
 package services
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"ca.openbracket.cribbage_cli/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -16,13 +14,8 @@ func PutPlayerMatch(id int) tea.Msg {
 	return url(EndPointMatch, http.MethodPut, "")
 }
 
-func PostPlayerMatch(match model.Match) tea.Msg {
-	b, err := json.Marshal(match)
-	if err != nil {
-		return err
-	}
-
-	return url(EndPointMatch, http.MethodPost, string(b))
+func PostPlayerMatch() tea.Msg {
+	return url(EndPointMatch, http.MethodPost, "")
 }
 
 func GetPlayerMatchCard() tea.Msg {

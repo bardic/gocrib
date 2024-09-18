@@ -1,8 +1,12 @@
-module ca.openbracket.cribbage_cli
+module github.com/bardic/cribbagev2/cli
 
 go 1.22.5
 
 require github.com/charmbracelet/bubbletea v1.1.0
+
+require github.com/bardic/cribbagev2/model v0.0.0
+
+replace github.com/bardic/cribbagev2/model => ../model
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
