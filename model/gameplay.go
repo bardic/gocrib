@@ -1,9 +1,5 @@
 package model
 
-import (
-	"time"
-)
-
 type CardValue int
 
 const (
@@ -77,6 +73,34 @@ type Player struct {
 	Art       string
 }
 
+func (p *Player) Eq(c Player) bool {
+	if p.Id != c.Id {
+		return false
+	}
+
+	if p.AccountId != c.AccountId {
+		return false
+	}
+
+	if p.Score != c.Score {
+		return false
+	}
+
+	if p.Art != c.Art {
+		return false
+	}
+
+	if !eqIntArr(p.Hand, c.Hand) {
+		return false
+	}
+
+	if !eqIntArr(p.Kitty, c.Kitty) {
+		return false
+	}
+
+	return true
+}
+
 type History struct {
 	MatchId               int
 	MatchCompletetionDate string
@@ -102,13 +126,37 @@ type MatchRequirements struct {
 	EloRangeMax int
 }
 
+type CardSlots uint
+
+const (
+	CardOne CardSlots = iota
+	CardTwo
+	CardThree
+	CardFour
+	CardFive
+	CardSix
+)
+
+type MatchDiffType uint
+
+const (
+	GenericDiff = 1 << iota
+	NewDeckDiff
+	CutDiff
+	TurnDiff
+	GameStateDiff
+	CardsInPlayDiff
+	TurnPassTimestampsDiff
+	MaxDiff
+)
+
 type Match struct {
 	Id                 int
 	PlayerIds          []int
 	PrivateMatch       bool
 	EloRangeMin        int
 	EloRangeMax        int
-	CreationDate       time.Time
+	CreationDate       string
 	DeckId             int
 	CardsInPlay        []int
 	CutGameCardId      int
@@ -119,10 +167,105 @@ type Match struct {
 	Players            []Player
 }
 
+func (m *Match) Eq(c Match) int {
+
+	diff := 0
+
+	if m.Id != c.Id {
+		diff |= GenericDiff
+	}
+
+	if m.PrivateMatch != c.PrivateMatch {
+		diff |= GenericDiff
+	}
+
+	if m.EloRangeMin != c.EloRangeMin {
+		diff |= GenericDiff
+	}
+
+	if m.EloRangeMax != c.EloRangeMax {
+		diff |= GenericDiff
+	}
+
+	if m.CreationDate != c.CreationDate {
+		diff |= GenericDiff
+	}
+
+	if m.DeckId != c.DeckId {
+		diff |= NewDeckDiff
+	}
+
+	if m.CutGameCardId != c.CutGameCardId {
+		diff |= CutDiff
+	}
+
+	if m.CurrentPlayerTurn != c.CurrentPlayerTurn {
+		diff |= TurnDiff
+	}
+
+	if m.GameState != c.GameState {
+		diff |= GameStateDiff
+	}
+
+	if m.Art != c.Art {
+		diff |= GenericDiff
+	}
+
+	if !eqIntArr(m.PlayerIds, c.PlayerIds) {
+		diff |= GenericDiff
+	}
+
+	if !eqIntArr(m.CardsInPlay, c.CardsInPlay) {
+		diff |= CardsInPlayDiff
+	}
+
+	if !eqStringArr(m.TurnPassTimestamps, c.TurnPassTimestamps) {
+		diff |= TurnPassTimestampsDiff
+	}
+
+	return diff
+}
+
+func eqIntArr(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func eqStringArr(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func eqPlayerArr(a, b []Player) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if !a[i].Eq(b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 type GameState uint
 
 const (
-	WaitingState GameState = iota
+	WaitingState GameState = 1 << iota
 	DealState
 	CutState
 	DiscardState
@@ -160,10 +303,23 @@ type Scores struct {
 type ViewState uint
 
 const (
-	LobbyView ViewState = iota
-	KittyView
+	ActiveView ViewState = iota
+	LobbyView
+	BoardView
 	PlayView
 	HandView
+	KittyView
 	ScoresView
 	GameOverView
 )
+
+type GameViewTab uint
+
+const (
+	BoardTab GameViewTab = iota
+	PlayTab
+	HandTab
+	KittyTab
+)
+
+var TabNames = []string{"Board", "Play", "Hand", "Kitty"}

@@ -26,6 +26,7 @@ func (m appModel) Init() tea.Cmd {
 }
 
 func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// fmt.Println(msg)
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -48,8 +49,9 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.SelectedCardIds = append(m.SelectedCardIds, cards[m.Next].Id)
 			}
 		case "tab":
+			fmt.Println("tab")
 			m.SelectedCardIds = make([]int, 0)
-			m.ActiveTab = min(m.ActiveTab+1, len(m.Tabs)-1)
+			m.ActiveTab = model.GameViewTab(min(int(m.ActiveTab)+1, len(m.Tabs)-1))
 			return m, nil
 		case "shift+tab":
 			m.SelectedCardIds = make([]int, 0)
@@ -115,6 +117,7 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd, services.GetPlayerMatch)
 	case []byte:
 		var matchStr string
+
 		err := json.Unmarshal(msg, &matchStr)
 
 		if err != nil {
@@ -128,41 +131,45 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			fmt.Println(err)
 		}
 
+		fmt.Printf("diffs %v", match)
+
 		diffs := match.Eq(state.ActiveMatch)
 		if diffs == 0 {
 			return m, tea.Batch(cmds...)
 		}
 
+		fmt.Printf("diffs %v", diffs)
 		for diff := model.GenericDiff; diff < model.MaxDiff; diff <<= 1 {
 			d := diffs & diff
+			fmt.Printf("d %v", d)
 			if d != 0 {
 				switch d {
 				case model.CutDiff:
-					// fmt.Println("CutDiff")
+					fmt.Println("CutDiff")
+					m.ViewState = model.BoardView
 					m.GameState = model.CutState
-					m.ViewState = model.CutView
-					cmds = append(cmds, updateView)
 				case model.CardsInPlayDiff:
-					// fmt.Println("CardsInPlayDiff")
+					fmt.Println("CardsInPlayDiff")
 					if m.GameState&model.OpponentState == 1 {
 						m.GameState = model.PlayState
 					} else {
 						m.GameState = model.OpponentState
 					}
-
-					cmds = append(cmds, updateView)
 				case model.GameStateDiff:
-					// fmt.Println("GameStateDiff" + string(m.GameState))
-					cmds = append(cmds, updateView)
+					fmt.Println("GameStateDiff" + string(m.GameState))
+					//cmds = append(cmds, updateView)
 				case model.GenericDiff:
-					// fmt.Println("GenericDiff")
-
+					fmt.Println("GenericDiff")
+				case model.NewDeckDiff:
+					m.ViewState = model.BoardView
+					m.GameState = model.DealState
+					m.ActiveTab = model.BoardTab
 				case model.MaxDiff:
-					// fmt.Println("MaxDiff")
+					fmt.Println("MaxDiff")
 				case model.TurnDiff:
-					// fmt.Println("TurnDiff")
+					fmt.Println("TurnDiff")
 				case model.TurnPassTimestampsDiff:
-					// fmt.Println("TurnPassTimestampsDiff")
+					fmt.Println("TurnPassTimestampsDiff")
 				}
 			}
 		}
@@ -171,10 +178,9 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		//Once it does change, determine the change
 
 	case appModel:
+		fmt.Println("update to app model")
 		switch msg.ViewState {
 		case model.LobbyView:
-			m.ViewState = model.LobbyView
-			m.ActiveTab = 1
 		case model.PlayView:
 			m.GameState = model.PlayState
 			m.ActiveTab = 2
@@ -194,7 +200,6 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func updateView() tea.Msg {
-	//fmt.Println("update view")
 	m := state.ActiveViewModel
 	if m.ViewState == model.PlayView {
 		switch m.GameState {
@@ -239,21 +244,25 @@ func updateView() tea.Msg {
 }
 
 func (m appModel) View() string {
-	v := styles.ViewStyle.Render(views.LobbyView())
+	var v string
 
 	switch m.ViewState {
+	case model.ActiveView:
+		v = styles.ViewStyle.Render(views.ActiveView())
 	case model.LobbyView:
 		v = styles.ViewStyle.Render(views.LobbyView())
+	case model.BoardView:
+		m.ViewModel.ActiveTab = model.BoardTab
+		v = styles.ViewStyle.Render(views.GameView(m.ViewModel))
 	case model.PlayView:
+		m.ViewModel.ActiveTab = model.PlayTab
+		v = styles.ViewStyle.Render(views.GameView(m.ViewModel))
+	case model.HandView:
+		m.ViewModel.ActiveTab = model.HandTab
 		v = styles.ViewStyle.Render(views.GameView(m.ViewModel))
 	case model.KittyView:
-		//return styles.ViewStyle.Render(m.kittyView())
-		break
-	case model.CutView:
-		v = styles.ViewStyle.Render(views.CutView())
-	case model.HandView:
-		//return styles.ViewStyle.Render(m.HandView())
-		break
+		m.ViewModel.ActiveTab = model.KittyTab
+		return styles.ViewStyle.Render(views.GameView(m.ViewModel))
 	default:
 		v = styles.ViewStyle.Render(views.LobbyView())
 	}
@@ -264,7 +273,7 @@ func newModel() appModel {
 	m := appModel{
 		ViewModel: views.ViewModel{
 			ActiveSlot:  model.CardOne,
-			ViewState:   model.LobbyView,
+			ViewState:   model.ActiveView,
 			GameState:   model.WaitingState,
 			CardsInPlay: []model.Card{},
 			Hand: []model.Card{
@@ -276,7 +285,7 @@ func newModel() appModel {
 				{Id: 6, Suit: 3, Value: 6, Art: "meow.png"},
 			},
 			Next: 0,
-			Tabs: []string{"Play", "Hand", "Kitty"},
+			Tabs: model.TabNames,
 		},
 
 		timer: timer.NewWithInterval(time.Hour, time.Second),
@@ -284,17 +293,11 @@ func newModel() appModel {
 	return m
 }
 
-func createMatch() model.Match {
+func createGame() tea.Msg {
 	newMatch := services.PostPlayerMatch().([]byte)
 
 	var match model.Match
 	json.Unmarshal(newMatch, &match)
-
-	return match
-}
-
-func createGame() tea.Msg {
-	match := createMatch()
 
 	return match
 }

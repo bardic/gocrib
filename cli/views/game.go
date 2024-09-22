@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/bardic/cribbagev2/cli/styles"
+	"github.com/bardic/cribbagev2/model"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -13,7 +14,7 @@ func GameView(m ViewModel) string {
 
 	for i, t := range m.Tabs {
 		var style lipgloss.Style
-		isFirst, isLast, isActive := i == 0, i == len(m.Tabs)-1, i == m.ActiveTab
+		isFirst, isLast, isActive := i == 0, i == len(m.Tabs)-1, i == int(m.ActiveTab)
 		if isActive {
 			style = styles.ActiveTabStyle
 		} else {
@@ -42,14 +43,14 @@ func GameView(m ViewModel) string {
 
 	var view string
 	switch m.ActiveTab {
-	case 0:
-		view = HandView(m.SelectedCardIds, m.CardsInPlay, m.Next)
-	case 1:
-		view = HandView(m.SelectedCardIds, m.Hand, m.Next)
-	case 2:
-		view = HandView(m.SelectedCardIds, m.Kitty, m.Next)
-	case 3:
+	case model.BoardTab:
 		view = ""
+	case model.PlayTab:
+		view = HandView(m.SelectedCardIds, m.CardsInPlay, m.Next)
+	case model.HandTab:
+		view = HandView(m.SelectedCardIds, m.Hand, m.Next)
+	case model.KittyTab:
+		view = HandView(m.SelectedCardIds, m.Kitty, m.Next)
 	}
 
 	doc.WriteString(styles.WindowStyle.Width(100).Render(view))

@@ -13,6 +13,6 @@ type ViewModel struct {
 	CardsInPlay     []model.Card
 	SelectedCardIds []int
 	Next            int
-	ActiveTab       int
+	ActiveTab       model.GameViewTab
 	Tabs            []string
 }
