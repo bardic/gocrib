@@ -99,7 +99,10 @@ func NewMatch(c echo.Context) error {
 				eloRangeMin,
 				eloRangeMax,
 				deckId,
+				cardsInPlay,
+				cutGameCardId,
 				currentPlayerTurn,
+				turnPassTimestamps,
 				gameState, 
 				art) 
 			VALUES ( 
@@ -108,7 +111,10 @@ func NewMatch(c echo.Context) error {
 				@eloRangeMin,
 				@eloRangeMax,
 				@deckId,
-				@currentPlayerTurn, 
+				@cardsInPlay,
+				@cutGameCardId,
+				@currentPlayerTurn,
+				@turnPassTimestamps,
 				@gameState,
 				@art) 
 			RETURNING id`
@@ -374,18 +380,34 @@ func parseMatch(details model.Match) pgx.NamedArgs {
 		"eloRangeMin":        details.EloRangeMin,
 		"eloRangeMax":        details.EloRangeMax,
 		"deckId":             details.DeckId,
-		"cardsInPlay":        details.CardsInPlay,
+		"cardsInPlay":        []int{},
 		"creationDate":       details.CreationDate,
 		"cutGameCardId":      details.CutGameCardId,
 		"currentPlayerTurn":  details.CurrentPlayerTurn,
-		"turnPassTimestamps": details.TurnPassTimestamps,
+		"turnPassTimestamps": []string{},
 		"art":                details.Art,
 	}
 }
 
 func newPlayer() (int, error) {
-	args := pgx.NamedArgs{"art": "default.png"}
-	query := "INSERT INTO player (art) VALUES (@art) RETURNING id"
+	args := pgx.NamedArgs{
+		"hand":  []int{},
+		"kitty": []int{},
+		"score": 0,
+		"art":   "default.png",
+	}
+	query := `INSERT INTO player (
+			hand, 
+			kitty, 
+			score, 
+			art
+		) VALUES (
+		 	@hand, 
+			@kitty, 
+			@score,
+			@art
+		) 
+		RETURNING id`
 
 	db := conn.Pool()
 	defer db.Close()

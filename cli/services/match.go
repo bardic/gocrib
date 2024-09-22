@@ -2,12 +2,14 @@ package services
 
 import (
 	"net/http"
+	"strconv"
 
+	"github.com/bardic/cribbagev2/cli/state"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func GetPlayerMatch() tea.Msg {
-	return url(EndPointMatch, http.MethodGet, "")
+	return url(EndPointMatch+"/?id="+strconv.Itoa(state.ActiveMatchId), http.MethodGet, "")
 }
 
 func PutPlayerMatch(id int) tea.Msg {

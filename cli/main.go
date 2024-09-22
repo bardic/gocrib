@@ -5,123 +5,286 @@ import (
 	"fmt"
 	"log"
 	"slices"
-	"strings"
+	"time"
 
 	"github.com/bardic/cribbagev2/cli/services"
+	"github.com/bardic/cribbagev2/cli/state"
+	"github.com/bardic/cribbagev2/cli/styles"
+	"github.com/bardic/cribbagev2/cli/views"
 	"github.com/bardic/cribbagev2/model"
+	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
-type cardSlots uint
-
-const (
-	cardOne cardSlots = iota
-	cardTwo
-	cardThree
-	cardFour
-	cardFive
-	cardSix
-)
-
-var (
-	modelStyle = lipgloss.NewStyle().
-			Width(10).
-			Height(5).
-			Align(lipgloss.Center, lipgloss.Center).
-			BorderStyle(lipgloss.HiddenBorder())
-
-	selectedStyle = lipgloss.NewStyle().
-			Width(10).
-			Height(5).
-			Align(lipgloss.Center, lipgloss.Center).
-			BorderStyle(lipgloss.ThickBorder()).
-			BorderForeground(lipgloss.Color("10"))
-
-	selectedFocusedStyle = lipgloss.NewStyle().
-				Width(10).
-				Height(5).
-				Align(lipgloss.Center, lipgloss.Center).
-				BorderStyle(lipgloss.ThickBorder()).
-				BorderForeground(lipgloss.Color("69"))
-
-	focusedModelStyle = lipgloss.NewStyle().
-				Width(10).
-				Height(5).
-				Align(lipgloss.Center, lipgloss.Center).
-				BorderStyle(lipgloss.NormalBorder()).
-				BorderForeground(lipgloss.Color("69"))
-
-	helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
-
-	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
-	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
-
-	viewStyle        = lipgloss.NewStyle().Padding(1, 2, 1, 2)
-	highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	inactiveTabStyle = lipgloss.NewStyle().Border(inactiveTabBorder, true).BorderForeground(highlightColor).Padding(0, 1)
-	activeTabStyle   = inactiveTabStyle.Border(activeTabBorder, true)
-	windowStyle      = lipgloss.NewStyle().BorderForeground(highlightColor).Padding(2, 0).Border(lipgloss.NormalBorder()).UnsetBorderTop()
-)
-
-type mainModel struct {
-	activeSlot      cardSlots
-	gameState       model.GameState
-	viewState       model.ViewState
-	hand            []model.Card
-	kitty           []model.Card
-	cardsInPlay     []model.Card
-	selectedCardIds []int
-	next            int
-	activeTab       int
-	tabs            []string
+type appModel struct {
+	views.ViewModel
+	timer timer.Model
 }
 
-func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
-	border := lipgloss.RoundedBorder()
-	border.BottomLeft = left
-	border.Bottom = middle
-	border.BottomRight = right
-	return border
+func (m appModel) Init() tea.Cmd {
+	return tea.Batch(createGame, m.timer.Init())
 }
 
-func newModel() mainModel {
-	m := mainModel{
-		activeSlot:  cardOne,
-		viewState:   model.LobbyView,
-		gameState:   model.WaitingState,
-		cardsInPlay: []model.Card{},
-		hand: []model.Card{
-			{Id: 1, Suit: 0, Value: 1, Art: "meow.png"},
-			{Id: 2, Suit: 1, Value: 2, Art: "meow.png"},
-			{Id: 3, Suit: 2, Value: 3, Art: "meow.png"},
-			{Id: 4, Suit: 3, Value: 4, Art: "meow.png"},
-			{Id: 5, Suit: 3, Value: 5, Art: "meow.png"},
-			{Id: 6, Suit: 3, Value: 6, Art: "meow.png"},
+func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		case "c":
+			return m, tea.Quit
+		case "enter", "view_update":
+			cmds = append(cmds, updateView)
+		case " ":
+			cards := m.Hand
+			if m.ActiveTab == 2 {
+				cards = m.Kitty
+			}
+			idx := slices.Index(m.SelectedCardIds, cards[m.Next].Id)
+			if idx > -1 {
+				m.SelectedCardIds = slices.Delete(m.SelectedCardIds, idx, 1)
+			} else {
+				m.SelectedCardIds = append(m.SelectedCardIds, cards[m.Next].Id)
+			}
+		case "tab":
+			m.SelectedCardIds = make([]int, 0)
+			m.ActiveTab = min(m.ActiveTab+1, len(m.Tabs)-1)
+			return m, nil
+		case "shift+tab":
+			m.SelectedCardIds = make([]int, 0)
+			m.ActiveTab = max(m.ActiveTab-1, 0)
+			return m, nil
+		case "right":
+			switch m.ActiveSlot {
+			case model.CardOne:
+				m.Next = 1
+				m.ActiveSlot = model.CardTwo
+			case model.CardTwo:
+				m.Next = 2
+				m.ActiveSlot = model.CardThree
+			case model.CardThree:
+				m.Next = 3
+				m.ActiveSlot = model.CardFour
+			case model.CardFour:
+				if len(m.Hand) == 4 {
+					m.ActiveSlot = model.CardOne
+					m.Next = 0
+				} else {
+					m.ActiveSlot = model.CardFive
+					m.Next = 4
+				}
+			case model.CardFive:
+				m.Next = 5
+				m.ActiveSlot = model.CardSix
+			case model.CardSix:
+				m.Next = 0
+				m.ActiveSlot = model.CardOne
+			}
+		case "left":
+			switch m.ActiveSlot {
+			case model.CardOne:
+				if len(m.Hand) == 4 {
+					m.Next = 3
+					m.ActiveSlot = model.CardFour
+				} else {
+					m.Next = 5
+					m.ActiveSlot = model.CardSix
+				}
+			case model.CardTwo:
+				m.Next = 0
+				m.ActiveSlot = model.CardOne
+			case model.CardThree:
+				m.Next = 1
+				m.ActiveSlot = model.CardTwo
+			case model.CardFour:
+				m.Next = 2
+				m.ActiveSlot = model.CardThree
+			case model.CardFive:
+				m.Next = 3
+				m.ActiveSlot = model.CardFour
+			case model.CardSix:
+				m.Next = 4
+				m.ActiveSlot = model.CardFive
+			}
+		}
+	case timer.TickMsg:
+		var cmd tea.Cmd
+		m.timer, cmd = m.timer.Update(msg)
+		state.ActiveMatchId = 2
+		cmds = append(cmds, cmd, services.GetPlayerMatch)
+	case []byte:
+		var matchStr string
+		err := json.Unmarshal(msg, &matchStr)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		var match model.Match
+		err = json.Unmarshal([]byte(matchStr), &match)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		diffs := match.Eq(state.ActiveMatch)
+		if diffs == 0 {
+			return m, tea.Batch(cmds...)
+		}
+
+		for diff := model.GenericDiff; diff < model.MaxDiff; diff <<= 1 {
+			d := diffs & diff
+			if d != 0 {
+				switch d {
+				case model.CutDiff:
+					// fmt.Println("CutDiff")
+					m.GameState = model.CutState
+					m.ViewState = model.CutView
+					cmds = append(cmds, updateView)
+				case model.CardsInPlayDiff:
+					// fmt.Println("CardsInPlayDiff")
+					if m.GameState&model.OpponentState == 1 {
+						m.GameState = model.PlayState
+					} else {
+						m.GameState = model.OpponentState
+					}
+
+					cmds = append(cmds, updateView)
+				case model.GameStateDiff:
+					// fmt.Println("GameStateDiff" + string(m.GameState))
+					cmds = append(cmds, updateView)
+				case model.GenericDiff:
+					// fmt.Println("GenericDiff")
+
+				case model.MaxDiff:
+					// fmt.Println("MaxDiff")
+				case model.TurnDiff:
+					// fmt.Println("TurnDiff")
+				case model.TurnPassTimestampsDiff:
+					// fmt.Println("TurnPassTimestampsDiff")
+				}
+			}
+		}
+
+		state.ActiveMatch = match
+		//Once it does change, determine the change
+
+	case appModel:
+		switch msg.ViewState {
+		case model.LobbyView:
+			m.ViewState = model.LobbyView
+			m.ActiveTab = 1
+		case model.PlayView:
+			m.GameState = model.PlayState
+			m.ActiveTab = 2
+		case model.KittyView:
+			m.GameState = model.PlayState
+			m.ActiveTab = 3
+		case model.HandView:
+			m.GameState = model.PlayState
+			m.ActiveTab = 1
+		case model.ScoresView:
+			break
+		case model.GameOverView:
+			break
+		}
+	}
+	return m, tea.Batch(cmds...)
+}
+
+func updateView() tea.Msg {
+	//fmt.Println("update view")
+	m := state.ActiveViewModel
+	if m.ViewState == model.PlayView {
+		switch m.GameState {
+		case model.DealState:
+			break
+		case model.CutState:
+
+			break
+		case model.DiscardState:
+			for _, idx := range m.SelectedCardIds {
+				m.Kitty = append(m.Kitty, getCardById(idx, m.Hand))
+				m.Hand = slices.DeleteFunc(m.Hand, func(c model.Card) bool {
+					return c.Id == idx
+				})
+			}
+			m.GameState = model.PlayState
+			m.ActiveTab = 2
+		case model.PlayState:
+			for _, idx := range m.SelectedCardIds {
+				m.CardsInPlay = append(m.CardsInPlay, getCardById(idx, m.Hand))
+				m.Hand = slices.DeleteFunc(m.Hand, func(c model.Card) bool {
+					return c.Id == idx
+				})
+			}
+			m.GameState = model.OpponentState
+			m.ActiveTab = 0
+		case model.OpponentState:
+			break
+		case model.KittyState:
+			break
+		case model.GameWonState:
+			break
+		case model.GameLostState:
+			break
+		}
+		m.SelectedCardIds = make([]int, 0)
+	} else {
+		m.ViewState = model.PlayView
+	}
+
+	return ""
+}
+
+func (m appModel) View() string {
+	v := styles.ViewStyle.Render(views.LobbyView())
+
+	switch m.ViewState {
+	case model.LobbyView:
+		v = styles.ViewStyle.Render(views.LobbyView())
+	case model.PlayView:
+		v = styles.ViewStyle.Render(views.GameView(m.ViewModel))
+	case model.KittyView:
+		//return styles.ViewStyle.Render(m.kittyView())
+		break
+	case model.CutView:
+		v = styles.ViewStyle.Render(views.CutView())
+	case model.HandView:
+		//return styles.ViewStyle.Render(m.HandView())
+		break
+	default:
+		v = styles.ViewStyle.Render(views.LobbyView())
+	}
+	return v
+}
+
+func newModel() appModel {
+	m := appModel{
+		ViewModel: views.ViewModel{
+			ActiveSlot:  model.CardOne,
+			ViewState:   model.LobbyView,
+			GameState:   model.WaitingState,
+			CardsInPlay: []model.Card{},
+			Hand: []model.Card{
+				{Id: 1, Suit: 0, Value: 1, Art: "meow.png"},
+				{Id: 2, Suit: 1, Value: 2, Art: "meow.png"},
+				{Id: 3, Suit: 2, Value: 3, Art: "meow.png"},
+				{Id: 4, Suit: 3, Value: 4, Art: "meow.png"},
+				{Id: 5, Suit: 3, Value: 5, Art: "meow.png"},
+				{Id: 6, Suit: 3, Value: 6, Art: "meow.png"},
+			},
+			Next: 0,
+			Tabs: []string{"Play", "Hand", "Kitty"},
 		},
-		next: 0,
-		tabs: []string{"Play", "Hand", "Kitty"},
+
+		timer: timer.NewWithInterval(time.Hour, time.Second),
 	}
 	return m
 }
 
-// func createDeck() model.GameDeck {
-// 	deck := model.GameDeck{
-// 		Cards: []int{
-// 			1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
-// 		},
-// 	}
-
-// 	newDeck := services.PostDeck(deck).([]byte)
-// 	var deckId int
-// 	json.Unmarshal(newDeck, &deckId)
-// 	deck.Id = deckId
-
-// 	return deck
-// }
-
 func createMatch() model.Match {
-
 	newMatch := services.PostPlayerMatch().([]byte)
 
 	var match model.Match
@@ -130,347 +293,14 @@ func createMatch() model.Match {
 	return match
 }
 
-func createPlayerForMatch(matchId int, accountId int) model.Player {
-	player := model.Player{
-		AccountId: accountId,
-	}
-
-	newPlayer := services.PostPlayer(player).([]byte)
-
-	fmt.Println(string(newPlayer))
-
-	var playerId int
-	json.Unmarshal(newPlayer, &playerId)
-	player.Id = matchId
-
-	return player
-}
-
 func createGame() tea.Msg {
-	// deck := createDeck()
-	createMatch()
 	match := createMatch()
-
-	fmt.Println(match)
-
-	player1 := createPlayerForMatch(match.Id, 1)
-	player2 := createPlayerForMatch(match.Id, 2)
-
-	fmt.Println(player1)
-
-	match.PlayerIds = []int{player1.Id, player2.Id}
 
 	return match
 }
 
-func (m mainModel) Init() tea.Cmd {
-	return createGame
-
-	// return createMatch
-
-	// //create match
-
-	// //Start Match
-	// // when second player joins server will dispatch a state change message
-	// //set game state from waiting to discard
-
-	// m.gameState = model.GameState(model.Discard)
-
-	// submit dicarded cards
-
-	// enter free play state
-
-	// Check for round end
-	// Check if freeplay end
-	// reset player turn and start next round
-
-	// count hand
-	// loop
-
-	// //get all cards
-
-	// // r = services.GetAllCards()
-	// // var c string
-
-	// // if err := json.Unmarshal((r.([]byte)), &c); err != nil {
-	// // 	panic(err)
-	// // }
-
-	// // var cards []model.Card
-
-	// // if err := json.Unmarshal(([]byte(c)), &cards); err != nil {
-	// // 	panic(err)
-	// // }
-
-	// //start match
-
-	// // submit action
-
-	// a := model.GameAction{
-	// 	MatchId:        match.Id,
-	// 	Type:           model.Discard,
-	// 	GameplayCardId: cards[0].Id,
-	// }
-	// services.PostGame(a)
-
-	// return nil
-}
-
-func handleErr(r tea.Msg) error {
-	switch r := r.(type) {
-	case error:
-		return r
-	}
-
-	return nil
-}
-
-func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		case "enter":
-			if m.viewState == model.PlayView {
-				switch m.gameState {
-				case model.DealState:
-					break
-				case model.CutState:
-					break
-				case model.DiscardState:
-					for _, idx := range m.selectedCardIds {
-						m.kitty = append(m.kitty, m.getCardById(idx))
-						m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
-							return c.Id == idx
-						})
-					}
-					m.gameState = model.PlayState
-					m.activeTab = 2
-				case model.PlayState:
-					for _, idx := range m.selectedCardIds {
-						m.cardsInPlay = append(m.cardsInPlay, m.getCardById(idx))
-						m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
-							return c.Id == idx
-						})
-					}
-					m.gameState = model.OpponentState
-					m.activeTab = 0
-				case model.OpponentState:
-					break
-				case model.KittyState:
-					break
-				case model.GameWonState:
-					break
-				case model.GameLostState:
-					break
-				}
-				m.selectedCardIds = make([]int, 0)
-			} else {
-				m.viewState = model.PlayView
-			}
-		case " ":
-			cards := m.hand
-			if m.activeTab == 2 {
-				cards = m.kitty
-			}
-			idx := slices.Index(m.selectedCardIds, cards[m.next].Id)
-			if idx > -1 {
-				m.selectedCardIds = slices.Delete(m.selectedCardIds, idx, 1)
-			} else {
-				m.selectedCardIds = append(m.selectedCardIds, cards[m.next].Id)
-			}
-		case "tab":
-			m.selectedCardIds = make([]int, 0)
-			m.activeTab = min(m.activeTab+1, len(m.tabs)-1)
-			return m, nil
-		case "shift+tab":
-			m.selectedCardIds = make([]int, 0)
-			m.activeTab = max(m.activeTab-1, 0)
-			return m, nil
-		case "right":
-			switch m.activeSlot {
-			case cardOne:
-				m.next = 1
-				m.activeSlot = cardTwo
-			case cardTwo:
-				m.next = 2
-				m.activeSlot = cardThree
-			case cardThree:
-				m.next = 3
-				m.activeSlot = cardFour
-			case cardFour:
-				if len(m.hand) == 4 {
-					m.activeSlot = cardOne
-					m.next = 0
-				} else {
-					m.activeSlot = cardFive
-					m.next = 4
-				}
-			case cardFive:
-				m.next = 5
-				m.activeSlot = cardSix
-			case cardSix:
-				m.next = 0
-				m.activeSlot = cardOne
-			}
-		case "left":
-			switch m.activeSlot {
-			case cardOne:
-				if len(m.hand) == 4 {
-					m.next = 3
-					m.activeSlot = cardFour
-				} else {
-					m.next = 5
-					m.activeSlot = cardSix
-				}
-			case cardTwo:
-				m.next = 0
-				m.activeSlot = cardOne
-			case cardThree:
-				m.next = 1
-				m.activeSlot = cardTwo
-			case cardFour:
-				m.next = 2
-				m.activeSlot = cardThree
-			case cardFive:
-				m.next = 3
-				m.activeSlot = cardFour
-			case cardSix:
-				m.next = 4
-				m.activeSlot = cardFive
-			}
-		}
-	case mainModel:
-		switch msg.viewState {
-		case model.LobbyView:
-			m.viewState = model.LobbyView
-			m.activeTab = 1
-		case model.PlayView:
-			m.gameState = model.PlayState
-			m.activeTab = 2
-		case model.KittyView:
-			m.gameState = model.PlayState
-			m.activeTab = 3
-		case model.HandView:
-			m.gameState = model.PlayState
-			m.activeTab = 1
-		case model.ScoresView:
-			break
-		case model.GameOverView:
-			break
-		default:
-			break
-		}
-	}
-	return m, tea.Batch(cmds...)
-}
-
-func (m mainModel) View() string {
-	switch m.viewState {
-	case model.LobbyView:
-		return viewStyle.Render(m.lobbyView())
-	case model.PlayView:
-		return viewStyle.Render(m.gameView())
-	case model.KittyView:
-		//return viewStyle.Render(m.kittyView())
-		break
-	case model.HandView:
-		//return viewStyle.Render(m.handView())
-		break
-	default:
-		return viewStyle.Render(m.lobbyView())
-	}
-	return viewStyle.Render(m.lobbyView())
-}
-
-func (m mainModel) gameView() string {
-	doc := strings.Builder{}
-	var renderedTabs []string
-
-	for i, t := range m.tabs {
-		var style lipgloss.Style
-		isFirst, isLast, isActive := i == 0, i == len(m.tabs)-1, i == m.activeTab
-		if isActive {
-			style = activeTabStyle
-		} else {
-			style = inactiveTabStyle
-		}
-		border, _, _, _, _ := style.GetBorder()
-		if isFirst && isActive {
-			border.BottomLeft = "│"
-		} else if isFirst && !isActive {
-			border.BottomLeft = "├"
-		} else if isLast && isActive {
-			border.BottomRight = "└"
-		} else if isLast && !isActive {
-			border.BottomRight = "┴"
-		}
-
-		style = style.Border(border)
-		renderedTabs = append(renderedTabs, style.Render(t))
-	}
-
-	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
-	doc.WriteString(row)
-	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "────────────────────────────────────────────────────────────────────────────┐")
-	doc.WriteString(row)
-	doc.WriteString("\n")
-
-	var view string
-	switch m.activeTab {
-	case 0:
-		view = m.handView(m.cardsInPlay)
-	case 1:
-		view = m.handView(m.hand)
-	case 2:
-		view = m.handView(m.kitty)
-	case 3:
-		view = m.handleTestView()
-	}
-
-	doc.WriteString(windowStyle.Width(100).Render(view))
-	return doc.String()
-}
-
-func (m mainModel) lobbyView() string {
-	return "Lobby View"
-}
-
-func (m mainModel) handView(cards []model.Card) string {
-	var s string
-
-	cardViews := make([]string, 0)
-	for i := 0; i < len(cards); i++ {
-		view := fmt.Sprintf("%s : %v", cards[i].Suit, cards[i].Value)
-
-		if slices.Contains(m.selectedCardIds, cards[i].Id) {
-			if i == m.next {
-				cardViews = append(cardViews, selectedFocusedStyle.Render(view))
-			} else {
-				cardViews = append(cardViews, selectedStyle.Render(view))
-			}
-		} else {
-			if i == m.next {
-				cardViews = append(cardViews, focusedModelStyle.Render(view))
-			} else {
-				cardViews = append(cardViews, modelStyle.Render(view))
-			}
-		}
-	}
-
-	s += lipgloss.JoinHorizontal(lipgloss.Top, cardViews...)
-	s += helpStyle.Render("\ntab: focus next • q: exit\n")
-	return s
-}
-
-func (m mainModel) handleTestView() string {
-	return ""
-}
-
-func (m mainModel) getCardById(id int) model.Card {
-	idx := slices.IndexFunc(m.hand, func(c model.Card) bool {
+func getCardById(id int, hand []model.Card) model.Card {
+	idx := slices.IndexFunc(hand, func(c model.Card) bool {
 		return c.Id == id
 	})
 
@@ -478,7 +308,7 @@ func (m mainModel) getCardById(id int) model.Card {
 		return model.Card{}
 	}
 
-	return m.hand[idx]
+	return hand[idx]
 }
 
 func main() {

@@ -96,6 +96,15 @@ definitions:
     - Discard
     - Peg
     - Tally
+  model.GameDeck:
+    properties:
+      cards:
+        items:
+          $ref: '#/definitions/model.GameplayCard'
+        type: array
+      id:
+        type: integer
+    type: object
   model.GameState:
     enum:
     - 0
@@ -184,6 +193,15 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  model.MatchRequirements:
+    properties:
+      eloRangeMax:
+        type: integer
+      eloRangeMin:
+        type: integer
+      isPrivate:
+        type: boolean
     type: object
   model.Player:
     properties:
@@ -664,6 +682,32 @@ paths:
       summary: Update history by barcode
       tags:
       - historys
+  /match/deck/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for deck by id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GameDeck'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get deck by id
+      tags:
+      - deck
   /player/allcards/:
     get:
       consumes:
@@ -745,7 +789,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: search for match by barcode
+      - description: search for match by id
         in: query
         name: id
         required: true
@@ -763,12 +807,19 @@ paths:
         "422":
           description: Unprocessable Entity
           schema: {}
-      summary: Get match by barcode
+      summary: Get match by id
       tags:
       - match
     post:
       consumes:
       - application/json
+      parameters:
+      - description: MatchRequirements
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.MatchRequirements'
       produces:
       - application/json
       responses:
@@ -792,7 +843,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: match Object to save
+      - description: match Object to update
         in: body
         name: details
         required: true
@@ -814,7 +865,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Update match by barcode
+      summary: Update match by id
       tags:
       - match
   /player/match/card:

@@ -644,6 +644,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/match/deck/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deck"
+                ],
+                "summary": "Get deck by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for deck by id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GameDeck"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/player/allcards/": {
             "get": {
                 "consumes": [
@@ -769,11 +808,11 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Get match by barcode",
+                "summary": "Get match by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for match by barcode",
+                        "description": "search for match by id",
                         "name": "id",
                         "in": "query",
                         "required": true
@@ -806,10 +845,10 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Update match by barcode",
+                "summary": "Update match by id",
                 "parameters": [
                     {
-                        "description": "match Object to save",
+                        "description": "match Object to update",
                         "name": "details",
                         "in": "body",
                         "required": true,
@@ -850,6 +889,17 @@ const docTemplate = `{
                     "match"
                 ],
                 "summary": "Create new match",
+                "parameters": [
+                    {
+                        "description": "MatchRequirements",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.MatchRequirements"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1300,6 +1350,20 @@ const docTemplate = `{
                 "Tally"
             ]
         },
+        "model.GameDeck": {
+            "type": "object",
+            "properties": {
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.GameplayCard"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.GameState": {
             "type": "integer",
             "enum": [
@@ -1424,6 +1488,20 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "model.MatchRequirements": {
+            "type": "object",
+            "properties": {
+                "eloRangeMax": {
+                    "type": "integer"
+                },
+                "eloRangeMin": {
+                    "type": "integer"
+                },
+                "isPrivate": {
+                    "type": "boolean"
                 }
             }
         },
