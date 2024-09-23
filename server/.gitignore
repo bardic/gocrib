@@ -16,6 +16,10 @@
 
 !README.md
 !LICENSE
+!*.sql
+!*.sh
+!Dockerfile
+!docker-compose.yml
 
 # !Makefile
 
