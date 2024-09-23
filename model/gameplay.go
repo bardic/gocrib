@@ -313,13 +313,4 @@ const (
 	GameOverView
 )
 
-type GameViewTab uint
-
-const (
-	BoardTab GameViewTab = iota
-	PlayTab
-	HandTab
-	KittyTab
-)
-
 var TabNames = []string{"Board", "Play", "Hand", "Kitty"}
