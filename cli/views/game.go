@@ -14,7 +14,7 @@ func GameView(m ViewModel) string {
 
 	for i, t := range m.Tabs {
 		var style lipgloss.Style
-		isFirst, isLast, isActive := i == 0, i == len(m.Tabs)-1, i == int(m.ActiveTab)
+		isFirst, isLast, isActive := i == 0, i == len(m.Tabs)-1, i == m.ActiveTab
 		if isActive {
 			style = styles.ActiveTabStyle
 		} else {
@@ -37,20 +37,20 @@ func GameView(m ViewModel) string {
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
-	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "────────────────────────────────────────────────────────────────────────────┐")
+	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────────────────────────────────┐")
 	doc.WriteString(row)
 	doc.WriteString("\n")
 
 	var view string
-	switch m.ActiveTab {
-	case model.BoardTab:
+	switch m.ViewState {
+	case model.BoardView:
 		view = ""
-	case model.PlayTab:
-		view = HandView(m.SelectedCardIds, m.CardsInPlay, m.Next)
-	case model.HandTab:
-		view = HandView(m.SelectedCardIds, m.Hand, m.Next)
-	case model.KittyTab:
-		view = HandView(m.SelectedCardIds, m.Kitty, m.Next)
+	case model.PlayView:
+		view = HandView(m.SelectedCardId, m.SelectedCardIds, m.CardsInPlay)
+	case model.HandView:
+		view = HandView(m.SelectedCardId, m.SelectedCardIds, m.Hand)
+	case model.KittyView:
+		view = HandView(m.SelectedCardId, m.SelectedCardIds, m.Kitty)
 	}
 
 	doc.WriteString(styles.WindowStyle.Width(100).Render(view))

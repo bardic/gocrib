@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func HandView(selectedCardIds []int, cards []model.Card, next int) string {
+func HandView(selectedCardId int, selectedCardIds []int, cards []model.Card) string {
 	var s string
 
 	cardViews := make([]string, 0)
@@ -17,13 +17,13 @@ func HandView(selectedCardIds []int, cards []model.Card, next int) string {
 		view := fmt.Sprintf("%v : %v", cards[i].Suit, cards[i].Value)
 
 		if slices.Contains(selectedCardIds, cards[i].Id) {
-			if i == next {
+			if i == selectedCardId {
 				cardViews = append(cardViews, styles.SelectedFocusedStyle.Render(view))
 			} else {
 				cardViews = append(cardViews, styles.SelectedStyle.Render(view))
 			}
 		} else {
-			if i == next {
+			if i == selectedCardId {
 				cardViews = append(cardViews, styles.FocusedModelStyle.Render(view))
 			} else {
 				cardViews = append(cardViews, styles.ModelStyle.Render(view))

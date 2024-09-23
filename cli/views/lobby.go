@@ -6,5 +6,5 @@ import (
 )
 
 func LobbyView() string {
-	return styles.WindowStyle.Width(100).Align(lipgloss.Center, lipgloss.Center).Render("Lobby View")
+	return styles.ScreenStyle.Width(100).Align(lipgloss.Center, lipgloss.Center).Render("Lobby View")
 }

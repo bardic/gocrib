@@ -39,7 +39,8 @@ var (
 	highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	InactiveTabStyle = lipgloss.NewStyle().Border(inactiveTabBorder, true).BorderForeground(highlightColor).Padding(0, 1)
 	ActiveTabStyle   = InactiveTabStyle.Border(activeTabBorder, true)
-	WindowStyle      = lipgloss.NewStyle().BorderForeground(highlightColor).Padding(2, 0).Border(lipgloss.NormalBorder())
+	WindowStyle      = lipgloss.NewStyle().BorderForeground(highlightColor).Padding(2, 0).Border(lipgloss.NormalBorder()).BorderTop(false)
+	ScreenStyle      = lipgloss.NewStyle().BorderForeground(highlightColor).Padding(2, 0).Border(lipgloss.NormalBorder())
 )
 
 func tabBorderWithBottom(left, middle, right string) lipgloss.Border {

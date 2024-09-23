@@ -5,14 +5,13 @@ import (
 )
 
 type ViewModel struct {
-	ActiveSlot      model.CardSlots
-	GameState       model.GameState
 	ViewState       model.ViewState
+	Tabs            []string
+	ActiveTab       int
+	ActiveSlot      model.CardSlots
 	Hand            []model.Card
 	Kitty           []model.Card
-	CardsInPlay     []model.Card
+	SelectedCardId  int
 	SelectedCardIds []int
-	Next            int
-	ActiveTab       model.GameViewTab
-	Tabs            []string
+	CardsInPlay     []model.Card
 }
