@@ -8,3 +8,5 @@ import (
 var ActiveMatchId int
 var ActiveMatch model.Match
 var ActiveViewModel views.ViewModel
+var ActiveDeck model.GameDeck
+var CurrentAction model.GameAction

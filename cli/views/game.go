@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func GameView(m ViewModel) string {
+func GameView(highlightId int, highlightedIds []int, cards []model.Card, m ViewModel) string {
 	doc := strings.Builder{}
 	var renderedTabs []string
 
@@ -46,11 +46,11 @@ func GameView(m ViewModel) string {
 	case model.BoardView:
 		view = ""
 	case model.PlayView:
-		view = HandView(m.SelectedCardId, m.SelectedCardIds, m.CardsInPlay)
+		view = HandView(highlightId, highlightedIds, cards)
 	case model.HandView:
-		view = HandView(m.SelectedCardId, m.SelectedCardIds, m.Hand)
+		view = HandView(highlightId, highlightedIds, cards)
 	case model.KittyView:
-		view = HandView(m.SelectedCardId, m.SelectedCardIds, m.Kitty)
+		view = HandView(highlightId, highlightedIds, cards)
 	}
 
 	doc.WriteString(styles.WindowStyle.Width(100).Render(view))

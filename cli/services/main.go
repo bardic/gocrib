@@ -29,7 +29,7 @@ const (
 	EndPointLobby = BaseUrl + "/player/lobby"
 	//Deck
 	EndPointDeck     = BaseUrl + "/deck"
-	EndPointDeckById = BaseUrl + "/deck?id="
+	EndPointDeckById = BaseUrl + "/player/match/deck?id="
 )
 
 func url(url string, method string, json string) tea.Msg {

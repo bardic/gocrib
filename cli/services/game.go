@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/cribbagev2/cli/state"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func PostGame(a model.GameAction) tea.Msg {
+func PostGame() tea.Msg {
+	a := state.CurrentAction
 	b, err := json.Marshal(a)
 	if err != nil {
 		return err

@@ -1,5 +1,10 @@
 package model
 
+import (
+	"math/rand/v2"
+	"time"
+)
+
 type CardValue int
 
 const (
@@ -64,6 +69,14 @@ type GameDeck struct {
 	Cards []GameplayCard `json:"cards"`
 }
 
+func (d *GameDeck) Shuffle() *GameDeck {
+	rand.Shuffle(len(d.Cards), func(i, j int) {
+		d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
+	})
+
+	return d
+}
+
 type Player struct {
 	Id        int
 	AccountId int
@@ -121,6 +134,7 @@ type ChatMessage struct {
 }
 
 type MatchRequirements struct {
+	RequesterId int
 	IsPrivate   bool
 	EloRangeMin int
 	EloRangeMax int
@@ -150,21 +164,25 @@ const (
 	MaxDiff
 )
 
+type GameMatch struct {
+	Match
+	Players []Player
+}
+
 type Match struct {
-	Id                 int
-	PlayerIds          []int
-	PrivateMatch       bool
-	EloRangeMin        int
-	EloRangeMax        int
-	CreationDate       string
-	DeckId             int
-	CardsInPlay        []int
-	CutGameCardId      int
-	CurrentPlayerTurn  int
-	TurnPassTimestamps []string
-	GameState          GameState
-	Art                string
-	Players            []Player
+	Id                 int       `json:"id"`
+	PlayerIds          []int     `json:"playerIds"`
+	PrivateMatch       bool      `json:"privateMatch"`
+	EloRangeMin        int       `json:"eloRangeMin"`
+	EloRangeMax        int       `json:"eloRangeMax"`
+	CreationDate       time.Time `json:"creationDate"`
+	DeckId             int       `json:"deckId"`
+	CardsInPlay        []int     `json:"cardsInPlay"`
+	CutGameCardId      int       `json:"cutGameCardId"`
+	CurrentPlayerTurn  int       `json:"currentPlayerTurn"`
+	TurnPassTimestamps []string  `json:"turnPassTimestamps"`
+	GameState          GameState `json:"gameState"`
+	Art                string    `json:"art "`
 }
 
 func (m *Match) Eq(c Match) int {
@@ -286,9 +304,9 @@ const (
 )
 
 type GameAction struct {
-	MatchId        int
-	Type           GameActionType
-	GameplayCardId int
+	MatchId  int
+	Type     GameActionType
+	CardsIds []int
 }
 
 type ScoreResults struct {
