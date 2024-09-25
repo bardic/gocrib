@@ -3,6 +3,7 @@ package route
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -34,30 +35,30 @@ func NewMatch(c echo.Context) error {
 	defer db.Close()
 
 	args := pgx.NamedArgs{"eloMin": details.EloRangeMin, "eloMax": details.EloRangeMax}
-	q := `SELECT 
+	q := `SELECT
 			json_build_object(
-				'playerIds', playerIds, 
+				'playerIds', playerIds,
 				'creationDate', creationDate,
 				'privateMatch', privateMatch,
 				'eloRangeMin', eloRangeMin,
 				'eloRangeMax', eloRangeMax,
-				'deckid', deckid, 
-				'cardsinplay', cardsinplay, 
-				'cutgamecardid', cutgamecardid, 
-				'currentplayerturn', currentplayerturn, 
-				'turnpasstimestamps', turnpasstimestamps, 
-				'art', art,  
+				'deckid', deckid,
+				'cardsinplay', cardsinplay,
+				'cutgamecardid', cutgamecardid,
+				'currentplayerturn', currentplayerturn,
+				'turnpasstimestamps', turnpasstimestamps,
+				'art', art,
 				'players', (SELECT json_agg(
-					json_build_object( 
+					json_build_object(
 						'id', p.id,
-						'hand', p.hand, 
-						'kitty', p.kitty, 
-						'score', p.score, 
-						'art', p.art )) 
-				FROM player as p WHERE p.id = ANY(m.playerIds))) 
+						'hand', p.hand,
+						'kitty', p.kitty,
+						'score', p.score,
+						'art', p.art ))
+				FROM player as p WHERE p.id = ANY(m.playerIds)))
 			FROM match as m WHERE m.eloRangeMin BETWEEN @eloMin AND @eloMax OR m.eloRangeMax BETWEEN @eloMin AND @eloMax`
 
-	var match model.Match
+	var match model.GameMatch
 	err := db.QueryRow(
 		context.Background(),
 		q,
@@ -93,7 +94,7 @@ func NewMatch(c echo.Context) error {
 
 	args = parseMatch(match)
 
-	query := `INSERT INTO match( 	
+	query := `INSERT INTO match(
 				playerIds,
 				privateMatch,
 				eloRangeMin,
@@ -103,9 +104,9 @@ func NewMatch(c echo.Context) error {
 				cutGameCardId,
 				currentPlayerTurn,
 				turnPassTimestamps,
-				gameState, 
-				art) 
-			VALUES ( 
+				gameState,
+				art)
+			VALUES (
 				@playerIds,
 				@privateMatch,
 				@eloRangeMin,
@@ -116,7 +117,7 @@ func NewMatch(c echo.Context) error {
 				@currentPlayerTurn,
 				@turnPassTimestamps,
 				@gameState,
-				@art) 
+				@art)
 			RETURNING id`
 
 	var matchId int
@@ -130,6 +131,40 @@ func NewMatch(c echo.Context) error {
 	}
 
 	match.Id = matchId
+
+	d = *d.Shuffle()
+	for i := 0; i < 12; i++ {
+		if i%2 == 0 {
+			match.Players[0].Hand = append(match.Players[0].Hand, d.Cards[i].CardId)
+		} else {
+			match.Players[1].Hand = append(match.Players[1].Hand, d.Cards[i].CardId)
+		}
+	}
+
+	match.GameState = model.DiscardState
+
+	err = updateMatch(match)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = UpdatePlayerQuery(match.Players[0])
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = UpdatePlayerQuery(match.Players[1])
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	if match.Players[0].Id == details.RequesterId {
+		match.Players[1].Hand = []int{}
+	} else {
+		match.Players[0].Hand = []int{}
+	}
 
 	return c.JSON(http.StatusOK, match)
 }
@@ -147,23 +182,22 @@ func NewMatch(c echo.Context) error {
 // @Failure      500  {object}  error
 // @Router       /player/match/ [put]
 func UpdateMatch(c echo.Context) error {
-	details := new(model.Match)
+	details := new(model.GameMatch)
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	args := parseMatch(*details)
-
-	if err := updateMatch(args); err != nil {
+	if err := updateMatch(*details); err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusOK, "meow")
 }
 
-func updateMatch(args pgx.NamedArgs) error {
-	query := `UPDATE match SET  
-				playerIds = @playerIds
+func updateMatch(match model.GameMatch) error {
+	args := parseMatch(match)
+	query := `UPDATE match SET
+				playerIds = @playerIds,
 				creationDate = @creationDate,
 				privateMatch = @privateMatch,
 				eloRangeMin = @eloRangeMin,
@@ -231,7 +265,7 @@ func GetMatch(c echo.Context) error {
 // @Success      200  {object}  model.GameDeck
 // @Failure      404  {object}  error
 // @Failure      422  {object}  error
-// @Router       /match/deck/ [get]
+// @Router       /player/match/deck/ [get]
 func GetDeck(c echo.Context) error {
 	p := c.Request().URL.Query().Get("id")
 	id, err := strconv.Atoi(p)
@@ -250,7 +284,12 @@ func GetDeck(c echo.Context) error {
 		return err
 	}
 
-	r, err := json.Marshal(cards)
+	deck := model.GameDeck{
+		Id:    deckId,
+		Cards: cards,
+	}
+
+	r, err := json.Marshal(deck)
 
 	if err != nil {
 		return err
@@ -264,27 +303,29 @@ func getMatch(id int) (model.Match, error) {
 	defer db.Close()
 
 	var match model.Match
-	err := db.QueryRow(context.Background(), `SELECT 
+	err := db.QueryRow(context.Background(), `SELECT
 			json_build_object(
-				'playerIds', playerIds, 
+				'id', id,
+				'playerIds', playerIds,
 				'creationDate', creationDate,
 				'privateMatch', privateMatch,
 				'eloRangeMin', eloRangeMin,
 				'eloRangeMax', eloRangeMax,
-				'deckid', deckid, 
-				'cardsinplay', cardsinplay, 
-				'cutgamecardid', cutgamecardid, 
-				'currentplayerturn', currentplayerturn, 
-				'turnpasstimestamps', turnpasstimestamps, 
-				'art', art,  
+				'deckid', deckid,
+				'cardsinplay', cardsinplay,
+				'cutgamecardid', cutgamecardid,
+				'currentplayerturn', currentplayerturn,
+				'turnpasstimestamps', turnpasstimestamps,
+				'gamestate', gamestate,
+				'art', art,
 				'players', (SELECT json_agg(
-					json_build_object( 
+					json_build_object(
 						'id', p.id,
-						'hand', p.hand, 
-						'kitty', p.kitty, 
-						'score', p.score, 
-						'art', p.art )) 
-				FROM player as p WHERE p.id = ANY(m.playerIds))) 
+						'hand', p.hand,
+						'kitty', p.kitty,
+						'score', p.score,
+						'art', p.art ))
+				FROM player as p WHERE p.id = ANY(m.playerIds)))
 			FROM match as m WHERE m.id = $1`, id).Scan(
 		&match,
 	)
@@ -337,10 +378,10 @@ func UpdateCut(matchId int, cutCardId int) error {
 	return nil
 }
 
-func UpdateCardsInPlay(matchId int, gameplayCardId int) (model.Match, error) {
-	args := pgx.NamedArgs{"id": matchId, "cardId": gameplayCardId}
+func UpdateCardsInPlay(a *model.GameAction) (model.Match, error) {
+	args := pgx.NamedArgs{"id": a.MatchId, "cardsIds": a.CardsIds}
 
-	query := "UPDATE match SET cardsInPlay = array_append(cardsInPlay, @cardId)	where id=@id RETURNING *"
+	query := "UPDATE match SET cardsInPlay = array_append(cardsInPlay, @cardIds) where id=@id RETURNING *"
 
 	db := conn.Pool()
 	defer db.Close()
@@ -351,8 +392,8 @@ func UpdateCardsInPlay(matchId int, gameplayCardId int) (model.Match, error) {
 		query,
 		args).Scan(
 		&match.Id,
-		&match.GameState,
 		&match.PlayerIds,
+		&match.CreationDate,
 		&match.PrivateMatch,
 		&match.EloRangeMin,
 		&match.EloRangeMax,
@@ -361,6 +402,7 @@ func UpdateCardsInPlay(matchId int, gameplayCardId int) (model.Match, error) {
 		&match.CutGameCardId,
 		&match.CurrentPlayerTurn,
 		&match.TurnPassTimestamps,
+		&match.GameState,
 		&match.Art,
 	)
 
@@ -371,7 +413,7 @@ func UpdateCardsInPlay(matchId int, gameplayCardId int) (model.Match, error) {
 	return match, nil
 }
 
-func parseMatch(details model.Match) pgx.NamedArgs {
+func parseMatch(details model.GameMatch) pgx.NamedArgs {
 	return pgx.NamedArgs{
 		"id":                 details.Id,
 		"gameState":          details.GameState,
@@ -397,16 +439,16 @@ func newPlayer() (int, error) {
 		"art":   "default.png",
 	}
 	query := `INSERT INTO player (
-			hand, 
-			kitty, 
-			score, 
+			hand,
+			kitty,
+			score,
 			art
 		) VALUES (
-		 	@hand, 
-			@kitty, 
+		 	@hand,
+			@kitty,
 			@score,
 			@art
-		) 
+		)
 		RETURNING id`
 
 	db := conn.Pool()

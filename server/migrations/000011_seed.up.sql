@@ -177,8 +177,7 @@ VALUES
 INSERT INTO
     accounts("name")
 VALUES
-    ('test1'),
-    ('test2');
+    ('test1');
 
 -- INSERT INTO
 --     match(

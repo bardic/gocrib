@@ -32,7 +32,7 @@ func PlayCard(c echo.Context) error {
 	//todo confirm the player has the card in question
 
 	// insert card into db
-	_, err := UpdateCardsInPlay(details.MatchId, details.GameplayCardId)
+	m, err := UpdateCardsInPlay(details)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func PlayCard(c echo.Context) error {
 	// 	return err
 	// }
 
-	var scores model.ScoreResults
+	// var scores model.ScoreResults
 
 	// switch details.Type {
 	// case model.Cut:
@@ -60,10 +60,10 @@ func PlayCard(c echo.Context) error {
 	// 	return err
 	// }
 
-	return c.JSON(http.StatusOK, scores)
+	return c.JSON(http.StatusOK, m)
 }
 
-func countPegs(match model.Match) (model.ScoreResults, error) {
+func countPegs(match model.GameMatch) (model.ScoreResults, error) {
 	res := model.ScoreResults{}
 
 	r, err := scanForThirtyOne(match.CardsInPlay)
@@ -107,7 +107,7 @@ func countPegs(match model.Match) (model.ScoreResults, error) {
 	return model.ScoreResults{Results: res.Results}, nil
 }
 
-func countHand(match model.Match) (model.ScoreResults, error) {
+func countHand(match model.GameMatch) (model.ScoreResults, error) {
 	res := model.ScoreResults{}
 
 	r, err := scanForThirtyOne(match.CardsInPlay)
@@ -360,7 +360,7 @@ func scanForFifthteens(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanRightJackCut(gameplayCardsIdsInPlay []int, match model.Match) ([]model.Scores, error) {
+func scanRightJackCut(gameplayCardsIdsInPlay []int, match model.GameMatch) ([]model.Scores, error) {
 	cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
 	if err != nil {
 		return []model.Scores{}, err
@@ -451,7 +451,7 @@ func scanForThirtyOne(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanForLastCard(m model.Match) ([]model.Scores, error) {
+func scanForLastCard(m model.GameMatch) ([]model.Scores, error) {
 	if len(m.Players) < 2 {
 		return []model.Scores{}, errors.New("too few players")
 	}
@@ -504,7 +504,7 @@ func scanForLastCard(m model.Match) ([]model.Scores, error) {
 	return []model.Scores{}, nil
 }
 
-func scanJackOnCut(match model.Match) ([]model.Scores, error) {
+func scanJackOnCut(match model.GameMatch) ([]model.Scores, error) {
 	cardsInPlay, err := getGameplayCardsForIds([]int{match.CutGameCardId})
 	if err != nil || len(cardsInPlay) == 0 {
 		return []model.Scores{}, err

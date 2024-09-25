@@ -644,45 +644,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/match/deck/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "deck"
-                ],
-                "summary": "Get deck by id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for deck by id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.GameDeck"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/player/allcards/": {
             "get": {
                 "consumes": [
@@ -982,7 +943,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
+                            "$ref": "#/definitions/model.GameMatch"
                         }
                     }
                 ],
@@ -1046,6 +1007,45 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/player/match/deck/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deck"
+                ],
+                "summary": "Get deck by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for deck by id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GameDeck"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {}
                     }
                 }
@@ -1324,8 +1324,11 @@ const docTemplate = `{
         "model.GameAction": {
             "type": "object",
             "properties": {
-                "gameplayCardId": {
-                    "type": "integer"
+                "cardsIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "matchId": {
                     "type": "integer"
@@ -1361,6 +1364,65 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.GameMatch": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "cardsInPlay": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "creationDate": {
+                    "type": "string"
+                },
+                "currentPlayerTurn": {
+                    "type": "integer"
+                },
+                "cutGameCardId": {
+                    "type": "integer"
+                },
+                "deckId": {
+                    "type": "integer"
+                },
+                "eloRangeMax": {
+                    "type": "integer"
+                },
+                "eloRangeMin": {
+                    "type": "integer"
+                },
+                "gameState": {
+                    "$ref": "#/definitions/model.GameState"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "playerIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Player"
+                    }
+                },
+                "privateMatch": {
+                    "type": "boolean"
+                },
+                "turnPassTimestamps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1474,12 +1536,6 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
-                "players": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Player"
-                    }
-                },
                 "privateMatch": {
                     "type": "boolean"
                 },
@@ -1502,6 +1558,9 @@ const docTemplate = `{
                 },
                 "isPrivate": {
                     "type": "boolean"
+                },
+                "requesterId": {
+                    "type": "integer"
                 }
             }
         },

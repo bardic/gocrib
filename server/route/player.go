@@ -67,7 +67,17 @@ func UpdatePlayer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	args := parsePlayer(*details)
+	err := UpdatePlayerQuery(*details)
+
+	if err != nil {
+		return c.JSON(http.StatusOK, err)
+	}
+
+	return c.JSON(http.StatusOK, nil)
+}
+
+func UpdatePlayerQuery(player model.Player) error {
+	args := parsePlayer(player)
 
 	query := "UPDATE player SET hand = @hand, kitty = @kitty, score = @score, art = @art where id = @id"
 
@@ -83,7 +93,7 @@ func UpdatePlayer(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, "meow")
+	return nil
 }
 
 // Create godoc
