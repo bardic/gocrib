@@ -3,7 +3,6 @@ package route
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -37,13 +36,13 @@ func NewMatch(c echo.Context) error {
 	args := pgx.NamedArgs{"eloMin": details.EloRangeMin, "eloMax": details.EloRangeMax}
 	q := `SELECT
 			json_build_object(
+				'id', id,
 				'playerIds', playerIds,
 				'creationDate', creationDate,
 				'privateMatch', privateMatch,
 				'eloRangeMin', eloRangeMin,
 				'eloRangeMax', eloRangeMax,
 				'deckid', deckid,
-				'cardsinplay', cardsinplay,
 				'cutgamecardid', cutgamecardid,
 				'currentplayerturn', currentplayerturn,
 				'turnpasstimestamps', turnpasstimestamps,
@@ -51,6 +50,7 @@ func NewMatch(c echo.Context) error {
 				'players', (SELECT json_agg(
 					json_build_object(
 						'id', p.id,
+						'play', p.play,
 						'hand', p.hand,
 						'kitty', p.kitty,
 						'score', p.score,
@@ -72,12 +72,22 @@ func NewMatch(c echo.Context) error {
 	match.EloRangeMax = details.EloRangeMax
 	match.PrivateMatch = details.IsPrivate
 
-	p1, err := newPlayer()
+	// p1, err := newPlayer()
+	// if err != nil {
+	// 	return err
+	// }
+
+	// p2, err := newPlayer()
+
+	p1 := "1"
+	p2 := "2"
+
+	player1, err := getPlayer(p1)
 	if err != nil {
 		return err
 	}
 
-	p2, err := newPlayer()
+	player2, err := getPlayer(p2)
 
 	if err != nil {
 		return err
@@ -90,7 +100,21 @@ func NewMatch(c echo.Context) error {
 	}
 
 	match.DeckId = d.Id
-	match.PlayerIds = []int{p1, p2}
+
+	p1Id, err := strconv.Atoi(p1)
+
+	if err != nil {
+		return err
+	}
+
+	p2Id, err := strconv.Atoi(p2)
+
+	if err != nil {
+		return err
+	}
+
+	match.PlayerIds = []int{p1Id, p2Id}
+	match.Players = []model.Player{player1, player2}
 
 	args = parseMatch(match)
 
@@ -100,7 +124,6 @@ func NewMatch(c echo.Context) error {
 				eloRangeMin,
 				eloRangeMax,
 				deckId,
-				cardsInPlay,
 				cutGameCardId,
 				currentPlayerTurn,
 				turnPassTimestamps,
@@ -112,7 +135,6 @@ func NewMatch(c echo.Context) error {
 				@eloRangeMin,
 				@eloRangeMax,
 				@deckId,
-				@cardsInPlay,
 				@cutGameCardId,
 				@currentPlayerTurn,
 				@turnPassTimestamps,
@@ -120,7 +142,7 @@ func NewMatch(c echo.Context) error {
 				@art)
 			RETURNING id`
 
-	var matchId int
+	var matchId int64
 	err = db.QueryRow(
 		context.Background(),
 		query,
@@ -129,8 +151,6 @@ func NewMatch(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	match.Id = matchId
 
 	d = *d.Shuffle()
 	for i := 0; i < 12; i++ {
@@ -146,17 +166,14 @@ func NewMatch(c echo.Context) error {
 	err = updateMatch(match)
 
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	err = UpdatePlayerQuery(match.Players[0])
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	err = UpdatePlayerQuery(match.Players[1])
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -203,7 +220,6 @@ func updateMatch(match model.GameMatch) error {
 				eloRangeMin = @eloRangeMin,
 				eloRangeMax = @eloRangeMax,
 				deckId = @deckId,
-				cardsInPlay = @cardsInPlay,
 				cutGameCardId = @cutGameCardId,
 				currentPlayerTurn = @currentPlayerTurn,
 				turnPassTimestamps = @turnPassTimestamps,
@@ -312,7 +328,6 @@ func getMatch(id int) (model.Match, error) {
 				'eloRangeMin', eloRangeMin,
 				'eloRangeMax', eloRangeMax,
 				'deckid', deckid,
-				'cardsinplay', cardsinplay,
 				'cutgamecardid', cutgamecardid,
 				'currentplayerturn', currentplayerturn,
 				'turnpasstimestamps', turnpasstimestamps,
@@ -321,6 +336,7 @@ func getMatch(id int) (model.Match, error) {
 				'players', (SELECT json_agg(
 					json_build_object(
 						'id', p.id,
+						'play', p.play,
 						'hand', p.hand,
 						'kitty', p.kitty,
 						'score', p.score,
@@ -398,7 +414,6 @@ func UpdateCardsInPlay(a *model.GameAction) (model.Match, error) {
 		&match.EloRangeMin,
 		&match.EloRangeMax,
 		&match.DeckId,
-		&match.CardsInPlay,
 		&match.CutGameCardId,
 		&match.CurrentPlayerTurn,
 		&match.TurnPassTimestamps,
@@ -422,7 +437,6 @@ func parseMatch(details model.GameMatch) pgx.NamedArgs {
 		"eloRangeMin":        details.EloRangeMin,
 		"eloRangeMax":        details.EloRangeMax,
 		"deckId":             details.DeckId,
-		"cardsInPlay":        []int{},
 		"creationDate":       details.CreationDate,
 		"cutGameCardId":      details.CutGameCardId,
 		"currentPlayerTurn":  details.CurrentPlayerTurn,

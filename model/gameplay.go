@@ -78,8 +78,9 @@ func (d *GameDeck) Shuffle() *GameDeck {
 }
 
 type Player struct {
-	Id        int
+	Id        int32
 	AccountId int
+	Play      []int
 	Hand      []int
 	Kitty     []int
 	Score     int
@@ -104,6 +105,10 @@ func (p *Player) Eq(c Player) bool {
 	}
 
 	if !eqIntArr(p.Hand, c.Hand) {
+		return false
+	}
+
+	if !eqIntArr(p.Play, c.Play) {
 		return false
 	}
 
@@ -134,7 +139,7 @@ type ChatMessage struct {
 }
 
 type MatchRequirements struct {
-	RequesterId int
+	RequesterId int32
 	IsPrivate   bool
 	EloRangeMin int
 	EloRangeMax int
@@ -332,3 +337,9 @@ const (
 )
 
 var TabNames = []string{"Board", "Play", "Hand", "Kitty"}
+
+type HandModifier struct {
+	MatchId  int
+	PlayerId int
+	CardIds  []int
+}

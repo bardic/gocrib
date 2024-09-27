@@ -11,5 +11,4 @@ type ViewModel struct {
 	ActiveSlot     model.CardSlots
 	HighlighedId   int
 	HighlightedIds []int
-	CardsToDisplay []model.Card
 }

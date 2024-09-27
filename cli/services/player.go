@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/bardic/cribbagev2/cli/state"
 	"github.com/bardic/cribbagev2/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -14,6 +15,24 @@ func GetPlayer() tea.Msg {
 
 func PutPlayer(id int) tea.Msg {
 	return url(EndPointPlayer, http.MethodPut, "")
+}
+
+func PutKitty() tea.Msg {
+	b, err := json.Marshal(state.CurrentHandModifier)
+	if err != nil {
+		return err
+	}
+
+	return url(EndPointKitty, http.MethodPut, string(b))
+}
+
+func PutPlay() tea.Msg {
+	b, err := json.Marshal(state.CurrentHandModifier)
+	if err != nil {
+		return err
+	}
+
+	return url(EndPointPlay, http.MethodPut, string(b))
 }
 
 func PostPlayer(player model.Player) tea.Msg {

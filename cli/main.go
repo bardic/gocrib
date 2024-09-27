@@ -20,6 +20,7 @@ type appModel struct {
 	views.ViewModel
 	hand  []model.Card
 	kitty []model.Card
+	play  []model.Card
 
 	gameState model.GameState
 	timer     timer.Model
@@ -47,22 +48,29 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					})
 				}
 
-				state.CurrentAction = model.GameAction{
+				state.CurrentHandModifier = model.HandModifier{
 					MatchId:  state.ActiveMatchId,
-					Type:     model.Discard,
-					CardsIds: getIdsFromCards(m.kitty),
+					CardIds:  getIdsFromCards(m.kitty),
+					PlayerId: state.ActiveMatch.PlayerIds[0],
 				}
 
-				return m, services.PostGame
+				return m, services.PutKitty
 			} else {
 				for _, idx := range m.HighlightedIds {
-					m.CardsToDisplay = append(m.CardsToDisplay, getCardInHandById(idx, m.hand))
+					m.play = append(m.play, getCardInHandById(idx, m.hand))
 					m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
 						return c.Id == idx
 					})
 				}
+
+				state.CurrentHandModifier = model.HandModifier{
+					MatchId:  state.ActiveMatchId,
+					CardIds:  getIdsFromCards(m.play),
+					PlayerId: state.ActiveMatch.PlayerIds[0],
+				}
+
+				return m, services.PutPlay
 			}
-			return m, nil
 		case " ":
 			cards := m.hand
 			idx := slices.Index(m.HighlightedIds, cards[m.HighlighedId].Id)
@@ -173,42 +181,40 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if match.GameState == m.gameState {
 			return m, nil
-		} else {
-			fmt.Printf("change in state %v", m.gameState)
 		}
 
-		// diffs := match.Eq(state.ActiveMatch)
-		// if diffs == 0 {
-		// 	return m, tea.Batch(cmds...)
-		// }
+		diffs := match.Eq(state.ActiveMatch)
 
-		// for diff := model.GenericDiff; diff < model.MaxDiff; diff <<= 1 {
-		// 	d := diffs & diff
-		// 	if d != 0 {
-		// 		switch d {
-		// 		case model.CutDiff:
-		// 			// fmt.Println("cutdiff")
-		// 			m.ViewState = model.BoardView
-		// 		case model.CardsInPlayDiff:
-		// 			// fmt.Println("cards in play diff")
-		// 		case model.GameStateDiff:
-		// 			// fmt.Println("game state diff")
-		// 		case model.GenericDiff:
-		// 			//fmt.Println("generic diff")
-		// 		case model.NewDeckDiff:
-		// 			m.ViewState = model.BoardView
-		// 			// fmt.Println("new deck diff")
-		// 		case model.MaxDiff:
-		// 			// fmt.Println("max diff")
-		// 		case model.TurnDiff:
-		// 			// fmt.Println("turn diff")
-		// 		case model.TurnPassTimestampsDiff:
-		// 			// fmt.Println("pass timestamp diff")
-		// 		}
-		// 	}
-		// }
-		// m.gameState = match.GameState
-		// m.ViewState = model.BoardView
+		if diffs == 0 {
+			return m, tea.Batch(cmds...)
+		}
+
+		for diff := model.GenericDiff; diff < model.MaxDiff; diff <<= 1 {
+			d := diffs & diff
+			if d != 0 {
+				switch d {
+				case model.CutDiff:
+					// fmt.Println("cutdiff")
+					m.ViewState = model.BoardView
+				case model.CardsInPlayDiff:
+					// fmt.Println("cards in play diff")
+				case model.GameStateDiff:
+					// fmt.Println("game state diff")
+				case model.GenericDiff:
+					// fmt.Println("generic diff")
+				case model.NewDeckDiff:
+					m.ViewState = model.BoardView
+					// fmt.Println("new deck diff")
+				case model.MaxDiff:
+					// fmt.Println("max diff")
+				case model.TurnDiff:
+					// fmt.Println("turn diff")
+				case model.TurnPassTimestampsDiff:
+					// fmt.Println("pass timestamp diff")
+				}
+			}
+		}
+		m.gameState = match.GameState
 	case model.Match:
 		deckByte := services.GetDeckById(msg.DeckId).([]byte)
 		var deckJson string
@@ -218,6 +224,7 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		json.Unmarshal([]byte(deckJson), &deck)
 
 		state.ActiveDeck = deck
+		//	state.ActiveMatchId = msg.Id
 
 		m.gameState = msg.GameState
 		m.ViewState = model.BoardView
@@ -241,7 +248,7 @@ func (m appModel) View() string {
 	case model.PlayView:
 		v = styles.ViewStyle.Render(views.GameView(m.HighlighedId,
 			m.HighlightedIds,
-			[]model.Card{},
+			m.play,
 			m.ViewModel))
 	case model.HandView:
 		v = styles.ViewStyle.Render(views.GameView(m.HighlighedId,
@@ -265,7 +272,6 @@ func newModel() appModel {
 			ActiveSlot:     model.CardOne,
 			ViewState:      model.ActiveView,
 			Tabs:           model.TabNames,
-			CardsToDisplay: []model.Card{},
 			HighlighedId:   0,
 			HighlightedIds: []int{},
 		},
@@ -289,6 +295,7 @@ func createGame() tea.Msg {
 	var match model.Match
 	json.Unmarshal(newMatch, &match)
 	state.ActiveMatchId = match.Id
+	state.ActiveMatch = match
 	return match
 }
 

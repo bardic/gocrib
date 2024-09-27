@@ -758,6 +758,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/player/kitty": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Update kitty with ids",
+                "parameters": [
+                    {
+                        "description": "array of ids to add to kitty",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.HandModifier"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/player/match/": {
             "get": {
                 "consumes": [
@@ -1046,6 +1091,51 @@ const docTemplate = `{
                     },
                     "422": {
                         "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/player/play": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Update play with ids",
+                "parameters": [
+                    {
+                        "description": "array of ids to add to play",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.HandModifier"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -1471,6 +1561,23 @@ const docTemplate = `{
                 }
             }
         },
+        "model.HandModifier": {
+            "type": "object",
+            "properties": {
+                "cardIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "playerId": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.History": {
             "type": "object",
             "properties": {
@@ -1583,6 +1690,12 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "kitty": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "play": {
                     "type": "array",
                     "items": {
                         "type": "integer"
