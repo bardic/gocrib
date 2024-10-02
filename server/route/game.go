@@ -11,8 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
-
 // Create godoc
 // @Summary      Play a card
 // @Description
@@ -63,6 +61,43 @@ func PlayCard(c echo.Context) error {
 	// }
 
 	return c.JSON(http.StatusOK, m)
+}
+
+func deal(match model.Match) error {
+	deck, err := getDeck(match.DeckId)
+
+	if err != nil {
+		return err
+	}
+
+	players := []model.Player{}
+
+	for _, ids := range match.PlayerIds {
+		player, err := getPlayer(ids)
+
+		if err != nil {
+			return err
+		}
+
+		players = append(players, player)
+	}
+
+	cardsPerHand := 6
+	if len(players) == 3 {
+		cardsPerHand = 5
+	}
+
+	for i := 0; i < len(players)*cardsPerHand; i++ {
+		var card model.GameplayCard
+		card, deck.Cards = deck.Cards[0], deck.Cards[1:]
+		players[len(players)-1-i%len(players)].Hand = append(players[len(players)-1-i%len(players)].Hand, card.CardId)
+	}
+
+	for _, player := range players {
+		updatePlayer(player)
+	}
+
+	return nil
 }
 
 func countPegs(match model.GameMatch) (model.ScoreResults, error) {

@@ -24,6 +24,9 @@ const (
 	EndPointHistory = BaseUrl + "/history"
 	//Match
 	EndPointMatch     = BaseUrl + "/player/match"
+	EndPointJoinMatch = BaseUrl + "/player/match/join"
+	EndPointMatches   = BaseUrl + "/player/matches"
+	EndPointOpenMatch = BaseUrl + "/player/matches/open"
 	EndPointMatchCard = BaseUrl + "/player/match/card"
 	//Chat
 	EndPointChat = BaseUrl + "/chat"
@@ -32,6 +35,8 @@ const (
 	//Deck
 	EndPointDeck     = BaseUrl + "/deck"
 	EndPointDeckById = BaseUrl + "/player/match/deck?id="
+	//Account
+	EndPointLogin = BaseUrl + "/account/login"
 )
 
 func url(url string, method string, json string) tea.Msg {

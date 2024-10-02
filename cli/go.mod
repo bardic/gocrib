@@ -6,6 +6,8 @@ require github.com/charmbracelet/bubbletea v1.1.0
 
 require github.com/bardic/cribbagev2/model v0.0.0
 
+require github.com/atotto/clipboard v0.1.4 // indirect
+
 replace github.com/bardic/cribbagev2/model => ../model
 
 require (

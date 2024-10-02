@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/bardic/cribbagev2/cli/services"
@@ -18,16 +19,56 @@ import (
 
 type appModel struct {
 	views.ViewModel
-	hand  []model.Card
-	kitty []model.Card
-	play  []model.Card
-
+	hand      []model.Card
+	kitty     []model.Card
+	play      []model.Card
 	gameState model.GameState
 	timer     timer.Model
 }
 
 func (m appModel) Init() tea.Cmd {
-	return tea.Batch(createGame, m.timer.Init())
+	return tea.Batch(m.timer.Init())
+}
+
+func (m appModel) OnEnterDuringPlay() (appModel, tea.Cmd) {
+	if m.gameState == model.WaitingState {
+		m.gameState = model.DiscardState
+	}
+
+	m.ViewState = model.BoardView
+	if m.gameState == model.DiscardState {
+		for _, idx := range m.HighlightedIds {
+			m.kitty = append(m.kitty, getCardInHandById(idx, m.hand))
+			m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
+				return c.Id == idx
+			})
+		}
+
+		state.CurrentHandModifier = model.HandModifier{
+			MatchId:  state.ActiveMatchId,
+			CardIds:  getIdsFromCards(m.kitty),
+			PlayerId: state.ActiveMatch.PlayerIds[0],
+		}
+
+		m.HighlightedIds = []int{}
+		return m, services.PutKitty
+	} else {
+		for _, idx := range m.HighlightedIds {
+			m.play = append(m.play, getCardInHandById(idx, m.hand))
+			m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
+				return c.Id == idx
+			})
+		}
+
+		state.CurrentHandModifier = model.HandModifier{
+			MatchId:  state.ActiveMatchId,
+			CardIds:  getIdsFromCards(m.play),
+			PlayerId: state.ActiveMatch.PlayerIds[0],
+		}
+
+		m.HighlightedIds = []int{}
+		return m, services.PutPlay
+	}
 }
 
 func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -40,37 +81,39 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "c":
 			return m, tea.Quit
 		case "enter", "view_update":
-			if m.gameState == model.DiscardState {
-				for _, idx := range m.HighlightedIds {
-					m.kitty = append(m.kitty, getCardInHandById(idx, m.hand))
-					m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
-						return c.Id == idx
-					})
+			switch m.ViewState {
+			case model.LoginView:
+				idStr := views.LoginIdField.Value()
+				id, err := strconv.Atoi(idStr)
+				if err != nil {
+					return m, tea.Quit
 				}
 
-				state.CurrentHandModifier = model.HandModifier{
-					MatchId:  state.ActiveMatchId,
-					CardIds:  getIdsFromCards(m.kitty),
-					PlayerId: state.ActiveMatch.PlayerIds[0],
+				state.PlayerId = id
+				return m, services.Login
+			case model.LobbyView:
+				idStr := views.LobbyTable.SelectedRow()[0]
+				id, err := strconv.Atoi(idStr)
+				if err != nil {
+					return m, tea.Quit
 				}
 
-				return m, services.PutKitty
-			} else {
-				for _, idx := range m.HighlightedIds {
-					m.play = append(m.play, getCardInHandById(idx, m.hand))
-					m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
-						return c.Id == idx
-					})
-				}
-
-				state.CurrentHandModifier = model.HandModifier{
-					MatchId:  state.ActiveMatchId,
-					CardIds:  getIdsFromCards(m.play),
-					PlayerId: state.ActiveMatch.PlayerIds[0],
-				}
-
-				return m, services.PutPlay
+				state.ActiveMatchId = id
+				return m, services.JoinMatch
+			case model.BoardView:
+				return m.OnEnterDuringPlay()
+			case model.PlayView:
+				return m.OnEnterDuringPlay()
+			case model.HandView:
+				return m.OnEnterDuringPlay()
+			case model.KittyView:
+				return m.OnEnterDuringPlay()
+			case model.ScoresView:
+			case model.GameOverView:
 			}
+		case "n":
+			createGame()
+			m.ViewState = model.BoardView
 		case " ":
 			cards := m.hand
 			idx := slices.Index(m.HighlightedIds, cards[m.HighlighedId].Id)
@@ -80,31 +123,52 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.HighlightedIds = append(m.HighlightedIds, cards[m.HighlighedId].Id)
 			}
 		case "tab":
-			m.ActiveTab = m.ActiveTab + 1
-			switch m.ActiveTab {
-			case 0:
-				m.ViewState = model.BoardView
-			case 1:
-				m.ViewState = model.PlayView
-			case 2:
-				m.ViewState = model.HandView
-			case 3:
-				m.ViewState = model.KittyView
+			if m.ViewState == model.LobbyView {
+				m.ActiveLandingTab = m.ActiveLandingTab + 1
+				switch m.ActiveLandingTab {
+				case 0:
+					m.ViewState = model.LobbyView
+				case 1:
+					m.ViewState = model.LobbyView
+
+				}
+			} else {
+				m.ActiveTab = m.ActiveTab + 1
+				switch m.ActiveTab {
+				case 0:
+					m.ViewState = model.BoardView
+				case 1:
+					m.ViewState = model.PlayView
+				case 2:
+					m.ViewState = model.HandView
+				case 3:
+					m.ViewState = model.KittyView
+				}
 			}
-			return m, nil
 		case "shift+tab":
-			m.ActiveTab = m.ActiveTab - 1
-			switch m.ActiveTab {
-			case 0:
-				m.ViewState = model.BoardView
-			case 1:
-				m.ViewState = model.PlayView
-			case 2:
-				m.ViewState = model.HandView
-			case 3:
-				m.ViewState = model.KittyView
+			if m.ViewState == model.LobbyView {
+				m.ActiveLandingTab = m.ActiveLandingTab - 1
+				switch m.ActiveLandingTab {
+				case 0:
+					m.ViewState = model.LobbyView
+				case 1:
+					m.ViewState = model.LobbyView
+
+				}
+			} else {
+				m.ActiveTab = m.ActiveTab - 1
+				switch m.ActiveTab {
+				case 0:
+					m.ViewState = model.BoardView
+				case 1:
+					m.ViewState = model.PlayView
+				case 2:
+					m.ViewState = model.HandView
+				case 3:
+					m.ViewState = model.KittyView
+				}
 			}
-			return m, nil
+
 		case "right":
 			switch m.ActiveSlot {
 			case model.CardOne:
@@ -158,7 +222,24 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ActiveSlot = model.CardFive
 			}
 		}
+		var cmd tea.Cmd
+
+		if m.ViewState == model.LoginView {
+			views.LoginIdField.Focus()
+			views.LoginIdField, cmd = views.LoginIdField.Update(msg)
+		}
+
+		if m.ViewState == model.LobbyView {
+			views.LobbyTable.Focus()
+			views.LobbyTable, cmd = views.LobbyTable.Update(msg)
+
+		}
+
+		cmds = append(cmds, cmd)
 	case timer.TickMsg:
+		if m.ViewState == model.LobbyView || m.ViewState == model.LoginView {
+			return m, nil
+		}
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
 
@@ -170,6 +251,24 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if err != nil {
 			fmt.Println(err)
+		}
+
+		switch m.ViewState {
+		case model.LoginView:
+			m.ViewState = model.LobbyView
+			var account model.Account
+			err = json.Unmarshal([]byte(matchStr), &account)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			state.PlayerId = account.Id
+
+			return m, tea.Batch(cmds...)
+		case model.LobbyView:
+			m.ViewState = model.BoardView
+			return m, tea.Batch(cmds...)
 		}
 
 		var match model.Match
@@ -199,7 +298,7 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case model.CardsInPlayDiff:
 					// fmt.Println("cards in play diff")
 				case model.GameStateDiff:
-					// fmt.Println("game state diff")
+					fmt.Println("game state diff")
 				case model.GenericDiff:
 					// fmt.Println("generic diff")
 				case model.NewDeckDiff:
@@ -215,6 +314,7 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.gameState = match.GameState
+		state.ActiveMatch = match
 	case model.Match:
 		deckByte := services.GetDeckById(msg.DeckId).([]byte)
 		var deckJson string
@@ -224,44 +324,58 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		json.Unmarshal([]byte(deckJson), &deck)
 
 		state.ActiveDeck = deck
-		//	state.ActiveMatchId = msg.Id
-
-		m.gameState = msg.GameState
-		m.ViewState = model.BoardView
+		state.ActiveMatch = msg
+	case model.Account:
+		fmt.Println("cat")
 	}
+
 	return m, tea.Batch(cmds...)
 }
 
 func (m appModel) View() string {
 	var v string
 	switch m.ViewState {
-	case model.ActiveView:
-		v = styles.ViewStyle.Render(views.ActiveView())
+	case model.LoginView:
+		v = styles.ViewStyle.Render(views.LoginView())
 	case model.LobbyView:
-		v = styles.ViewStyle.Render(views.LobbyView())
+		view, err := views.LobbyView(m.ViewModel)
+		if err != nil {
+			return err.Error()
+		}
+		v = styles.ViewStyle.Render(view)
 	case model.BoardView:
 		v = styles.ViewStyle.Render(views.GameView(
 			m.HighlighedId,
 			m.HighlightedIds,
 			[]model.Card{},
-			m.ViewModel))
+			m.ViewModel,
+			m.gameState))
 	case model.PlayView:
-		v = styles.ViewStyle.Render(views.GameView(m.HighlighedId,
+		v = styles.ViewStyle.Render(views.GameView(
+			m.HighlighedId,
 			m.HighlightedIds,
 			m.play,
-			m.ViewModel))
+			m.ViewModel,
+			m.gameState))
 	case model.HandView:
 		v = styles.ViewStyle.Render(views.GameView(m.HighlighedId,
 			m.HighlightedIds,
 			m.hand,
-			m.ViewModel))
+			m.ViewModel,
+			m.gameState))
 	case model.KittyView:
 		return styles.ViewStyle.Render(views.GameView(m.HighlighedId,
 			m.HighlightedIds,
 			m.kitty,
-			m.ViewModel))
+			m.ViewModel,
+			m.gameState))
 	default:
-		v = styles.ViewStyle.Render(views.LobbyView())
+		view, err := views.LobbyView(m.ViewModel)
+		if err != nil {
+			return err.Error()
+		}
+		//m.table = table
+		v = styles.ViewStyle.Render(view)
 	}
 	return v
 }
@@ -270,19 +384,13 @@ func newModel() appModel {
 	m := appModel{
 		ViewModel: views.ViewModel{
 			ActiveSlot:     model.CardOne,
-			ViewState:      model.ActiveView,
+			ViewState:      model.LoginView,
 			Tabs:           model.TabNames,
+			LandingTabs:    model.LandingTabName,
 			HighlighedId:   0,
 			HighlightedIds: []int{},
 		},
-		hand: []model.Card{
-			{Id: 1, Suit: 0, Value: 1, Art: "meow.png"},
-			{Id: 2, Suit: 1, Value: 2, Art: "meow.png"},
-			{Id: 3, Suit: 2, Value: 3, Art: "meow.png"},
-			{Id: 4, Suit: 3, Value: 4, Art: "meow.png"},
-			{Id: 5, Suit: 3, Value: 5, Art: "meow.png"},
-			{Id: 6, Suit: 3, Value: 6, Art: "meow.png"},
-		},
+		hand:      []model.Card{},
 		gameState: model.WaitingState,
 		timer:     timer.NewWithInterval(time.Hour, time.Second*1),
 	}

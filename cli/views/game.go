@@ -8,32 +8,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func GameView(highlightId int, highlightedIds []int, cards []model.Card, m ViewModel) string {
+var focusedModelStyle = lipgloss.NewStyle().
+	BorderStyle(lipgloss.NormalBorder()).
+	BorderForeground(lipgloss.Color("69"))
+
+func GameView(highlightId int, highlightedIds []int, cards []model.Card, m ViewModel, s model.GameState) string {
 	doc := strings.Builder{}
-	var renderedTabs []string
 
-	for i, t := range m.Tabs {
-		var style lipgloss.Style
-		isFirst, isLast, isActive := i == 0, i == len(m.Tabs)-1, i == m.ActiveTab
-		if isActive {
-			style = styles.ActiveTabStyle
-		} else {
-			style = styles.InactiveTabStyle
-		}
-		border, _, _, _, _ := style.GetBorder()
-		if isFirst && isActive {
-			border.BottomLeft = "│"
-		} else if isFirst && !isActive {
-			border.BottomLeft = "├"
-		} else if isLast && isActive {
-			border.BottomRight = "└"
-		} else if isLast && !isActive {
-			border.BottomRight = "┴"
-		}
-
-		style = style.Border(border)
-		renderedTabs = append(renderedTabs, style.Render(t))
-	}
+	renderedTabs := renderTabs(m.Tabs, m.ActiveTab)
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
@@ -44,13 +26,33 @@ func GameView(highlightId int, highlightedIds []int, cards []model.Card, m ViewM
 	var view string
 	switch m.ViewState {
 	case model.BoardView:
-		view = ""
+		view = `
+	○•○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		
+	○•○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		
+	----- ----- ----- ----- ----- ----- ----- ----- ----- -----		
+	○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		
+	○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		
+	----- ----- ----- ----- ----- ----- ----- ----- ----- -----		
+	○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○
+	○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○
+`
+
+		s := lipgloss.JoinHorizontal(lipgloss.Top, focusedModelStyle.Render(view), focusedModelStyle.Render("59"))
+		view = s
 	case model.PlayView:
 		view = HandView(highlightId, highlightedIds, cards)
 	case model.HandView:
-		view = HandView(highlightId, highlightedIds, cards)
+		if s == 0 {
+			view = "Waiting to be dealt"
+		} else {
+			view = HandView(highlightId, highlightedIds, cards)
+		}
 	case model.KittyView:
-		view = HandView(highlightId, highlightedIds, cards)
+		if len(cards) == 0 {
+			view = "Empty Kitty"
+		} else {
+			view = HandView(highlightId, highlightedIds, cards)
+		}
 	}
 
 	doc.WriteString(styles.WindowStyle.Width(100).Render(view))

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	conn "github.com/bardic/cribbage/server/db"
 	"github.com/bardic/cribbagev2/model"
@@ -29,23 +30,49 @@ func NewPlayer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	args := parsePlayer(*details)
-
-	query := "INSERT INTO player(hand, kitty, score, art) VALUES (@hand, @kitty, @score, @art)"
-
-	db := conn.Pool()
-	defer db.Close()
-
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	id, err := newPlayer()
 
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, "meow")
+	return c.JSON(http.StatusOK, strconv.Itoa(id))
+}
+
+func newPlayer() (int, error) {
+	args := pgx.NamedArgs{
+		"hand":  []int{},
+		"kitty": []int{},
+		"score": 0,
+		"art":   "default.png",
+	}
+	query := `INSERT INTO player (
+			hand,
+			kitty,
+			score,
+			art
+		) VALUES (
+			@hand,
+			@kitty,
+			@score,
+			@art
+		)
+		RETURNING id`
+
+	db := conn.Pool()
+	defer db.Close()
+
+	var playerId int
+	err := db.QueryRow(
+		context.Background(),
+		query,
+		args).Scan(&playerId)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return playerId, nil
 }
 
 // Create godoc
@@ -66,7 +93,7 @@ func UpdatePlayer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := UpdatePlayerQuery(*details)
+	err := updatePlayer(*details)
 
 	if err != nil {
 		return c.JSON(http.StatusOK, err)
@@ -75,7 +102,7 @@ func UpdatePlayer(c echo.Context) error {
 	return c.JSON(http.StatusOK, nil)
 }
 
-func UpdatePlayerQuery(player model.Player) error {
+func updatePlayer(player model.Player) error {
 	args := parsePlayer(player)
 
 	query := "UPDATE player SET hand = @hand, play = @play, kitty = @kitty, score = @score, art = @art where id = @id"
@@ -110,7 +137,13 @@ func UpdatePlayerQuery(player model.Player) error {
 func GetPlayer(c echo.Context) error {
 	id := c.Request().URL.Query().Get("id")
 
-	p, err := getPlayer(id)
+	p1Id, err := strconv.Atoi(id)
+
+	if err != nil {
+		return err
+	}
+
+	p, err := getPlayer(p1Id)
 
 	if err != nil {
 		return err
@@ -120,7 +153,7 @@ func GetPlayer(c echo.Context) error {
 	return c.JSON(http.StatusOK, string(r))
 }
 
-func getPlayer(id string) (model.Player, error) {
+func getPlayer(id int) (model.Player, error) {
 	db := conn.Pool()
 	defer db.Close()
 
@@ -194,6 +227,12 @@ func UpdateKitty(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	err = updateGameState(m.Id, model.PlayState)
+
+	if err != nil {
+		return err
+	}
+
 	m.GameState = model.PlayState
 
 	r, _ := json.Marshal(m)
@@ -264,7 +303,11 @@ func UpdatePlay(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	m.GameState = model.PlayState
+	err = updateGameState(m.Id, model.OpponentState)
+
+	if err != nil {
+		return err
+	}
 
 	r, _ := json.Marshal(m)
 

@@ -83,8 +83,11 @@ func v1Routes(g *echo.Group) {
 	playerGroup.PUT("/play", route.UpdatePlay)
 	//Match
 	playerGroup.GET("/match", route.GetMatch)
+	playerGroup.GET("/matches", route.GetMatches)
+	playerGroup.GET("/matches/open", route.GetOpenMatches)
 	playerGroup.POST("/match", route.NewMatch)
 	playerGroup.PUT("/match", route.UpdateMatch)
+	playerGroup.PUT("/match/join", route.JoinMatch)
 	playerGroup.GET("/match/deck", route.GetDeck)
 	// History
 	playerGroup.GET("/history", route.GetHistory)
@@ -94,6 +97,10 @@ func v1Routes(g *echo.Group) {
 	playerGroup.GET("/chat", route.GetChat)
 	playerGroup.POST("/chat", route.NewChat)
 	playerGroup.PUT("/chat", route.UpdateChat)
+
+	//Account
+	accountGroup := g.Group("/account")
+	accountGroup.POST("/login", route.Login)
 
 	gameGroup := g.Group("/game")
 	gameGroup.POST("/playCard", route.PlayCard)

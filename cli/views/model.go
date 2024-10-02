@@ -5,10 +5,12 @@ import (
 )
 
 type ViewModel struct {
-	ViewState      model.ViewState
-	Tabs           []string
-	ActiveTab      int
-	ActiveSlot     model.CardSlots
-	HighlighedId   int
-	HighlightedIds []int
+	ViewState        model.ViewState
+	Tabs             []string
+	LandingTabs      []string
+	ActiveTab        int
+	ActiveLandingTab int
+	ActiveSlot       model.CardSlots
+	HighlighedId     int
+	HighlightedIds   []int
 }

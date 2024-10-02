@@ -78,7 +78,7 @@ func (d *GameDeck) Shuffle() *GameDeck {
 }
 
 type Player struct {
-	Id        int32
+	Id        int
 	AccountId int
 	Play      []int
 	Hand      []int
@@ -139,7 +139,7 @@ type ChatMessage struct {
 }
 
 type MatchRequirements struct {
-	RequesterId int32
+	RequesterId int
 	IsPrivate   bool
 	EloRangeMin int
 	EloRangeMax int
@@ -168,6 +168,11 @@ const (
 	TurnPassTimestampsDiff
 	MaxDiff
 )
+
+type JoinMatchReq struct {
+	MatchId     int
+	RequesterId int
+}
 
 type GameMatch struct {
 	Match
@@ -326,7 +331,7 @@ type Scores struct {
 type ViewState uint
 
 const (
-	ActiveView ViewState = iota
+	LoginView ViewState = iota
 	LobbyView
 	BoardView
 	PlayView
@@ -338,8 +343,15 @@ const (
 
 var TabNames = []string{"Board", "Play", "Hand", "Kitty"}
 
+var LandingTabName = []string{"Active Matches", "Open Matches"}
+
 type HandModifier struct {
 	MatchId  int
 	PlayerId int
 	CardIds  []int
+}
+
+type Account struct {
+	Id   int
+	Name string
 }

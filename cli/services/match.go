@@ -10,8 +10,31 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+func GetMatchesForPlayerId() tea.Msg {
+	return url(EndPointMatches+"/?id="+strconv.Itoa(state.PlayerId), http.MethodGet, "")
+}
+
 func GetPlayerMatch() tea.Msg {
 	return url(EndPointMatch+"/?id="+strconv.Itoa(state.ActiveMatchId), http.MethodGet, "")
+}
+
+func GetOpenMatches() tea.Msg {
+	return url(EndPointOpenMatch, http.MethodGet, "")
+}
+
+func JoinMatch() tea.Msg {
+	req := model.JoinMatchReq{
+		RequesterId: state.PlayerId,
+		MatchId:     state.ActiveMatchId,
+	}
+
+	b, err := json.Marshal(req)
+
+	if err != nil {
+		return err
+	}
+
+	return url(EndPointJoinMatch, http.MethodPut, string(b))
 }
 
 func PutPlayerMatch(id int) tea.Msg {
