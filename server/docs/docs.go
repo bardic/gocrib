@@ -1716,13 +1716,23 @@ const docTemplate = `{
         "model.GameplayCard": {
             "type": "object",
             "properties": {
+                "Art": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer"
+                },
+                "Suit": {
+                    "$ref": "#/definitions/model.Suit"
+                },
+                "Value": {
+                    "$ref": "#/definitions/model.CardValue"
+                },
                 "cardId": {
+                    "description": "Id        int",
                     "type": "integer"
                 },
                 "currOwner": {
-                    "type": "integer"
-                },
-                "id": {
                     "type": "integer"
                 },
                 "origOwner": {

@@ -93,16 +93,18 @@ func UpdatePlayer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := updatePlayer(*details)
+	p, err := updatePlayer(*details)
 
 	if err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
-	return c.JSON(http.StatusOK, nil)
+	b, _ := json.Marshal(p)
+
+	return c.JSON(http.StatusOK, string(b))
 }
 
-func updatePlayer(player model.Player) error {
+func updatePlayer(player model.Player) (model.Player, error) {
 	args := parsePlayer(player)
 
 	query := "UPDATE player SET hand = @hand, play = @play, kitty = @kitty, score = @score, art = @art where id = @id"
@@ -116,10 +118,10 @@ func updatePlayer(player model.Player) error {
 		args)
 
 	if err != nil {
-		return err
+		return model.Player{}, err
 	}
 
-	return nil
+	return player, nil
 }
 
 // Create godoc
@@ -363,5 +365,5 @@ func playCard(details model.HandModifier) (model.Match, error) {
 		return model.Match{}, err
 	}
 
-	return m, nil
+	return m.Match, nil
 }

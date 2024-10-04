@@ -24,7 +24,7 @@ func GameView(highlightId int, highlightedIds []int, cards []model.Card, m ViewM
 	doc.WriteString("\n")
 
 	var view string
-	switch m.ViewState {
+	switch m.GameViewState {
 	case model.BoardView:
 		view = `
 	○•○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		

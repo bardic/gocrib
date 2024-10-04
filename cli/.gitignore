@@ -16,7 +16,8 @@
 
 !README.md
 !LICENSE
-
+!.vscode/launch.json
+!.vscode/tasks.json
 # !Makefile
 
 # ...even if they are in subdirectories

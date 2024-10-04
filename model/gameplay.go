@@ -54,14 +54,15 @@ type Cards struct {
 }
 
 type GameplayCard struct {
-	Id        int
+	Card
+	// Id        int
 	CardId    int
 	OrigOwner int
 	CurrOwner int
 	State     CardState
-	Value     int    `json:"-"`
-	Suit      string `json:"-"`
-	Art       string `json:"-"`
+	// Value     int    `json:"-"`
+	// Suit      string `json:"-"`
+	// Art       string `json:"-"`
 }
 
 type GameDeck struct {
@@ -333,17 +334,13 @@ type ViewState uint
 const (
 	LoginView ViewState = iota
 	LobbyView
-	BoardView
-	PlayView
-	HandView
-	KittyView
-	ScoresView
+	GameView
 	GameOverView
 )
 
-var TabNames = []string{"Board", "Play", "Hand", "Kitty"}
+var GameTabNames = []string{"Board", "Play", "Hand", "Kitty"}
 
-var LandingTabName = []string{"Active Matches", "Open Matches"}
+var LobbyTabNames = []string{"Active Matches", "Open Matches"}
 
 type HandModifier struct {
 	MatchId  int
@@ -355,3 +352,19 @@ type Account struct {
 	Id   int
 	Name string
 }
+
+type LobbyViewState uint
+
+const (
+	OpenMatches LobbyViewState = iota
+	AvailableMatches
+)
+
+type GameViewState uint
+
+const (
+	BoardView GameViewState = iota
+	PlayView
+	HandView
+	KittyView
+)

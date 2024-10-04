@@ -5,9 +5,11 @@ import (
 )
 
 type ViewModel struct {
+	LobbyViewState   model.LobbyViewState
+	GameViewState    model.GameViewState
 	ViewState        model.ViewState
 	Tabs             []string
-	LandingTabs      []string
+	LobbyTabs        []string
 	ActiveTab        int
 	ActiveLandingTab int
 	ActiveSlot       model.CardSlots

@@ -222,7 +222,7 @@ func updatePlayersInMatch(req model.JoinMatchReq) error {
 		return err
 	}
 
-	deal(m)
+	deal(m.Match)
 
 	return nil
 }
@@ -381,9 +381,13 @@ func GetMatch(c echo.Context) error {
 		return err
 	}
 
-	r, _ := json.Marshal(v)
+	r, err := json.Marshal(v)
 
-	return c.JSON(http.StatusOK, string(r))
+	if err != nil {
+		return err
+	}
+
+		return c.JSON(http.StatusOK, string(r))
 }
 
 // Create godoc
@@ -488,11 +492,11 @@ func getMatches(id int) ([]model.Match, error) {
 	return matches, nil
 }
 
-func getMatch(id int) (model.Match, error) {
+func getMatch(id int) (model.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 
-	var match model.Match
+	var match model.GameMatch
 	err := db.QueryRow(context.Background(), `SELECT
 			json_build_object(
 				'id', id,
@@ -521,7 +525,7 @@ func getMatch(id int) (model.Match, error) {
 	)
 
 	if err != nil {
-		return model.Match{}, err
+		return model.GameMatch{}, err
 	}
 
 	return match, nil

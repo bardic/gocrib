@@ -6,7 +6,7 @@ import (
 
 var PlayerId int
 var ActiveMatchId int
-var ActiveMatch model.Match
+var ActiveMatch model.GameMatch
 var ActiveDeck model.GameDeck
 var CurrentAction model.GameAction
 var CurrentHandModifier model.HandModifier

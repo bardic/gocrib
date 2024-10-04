@@ -20,7 +20,8 @@
 !*.sh
 !Dockerfile
 !docker-compose.yml
-
+!.vscode/launch.json
+!.vscode/tasks.json
 # !Makefile
 
 # ...even if they are in subdirectories

@@ -198,13 +198,13 @@ func scanForFlush(cardIdsInHand []int) ([]model.Scores, error) {
 		return []model.Scores{}, err
 	}
 
-	var flushSuit string
+	var flushSuit *model.Suit
 	matchesFlush := true
 	for _, card := range gameplayCardsInHand {
-		if flushSuit == "" {
-			flushSuit = card.Suit
+		if flushSuit == nil {
+			flushSuit = &card.Suit
 		} else {
-			matchesFlush = flushSuit == card.Suit
+			matchesFlush = flushSuit == &card.Suit
 		}
 	}
 
@@ -513,19 +513,19 @@ func scanForLastCard(m model.GameMatch) ([]model.Scores, error) {
 
 	total := 0
 	for _, card := range cardsInPlay {
-		total = total + card.Value
+		total = total + int(card.Value)
 	}
 
 	playerOneCanPlay := false
 	for _, card := range playerOneCards {
-		if card.Value+total <= 31 {
+		if int(card.Value)+total <= 31 {
 			playerOneCanPlay = true
 		}
 	}
 
 	playerTwoCanPlay := false
 	for _, card := range playerTwoCards {
-		if card.Value+total <= 31 {
+		if int(card.Value)+total <= 31 {
 			playerTwoCanPlay = true
 		}
 	}

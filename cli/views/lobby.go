@@ -28,7 +28,7 @@ func LobbyView(v ViewModel) (string, error) {
 
 	doc := strings.Builder{}
 
-	renderedTabs := renderTabs(v.LandingTabs, v.ActiveLandingTab)
+	renderedTabs := renderTabs(v.LobbyTabs, v.ActiveLandingTab)
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
@@ -80,7 +80,7 @@ func getActiveView() (table.Model, error) {
 	var matches []model.Match
 	err = json.Unmarshal([]byte(matchesStr), &matches)
 
-	if err != nil  {
+	if err != nil {
 		return table.Model{}, err
 	}
 
