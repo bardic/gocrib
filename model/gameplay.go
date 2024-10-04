@@ -329,10 +329,19 @@ type Scores struct {
 	Point int
 }
 
-type ViewState uint
+type IViewState interface {
+	Enter()
+	View() string
+}
+
+type ViewState struct {
+	Name ViewStateName
+}
+
+type ViewStateName uint
 
 const (
-	LoginView ViewState = iota
+	LoginView ViewStateName = iota
 	LobbyView
 	GameView
 	GameOverView

@@ -13,18 +13,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type LobbyView struct {
+}
+
 var LobbyTable table.Model
 var isLobbyTableSet bool
 
-func getMatches() tea.Msg {
-	return services.GetMatchesForPlayerId()
-}
-
-func getOpenMatches() tea.Msg {
-	return services.GetOpenMatches()
-}
-
-func LobbyView(v ViewModel) (string, error) {
+func (s *LobbyView) View(v ViewModel) string {
 
 	doc := strings.Builder{}
 
@@ -36,17 +31,17 @@ func LobbyView(v ViewModel) (string, error) {
 	doc.WriteString(row)
 	doc.WriteString("\n")
 
-	switch v.ViewState {
-	case model.LoginView:
+	switch v.ViewStateName {
+	case Login:
 
-	case model.LobbyView:
+	case Lobby:
 		if isLobbyTableSet {
 			break
 		}
 
 		t, err := getActiveView()
 		if err != nil {
-			return "", err
+			return err.Error()
 		}
 
 		LobbyTable = t
@@ -54,7 +49,11 @@ func LobbyView(v ViewModel) (string, error) {
 	}
 
 	doc.WriteString(styles.WindowStyle.Width(100).Render(LobbyTable.View()))
-	return doc.String(), nil
+	return doc.String()
+}
+
+func (s *LobbyView) Enter() {
+	fmt.Println("Enter")
 }
 
 func getActiveView() (table.Model, error) {
@@ -123,4 +122,12 @@ func getActiveView() (table.Model, error) {
 	t.SetStyles(s)
 
 	return t, nil
+}
+
+func getMatches() tea.Msg {
+	return services.GetMatchesForPlayerId()
+}
+
+func getOpenMatches() tea.Msg {
+	return services.GetOpenMatches()
 }

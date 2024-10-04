@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bardic/cribbagev2/cli/styles"
@@ -8,10 +9,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type LoginView struct {
+}
+
 var LoginIdField textinput.Model
 var isLoginIdFieldSet bool
 
-func LoginView() string {
+func (s LoginView) View() string {
 	doc := strings.Builder{}
 	if !isLoginIdFieldSet {
 		LoginIdField = textinput.New()
@@ -25,4 +29,8 @@ func LoginView() string {
 	doc.WriteString(LoginIdField.View())
 
 	return styles.ScreenStyle.Width(100).Align(lipgloss.Center, lipgloss.Center).Render(doc.String())
+}
+
+func (s LoginView) Enter() {
+	fmt.Println("Enter")
 }

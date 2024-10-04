@@ -7,7 +7,7 @@ import (
 type ViewModel struct {
 	LobbyViewState   model.LobbyViewState
 	GameViewState    model.GameViewState
-	ViewState        model.ViewState
+	ViewStateName    ViewStateName
 	Tabs             []string
 	LobbyTabs        []string
 	ActiveTab        int
@@ -16,3 +16,17 @@ type ViewModel struct {
 	HighlighedId     int
 	HighlightedIds   []int
 }
+
+type IViewState interface {
+	Enter()
+	View() string
+}
+
+type ViewStateName uint
+
+const (
+	Login ViewStateName = iota
+	Lobby
+	Game
+	GameOver
+)

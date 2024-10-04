@@ -387,7 +387,7 @@ func GetMatch(c echo.Context) error {
 		return err
 	}
 
-		return c.JSON(http.StatusOK, string(r))
+	return c.JSON(http.StatusOK, string(r))
 }
 
 // Create godoc
@@ -702,6 +702,7 @@ func newDeck() (model.GameDeck, error) {
 	for _, c := range v {
 		deck.Cards = append(deck.Cards, model.GameplayCard{
 			CardId: c.Id,
+			Card:   c,
 			State:  0,
 		})
 	}
