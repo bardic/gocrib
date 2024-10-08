@@ -6,6 +6,7 @@ import (
 
 	"github.com/bardic/cribbagev2/cli/services"
 	"github.com/bardic/cribbagev2/cli/state"
+	"github.com/bardic/cribbagev2/cli/utils"
 	"github.com/bardic/cribbagev2/cli/views"
 	"github.com/bardic/cribbagev2/model"
 	tea "github.com/charmbracelet/bubbletea"
@@ -26,7 +27,7 @@ func (m *appModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 				return tea.Quit
 			}
 
-			state.PlayerId = id
+			state.AccountId = id
 			return services.Login
 		case views.Lobby:
 			idStr := views.LobbyTable.SelectedRow()[0]
@@ -165,7 +166,7 @@ func (m *appModel) OnEnterDuringPlay() tea.Cmd {
 	m.ViewStateName = views.Game
 	if m.gameState == model.DiscardState {
 		for _, idx := range m.HighlightedIds {
-			m.kitty = append(m.kitty, getCardInHandById(idx, m.hand))
+			m.kitty = append(m.kitty, utils.GetCardInHandById(idx, m.hand))
 			m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
 				return c.Id == idx
 			})
@@ -173,7 +174,7 @@ func (m *appModel) OnEnterDuringPlay() tea.Cmd {
 
 		state.CurrentHandModifier = model.HandModifier{
 			MatchId:  state.ActiveMatchId,
-			CardIds:  getIdsFromCards(m.kitty),
+			CardIds:  utils.GetIdsFromCards(m.kitty),
 			PlayerId: state.ActiveMatch.PlayerIds[0],
 		}
 
@@ -181,7 +182,7 @@ func (m *appModel) OnEnterDuringPlay() tea.Cmd {
 		return services.PutKitty
 	} else {
 		for _, idx := range m.HighlightedIds {
-			m.play = append(m.play, getCardInHandById(idx, m.hand))
+			m.play = append(m.play, utils.GetCardInHandById(idx, m.hand))
 			m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
 				return c.Id == idx
 			})
@@ -189,7 +190,7 @@ func (m *appModel) OnEnterDuringPlay() tea.Cmd {
 
 		state.CurrentHandModifier = model.HandModifier{
 			MatchId:  state.ActiveMatchId,
-			CardIds:  getIdsFromCards(m.play),
+			CardIds:  utils.GetIdsFromCards(m.play),
 			PlayerId: state.ActiveMatch.PlayerIds[0],
 		}
 

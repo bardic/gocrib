@@ -1,8 +1,7 @@
-package route
+package account
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	conn "github.com/bardic/cribbage/server/db"
@@ -42,7 +41,5 @@ func Login(c echo.Context) error {
 		Name: name,
 	}
 
-	r, _ := json.Marshal(a)
-
-	return c.JSON(http.StatusOK, string(r))
+	return c.JSON(http.StatusOK, a)
 }

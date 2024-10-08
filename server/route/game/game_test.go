@@ -1,4 +1,4 @@
-// package route
+package game
 
 // import (
 // 	"fmt"
@@ -66,7 +66,7 @@
 // 	hand := []int{9, 10, 11, 24}
 
 // 	scores, err := scanForMatchingKinds(hand)
-// 	fmt.Println(scores[0])
+// 	utils.L(scores[0])
 // 	if scores[0].Point != 2 || err != nil {
 // 		t.Fatalf(`scanForMatchingKinds(hand) = %q, %v, want match for %#q`, scores, err, 2)
 // 	}
@@ -478,5 +478,3 @@
 // 		t.Fatalf(`countPegs() = %q, %v, want match for %#q`, scores, err, 0)
 // 	}
 // }
-
-package route_test

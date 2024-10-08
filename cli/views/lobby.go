@@ -7,6 +7,7 @@ import (
 
 	"github.com/bardic/cribbagev2/cli/services"
 	"github.com/bardic/cribbagev2/cli/styles"
+	"github.com/bardic/cribbagev2/cli/utils"
 	"github.com/bardic/cribbagev2/model"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -53,7 +54,7 @@ func (s *LobbyView) View(v ViewModel) string {
 }
 
 func (s *LobbyView) Enter() {
-	fmt.Println("Enter")
+	utils.Logger.Info("Enter")
 }
 
 func getActiveView() (table.Model, error) {
@@ -69,15 +70,8 @@ func getActiveView() (table.Model, error) {
 
 	m := getOpenMatches()
 
-	var matchesStr string
-	err := json.Unmarshal(m.([]byte), &matchesStr)
-
-	if err != nil {
-		return table.Model{}, err
-	}
-
-	var matches []model.Match
-	err = json.Unmarshal([]byte(matchesStr), &matches)
+	var matches []model.GameMatch
+	err := json.Unmarshal(m.([]byte), &matches)
 
 	if err != nil {
 		return table.Model{}, err

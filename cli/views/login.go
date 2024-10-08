@@ -1,10 +1,10 @@
 package views
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/bardic/cribbagev2/cli/styles"
+	"github.com/bardic/cribbagev2/cli/utils"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -32,5 +32,5 @@ func (s LoginView) View() string {
 }
 
 func (s LoginView) Enter() {
-	fmt.Println("Enter")
+	utils.Logger.Info("Enter")
 }

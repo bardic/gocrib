@@ -9,5 +9,5 @@ import (
 )
 
 func Login() tea.Msg {
-	return url(EndPointLogin, http.MethodPost, strconv.Itoa(state.PlayerId))
+	return url(EndPointLogin, http.MethodPost, strconv.Itoa(state.AccountId))
 }

@@ -161,50 +161,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/admin/match/card": {
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Get match by barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for match by barcode",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Match"
+                            "$ref": "#/definitions/model.GameMatch"
                         }
                     },
                     "400": {
@@ -456,51 +413,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/game/playCard/": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "game"
-                ],
-                "summary": "Play a card",
-                "parameters": [
-                    {
-                        "description": "Action to perform",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.GameAction"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.ScoreResults"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/history/": {
             "get": {
                 "consumes": [
@@ -718,45 +630,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/player/card/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Get card by barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for card by id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Card"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/player/gameplaycards/": {
             "get": {
                 "consumes": [
@@ -826,7 +699,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
+                            "$ref": "#/definitions/model.GameMatch"
                         }
                     },
                     "400": {
@@ -869,7 +742,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.GameMatch"
+                            }
                         }
                     },
                     "404": {
@@ -900,7 +776,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
+                            "$ref": "#/definitions/model.GameMatch"
                         }
                     }
                 ],
@@ -908,7 +784,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
+                            "$ref": "#/definitions/model.GameMatch"
                         }
                     },
                     "400": {
@@ -951,136 +827,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/player/match/card": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Get match by barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for match by barcode",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Update match by barcode",
-                "parameters": [
-                    {
-                        "description": "match Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
                             "$ref": "#/definitions/model.GameMatch"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match_card"
-                ],
-                "summary": "Create new match card",
-                "parameters": [
-                    {
-                        "description": "match Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Match"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Match"
                         }
                     },
                     "400": {
@@ -1164,7 +911,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
+                            "$ref": "#/definitions/model.GameMatch"
                         }
                     },
                     "400": {
@@ -1177,48 +924,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/player/matches/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Get match by id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for match by id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Match"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
                         "schema": {}
                     }
                 }
@@ -1242,7 +947,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Match"
+                                "$ref": "#/definitions/model.GameMatch"
                             }
                         }
                     },
@@ -1284,7 +989,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Match"
+                            "$ref": "#/definitions/model.GameMatch"
                         }
                     },
                     "400": {
@@ -1405,7 +1110,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Player"
+                            "type": "integer"
                         }
                     }
                 ],
@@ -1583,38 +1288,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.GameAction": {
-            "type": "object",
-            "properties": {
-                "cardsIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "matchId": {
-                    "type": "integer"
-                },
-                "type": {
-                    "$ref": "#/definitions/model.GameActionType"
-                }
-            }
-        },
-        "model.GameActionType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "Cut",
-                "Discard",
-                "Peg",
-                "Tally"
-            ]
-        },
         "model.GameDeck": {
             "type": "object",
             "properties": {
@@ -1634,12 +1307,6 @@ const docTemplate = `{
             "properties": {
                 "art": {
                     "type": "string"
-                },
-                "cardsInPlay": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "creationDate": {
                     "type": "string"
@@ -1789,61 +1456,11 @@ const docTemplate = `{
                 "matchId": {
                     "type": "integer"
                 },
+                "playerId": {
+                    "type": "integer"
+                },
                 "requesterId": {
                     "type": "integer"
-                }
-            }
-        },
-        "model.Match": {
-            "type": "object",
-            "properties": {
-                "art": {
-                    "type": "string"
-                },
-                "cardsInPlay": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "creationDate": {
-                    "type": "string"
-                },
-                "currentPlayerTurn": {
-                    "type": "integer"
-                },
-                "cutGameCardId": {
-                    "type": "integer"
-                },
-                "deckId": {
-                    "type": "integer"
-                },
-                "eloRangeMax": {
-                    "type": "integer"
-                },
-                "eloRangeMin": {
-                    "type": "integer"
-                },
-                "gameState": {
-                    "$ref": "#/definitions/model.GameState"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "playerIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "privateMatch": {
-                    "type": "boolean"
-                },
-                "turnPassTimestamps": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -1867,7 +1484,7 @@ const docTemplate = `{
         "model.Player": {
             "type": "object",
             "properties": {
-                "accountId": {
+                "accountid": {
                     "type": "integer"
                 },
                 "art": {
@@ -1895,31 +1512,6 @@ const docTemplate = `{
                     }
                 },
                 "score": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.ScoreResults": {
-            "type": "object",
-            "properties": {
-                "results": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Scores"
-                    }
-                }
-            }
-        },
-        "model.Scores": {
-            "type": "object",
-            "properties": {
-                "cards": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.GameplayCard"
-                    }
-                },
-                "point": {
                     "type": "integer"
                 }
             }

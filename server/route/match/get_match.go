@@ -1,0 +1,36 @@
+package match
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/bardic/cribbage/server/utils"
+	"github.com/labstack/echo/v4"
+)
+
+// Create godoc
+// @Summary      Get match by id
+// @Description
+// @Tags         match
+// @Accept       json
+// @Produce      json
+// @Param        id    query     string  true  "search for match by id"'
+// @Success      200  {object}  []model.GameMatch
+// @Failure      404  {object}  error
+// @Failure      422  {object}  error
+// @Router       /player/match/ [get]
+func GetMatch(c echo.Context) error {
+	p := c.Request().URL.Query().Get("id")
+	id, err := strconv.Atoi(p)
+
+	if err != nil {
+		return err
+	}
+
+	v, err := utils.GetMatch(id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, v)
+}

@@ -80,7 +80,7 @@ func (d *GameDeck) Shuffle() *GameDeck {
 
 type Player struct {
 	Id        int
-	AccountId int
+	AccountId int `json:"accountid"`
 	Play      []int
 	Hand      []int
 	Kitty     []int
@@ -161,6 +161,7 @@ type MatchDiffType uint
 
 const (
 	GenericDiff = 1 << iota
+	PlayersDiff
 	NewDeckDiff
 	CutDiff
 	TurnDiff
@@ -173,14 +174,10 @@ const (
 type JoinMatchReq struct {
 	MatchId     int
 	RequesterId int
+	PlayerId    int
 }
 
 type GameMatch struct {
-	Match
-	Players []Player
-}
-
-type Match struct {
 	Id                 int       `json:"id"`
 	PlayerIds          []int     `json:"playerIds"`
 	PrivateMatch       bool      `json:"privateMatch"`
@@ -188,15 +185,15 @@ type Match struct {
 	EloRangeMax        int       `json:"eloRangeMax"`
 	CreationDate       time.Time `json:"creationDate"`
 	DeckId             int       `json:"deckId"`
-	CardsInPlay        []int     `json:"cardsInPlay"`
 	CutGameCardId      int       `json:"cutGameCardId"`
 	CurrentPlayerTurn  int       `json:"currentPlayerTurn"`
 	TurnPassTimestamps []string  `json:"turnPassTimestamps"`
 	GameState          GameState `json:"gameState"`
 	Art                string    `json:"art "`
+	Players            []Player
 }
 
-func (m *Match) Eq(c Match) int {
+func (m *GameMatch) Eq(c GameMatch) int {
 
 	diff := 0
 
@@ -241,11 +238,7 @@ func (m *Match) Eq(c Match) int {
 	}
 
 	if !eqIntArr(m.PlayerIds, c.PlayerIds) {
-		diff |= GenericDiff
-	}
-
-	if !eqIntArr(m.CardsInPlay, c.CardsInPlay) {
-		diff |= CardsInPlayDiff
+		diff |= PlayersDiff
 	}
 
 	if !eqStringArr(m.TurnPassTimestamps, c.TurnPassTimestamps) {

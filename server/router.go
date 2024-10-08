@@ -2,7 +2,13 @@ package main
 
 import (
 	_ "github.com/bardic/cribbage/server/docs"
-	"github.com/bardic/cribbage/server/route"
+
+	"github.com/bardic/cribbage/server/route/account"
+	"github.com/bardic/cribbage/server/route/admin/card"
+	"github.com/bardic/cribbage/server/route/deck"
+	"github.com/bardic/cribbage/server/route/gameplaycard"
+	"github.com/bardic/cribbage/server/route/match"
+	"github.com/bardic/cribbage/server/route/player"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 
@@ -56,52 +62,53 @@ func v1Routes(g *echo.Group) {
 	}))
 
 	//Card
-	adminGroup.POST("/card", route.NewCard)
-	adminGroup.PUT("/card", route.UpdateCard)
-	adminGroup.DELETE("/card", route.DeleteCard)
+	adminGroup.POST("/card", card.NewCard)
+	adminGroup.PUT("/card", card.UpdateCard)
+	adminGroup.DELETE("/card", card.DeleteCard)
 	//Player
-	adminGroup.DELETE("/player", route.DeletePlayer)
+	adminGroup.DELETE("/player", player.DeletePlayer)
 	//Match
-	adminGroup.DELETE("/match", route.DeleteMatch)
+	adminGroup.DELETE("/match", match.DeleteMatch)
 
-	//History
-	adminGroup.DELETE("/history", route.DeleteHistory)
-	//Chat
-	adminGroup.DELETE("/chat", route.DeleteChat)
+	// //History
+	// adminGroup.DELETE("/history", route.DeleteHistory)
+	// //Chat
+	// adminGroup.DELETE("/chat", route.DeleteChat)
 
 	playerGroup := g.Group("/player")
 
 	//Card
-	playerGroup.GET("/card", route.GetCard)
-	playerGroup.GET("/allcards", route.GetAllCards)
-	playerGroup.GET("/gameplaycards", route.GetGameplayCards)
+	// playerGroup.GET("/card", card.GetCard)
+	// playerGroup.GET("/allcards", route.GetAllCards)
 	//Player
-	playerGroup.GET("/player", route.GetPlayer)
-	playerGroup.POST("/player", route.NewPlayer)
-	playerGroup.PUT("/player", route.UpdatePlayer)
-	playerGroup.PUT("/kitty", route.UpdateKitty)
-	playerGroup.PUT("/play", route.UpdatePlay)
+	playerGroup.GET("/gameplaycards", gameplaycard.GetGameplayCards)
+	playerGroup.GET("/player", player.GetPlayer)
+	playerGroup.POST("", player.NewPlayer)
+	playerGroup.PUT("/player", player.UpdatePlayer)
+	playerGroup.PUT("/kitty", player.UpdateKitty)
+	// playerGroup.PUT("/play", player.UpdatePlay)
 	//Match
-	playerGroup.GET("/match", route.GetMatch)
-	playerGroup.GET("/matches", route.GetMatches)
-	playerGroup.GET("/matches/open", route.GetOpenMatches)
-	playerGroup.POST("/match", route.NewMatch)
-	playerGroup.PUT("/match", route.UpdateMatch)
-	playerGroup.PUT("/match/join", route.JoinMatch)
-	playerGroup.GET("/match/deck", route.GetDeck)
+	playerGroup.GET("/match", match.GetMatch)
+	// playerGroup.GET("/matches", match.GetMatches)
+	playerGroup.GET("/matches/open", match.GetOpenMatches)
+	playerGroup.POST("/match", match.NewMatch)
+	playerGroup.PUT("/match", match.UpdateMatch)
+	playerGroup.PUT("/match/join", match.JoinMatch)
+
+	playerGroup.GET("/match/deck", deck.GetDeck)
 	// History
-	playerGroup.GET("/history", route.GetHistory)
-	playerGroup.POST("/history", route.NewHistory)
-	playerGroup.PUT("/history", route.UpdateHistory)
-	// Chat
-	playerGroup.GET("/chat", route.GetChat)
-	playerGroup.POST("/chat", route.NewChat)
-	playerGroup.PUT("/chat", route.UpdateChat)
+	// playerGroup.GET("/history", route.GetHistory)
+	// playerGroup.POST("/history", route.NewHistory)
+	// playerGroup.PUT("/history", route.UpdateHistory)
+	// // Chat
+	// playerGroup.GET("/chat", route.GetChat)
+	// playerGroup.POST("/chat", route.NewChat)
+	// playerGroup.PUT("/chat", route.UpdateChat)
 
 	//Account
 	accountGroup := g.Group("/account")
-	accountGroup.POST("/login", route.Login)
+	accountGroup.POST("/login", account.Login)
 
-	gameGroup := g.Group("/game")
-	gameGroup.POST("/playCard", route.PlayCard)
+	// gameGroup := g.Group("/game")
+	// gameGroup.POST("/playCard", player.PlayCard)
 }

@@ -1,13 +1,16 @@
-package main
+package utils
 
 import (
 	"slices"
 
 	"github.com/bardic/cribbagev2/cli/state"
 	"github.com/bardic/cribbagev2/model"
+	"go.uber.org/zap"
 )
 
-func getCardById(id int) *model.Card {
+var Logger *zap.Logger
+
+func GetCardById(id int) *model.Card {
 	for _, card := range state.ActiveDeck.Cards {
 		if card.CardId == id {
 			return &card.Card
@@ -16,8 +19,8 @@ func getCardById(id int) *model.Card {
 	return nil
 }
 
-func getIdsFromCards(c []model.Card) []int {
-	ids := make([]int, len(c))
+func GetIdsFromCards(c []model.Card) []int {
+	ids := []int{}
 	for _, card := range c {
 		ids = append(ids, card.Id)
 	}
@@ -25,7 +28,7 @@ func getIdsFromCards(c []model.Card) []int {
 	return ids
 }
 
-func getCardInHandById(id int, hand []model.Card) model.Card {
+func GetCardInHandById(id int, hand []model.Card) model.Card {
 	idx := slices.IndexFunc(hand, func(c model.Card) bool {
 		return c.Id == id
 	})
@@ -35,4 +38,12 @@ func getCardInHandById(id int, hand []model.Card) model.Card {
 	}
 
 	return hand[idx]
+}
+
+func NewLogger() (*zap.Logger, error) {
+	cfg := zap.NewProductionConfig()
+	cfg.OutputPaths = []string{
+		"crib.log",
+	}
+	return cfg.Build()
 }

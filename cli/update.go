@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/bardic/cribbagev2/cli/services"
 	"github.com/bardic/cribbagev2/cli/state"
+	"github.com/bardic/cribbagev2/cli/utils"
 	"github.com/bardic/cribbagev2/cli/views"
 	"github.com/bardic/cribbagev2/model"
 	"github.com/charmbracelet/bubbles/timer"
@@ -44,25 +44,17 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd, services.GetPlayerMatch)
 		}
 	case []byte:
-		var matchStr string
-
-		err := json.Unmarshal(msg, &matchStr)
-
-		if err != nil {
-			fmt.Println(err)
-		}
-
 		switch m.ViewStateName {
 		case views.Login:
 			m.ViewStateName = views.Lobby
 			var account model.Account
-			err = json.Unmarshal([]byte(matchStr), &account)
+			err := json.Unmarshal([]byte(msg), &account)
 
 			if err != nil {
-				fmt.Println(err)
+				utils.Logger.Info(err.Error())
 			}
 
-			state.PlayerId = account.Id
+			state.AccountId = account.Id
 
 			return m, tea.Batch(cmds...)
 		case views.Lobby:
@@ -71,62 +63,76 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		var match model.GameMatch
-		err = json.Unmarshal([]byte(matchStr), &match)
+		err := json.Unmarshal([]byte(msg), &match)
 
 		if err != nil {
-			fmt.Println(err)
+			utils.Logger.Info(err.Error())
 		}
 
-		diffs := match.Eq(state.ActiveMatch.Match)
+		diffs := match.Eq(state.ActiveMatch)
 
 		if diffs == 0 {
 			return m, tea.Batch(cmds...)
 		}
 
 		state.ActiveMatch = match
+		m.gameState = match.GameState
 
 		for diff := model.GenericDiff; diff < model.MaxDiff; diff <<= 1 {
 			d := diffs & diff
 			if d != 0 {
 				switch d {
 				case model.CutDiff:
-					fmt.Println("cutdiff")
+					utils.Logger.Info("cutdiff")
 					m.ViewStateName = views.Game
 				case model.CardsInPlayDiff:
-					fmt.Println("cards in play diff")
+					utils.Logger.Info("cards in play diff")
 				case model.GameStateDiff:
-					fmt.Println("game state diff")
+					utils.Logger.Info("game state diff")
 				case model.GenericDiff:
-					fmt.Println("generic diff")
+					// utils.Logger.Info("generic diff")
+					m.ViewStateName = views.Game
+					// utils.Logger.Info("new deck diff")
+					// deckByte := services.GetDeckById(match.DeckId).([]byte)
+					// var deck model.GameDeck
+					// json.Unmarshal(deckByte, &deck)
+					// state.ActiveDeck = &deck
 				case model.NewDeckDiff:
 					m.ViewStateName = views.Game
-					fmt.Println("new deck diff")
+					utils.Logger.Info("new deck diff")
 					deckByte := services.GetDeckById(match.DeckId).([]byte)
-					var deckJson string
-					json.Unmarshal(deckByte, &deckJson)
-
 					var deck model.GameDeck
-					json.Unmarshal([]byte(deckJson), &deck)
-
-					state.ActiveDeck = deck
-					state.ActiveMatch = match
+					json.Unmarshal(deckByte, &deck)
+					state.ActiveDeck = &deck
 				case model.MaxDiff:
-					fmt.Println("max diff")
+					utils.Logger.Info("max diff")
+				case model.PlayersDiff:
+					utils.Logger.Info("players diff")
 				case model.TurnDiff:
-					fmt.Println("turn diff")
+					utils.Logger.Info("turn diff")
 				case model.TurnPassTimestampsDiff:
-					fmt.Println("pass timestamp diff")
+					utils.Logger.Info("pass timestamp diff")
 				}
 			}
 		}
 
-		m.setCards(match)
-
-		m.gameState = match.GameState
-		state.ActiveMatch = match
+		if state.ActiveDeck != nil {
+			utils.Logger.Info("set cards")
+			m.setCards(match)
+		}
 	}
 
 	return m, tea.Batch(cmds...)
+}
+
+func getPlayerForId(id int, match model.GameMatch) *model.Player {
+	for _, player := range match.Players {
+		if player.AccountId == id {
+			return &player
+		}
+	}
+
+	return nil
 }
 
 func (m *appModel) setCards(match model.GameMatch) {
@@ -134,20 +140,22 @@ func (m *appModel) setCards(match model.GameMatch) {
 	m.kitty = []model.Card{}
 	m.play = []model.Card{}
 
-	for _, cardId := range match.Players[0].Hand {
-		card := getCardById(cardId)
+	p := getPlayerForId(state.AccountId, match)
+
+	for _, cardId := range p.Hand {
+		card := utils.GetCardById(cardId)
 		if card != nil {
 			m.hand = append(m.hand, *card)
 		}
 	}
 
-	for _, cardId := range match.Players[0].Kitty {
-		card := getCardById(cardId)
+	for _, cardId := range p.Kitty {
+		card := utils.GetCardById(cardId)
 		m.kitty = append(m.kitty, *card)
 	}
 
-	for _, cardId := range match.Players[0].Play {
-		card := getCardById(cardId)
+	for _, cardId := range p.Play {
+		card := utils.GetCardById(cardId)
 		m.play = append(m.play, *card)
 	}
 }

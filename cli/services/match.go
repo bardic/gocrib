@@ -11,7 +11,7 @@ import (
 )
 
 func GetMatchesForPlayerId() tea.Msg {
-	return url(EndPointMatches+"/?id="+strconv.Itoa(state.PlayerId), http.MethodGet, "")
+	return url(EndPointMatches+"/?id="+strconv.Itoa(state.AccountId), http.MethodGet, "")
 }
 
 func GetPlayerMatch() tea.Msg {
@@ -24,7 +24,7 @@ func GetOpenMatches() tea.Msg {
 
 func JoinMatch() tea.Msg {
 	req := model.JoinMatchReq{
-		RequesterId: state.PlayerId,
+		RequesterId: state.AccountId,
 		MatchId:     state.ActiveMatchId,
 	}
 
@@ -43,7 +43,7 @@ func PutPlayerMatch(id int) tea.Msg {
 
 func PostPlayerMatch() tea.Msg {
 	req := model.MatchRequirements{
-		RequesterId: 1,
+		RequesterId: state.AccountId,
 		IsPrivate:   false,
 		EloRangeMin: 1,
 		EloRangeMax: 3000,
@@ -56,16 +56,4 @@ func PostPlayerMatch() tea.Msg {
 	}
 
 	return url(EndPointMatch, http.MethodPost, string(b))
-}
-
-func GetPlayerMatchCard() tea.Msg {
-	return url(EndPointMatchCard, http.MethodPut, "")
-}
-
-func PutPlayerMatchCard(id int) tea.Msg {
-	return url(EndPointMatchCard, http.MethodPut, "")
-}
-
-func PostPlayerMatchCard(ids []int) tea.Msg {
-	return url(EndPointMatchCard, http.MethodPost, "")
 }

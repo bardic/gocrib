@@ -19,5 +19,5 @@ func GetCardById(id int) tea.Msg {
 
 func GetGameplayCardsByIds(ids []int) tea.Msg {
 	s, _ := json.Marshal(ids)
-	return url(EndPointGameplayCardsByIds + strings.Trim(string(s), "[]"), http.MethodGet, "")
+	return url(EndPointGameplayCardsByIds+strings.Trim(string(s), "[]"), http.MethodGet, "")
 }

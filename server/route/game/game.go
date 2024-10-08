@@ -1,82 +1,31 @@
-package route
+package game
 
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"sort"
 	"strings"
 
+	"github.com/bardic/cribbage/server/route/deck"
+	"github.com/bardic/cribbage/server/route/player"
+	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/cribbagev2/model"
-	"github.com/labstack/echo/v4"
 )
 
-// Create godoc
-// @Summary      Play a card
-// @Description
-// @Tags         game
-// @Accept       json
-// @Produce      json
-// @Param details body model.GameAction true "Action to perform"
-// @Success      200  {object}  model.ScoreResults
-// @Failure      400  {object}  error
-// @Failure      404  {object}  error
-// @Failure      500  {object}  error
-// @Router       /game/playCard/ [post]
-func PlayCard(c echo.Context) error {
-	details := new(model.GameAction)
-	if err := c.Bind(details); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	//todo confirm the player has the card in question
-
-	// insert card into db
-	m, err := UpdateCardsInPlay(details)
-	if err != nil {
-		return err
-	}
-
-	//Get all match details
-	// match, err := GetMatchQuery(m.LobbyId)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// var scores model.ScoreResults
-
-	// switch details.Type {
-	// case model.Cut:
-	// 	scores, err = cutDeck(match, details.GameplayCardId)
-	// case model.Discard:
-	// 	scores, err = discardCard(match)
-	// case model.Peg:
-	// 	scores, err = countPegs(match)
-	// case model.Tally:
-	// 	scores, err = countHand(match)
-	// }
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	return c.JSON(http.StatusOK, m)
-}
-
-func deal(match model.Match) error {
-	deck, err := getDeck(match.DeckId)
+func Deal(match model.GameMatch) (*model.GameDeck, error) {
+	deck, err := deck.GetDeckById(match.DeckId)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	players := []model.Player{}
 
 	for _, ids := range match.PlayerIds {
-		player, err := getPlayer(ids)
+		player, err := player.GetPlayerById(ids)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		players = append(players, player)
@@ -90,52 +39,65 @@ func deal(match model.Match) error {
 	for i := 0; i < len(players)*cardsPerHand; i++ {
 		var card model.GameplayCard
 		card, deck.Cards = deck.Cards[0], deck.Cards[1:]
-		players[len(players)-1-i%len(players)].Hand = append(players[len(players)-1-i%len(players)].Hand, card.CardId)
+		idx := len(players) - 1 - i%len(players)
+
+		if len(players[idx].Hand) < cardsPerHand {
+			players[idx].Hand = append(players[idx].Hand, card.CardId)
+		}
 	}
 
-	for _, player := range players {
-		updatePlayer(player)
+	for _, p := range players {
+		player.UpdatePlayerById(p)
 	}
 
-	return nil
+	return &deck, nil
 }
 
-func countPegs(match model.GameMatch) (model.ScoreResults, error) {
+func cardsInPlay(players []model.Player) []int {
+	cardIds := []int{}
+	for _, p := range players {
+		cardIds = append(cardIds, p.Hand...)
+	}
+
+	return cardIds
+}
+
+func countPegs(m model.GameMatch) (model.ScoreResults, error) {
 	res := model.ScoreResults{}
 
-	r, err := scanForThirtyOne(match.CardsInPlay)
+	r, err := scanForThirtyOne(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	if len(match.TurnPassTimestamps) == 0 {
-		r, err = scanJackOnCut(match)
+	if len(m.TurnPassTimestamps) == 0 {
+		r, err = scanJackOnCut(m)
 		if err != nil {
 			return model.ScoreResults{}, err
 		}
 		res.Results = append(res.Results, r...)
 	}
 
-	r, err = scanForFifthteens(match.CardsInPlay)
+	r, err = scanForFifthteens(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForLastCard(match)
+	r, err = scanForLastCard(m)
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForMatchingKinds(match.CardsInPlay)
+	r, err = scanForMatchingKinds(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForRuns(match.CardsInPlay)
+	r, err = scanForRuns(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
@@ -144,46 +106,46 @@ func countPegs(match model.GameMatch) (model.ScoreResults, error) {
 	return model.ScoreResults{Results: res.Results}, nil
 }
 
-func countHand(match model.GameMatch) (model.ScoreResults, error) {
+func countHand(m model.GameMatch) (model.ScoreResults, error) {
 	res := model.ScoreResults{}
 
-	r, err := scanForThirtyOne(match.CardsInPlay)
+	r, err := scanForThirtyOne(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanRightJackCut(match.CardsInPlay, match)
+	r, err = scanRightJackCut(cardsInPlay(m.Players), m)
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForFifthteens(match.CardsInPlay)
+	r, err = scanForFifthteens(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForLastCard(match)
+	r, err = scanForLastCard(m)
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForMatchingKinds(match.CardsInPlay)
+	r, err = scanForMatchingKinds(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForRuns(match.CardsInPlay)
+	r, err = scanForRuns(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForFlush(match.CardsInPlay)
+	r, err = scanForFlush(cardsInPlay(m.Players))
 	if err != nil {
 		return model.ScoreResults{}, err
 	}
@@ -219,7 +181,7 @@ func scanForFlush(cardIdsInHand []int) ([]model.Scores, error) {
 	return []model.Scores{}, nil
 }
 
-func discardCard(match model.Match) (model.ScoreResults, error) {
+func discardCard(match model.GameMatch) (model.ScoreResults, error) {
 	return model.ScoreResults{Results: []model.Scores{
 		{
 			Cards: []model.GameplayCard{},
@@ -228,9 +190,9 @@ func discardCard(match model.Match) (model.ScoreResults, error) {
 	}}, nil
 }
 
-func cutDeck(match model.Match, cutCardId int) (model.ScoreResults, error) {
+func cutDeck(m model.GameMatch, cutCardId int) (model.ScoreResults, error) {
 
-	UpdateCut(match.Id, cutCardId)
+	utils.UpdateCut(m.Id, cutCardId)
 
 	return model.ScoreResults{Results: []model.Scores{
 		{
@@ -426,7 +388,7 @@ func getGameplayCardsForIds(ids []int) ([]model.GameplayCard, error) {
 	}
 
 	string_ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(ids)), ","), "[]")
-	cards, err := QueryForCards(string_ids)
+	cards, err := utils.QueryForCards(string_ids)
 	if err != nil {
 		return []model.GameplayCard{}, err
 	}
@@ -505,7 +467,7 @@ func scanForLastCard(m model.GameMatch) ([]model.Scores, error) {
 		return []model.Scores{}, err
 	}
 
-	cardsInPlay, err := getGameplayCardsForIds(m.CardsInPlay)
+	cardsInPlay, err := getGameplayCardsForIds(cardsInPlay(m.Players))
 
 	if err != nil {
 		return []model.Scores{}, err

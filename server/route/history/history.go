@@ -2,7 +2,6 @@ package route
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -124,9 +123,7 @@ func GetHistory(c echo.Context) error {
 		return err
 	}
 
-	r, _ := json.Marshal(v)
-
-	return c.JSON(http.StatusOK, string(r))
+	return c.JSON(http.StatusOK, v)
 }
 
 // Create godoc

@@ -6,7 +6,11 @@ require github.com/charmbracelet/bubbletea v1.1.0
 
 require github.com/bardic/cribbagev2/model v0.0.0
 
-require github.com/atotto/clipboard v0.1.4 // indirect
+require (
+	github.com/atotto/clipboard v0.1.4 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.27.0 // indirect
+)
 
 replace github.com/bardic/cribbagev2/model => ../model
 

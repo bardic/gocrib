@@ -35,7 +35,7 @@ func (m *appModel) View() string {
 				m.ViewModel,
 				m.gameState))
 		case model.HandView:
-			v = styles.ViewStyle.Render(views.GameView(m.HighlighedId,
+				v = styles.ViewStyle.Render(views.GameView(m.HighlighedId,
 				m.HighlightedIds,
 				m.hand,
 				m.ViewModel,

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"log"
 	"time"
 
+	"github.com/bardic/cribbagev2/cli/utils"
 	"github.com/bardic/cribbagev2/cli/views"
 	"github.com/bardic/cribbagev2/model"
 	"github.com/charmbracelet/bubbles/timer"
@@ -25,10 +25,14 @@ func (m *appModel) Init() tea.Cmd {
 }
 
 func main() {
+
+	utils.Logger, _ = utils.NewLogger()
+	defer utils.Logger.Sync() // flushes buffer, if any
+
 	p := tea.NewProgram(newModel())
 
 	if _, err := p.Run(); err != nil {
-		log.Fatal(err)
+		utils.Logger.Sugar().Error(err)
 	}
 }
 
