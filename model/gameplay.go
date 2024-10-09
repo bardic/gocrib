@@ -287,7 +287,9 @@ func eqPlayerArr(a, b []Player) bool {
 type GameState uint
 
 const (
-	WaitingState GameState = 1 << iota
+	NewGameState GameState = 1 << iota
+	WaitingState
+	MatchReady
 	DealState
 	CutState
 	DiscardState
@@ -296,6 +298,7 @@ const (
 	KittyState
 	GameWonState
 	GameLostState
+	MaxGameState
 )
 
 type GameActionType int

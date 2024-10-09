@@ -60,66 +60,80 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case views.Lobby:
 			m.ViewStateName = views.Game
 			return m, tea.Batch(cmds...)
-		}
+		case views.Game:
+			switch m.gameState {
+			case model.WaitingState:
+			case model.MatchReady:
+			case model.DealState:
+			case model.CutState:
+			case model.DiscardState:
+			case model.PlayState:
+			case model.OpponentState:
+			case model.KittyState:
+			case model.GameWonState:
+			case model.GameLostState:
 
-		var match model.GameMatch
-		err := json.Unmarshal([]byte(msg), &match)
-
-		if err != nil {
-			utils.Logger.Info(err.Error())
-		}
-
-		diffs := match.Eq(state.ActiveMatch)
-
-		if diffs == 0 {
-			return m, tea.Batch(cmds...)
-		}
-
-		state.ActiveMatch = match
-		m.gameState = match.GameState
-
-		for diff := model.GenericDiff; diff < model.MaxDiff; diff <<= 1 {
-			d := diffs & diff
-			if d != 0 {
-				switch d {
-				case model.CutDiff:
-					utils.Logger.Info("cutdiff")
-					m.ViewStateName = views.Game
-				case model.CardsInPlayDiff:
-					utils.Logger.Info("cards in play diff")
-				case model.GameStateDiff:
-					utils.Logger.Info("game state diff")
-				case model.GenericDiff:
-					// utils.Logger.Info("generic diff")
-					m.ViewStateName = views.Game
-					// utils.Logger.Info("new deck diff")
-					// deckByte := services.GetDeckById(match.DeckId).([]byte)
-					// var deck model.GameDeck
-					// json.Unmarshal(deckByte, &deck)
-					// state.ActiveDeck = &deck
-				case model.NewDeckDiff:
-					m.ViewStateName = views.Game
-					utils.Logger.Info("new deck diff")
-					deckByte := services.GetDeckById(match.DeckId).([]byte)
-					var deck model.GameDeck
-					json.Unmarshal(deckByte, &deck)
-					state.ActiveDeck = &deck
-				case model.MaxDiff:
-					utils.Logger.Info("max diff")
-				case model.PlayersDiff:
-					utils.Logger.Info("players diff")
-				case model.TurnDiff:
-					utils.Logger.Info("turn diff")
-				case model.TurnPassTimestampsDiff:
-					utils.Logger.Info("pass timestamp diff")
-				}
 			}
 		}
 
-		if state.ActiveDeck != nil {
-			utils.Logger.Info("set cards")
-			m.setCards(match)
-		}
+		// var match model.GameMatch
+		// err := json.Unmarshal([]byte(msg), &match)
+
+		// if err != nil {
+		// 	utils.Logger.Info(err.Error())
+		// }
+
+		// diffs := match.Eq(state.ActiveMatch)
+
+		// if diffs == 0 {
+		// 	return m, tea.Batch(cmds...)
+		// }
+
+		// state.ActiveMatch = match
+		// m.gameState = match.GameState
+
+		// for diff := model.GenericDiff; diff < model.MaxDiff; diff <<= 1 {
+		// 	d := diffs & diff
+		// 	if d != 0 {
+		// 		switch d {
+		// 		case model.CutDiff:
+		// 			utils.Logger.Info("cutdiff")
+		// 			m.ViewStateName = views.Game
+		// 		case model.CardsInPlayDiff:
+		// 			utils.Logger.Info("cards in play diff")
+		// 		case model.GameStateDiff:
+		// 			utils.Logger.Info("game state diff")
+		// 		case model.GenericDiff:
+		// 			// utils.Logger.Info("generic diff")
+		// 			m.ViewStateName = views.Game
+		// 			// utils.Logger.Info("new deck diff")
+		// 			// deckByte := services.GetDeckById(match.DeckId).([]byte)
+		// 			// var deck model.GameDeck
+		// 			// json.Unmarshal(deckByte, &deck)
+		// 			// state.ActiveDeck = &deck
+		// 		case model.NewDeckDiff:
+		// 			m.ViewStateName = views.Game
+		// 			utils.Logger.Info("new deck diff")
+		// 			deckByte := services.GetDeckById(match.DeckId).([]byte)
+		// 			var deck model.GameDeck
+		// 			json.Unmarshal(deckByte, &deck)
+		// 			state.ActiveDeck = &deck
+		// 		case model.MaxDiff:
+		// 			utils.Logger.Info("max diff")
+		// 		case model.PlayersDiff:
+		// 			utils.Logger.Info("players diff")
+		// 		case model.TurnDiff:
+		// 			utils.Logger.Info("turn diff")
+		// 		case model.TurnPassTimestampsDiff:
+		// 			utils.Logger.Info("pass timestamp diff")
+		// 		}
+		// 	}
+		// }
+
+		// if state.ActiveDeck != nil {
+		// 	utils.Logger.Info("set cards")
+		// 	m.setCards(match)
+		// }
 	}
 
 	return m, tea.Batch(cmds...)

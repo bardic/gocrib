@@ -827,7 +827,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.GameMatch"
+                            "type": "integer"
                         }
                     },
                     "400": {
@@ -911,7 +911,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.GameMatch"
+                            "type": "integer"
                         }
                     },
                     "400": {
@@ -1366,9 +1366,12 @@ const docTemplate = `{
                 32,
                 64,
                 128,
-                256
+                256,
+                512,
+                1024
             ],
             "x-enum-varnames": [
+                "NewGameState",
                 "WaitingState",
                 "DealState",
                 "CutState",
@@ -1377,7 +1380,8 @@ const docTemplate = `{
                 "OpponentState",
                 "KittyState",
                 "GameWonState",
-                "GameLostState"
+                "GameLostState",
+                "MaxGameState"
             ]
         },
         "model.GameplayCard": {

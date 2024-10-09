@@ -2,7 +2,6 @@ package match
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	conn "github.com/bardic/cribbage/server/db"
@@ -21,7 +20,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param details body model.JoinMatchReq true "match Object to update"
-// @Success      200  {object}  model.GameMatch
+// @Success      200  {object}  int
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -39,18 +38,14 @@ func JoinMatch(c echo.Context) error {
 	}
 
 	details.PlayerId = p.Id
-	m, err := updatePlayersInMatch(*details)
+	_, err = updatePlayersInMatch(*details)
 	if err != nil {
 		return err
 	}
 
-	b, err := json.Marshal(m)
+	utils.UpdateMatchState(details.MatchId, model.WaitingState)
 
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, b)
+	return c.JSON(http.StatusOK, details.MatchId)
 }
 
 func updatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
@@ -58,12 +53,10 @@ func updatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 		"matchId":     req.MatchId,
 		"requesterId": req.RequesterId,
 		"playerId":    req.PlayerId,
-		"gameState":   model.WaitingState,
 	}
 
 	query := `UPDATE match SET
-				playerIds=ARRAY_APPEND(playerIds, @playerId),
-				gameState=@gameState
+				playerIds=ARRAY_APPEND(playerIds, @playerId)
 			WHERE id=@matchId`
 
 	db := conn.Pool()
@@ -84,11 +77,17 @@ func updatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 		return nil, err
 	}
 
-	//TODO: Not here
-	_, err = game.Deal(m)
+	isReady, err := utils.IsMatchReadyToStart(m)
 
 	if err != nil {
 		return nil, err
+	}
+
+	if isReady {
+		_, err = game.Deal(m)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &m, nil

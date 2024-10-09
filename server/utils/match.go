@@ -149,7 +149,11 @@ func GetOpenMatches() ([]model.GameMatch, error) {
 		matchQuery+`FROM match as m`,
 	)
 
-	var matches []model.GameMatch
+	if err != nil && err != pgx.ErrNoRows {
+		return []model.GameMatch{}, err
+	}
+
+	matches := []model.GameMatch{}
 
 	for rows.Next() {
 		var match model.GameMatch
@@ -160,10 +164,6 @@ func GetOpenMatches() ([]model.GameMatch, error) {
 		}
 
 		matches = append(matches, match)
-	}
-
-	if err != nil && err != pgx.ErrNoRows {
-		return []model.GameMatch{}, err
 	}
 
 	return matches, nil
@@ -265,4 +265,37 @@ func NewDeck() (model.GameDeck, error) {
 	deck.Id = deckId
 
 	return deck, nil
+}
+
+func IsMatchReadyToStart(m model.GameMatch) (bool, error) {
+	if len(m.Players) == 2 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func UpdateMatchState(matchId int, state model.GameState) error {
+	args := pgx.NamedArgs{
+		"id":        matchId,
+		"gameState": state,
+	}
+
+	query := `UPDATE match SET
+					gameState= @gameState,
+				WHERE id=@id`
+
+	db := conn.Pool()
+	defer db.Close()
+
+	_, err := db.Exec(
+		context.Background(),
+		query,
+		args)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

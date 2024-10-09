@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	conn "github.com/bardic/cribbage/server/db"
+	"github.com/bardic/cribbage/server/route/player"
 	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/cribbagev2/model"
 	"github.com/labstack/echo/v4"
@@ -17,7 +18,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param details body model.MatchRequirements true "MatchRequirements"
-// @Success      200  {object}  model.GameMatch
+// @Success      200  {object}  int
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -37,14 +38,20 @@ func NewMatch(c echo.Context) error {
 		return err
 	}
 
+	p, err := player.NewPlayerQuery(details.RequesterId)
+
+	if err != nil {
+		return err
+	}
+
 	match := model.GameMatch{}
 	match.DeckId = d.Id
 
-	match.PlayerIds = []int{details.RequesterId}
+	match.PlayerIds = []int{p.Id}
 	match.EloRangeMin = details.EloRangeMin
 	match.EloRangeMax = details.EloRangeMax
 	match.PrivateMatch = details.IsPrivate
-	match.GameState = model.WaitingState
+	match.GameState = model.NewGameState
 
 	args := utils.ParseMatch(match)
 
@@ -82,6 +89,8 @@ func NewMatch(c echo.Context) error {
 		return err
 	}
 
+	utils.UpdateMatchState(matchId, model.WaitingState)
+
 	// d = *d.Shuffle()
 	// for i := 0; i < 12; i++ {
 	// 	if i%2 == 0 {
@@ -105,6 +114,5 @@ func NewMatch(c echo.Context) error {
 	// 	match.Players[0].Hand = []int{}
 	// }
 
-	match.Id = matchId
-	return c.JSON(http.StatusOK, match)
+	return c.JSON(http.StatusOK, matchId)
 }
