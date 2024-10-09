@@ -1,7 +1,7 @@
 package card
 
 import (
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 	"github.com/jackc/pgx/v5"
 )
 

@@ -4,15 +4,15 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/bardic/cribbagev2/cli/services"
-	"github.com/bardic/cribbagev2/cli/state"
-	"github.com/bardic/cribbagev2/cli/utils"
-	"github.com/bardic/cribbagev2/cli/views"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/state"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/views"
+	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *appModel) parseInput(msg tea.KeyMsg) tea.Cmd {
+func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit
@@ -158,7 +158,7 @@ func (m *appModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 	return nil
 }
 
-func (m *appModel) OnEnterDuringPlay() tea.Cmd {
+func (m *AppModel) OnEnterDuringPlay() tea.Cmd {
 	if m.gameState == model.WaitingState {
 		m.gameState = model.DiscardState
 	}

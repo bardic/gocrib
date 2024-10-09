@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

@@ -8,7 +8,7 @@ import (
 	"github.com/bardic/cribbage/server/route/game"
 	"github.com/bardic/cribbage/server/route/player"
 	"github.com/bardic/cribbage/server/utils"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -38,12 +38,19 @@ func JoinMatch(c echo.Context) error {
 	}
 
 	details.PlayerId = p.Id
-	_, err = updatePlayersInMatch(*details)
+	m, err := updatePlayersInMatch(*details)
 	if err != nil {
 		return err
 	}
 
-	utils.UpdateMatchState(details.MatchId, model.WaitingState)
+	utils.UpdateMatchState(details.MatchId, model.MatchReady)
+	utils.UpdateMatchState(details.MatchId, model.DealState)
+
+	m, err = utils.GetMatch(m.Id)
+
+	game.Deal(m)
+
+	utils.UpdateMatchState(details.MatchId, model.CutState)
 
 	return c.JSON(http.StatusOK, details.MatchId)
 }
@@ -90,5 +97,5 @@ func updatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 		}
 	}
 
-	return &m, nil
+	return m, nil
 }

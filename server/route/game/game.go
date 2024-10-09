@@ -9,10 +9,10 @@ import (
 	"github.com/bardic/cribbage/server/route/deck"
 	"github.com/bardic/cribbage/server/route/player"
 	"github.com/bardic/cribbage/server/utils"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 )
 
-func Deal(match model.GameMatch) (*model.GameDeck, error) {
+func Deal(match *model.GameMatch) (*model.GameDeck, error) {
 	deck, err := deck.GetDeckById(match.DeckId)
 
 	if err != nil {

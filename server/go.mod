@@ -2,9 +2,9 @@ module github.com/bardic/cribbage/server
 
 go 1.22.5
 
-require github.com/bardic/cribbagev2/model v0.0.0
+require github.com/bardic/gocrib/model v0.0.0
 
-replace github.com/bardic/cribbagev2/model => ../model
+replace github.com/bardic/gocrib/model => ../model
 
 require (
 	github.com/labstack/echo/v4 v4.12.0

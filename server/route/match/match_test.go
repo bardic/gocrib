@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 	"github.com/labstack/echo/v4"
 )
 

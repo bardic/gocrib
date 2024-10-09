@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	conn "github.com/bardic/cribbage/server/db"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -120,11 +120,11 @@ func GetMatches(id int) ([]model.GameMatch, error) {
 	return matches, nil
 }
 
-func GetMatch(id int) (model.GameMatch, error) {
+func GetMatch(id int) (*model.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 
-	var match model.GameMatch
+	var match *model.GameMatch
 	err := db.QueryRow(
 		context.Background(),
 		matchQuery+" FROM match as m WHERE m.id = $1",
@@ -134,7 +134,7 @@ func GetMatch(id int) (model.GameMatch, error) {
 	)
 
 	if err != nil {
-		return model.GameMatch{}, err
+		return nil, err
 	}
 
 	return match, nil
@@ -267,7 +267,7 @@ func NewDeck() (model.GameDeck, error) {
 	return deck, nil
 }
 
-func IsMatchReadyToStart(m model.GameMatch) (bool, error) {
+func IsMatchReadyToStart(m *model.GameMatch) (bool, error) {
 	if len(m.Players) == 2 {
 		return true, nil
 	}
@@ -282,7 +282,7 @@ func UpdateMatchState(matchId int, state model.GameState) error {
 	}
 
 	query := `UPDATE match SET
-					gameState= @gameState,
+					gameState= @gameState
 				WHERE id=@id`
 
 	db := conn.Pool()

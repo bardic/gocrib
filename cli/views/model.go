@@ -1,7 +1,7 @@
 package views
 
 import (
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 )
 
 type ViewModel struct {

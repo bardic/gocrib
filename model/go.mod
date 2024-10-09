@@ -1,3 +1,3 @@
-module github.com/bardic/cribbagev2/model
+module github.com/bardic/gocrib/model
 
 go 1.22.5

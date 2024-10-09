@@ -3,25 +3,28 @@ package main
 import (
 	"time"
 
-	"github.com/bardic/cribbagev2/cli/utils"
-	"github.com/bardic/cribbagev2/cli/views"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/views"
+	"github.com/bardic/gocrib/model"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type appModel struct {
+type AppModel struct {
 	views.ViewModel
-	currentView views.IViewState
-	hand        []model.Card
-	kitty       []model.Card
-	play        []model.Card
-	gameState   model.GameState
-	timer       timer.Model
+	currentView  views.IViewState
+	hand         []model.Card
+	kitty        []model.Card
+	play         []model.Card
+	gameState    model.GameState
+	timer        timer.Model
+	timerStarted bool
+	cutInput     textinput.Model
 }
 
-func (m *appModel) Init() tea.Cmd {
-	return m.timer.Init()
+func (m *AppModel) Init() tea.Cmd {
+	return nil
 }
 
 func main() {
@@ -36,8 +39,8 @@ func main() {
 	}
 }
 
-func newModel() *appModel {
-	m := &appModel{
+func newModel() *AppModel {
+	m := &AppModel{
 		ViewModel: views.ViewModel{
 			ActiveSlot:     model.CardOne,
 			ViewStateName:  views.Login,
@@ -48,7 +51,7 @@ func newModel() *appModel {
 		},
 		currentView: views.LoginView{},
 		hand:        []model.Card{},
-		gameState:   model.WaitingState,
+		gameState:   model.NewGameState,
 		timer:       timer.NewWithInterval(time.Hour, time.Second*1),
 	}
 	return m

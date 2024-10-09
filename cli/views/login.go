@@ -3,8 +3,8 @@ package views
 import (
 	"strings"
 
-	"github.com/bardic/cribbagev2/cli/styles"
-	"github.com/bardic/cribbagev2/cli/utils"
+	"github.com/bardic/gocrib/cli/styles"
+	"github.com/bardic/gocrib/cli/utils"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )

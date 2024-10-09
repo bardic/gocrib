@@ -1,7 +1,7 @@
 package views
 
 import (
-	"github.com/bardic/cribbagev2/cli/styles"
+	"github.com/bardic/gocrib/cli/styles"
 	"github.com/charmbracelet/lipgloss"
 )
 

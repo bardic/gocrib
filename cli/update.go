@@ -2,17 +2,18 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"github.com/bardic/cribbagev2/cli/services"
-	"github.com/bardic/cribbagev2/cli/state"
-	"github.com/bardic/cribbagev2/cli/utils"
-	"github.com/bardic/cribbagev2/cli/views"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/state"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/views"
+	"github.com/bardic/gocrib/model"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -34,14 +35,49 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		cmds = append(cmds, cmd)
+
+		if m.gameState == model.CutState {
+			var cmd tea.Cmd
+			//views.CutInput.Focus()
+			views.CutInput, cmd = views.CutInput.Update(msg)
+			cmds = append(cmds, cmd)
+		}
 	case timer.TickMsg:
+		if m.ViewStateName != views.Game {
+			break
+		}
+
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
+		cmds = append(cmds, cmd, services.GetPlayerMatch)
+	case model.GameMatch:
+		fmt.Println("asdasdasd")
+	case int:
+		switch m.ViewStateName {
+		case views.Login:
 
-		if m.ViewStateName == views.Lobby || m.ViewStateName == views.Login {
-			cmds = append(cmds, cmd)
-		} else {
-			cmds = append(cmds, cmd, services.GetPlayerMatch)
+		case views.Lobby:
+			m.ViewStateName = views.Game
+			return m, tea.Batch(cmds...)
+		case views.Game:
+			if !m.timerStarted {
+				m.timerStarted = true
+				cmd := m.timer.Init()
+				cmds = append(cmds, cmd)
+			}
+			switch m.gameState {
+			case model.WaitingState:
+			case model.MatchReady:
+			case model.DealState:
+			case model.CutState:
+			case model.DiscardState:
+			case model.PlayState:
+			case model.OpponentState:
+			case model.KittyState:
+			case model.GameWonState:
+			case model.GameLostState:
+
+			}
 		}
 	case []byte:
 		switch m.ViewStateName {
@@ -59,13 +95,52 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(cmds...)
 		case views.Lobby:
 			m.ViewStateName = views.Game
+			cmds = append(cmds, services.GetPlayerMatch)
 			return m, tea.Batch(cmds...)
 		case views.Game:
+			if !m.timerStarted {
+				m.timerStarted = true
+				cmd := m.timer.Init()
+				cmds = append(cmds, cmd)
+			}
+
+			var match model.GameMatch
+			err := json.Unmarshal([]byte(msg), &match)
+
+			if err != nil {
+				utils.Logger.Info(err.Error())
+			}
+
+			var cmd tea.Cmd
+			//views.CutInput.Focus()
+			views.CutInput, cmd = views.CutInput.Update(msg)
+			cmds = append(cmds, cmd)
+
+			if m.gameState == match.GameState {
+				return m, tea.Batch(cmds...)
+			}
+
+			state.ActiveMatch = match
+			m.gameState = match.GameState
+
 			switch m.gameState {
+			case model.NewGameState:
 			case model.WaitingState:
+				fmt.Println("Waiting State")
+				deckByte := services.GetDeckById(match.DeckId).([]byte)
+				var deck model.GameDeck
+				json.Unmarshal(deckByte, &deck)
+				state.ActiveDeck = &deck
 			case model.MatchReady:
+				fmt.Println("Match Ready")
 			case model.DealState:
+				fmt.Println("Deal state")
 			case model.CutState:
+				var cmd tea.Cmd
+				//views.CutInput.Focus()
+				views.CutInput, cmd = views.CutInput.Update(msg)
+				cmds = append(cmds, cmd)
+				// fmt.Println("Cut state")
 			case model.DiscardState:
 			case model.PlayState:
 			case model.OpponentState:
@@ -75,65 +150,6 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			}
 		}
-
-		// var match model.GameMatch
-		// err := json.Unmarshal([]byte(msg), &match)
-
-		// if err != nil {
-		// 	utils.Logger.Info(err.Error())
-		// }
-
-		// diffs := match.Eq(state.ActiveMatch)
-
-		// if diffs == 0 {
-		// 	return m, tea.Batch(cmds...)
-		// }
-
-		// state.ActiveMatch = match
-		// m.gameState = match.GameState
-
-		// for diff := model.GenericDiff; diff < model.MaxDiff; diff <<= 1 {
-		// 	d := diffs & diff
-		// 	if d != 0 {
-		// 		switch d {
-		// 		case model.CutDiff:
-		// 			utils.Logger.Info("cutdiff")
-		// 			m.ViewStateName = views.Game
-		// 		case model.CardsInPlayDiff:
-		// 			utils.Logger.Info("cards in play diff")
-		// 		case model.GameStateDiff:
-		// 			utils.Logger.Info("game state diff")
-		// 		case model.GenericDiff:
-		// 			// utils.Logger.Info("generic diff")
-		// 			m.ViewStateName = views.Game
-		// 			// utils.Logger.Info("new deck diff")
-		// 			// deckByte := services.GetDeckById(match.DeckId).([]byte)
-		// 			// var deck model.GameDeck
-		// 			// json.Unmarshal(deckByte, &deck)
-		// 			// state.ActiveDeck = &deck
-		// 		case model.NewDeckDiff:
-		// 			m.ViewStateName = views.Game
-		// 			utils.Logger.Info("new deck diff")
-		// 			deckByte := services.GetDeckById(match.DeckId).([]byte)
-		// 			var deck model.GameDeck
-		// 			json.Unmarshal(deckByte, &deck)
-		// 			state.ActiveDeck = &deck
-		// 		case model.MaxDiff:
-		// 			utils.Logger.Info("max diff")
-		// 		case model.PlayersDiff:
-		// 			utils.Logger.Info("players diff")
-		// 		case model.TurnDiff:
-		// 			utils.Logger.Info("turn diff")
-		// 		case model.TurnPassTimestampsDiff:
-		// 			utils.Logger.Info("pass timestamp diff")
-		// 		}
-		// 	}
-		// }
-
-		// if state.ActiveDeck != nil {
-		// 	utils.Logger.Info("set cards")
-		// 	m.setCards(match)
-		// }
 	}
 
 	return m, tea.Batch(cmds...)
@@ -149,7 +165,7 @@ func getPlayerForId(id int, match model.GameMatch) *model.Player {
 	return nil
 }
 
-func (m *appModel) setCards(match model.GameMatch) {
+func (m *AppModel) setCards(match model.GameMatch) {
 	m.hand = []model.Card{}
 	m.kitty = []model.Card{}
 	m.play = []model.Card{}

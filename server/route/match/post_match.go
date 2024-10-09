@@ -7,7 +7,7 @@ import (
 	conn "github.com/bardic/cribbage/server/db"
 	"github.com/bardic/cribbage/server/route/player"
 	"github.com/bardic/cribbage/server/utils"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -89,7 +89,11 @@ func NewMatch(c echo.Context) error {
 		return err
 	}
 
-	utils.UpdateMatchState(matchId, model.WaitingState)
+	err = utils.UpdateMatchState(matchId, model.WaitingState)
+
+	if err != nil {
+		return err
+	}
 
 	// d = *d.Shuffle()
 	// for i := 0; i < 12; i++ {

@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/bardic/cribbagev2/cli/styles"
-	"github.com/bardic/cribbagev2/cli/views"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/cli/styles"
+	"github.com/bardic/gocrib/cli/views"
+	"github.com/bardic/gocrib/model"
 )
 
 type ViewModel struct {
 }
 
-func (m *appModel) View() string {
+func (m *AppModel) View() string {
 	var v string
 	switch m.ViewStateName {
 	case views.Login:
@@ -35,13 +35,15 @@ func (m *appModel) View() string {
 				m.ViewModel,
 				m.gameState))
 		case model.HandView:
-				v = styles.ViewStyle.Render(views.GameView(m.HighlighedId,
+			v = styles.ViewStyle.Render(views.GameView(
+				m.HighlighedId,
 				m.HighlightedIds,
 				m.hand,
 				m.ViewModel,
 				m.gameState))
 		case model.KittyView:
-			v = styles.ViewStyle.Render(views.GameView(m.HighlighedId,
+			v = styles.ViewStyle.Render(views.GameView(
+				m.HighlighedId,
 				m.HighlightedIds,
 				m.kitty,
 				m.ViewModel,

@@ -1368,11 +1368,13 @@ const docTemplate = `{
                 128,
                 256,
                 512,
-                1024
+                1024,
+                2048
             ],
             "x-enum-varnames": [
                 "NewGameState",
                 "WaitingState",
+                "MatchReady",
                 "DealState",
                 "CutState",
                 "DiscardState",

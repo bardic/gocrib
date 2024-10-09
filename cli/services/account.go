@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/cribbagev2/cli/state"
+	"github.com/bardic/gocrib/cli/state"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

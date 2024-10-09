@@ -3,8 +3,8 @@ package utils
 import (
 	"slices"
 
-	"github.com/bardic/cribbagev2/cli/state"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/cli/state"
+	"github.com/bardic/gocrib/model"
 	"go.uber.org/zap"
 )
 

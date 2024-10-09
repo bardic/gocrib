@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bardic/cribbagev2/cli/state"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/cli/state"
+	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

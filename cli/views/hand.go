@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/bardic/cribbagev2/cli/styles"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/cli/styles"
+	"github.com/bardic/gocrib/model"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -29,7 +29,7 @@ func HandView(selectedCardId int, selectedCardIds []int, cards []model.Card) str
 	var s string
 
 	cardViews := make([]string, 0)
-		for i := 0; i < len(cards); i++ {
+	for i := 0; i < len(cards); i++ {
 		view := fmt.Sprintf("%v%v", getCardSuit(cards[i]), cards[i].Value)
 
 		if slices.Contains(selectedCardIds, cards[i].Id) {

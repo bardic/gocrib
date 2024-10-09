@@ -20,8 +20,10 @@ sequenceDiagram
      Note over CI,GS: Polling
     CU->>CS: Polling
     CS->>SR: GET
-    SR->>SM: Get Match Object
-    SM->>CU: Update UI on GameState change
+    SR->>GS: Get Match Object
+    GS->>CU: Update UI on GameState change
+    CU->>SR: If State Diff
+    SR->>SM: Get Match
 
     Note over CI,GS: New Match
     CI->>CS: Create new

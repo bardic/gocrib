@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	conn "github.com/bardic/cribbage/server/db"
-	"github.com/bardic/cribbagev2/model"
+	"github.com/bardic/gocrib/model"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
