@@ -23,11 +23,13 @@ const (
 	//History
 	EndPointHistory = BaseUrl + "/history"
 	//Match
-	EndPointMatch     = BaseUrl + "/player/match"
-	EndPointJoinMatch = BaseUrl + "/player/match/join"
-	EndPointMatches   = BaseUrl + "/player/matches"
-	EndPointOpenMatch = BaseUrl + "/player/matches/open"
-	EndPointMatchCard = BaseUrl + "/player/match/card"
+	EndPointMatch        = BaseUrl + "/player/match"
+	EndPointMatchState   = BaseUrl + "/player/match/state"
+	EndPointJoinMatch    = BaseUrl + "/player/match/join"
+	EndPointMatches      = BaseUrl + "/player/matches"
+	EndPointOpenMatch    = BaseUrl + "/player/matches/open"
+	EndPointMatchCard    = BaseUrl + "/player/match/card"
+	EndPointMatchCutDeck = BaseUrl + "/player/match/cut"
 	//Chat
 	EndPointChat = BaseUrl + "/chat"
 	//Lobby

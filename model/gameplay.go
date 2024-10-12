@@ -146,6 +146,12 @@ type MatchRequirements struct {
 	EloRangeMax int
 }
 
+type CutDeckReq struct {
+	PlayerId int
+	MatchId  int
+	CutIndex string
+}
+
 type CardSlots uint
 
 const (
@@ -172,9 +178,14 @@ const (
 )
 
 type JoinMatchReq struct {
-	MatchId     int
-	RequesterId int
-	PlayerId    int
+	MatchId   int
+	AccountId int
+	PlayerId  int
+}
+
+type MatchDetailsResponse struct {
+	MatchId   int
+	GameState GameState
 }
 
 type GameMatch struct {

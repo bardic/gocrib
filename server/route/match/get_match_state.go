@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/bardic/cribbage/server/utils"
+	"github.com/bardic/gocrib/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,11 +16,11 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param        id    query     string  true  "search for match by id"'
-// @Success      200  {object}  model.GameMatch
+// @Success      200  {object}  model.MatchDetailsResponse
 // @Failure      404  {object}  error
 // @Failure      422  {object}  error
 // @Router       /player/match/ [get]
-func GetMatch(c echo.Context) error {
+func GetMatchState(c echo.Context) error {
 	p := c.Request().URL.Query().Get("id")
 	id, err := strconv.Atoi(p)
 
@@ -32,5 +33,8 @@ func GetMatch(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, m)
+	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
+		MatchId:   m.Id,
+		GameState: m.GameState,
+	})
 }

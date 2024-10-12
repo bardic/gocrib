@@ -299,3 +299,28 @@ func UpdateMatchState(matchId int, state model.GameState) error {
 
 	return nil
 }
+
+func UpdateMatchCut(cardId, matchId int) error {
+	args := pgx.NamedArgs{
+		"id":            matchId,
+		"cutGameCardId": cardId,
+	}
+
+	query := `UPDATE match SET
+					cutGameCardId= @cutGameCardId
+				WHERE id=@id`
+
+	db := conn.Pool()
+	defer db.Close()
+
+	_, err := db.Exec(
+		context.Background(),
+		query,
+		args)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

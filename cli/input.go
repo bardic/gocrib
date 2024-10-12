@@ -39,8 +39,25 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 			state.ActiveMatchId = id
 			return services.JoinMatch
 		case views.Game:
-			return m.OnEnterDuringPlay()
-		case views.GameOver:
+			switch m.gameState {
+			// case model.NewGameState:
+			// case model.WaitingState:
+			// 	fmt.Println("Waiting State")
+			// case model.MatchReady:
+			// 	fmt.Println("Match Ready")
+			// case model.DealState:
+			// 	fmt.Println("Deal state")
+			case model.CutState:
+				state.CutIndex = views.CutInput.Value()
+				services.CutDeck()
+				// case model.DiscardState:
+				// case model.PlayState:
+				// case model.OpponentState:
+				// case model.KittyState:
+				// case model.GameWonState:
+				// case model.GameLostState:
+				// case views.GameOver:
+			}
 		}
 	case "n":
 		createGame()

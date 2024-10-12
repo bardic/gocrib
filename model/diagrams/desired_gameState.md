@@ -17,7 +17,7 @@ sequenceDiagram
     end
     participant GS as GameState
 
-     Note over CI,GS: Polling
+    Note over CI,GS: Polling
     CU->>CS: Polling
     CS->>SR: GET
     SR->>GS: Get Match Object

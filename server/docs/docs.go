@@ -742,10 +742,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.GameMatch"
-                            }
+                            "$ref": "#/definitions/model.MatchDetailsResponse"
                         }
                     },
                     "404": {
@@ -845,6 +842,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/player/match/cut": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Cut deck by index",
+                "parameters": [
+                    {
+                        "description": "Deck index that is to become the cut",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CutDeckReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/player/match/deck/": {
             "get": {
                 "consumes": [
@@ -911,7 +953,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/model.MatchDetailsResponse"
                         }
                     },
                     "400": {
@@ -1288,6 +1330,20 @@ const docTemplate = `{
                 }
             }
         },
+        "model.CutDeckReq": {
+            "type": "object",
+            "properties": {
+                "cutIndex": {
+                    "type": "string"
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "playerId": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.GameDeck": {
             "type": "object",
             "properties": {
@@ -1459,13 +1515,24 @@ const docTemplate = `{
         "model.JoinMatchReq": {
             "type": "object",
             "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
                 "matchId": {
                     "type": "integer"
                 },
                 "playerId": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.MatchDetailsResponse": {
+            "type": "object",
+            "properties": {
+                "gameState": {
+                    "$ref": "#/definitions/model.GameState"
                 },
-                "requesterId": {
+                "matchId": {
                     "type": "integer"
                 }
             }

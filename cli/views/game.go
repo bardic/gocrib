@@ -28,7 +28,6 @@ func createInput() {
 	CutInput.Placeholder = "0"
 	CutInput.CharLimit = 5
 	CutInput.Width = 5
-
 }
 
 func GameView(highlightId int, highlightedIds []int, cards []model.Card, m ViewModel, s model.GameState) string {
@@ -48,7 +47,7 @@ func GameView(highlightId int, highlightedIds []int, cards []model.Card, m ViewM
 	var view string
 	switch m.GameViewState {
 	case model.BoardView:
-		if state.ActiveMatch.GameState == model.CutState {
+		if state.ActiveMatch != nil && state.ActiveMatch.GameState == model.CutState {
 			CutInput.Focus()
 			view = CutInput.View() + " \n"
 		} else {

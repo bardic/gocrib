@@ -20,7 +20,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param details body model.JoinMatchReq true "match Object to update"
-// @Success      200  {object}  int
+// @Success      200  {object}  model.MatchDetailsResponse
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -31,7 +31,7 @@ func JoinMatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := player.NewPlayerQuery(details.RequesterId)
+	p, err := player.NewPlayerQuery(details.AccountId)
 
 	if err != nil {
 		return err
@@ -48,17 +48,24 @@ func JoinMatch(c echo.Context) error {
 
 	m, err = utils.GetMatch(m.Id)
 
+	if err != nil {
+		return err
+	}
+
 	game.Deal(m)
 
 	utils.UpdateMatchState(details.MatchId, model.CutState)
 
-	return c.JSON(http.StatusOK, details.MatchId)
+	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
+		MatchId:   m.Id,
+		GameState: m.GameState,
+	})
 }
 
 func updatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 	args := pgx.NamedArgs{
 		"matchId":     req.MatchId,
-		"requesterId": req.RequesterId,
+		"requesterId": req.AccountId,
 		"playerId":    req.PlayerId,
 	}
 

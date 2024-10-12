@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/state"
@@ -31,14 +32,12 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.ViewStateName == views.Lobby {
 			views.LobbyTable.Focus()
 			views.LobbyTable, cmd = views.LobbyTable.Update(msg)
-
 		}
 
 		cmds = append(cmds, cmd)
 
 		if m.gameState == model.CutState {
 			var cmd tea.Cmd
-			//views.CutInput.Focus()
 			views.CutInput, cmd = views.CutInput.Update(msg)
 			cmds = append(cmds, cmd)
 		}
@@ -49,9 +48,13 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
-		cmds = append(cmds, cmd, services.GetPlayerMatch)
+		cmds = append(cmds, cmd, services.GetPlayerMatchState)
 	case model.GameMatch:
 		fmt.Println("asdasdasd")
+	case model.GameState:
+		fmt.Println("game states")
+	case model.MatchDetailsResponse:
+		fmt.Println("match details response")
 	case int:
 		switch m.ViewStateName {
 		case views.Login:
@@ -76,10 +79,10 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case model.KittyState:
 			case model.GameWonState:
 			case model.GameLostState:
-
 			}
 		}
 	case []byte:
+
 		switch m.ViewStateName {
 		case views.Login:
 			m.ViewStateName = views.Lobby
@@ -95,7 +98,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(cmds...)
 		case views.Lobby:
 			m.ViewStateName = views.Game
-			cmds = append(cmds, services.GetPlayerMatch)
+			cmds = append(cmds, services.GetPlayerMatchState)
 			return m, tea.Batch(cmds...)
 		case views.Game:
 			if !m.timerStarted {
@@ -104,58 +107,87 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmds = append(cmds, cmd)
 			}
 
-			var match model.GameMatch
-			err := json.Unmarshal([]byte(msg), &match)
+			if state.MatchDetailsResponse != nil {
+				var match *model.GameMatch
+				err := json.Unmarshal([]byte(msg), &match)
+
+				if err != nil {
+					utils.Logger.Info(err.Error())
+				}
+
+				cmd, err := m.ParseMatch(match, msg)
+
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				if cmd != nil {
+					cmds = append(cmds, cmd)
+				}
+
+				state.MatchDetailsResponse = nil
+
+				break
+			}
+
+			var resp *model.MatchDetailsResponse
+			err := json.Unmarshal([]byte(msg), &resp)
 
 			if err != nil {
-				utils.Logger.Info(err.Error())
+				log.Fatal(err)
 			}
 
 			var cmd tea.Cmd
-			//views.CutInput.Focus()
 			views.CutInput, cmd = views.CutInput.Update(msg)
 			cmds = append(cmds, cmd)
 
-			if m.gameState == match.GameState {
-				return m, tea.Batch(cmds...)
+			if m.gameState == resp.GameState {
+				break
 			}
 
-			state.ActiveMatch = match
-			m.gameState = match.GameState
+			m.gameState = resp.GameState
+			state.MatchDetailsResponse = resp
 
-			switch m.gameState {
-			case model.NewGameState:
-			case model.WaitingState:
-				fmt.Println("Waiting State")
-				deckByte := services.GetDeckById(match.DeckId).([]byte)
-				var deck model.GameDeck
-				json.Unmarshal(deckByte, &deck)
-				state.ActiveDeck = &deck
-			case model.MatchReady:
-				fmt.Println("Match Ready")
-			case model.DealState:
-				fmt.Println("Deal state")
-			case model.CutState:
-				var cmd tea.Cmd
-				//views.CutInput.Focus()
-				views.CutInput, cmd = views.CutInput.Update(msg)
-				cmds = append(cmds, cmd)
-				// fmt.Println("Cut state")
-			case model.DiscardState:
-			case model.PlayState:
-			case model.OpponentState:
-			case model.KittyState:
-			case model.GameWonState:
-			case model.GameLostState:
-
-			}
+			cmds = append(cmds, services.GetPlayerMatch)
 		}
 	}
 
 	return m, tea.Batch(cmds...)
 }
 
-func getPlayerForId(id int, match model.GameMatch) *model.Player {
+func (m *AppModel) ParseMatch(match *model.GameMatch, msg tea.Msg) (tea.Cmd, error) {
+	var cmd tea.Cmd
+
+	state.ActiveMatch = match
+
+	if state.ActiveDeck == nil {
+		deckByte := services.GetDeckById(match.DeckId).([]byte)
+		var deck model.GameDeck
+		json.Unmarshal(deckByte, &deck)
+		state.ActiveDeck = &deck
+	}
+
+	m.setCards(match)
+
+	switch match.GameState {
+	case model.NewGameState:
+	case model.WaitingState:
+	case model.CutState:
+	case model.MatchReady:
+	case model.DealState:
+		views.CutInput, cmd = views.CutInput.Update(msg)
+	case model.DiscardState:
+	case model.PlayState:
+	case model.OpponentState:
+	case model.KittyState:
+	case model.GameWonState:
+	case model.GameLostState:
+	}
+
+	return cmd, nil
+}
+
+func getPlayerForId(id int, match *model.GameMatch) *model.Player {
 	for _, player := range match.Players {
 		if player.AccountId == id {
 			return &player
@@ -165,7 +197,7 @@ func getPlayerForId(id int, match model.GameMatch) *model.Player {
 	return nil
 }
 
-func (m *AppModel) setCards(match model.GameMatch) {
+func (m *AppModel) setCards(match *model.GameMatch) {
 	m.hand = []model.Card{}
 	m.kitty = []model.Card{}
 	m.play = []model.Card{}
@@ -193,7 +225,7 @@ func (m *AppModel) setCards(match model.GameMatch) {
 func createGame() tea.Msg {
 	newMatch := services.PostPlayerMatch().([]byte)
 
-	var match model.GameMatch
+	var match *model.GameMatch
 	json.Unmarshal(newMatch, &match)
 	state.ActiveMatchId = match.Id
 	state.ActiveMatch = match
