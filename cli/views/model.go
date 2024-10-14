@@ -6,14 +6,13 @@ import (
 )
 
 type ViewModel struct {
-	LobbyViewState model.LobbyViewState
-	GameViewState  model.GameViewState
-	// ViewStateName    ViewStateName
+	LobbyViewState   model.LobbyViewState
+	GameViewState    model.GameViewState
+	ActiveSlot       int
 	Tabs             []string
 	LobbyTabs        []string
 	ActiveTab        int
 	ActiveLandingTab int
-	ActiveSlot       model.CardSlots
 	HighlighedId     int
 	HighlightedIds   []int
 }

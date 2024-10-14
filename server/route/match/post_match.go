@@ -38,7 +38,7 @@ func NewMatch(c echo.Context) error {
 		return err
 	}
 
-	p, err := player.NewPlayerQuery(details.RequesterId)
+	p, err := player.NewPlayerQuery(details.AccountId)
 
 	if err != nil {
 		return err

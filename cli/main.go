@@ -40,7 +40,7 @@ func main() {
 func newModel() *AppModel {
 	m := &AppModel{
 		ViewModel: views.ViewModel{
-			ActiveSlot: model.CardOne,
+			ActiveSlot: 0,
 			// ViewStateName:  views.Login,
 			Tabs:           model.GameTabNames,
 			LobbyTabs:      model.LobbyTabNames,

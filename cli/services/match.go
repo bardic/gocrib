@@ -28,8 +28,8 @@ func GetOpenMatches() tea.Msg {
 
 func JoinMatch() tea.Msg {
 	req := model.JoinMatchReq{
-		AccountId: state.AccountId,
-		MatchId:   state.ActiveMatchId,
+		PlayerId: state.ActivePlayerId,
+		MatchId:  state.ActiveMatchId,
 	}
 
 	b, err := json.Marshal(req)
@@ -47,7 +47,7 @@ func PutPlayerMatch(id int) tea.Msg {
 
 func PostPlayerMatch() tea.Msg {
 	req := model.MatchRequirements{
-		RequesterId: state.AccountId,
+		PlayerId:    state.ActivePlayerId,
 		IsPrivate:   false,
 		EloRangeMin: 1,
 		EloRangeMax: 3000,

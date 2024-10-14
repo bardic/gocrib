@@ -76,57 +76,25 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 			}
 		}
 	case "right":
-		switch m.ActiveSlot {
-		case model.CardOne:
-			m.HighlighedId = 1
-			m.ActiveSlot = model.CardTwo
-		case model.CardTwo:
-			m.HighlighedId = 2
-			m.ActiveSlot = model.CardThree
-		case model.CardThree:
-			m.HighlighedId = 3
-			m.ActiveSlot = model.CardFour
-		case model.CardFour:
-			if len(m.hand) == 4 {
-				m.ActiveSlot = model.CardOne
-				m.HighlighedId = 0
-			} else {
-				m.ActiveSlot = model.CardFive
-				m.HighlighedId = 4
-			}
-		case model.CardFive:
-			m.HighlighedId = 5
-			m.ActiveSlot = model.CardSix
-		case model.CardSix:
-			m.HighlighedId = 0
-			m.ActiveSlot = model.CardOne
+		if state.ViewStateName != model.GameView {
+			return nil
 		}
+
+		m.ActiveSlot++
+
+		if m.ActiveSlot > len(state.ActiveMatch.Players[0].Play) {
+			m.ActiveSlot = 0
+		}
+
+		m.HighlighedId = m.ActiveSlot
 	case "left":
-		switch m.ActiveSlot {
-		case model.CardOne:
-			if len(m.hand) == 4 {
-				m.HighlighedId = 3
-				m.ActiveSlot = model.CardFour
-			} else {
-				m.HighlighedId = 5
-				m.ActiveSlot = model.CardSix
-			}
-		case model.CardTwo:
-			m.HighlighedId = 0
-			m.ActiveSlot = model.CardOne
-		case model.CardThree:
-			m.HighlighedId = 1
-			m.ActiveSlot = model.CardTwo
-		case model.CardFour:
-			m.HighlighedId = 2
-			m.ActiveSlot = model.CardThree
-		case model.CardFive:
-			m.HighlighedId = 3
-			m.ActiveSlot = model.CardFour
-		case model.CardSix:
-			m.HighlighedId = 4
-			m.ActiveSlot = model.CardFive
+		m.ActiveSlot--
+
+		if m.ActiveSlot < 0 {
+			m.ActiveSlot = len(state.ActiveMatch.Players[0].Play) - 1
 		}
+
+		m.HighlighedId = m.ActiveSlot
 	}
 
 	return nil

@@ -17,3 +17,4 @@ var CutIndex string
 var MatchDetailsResponse *model.MatchDetailsResponse
 
 var ViewStateName model.ViewStateName
+var ActivePlayerId int = 0

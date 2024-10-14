@@ -31,7 +31,7 @@ func JoinMatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := player.NewPlayerQuery(details.AccountId)
+	p, err := player.NewPlayerQuery(details.PlayerId)
 
 	if err != nil {
 		return err
@@ -64,9 +64,8 @@ func JoinMatch(c echo.Context) error {
 
 func updatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 	args := pgx.NamedArgs{
-		"matchId":     req.MatchId,
-		"requesterId": req.AccountId,
-		"playerId":    req.PlayerId,
+		"matchId":  req.MatchId,
+		"playerId": req.PlayerId,
 	}
 
 	query := `UPDATE match SET

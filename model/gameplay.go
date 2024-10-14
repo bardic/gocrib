@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// _Cards_
+
 type CardValue int
 
 const (
@@ -53,6 +55,8 @@ type Cards struct {
 	Cards []Card `json:"Cards"`
 }
 
+// _Game_
+
 type GameplayCard struct {
 	Card
 	CardId    int
@@ -74,102 +78,6 @@ func (d *GameDeck) Shuffle() *GameDeck {
 	return d
 }
 
-type Player struct {
-	Id        int
-	AccountId int `json:"accountid"`
-	Play      []int
-	Hand      []int
-	Kitty     []int
-	Score     int
-	Art       string
-}
-
-func (p *Player) Eq(c Player) bool {
-	if p.Id != c.Id {
-		return false
-	}
-
-	if p.AccountId != c.AccountId {
-		return false
-	}
-
-	if p.Score != c.Score {
-		return false
-	}
-
-	if p.Art != c.Art {
-		return false
-	}
-
-	if !eqIntArr(p.Hand, c.Hand) {
-		return false
-	}
-
-	if !eqIntArr(p.Play, c.Play) {
-		return false
-	}
-
-	if !eqIntArr(p.Kitty, c.Kitty) {
-		return false
-	}
-
-	return true
-}
-
-type History struct {
-	MatchId               int
-	MatchCompletetionDate string
-	Winners               []int
-	Losers                []int
-}
-
-type Chat struct {
-	Id       int `json:"-"`
-	Members  []int
-	Messages []ChatMessage
-}
-
-type ChatMessage struct {
-	Sender    int
-	Message   string
-	Timestamp string
-}
-
-type MatchRequirements struct {
-	RequesterId int
-	IsPrivate   bool
-	EloRangeMin int
-	EloRangeMax int
-}
-
-type CutDeckReq struct {
-	PlayerId int
-	MatchId  int
-	CutIndex string
-}
-
-type CardSlots uint
-
-const (
-	CardOne CardSlots = iota
-	CardTwo
-	CardThree
-	CardFour
-	CardFive
-	CardSix
-)
-
-type JoinMatchReq struct {
-	MatchId   int
-	AccountId int
-	PlayerId  int
-}
-
-type MatchDetailsResponse struct {
-	MatchId   int
-	GameState GameState
-}
-
 type GameMatch struct {
 	Id                 int       `json:"id"`
 	PlayerIds          []int     `json:"playerIds"`
@@ -184,18 +92,6 @@ type GameMatch struct {
 	GameState          GameState `json:"gameState"`
 	Art                string    `json:"art "`
 	Players            []Player
-}
-
-func eqIntArr(a, b []int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
 }
 
 type GameState uint
@@ -230,6 +126,64 @@ type GameAction struct {
 	CardsIds []int
 }
 
+type GameViewState uint
+
+const (
+	BoardView GameViewState = iota
+	PlayView
+	HandView
+	KittyView
+)
+
+// _Player_
+
+type Player struct {
+	Id        int
+	AccountId int `json:"accountid"`
+	Play      []int
+	Hand      []int
+	Kitty     []int
+	Score     int
+	Art       string
+}
+
+type Account struct {
+	Id   int
+	Name string
+}
+
+//_Comms_
+
+type MatchRequirements struct {
+	PlayerId    int
+	AccountId   int
+	IsPrivate   bool
+	EloRangeMin int
+	EloRangeMax int
+}
+
+type CutDeckReq struct {
+	PlayerId int
+	MatchId  int
+	CutIndex string
+}
+
+type JoinMatchReq struct {
+	MatchId  int
+	PlayerId int
+}
+
+type MatchDetailsResponse struct {
+	MatchId   int
+	GameState GameState
+}
+
+type HandModifier struct {
+	MatchId  int
+	PlayerId int
+	CardIds  []int
+}
+
 type ScoreResults struct {
 	Results []Scores
 }
@@ -257,17 +211,6 @@ var GameTabNames = []string{"Board", "Play", "Hand", "Kitty"}
 
 var LobbyTabNames = []string{"Active Matches", "Open Matches"}
 
-type HandModifier struct {
-	MatchId  int
-	PlayerId int
-	CardIds  []int
-}
-
-type Account struct {
-	Id   int
-	Name string
-}
-
 type LobbyViewState uint
 
 const (
@@ -275,11 +218,46 @@ const (
 	AvailableMatches
 )
 
-type GameViewState uint
+func eqIntArr(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
 
-const (
-	BoardView GameViewState = iota
-	PlayView
-	HandView
-	KittyView
-)
+func (p *Player) Eq(c Player) bool {
+	if p.Id != c.Id {
+		return false
+	}
+
+	if p.AccountId != c.AccountId {
+		return false
+	}
+
+	if p.Score != c.Score {
+		return false
+	}
+
+	if p.Art != c.Art {
+		return false
+	}
+
+	if !eqIntArr(p.Hand, c.Hand) {
+		return false
+	}
+
+	if !eqIntArr(p.Play, c.Play) {
+		return false
+	}
+
+	if !eqIntArr(p.Kitty, c.Kitty) {
+		return false
+	}
+
+	return true
+}
