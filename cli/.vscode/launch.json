@@ -10,7 +10,8 @@
             "remotePath": "${workspaceFolder}",
             "port": 43000,
             "host": "127.0.0.1",
-            "preLaunchTask": "dlv"
-        }
+            "preLaunchTask": "dlv",
+        },
+        
     ]
 }

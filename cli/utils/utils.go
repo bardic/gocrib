@@ -1,10 +1,14 @@
 package utils
 
 import (
+	"encoding/json"
+	"errors"
 	"slices"
 
+	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/model"
+	tea "github.com/charmbracelet/bubbletea"
 	"go.uber.org/zap"
 )
 
@@ -46,4 +50,33 @@ func NewLogger() (*zap.Logger, error) {
 		"crib.log",
 	}
 	return cfg.Build()
+}
+
+func GetPlayerId(accountId int, players []model.Player) (*model.Player, error) {
+	for _, p := range players {
+		if p.AccountId == accountId {
+			return &p, nil
+		}
+	}
+	return nil, errors.New("no player found")
+}
+
+func CreateGame() tea.Msg {
+	newMatch := services.PostPlayerMatch().([]byte)
+
+	var match *model.GameMatch
+	json.Unmarshal(newMatch, &match)
+	state.ActiveMatchId = match.Id
+	state.ActiveMatch = match
+	return match
+}
+
+func GetPlayerForId(id int, match *model.GameMatch) *model.Player {
+	for _, player := range match.Players {
+		if player.AccountId == id {
+			return &player
+		}
+	}
+
+	return nil
 }

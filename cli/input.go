@@ -2,12 +2,10 @@ package main
 
 import (
 	"slices"
-	"strconv"
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -17,51 +15,10 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 	case "ctrl+c", "q":
 		return tea.Quit
 	case "enter", "view_update":
-		m.currentView.Enter()
-
-		switch m.ViewStateName {
-		case views.Login:
-			idStr := views.LoginIdField.Value()
-			id, err := strconv.Atoi(idStr)
-			if err != nil {
-				return tea.Quit
-			}
-
-			state.AccountId = id
-			return services.Login
-		case views.Lobby:
-			idStr := views.LobbyTable.SelectedRow()[0]
-			id, err := strconv.Atoi(idStr)
-			if err != nil {
-				return tea.Quit
-			}
-
-			state.ActiveMatchId = id
-			return services.JoinMatch
-		case views.Game:
-			switch m.gameState {
-			// case model.NewGameState:
-			// case model.WaitingState:
-			// 	fmt.Println("Waiting State")
-			// case model.MatchReady:
-			// 	fmt.Println("Match Ready")
-			// case model.DealState:
-			// 	fmt.Println("Deal state")
-			case model.CutState:
-				state.CutIndex = views.CutInput.Value()
-				services.CutDeck()
-				// case model.DiscardState:
-				// case model.PlayState:
-				// case model.OpponentState:
-				// case model.KittyState:
-				// case model.GameWonState:
-				// case model.GameLostState:
-				// case views.GameOver:
-			}
-		}
+		return m.currentView.Enter
 	case "n":
-		createGame()
-		m.ViewStateName = views.Game
+		utils.CreateGame()
+		state.ViewStateName = model.GameView
 	case " ":
 		cards := m.hand
 		idx := slices.Index(m.HighlightedIds, cards[m.HighlighedId].Id)
@@ -71,8 +28,8 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 			m.HighlightedIds = append(m.HighlightedIds, cards[m.HighlighedId].Id)
 		}
 	case "tab":
-		switch m.ViewStateName {
-		case views.Lobby:
+		switch state.ViewStateName {
+		case model.LobbyView:
 			m.ActiveLandingTab = m.ActiveLandingTab + 1
 			switch m.ActiveLandingTab {
 			case 0:
@@ -81,7 +38,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 				m.LobbyViewState = model.AvailableMatches
 
 			}
-		case views.Game:
+		case model.GameView:
 			m.ActiveTab = m.ActiveTab + 1
 			switch m.ActiveTab {
 			case 0:
@@ -95,8 +52,8 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 			}
 		}
 	case "shift+tab":
-		switch m.ViewStateName {
-		case views.Lobby:
+		switch state.ViewStateName {
+		case model.LobbyView:
 			m.ActiveLandingTab = m.ActiveLandingTab - 1
 			switch m.ActiveLandingTab {
 			case 0:
@@ -105,7 +62,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 				m.LobbyViewState = model.AvailableMatches
 
 			}
-		case views.Game:
+		case model.GameView:
 			m.ActiveTab = m.ActiveTab - 1
 			switch m.ActiveTab {
 			case 0:
@@ -180,7 +137,7 @@ func (m *AppModel) OnEnterDuringPlay() tea.Cmd {
 		m.gameState = model.DiscardState
 	}
 
-	m.ViewStateName = views.Game
+	state.ViewStateName = model.GameView
 	if m.gameState == model.DiscardState {
 		for _, idx := range m.HighlightedIds {
 			m.kitty = append(m.kitty, utils.GetCardInHandById(idx, m.hand))

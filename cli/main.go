@@ -6,7 +6,6 @@ import (
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -20,7 +19,6 @@ type AppModel struct {
 	gameState    model.GameState
 	timer        timer.Model
 	timerStarted bool
-	cutInput     textinput.Model
 }
 
 func (m *AppModel) Init() tea.Cmd {
@@ -42,8 +40,8 @@ func main() {
 func newModel() *AppModel {
 	m := &AppModel{
 		ViewModel: views.ViewModel{
-			ActiveSlot:     model.CardOne,
-			ViewStateName:  views.Login,
+			ActiveSlot: model.CardOne,
+			// ViewStateName:  views.Login,
 			Tabs:           model.GameTabNames,
 			LobbyTabs:      model.LobbyTabNames,
 			HighlighedId:   0,

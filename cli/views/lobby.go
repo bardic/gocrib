@@ -3,9 +3,11 @@ package views
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/model"
@@ -15,16 +17,17 @@ import (
 )
 
 type LobbyView struct {
+	ViewModel ViewModel
 }
 
 var LobbyTable table.Model
 var isLobbyTableSet bool
 
-func (s *LobbyView) View(v ViewModel) string {
+func (s LobbyView) View() string {
 
 	doc := strings.Builder{}
 
-	renderedTabs := renderTabs(v.LobbyTabs, v.ActiveLandingTab)
+	renderedTabs := renderTabs(s.ViewModel.LobbyTabs, s.ViewModel.ActiveLandingTab)
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
@@ -32,14 +35,7 @@ func (s *LobbyView) View(v ViewModel) string {
 	doc.WriteString(row)
 	doc.WriteString("\n")
 
-	switch v.ViewStateName {
-	case Login:
-
-	case Lobby:
-		if isLobbyTableSet {
-			break
-		}
-
+	if !isLobbyTableSet {
 		t, err := getActiveView()
 		if err != nil {
 			return err.Error()
@@ -53,8 +49,17 @@ func (s *LobbyView) View(v ViewModel) string {
 	return doc.String()
 }
 
-func (s *LobbyView) Enter() {
+func (s LobbyView) Enter() tea.Msg {
 	utils.Logger.Info("Enter")
+	idStr := LobbyTable.SelectedRow()[0]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return tea.Quit
+	}
+
+	state.ActiveMatchId = id
+	state.ViewStateName = model.GameView
+	return services.JoinMatch()
 }
 
 func getActiveView() (table.Model, error) {
@@ -116,10 +121,6 @@ func getActiveView() (table.Model, error) {
 	t.SetStyles(s)
 
 	return t, nil
-}
-
-func getMatches() tea.Msg {
-	return services.GetMatchesForPlayerId()
 }
 
 func getOpenMatches() tea.Msg {

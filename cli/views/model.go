@@ -2,12 +2,13 @@ package views
 
 import (
 	"github.com/bardic/gocrib/model"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type ViewModel struct {
-	LobbyViewState   model.LobbyViewState
-	GameViewState    model.GameViewState
-	ViewStateName    ViewStateName
+	LobbyViewState model.LobbyViewState
+	GameViewState  model.GameViewState
+	// ViewStateName    ViewStateName
 	Tabs             []string
 	LobbyTabs        []string
 	ActiveTab        int
@@ -18,7 +19,7 @@ type ViewModel struct {
 }
 
 type IViewState interface {
-	Enter()
+	Enter() tea.Msg
 	View() string
 }
 

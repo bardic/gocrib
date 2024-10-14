@@ -15,3 +15,5 @@ var CurrentHandModifier model.HandModifier
 var CutInput textinput.Model
 var CutIndex string
 var MatchDetailsResponse *model.MatchDetailsResponse
+
+var ViewStateName model.ViewStateName

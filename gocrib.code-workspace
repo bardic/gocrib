@@ -12,8 +12,5 @@
 			"name": "model",
 			"path": "model"
 		}
-	],
-	"settings": {
-		"colorWheel.settings.workspaceColor": "hsl(256,56%,46%)"
-	}
+	]
 }
