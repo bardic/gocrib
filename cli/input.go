@@ -25,7 +25,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 			return nil
 		}
 
-		gameView := m.currentView.(views.GameView)
+		gameView := m.currentView.(*views.GameView)
 		cards := m.hand
 		idx := slices.Index(gameView.HighlightedIds, cards[gameView.HighlighedId].Id)
 		if idx > -1 {
@@ -36,7 +36,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 	case "tab":
 		switch state.ViewStateName {
 		case model.LobbyView:
-			lobbyView := m.currentView.(views.LobbyView)
+			lobbyView := m.currentView.(*views.LobbyView)
 
 			lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab + 1
 
@@ -48,7 +48,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 
 			}
 		case model.GameView:
-			gameView := m.currentView.(views.GameView)
+			gameView := m.currentView.(*views.GameView)
 			gameView.ActiveTab = gameView.ActiveTab + 1
 
 			switch gameView.ActiveTab {
@@ -65,7 +65,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 	case "shift+tab":
 		switch state.ViewStateName {
 		case model.LobbyView:
-			lobbyView := m.currentView.(views.LobbyView)
+			lobbyView := m.currentView.(*views.LobbyView)
 			lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab - 1
 
 			switch lobbyView.ActiveLandingTab {
@@ -76,7 +76,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 
 			}
 		case model.GameView:
-			gameView := m.currentView.(views.GameView)
+			gameView := m.currentView.(*views.GameView)
 			gameView.ActiveTab = gameView.ActiveTab - 1
 
 			switch gameView.ActiveTab {
@@ -96,7 +96,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 			return nil
 		}
 
-		gameView := m.currentView.(views.GameView)
+		gameView := m.currentView.(*views.GameView)
 
 		gameView.ActiveSlot++
 
@@ -110,7 +110,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 			return nil
 		}
 
-		gameView := m.currentView.(views.GameView)
+		gameView := m.currentView.(*views.GameView)
 		gameView.ActiveSlot--
 
 		if gameView.ActiveSlot < 0 {
@@ -130,7 +130,7 @@ func (m *AppModel) OnEnterDuringPlay() tea.Cmd {
 
 	state.ViewStateName = model.GameView
 
-	gameView := m.currentView.(views.GameView)
+	gameView := m.currentView.(*views.GameView)
 
 	if m.gameState == model.DiscardState {
 		for _, idx := range gameView.HighlightedIds {

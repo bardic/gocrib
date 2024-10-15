@@ -25,21 +25,19 @@ type LobbyView struct {
 	lobbyViewInitd   bool
 }
 
-func (v LobbyView) Init() {
-	view := &v
-	if view.lobbyViewInitd {
+func (v *LobbyView) Init() {
+	if v.lobbyViewInitd {
 		return
 	}
 
-	view.lobbyViewInitd = true
+	v.lobbyViewInitd = true
 
-	view.ActiveLandingTab = 0
-	view.LobbyViewState = model.OpenMatches
-	view.LobbyTabNames = []string{"Open Matches", "Available Matches"}
-	v = *view
+	v.ActiveLandingTab = 0
+	v.LobbyViewState = model.OpenMatches
+	v.LobbyTabNames = []string{"Open Matches", "Available Matches"}
 }
 
-func (v LobbyView) View() string {
+func (v *LobbyView) View() string {
 	doc := strings.Builder{}
 
 	renderedTabs := renderTabs(v.LobbyTabNames, v.ActiveLandingTab)
@@ -64,7 +62,7 @@ func (v LobbyView) View() string {
 	return doc.String()
 }
 
-func (v LobbyView) Enter() tea.Msg {
+func (v *LobbyView) Enter() tea.Msg {
 	utils.Logger.Info("Enter")
 	idStr := v.LobbyTable.SelectedRow()[0]
 	id, err := strconv.Atoi(idStr)
@@ -74,10 +72,23 @@ func (v LobbyView) Enter() tea.Msg {
 
 	state.ActiveMatchId = id
 	state.ViewStateName = model.GameView
+
+	accountMsg := services.PostPlayer(model.Player{
+		AccountId: state.AccountId,
+	})
+	var player model.Player
+	err = json.Unmarshal(accountMsg.([]byte), &player)
+
+	if err != nil {
+		return tea.Quit
+	}
+
+	state.ActivePlayerId = player.Id
+
 	return services.JoinMatch()
 }
 
-func (v LobbyView) Update(msg tea.Msg) tea.Cmd {
+func (v *LobbyView) Update(msg tea.Msg) tea.Cmd {
 	v.Init()
 	v.LobbyTable.Focus()
 

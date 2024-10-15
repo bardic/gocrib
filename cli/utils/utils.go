@@ -71,7 +71,7 @@ func CreateGame() tea.Msg {
 	return match
 }
 
-func GetPlayerForId(id int, match *model.GameMatch) *model.Player {
+func GetPlayerForAccountId(id int, match *model.GameMatch) *model.Player {
 	for _, player := range match.Players {
 		if player.AccountId == id {
 			return &player

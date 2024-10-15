@@ -1,6 +1,7 @@
 package views
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/bardic/gocrib/cli/services"
@@ -15,6 +16,7 @@ import (
 
 type GameView struct {
 	GameState      model.GameState
+	PreviousState  model.GameState
 	HighlightedIds []int
 	Cards          []model.Card
 	GameTabNames   []string
@@ -24,29 +26,36 @@ type GameView struct {
 	HighlighedId   int
 	CutInput       textinput.Model
 	gameViewInitd  bool
+	DeckId         int
+	Hand           []model.Card
+	Kitty          []model.Card
+	Play           []model.Card
+	GameMatch      *model.GameMatch
 }
 
 var focusedModelStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("69"))
 
-func (v GameView) Init() {
-	view := &v
-	if view.gameViewInitd {
+func (v *GameView) Init() {
+	if v.gameViewInitd {
 		return
 	}
 
-	view.gameViewInitd = true
+	v.gameViewInitd = true
+	v.GameTabNames = []string{"Board", "Play", "Hand", "Kitty"}
+	v.CutInput = textinput.New()
+	v.CutInput.Placeholder = "0"
+	v.CutInput.CharLimit = 5
+	v.CutInput.Width = 5
 
-	view.GameTabNames = []string{"Board", "Play", "Hand", "Kitty"}
-
-	view.CutInput = textinput.New()
-	view.CutInput.Placeholder = "0"
-	view.CutInput.CharLimit = 5
-	view.CutInput.Width = 5
+	deckByte := services.GetDeckById(v.DeckId).([]byte)
+	var deck model.GameDeck
+	json.Unmarshal(deckByte, &deck)
+	state.ActiveDeck = &deck
 }
 
-func (v GameView) View() string {
+func (v *GameView) View() string {
 	doc := strings.Builder{}
 
 	renderedTabs := renderTabs(v.GameTabNames, v.ActiveTab)
@@ -100,7 +109,7 @@ func (v GameView) View() string {
 	return doc.String()
 }
 
-func (v GameView) Enter() tea.Msg {
+func (v *GameView) Enter() tea.Msg {
 	switch v.GameState {
 	case model.CutState:
 		state.CutIndex = v.CutInput.Value()
@@ -122,29 +131,46 @@ func (v GameView) Enter() tea.Msg {
 	return nil
 }
 
-func (v GameView) Update(msg tea.Msg) tea.Cmd {
-	v.Init()
-	return nil
+func (v *GameView) Update(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	v.CutInput.Focus()
+	v.CutInput, cmd = v.CutInput.Update(msg)
+	return cmd
 }
 
-// func (s *GameView) Enter() tea.Msg {
-// 	switch gameState {
-// 	case model.CutState:
-// 		state.CutIndex = CutInput.Value()
-// 		return services.CutDeck
-// 	case model.DiscardState:
-// 		p, err := utils.GetPlayerId(state.AccountId, state.ActiveMatch.Players)
+func (v *GameView) UpdateState(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
 
-// 		if err != nil {
-// 			utils.Logger.Sugar().Error(err)
-// 		}
-// 		state.CurrentHandModifier = model.HandModifier{
-// 			MatchId:  state.ActiveMatchId,
-// 			PlayerId: p.Id,
-// 			CardIds:  highlightIds,
-// 		}
-// 		return services.PutKitty
-// 	}
+	if v.PreviousState == v.GameState {
+		return nil
+	}
 
-// 	return nil
-// }
+	v.PreviousState = v.GameState
+
+	matchMsg := services.GetPlayerMatch()
+	var match *model.GameMatch
+	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
+		return nil
+	}
+
+	p := utils.GetPlayerForAccountId(state.AccountId, match)
+
+	for _, cardId := range p.Hand {
+		card := utils.GetCardById(cardId)
+		if card != nil {
+			v.Hand = append(v.Hand, *card)
+		}
+	}
+
+	for _, cardId := range p.Kitty {
+		card := utils.GetCardById(cardId)
+		v.Kitty = append(v.Kitty, *card)
+	}
+
+	for _, cardId := range p.Play {
+		card := utils.GetCardById(cardId)
+		v.Play = append(v.Play, *card)
+	}
+
+	return cmd
+}

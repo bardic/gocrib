@@ -56,6 +56,7 @@ func (v *LoginView) Enter() tea.Msg {
 func (v *LoginView) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 
+	v.LoginIdField.Focus()
 	v.LoginIdField, cmd = v.LoginIdField.Update(msg)
 
 	return cmd

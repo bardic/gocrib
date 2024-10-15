@@ -21,7 +21,6 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if cmd := m.parseInput(msg); cmd != nil {
 			cmds = append(cmds, cmd)
 		}
-		m.currentView.(*views.LoginView).LoginIdField.Focus()
 	case timer.TickMsg: // Polling update
 		if state.ViewStateName != model.GameView {
 			break
@@ -36,6 +35,10 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			utils.Logger.Sugar().Error(err)
 		} else {
 			cmds = append(cmds, cmd)
+		}
+
+		if state.ViewStateName != model.GameView {
+			break
 		}
 	}
 
@@ -57,7 +60,7 @@ func (m *AppModel) updateView(msg []byte) (tea.Cmd, error) {
 		state.AccountId = account.Id
 	case model.LobbyView:
 		services.GetOpenMatches()
-		m.currentView = views.LobbyView{}
+		m.currentView = &views.LobbyView{}
 
 		//cmds = append(cmds, services.GetPlayerMatchState)
 	case model.GameView:
@@ -67,36 +70,17 @@ func (m *AppModel) updateView(msg []byte) (tea.Cmd, error) {
 			cmds = append(cmds, cmd)
 		}
 
-		m.currentView = views.GameView{
-			GameState: m.gameState,
-			Cards:     []model.Card{},
-		}
-
-		//If the game state has changed, we will receive a model.GameMatch
-		if state.MatchDetailsResponse != nil {
-			var match *model.GameMatch
-			if err := json.Unmarshal([]byte(msg), &match); err != nil {
-				return nil, err
+		if !state.GameViewInitialized {
+			m.currentView = &views.GameView{
+				GameState: m.gameState,
+				Cards:     []model.Card{},
 			}
 
-			//Update state with new match data
-			state.ActiveMatch = match
-
-			//If active deck doesn't exist, get it
-			if state.ActiveDeck == nil {
-				deckByte := services.GetDeckById(match.DeckId).([]byte)
-				var deck model.GameDeck
-				json.Unmarshal(deckByte, &deck)
-				state.ActiveDeck = &deck
-			}
-
-			//Update model with cards from latest match
-			m.setCards(match)
-
-			state.MatchDetailsResponse = nil
+			m.currentView.(*views.GameView).Init()
+			state.GameViewInitialized = true
 		}
 
-		//Check match for change in statew
+		// //Check match for change in statew
 		var resp *model.MatchDetailsResponse
 		if err := json.Unmarshal([]byte(msg), &resp); err != nil {
 			return nil, err
@@ -107,12 +91,7 @@ func (m *AppModel) updateView(msg []byte) (tea.Cmd, error) {
 			break
 		}
 
-		//Update state and response
-		m.gameState = resp.GameState
-		state.MatchDetailsResponse = resp
-
-		//Get updated playermatch
-		cmds = append(cmds, services.GetPlayerMatch)
+		m.currentView.(*views.GameView).UpdateState(msg)
 	}
 
 	cmd := m.currentView.Update(msg)
@@ -127,7 +106,7 @@ func (m *AppModel) setCards(match *model.GameMatch) {
 	m.kitty = []model.Card{}
 	m.play = []model.Card{}
 
-	p := utils.GetPlayerForId(state.AccountId, match)
+	p := utils.GetPlayerForAccountId(state.AccountId, match)
 
 	for _, cardId := range p.Hand {
 		card := utils.GetCardById(cardId)
