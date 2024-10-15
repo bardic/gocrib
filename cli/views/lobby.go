@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/model"
@@ -17,12 +16,14 @@ import (
 )
 
 type LobbyView struct {
+	AccountId        int
 	ActiveLandingTab int
 	LobbyViewState   model.LobbyViewState
 	LobbyTabNames    []string
 	LobbyTable       table.Model
 	IsLobbyTableSet  bool
 	lobbyViewInitd   bool
+	ActiveMatchId    int
 }
 
 func (v *LobbyView) Init() {
@@ -70,12 +71,11 @@ func (v *LobbyView) Enter() tea.Msg {
 		return tea.Quit
 	}
 
-	state.ActiveMatchId = id
-	state.ViewStateName = model.GameView
-
+	v.ActiveMatchId = id
 	accountMsg := services.PostPlayer(model.Player{
-		AccountId: state.AccountId,
+		AccountId: v.AccountId,
 	})
+
 	var player model.Player
 	err = json.Unmarshal(accountMsg.([]byte), &player)
 
@@ -83,9 +83,11 @@ func (v *LobbyView) Enter() tea.Msg {
 		return tea.Quit
 	}
 
-	state.ActivePlayerId = player.Id
+	var matchDetails model.MatchDetailsResponse
+	msg := services.JoinMatch(player.Id, id)
+	json.Unmarshal(msg.([]byte), &matchDetails)
 
-	return services.JoinMatch()
+	return matchDetails
 }
 
 func (v *LobbyView) Update(msg tea.Msg) tea.Cmd {

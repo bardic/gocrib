@@ -2,10 +2,10 @@ package views
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/model"
@@ -15,17 +15,19 @@ import (
 )
 
 type GameView struct {
+	Initd          bool
+	MatchId        int
+	AccountId      int
+	CutIndex       string
 	GameState      model.GameState
-	PreviousState  model.GameState
 	HighlightedIds []int
-	Cards          []model.Card
 	GameTabNames   []string
 	GameViewState  model.GameViewState
 	ActiveSlot     int
 	ActiveTab      int
 	HighlighedId   int
 	CutInput       textinput.Model
-	gameViewInitd  bool
+	Deck           *model.GameDeck
 	DeckId         int
 	Hand           []model.Card
 	Kitty          []model.Card
@@ -38,21 +40,27 @@ var focusedModelStyle = lipgloss.NewStyle().
 	BorderForeground(lipgloss.Color("69"))
 
 func (v *GameView) Init() {
-	if v.gameViewInitd {
+	if v.Initd {
 		return
 	}
 
-	v.gameViewInitd = true
+	matchMsg := services.GetPlayerMatch(strconv.Itoa(v.MatchId))
+	var match *model.GameMatch
+	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
+		return
+	}
+
+	v.Initd = true
 	v.GameTabNames = []string{"Board", "Play", "Hand", "Kitty"}
 	v.CutInput = textinput.New()
 	v.CutInput.Placeholder = "0"
 	v.CutInput.CharLimit = 5
 	v.CutInput.Width = 5
 
-	deckByte := services.GetDeckById(v.DeckId).([]byte)
+	deckByte := services.GetDeckById(match.DeckId).([]byte)
 	var deck model.GameDeck
 	json.Unmarshal(deckByte, &deck)
-	state.ActiveDeck = &deck
+	v.Deck = &deck
 }
 
 func (v *GameView) View() string {
@@ -69,7 +77,7 @@ func (v *GameView) View() string {
 	var view string
 	switch v.GameViewState {
 	case model.BoardView:
-		if state.ActiveMatch != nil && state.ActiveMatch.GameState == model.CutState {
+		if v.GameState == model.CutState {
 			v.CutInput.Focus()
 			view = v.CutInput.View() + " \n"
 		} else {
@@ -90,18 +98,21 @@ func (v *GameView) View() string {
 		s := lipgloss.JoinHorizontal(lipgloss.Top, focusedModelStyle.Render(view), focusedModelStyle.Render("59"))
 		view = s
 	case model.PlayView:
-		view = HandView(v.HighlighedId, v.HighlightedIds, v.Cards)
+		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
+		view = HandView(v.HighlighedId, v.HighlightedIds, p.Hand, v.Deck)
 	case model.HandView:
+		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
 		if v.GameState == 0 {
 			view = "Waiting to be dealt"
 		} else {
-			view = HandView(v.HighlighedId, v.HighlightedIds, v.Cards)
+			view = HandView(v.HighlighedId, v.HighlightedIds, p.Hand, v.Deck)
 		}
 	case model.KittyView:
-		if len(v.Cards) == 0 {
+		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
+		if len(p.Kitty) == 0 {
 			view = "Empty Kitty"
 		} else {
-			view = HandView(v.HighlighedId, v.HighlightedIds, v.Cards)
+			view = HandView(v.HighlighedId, v.HighlightedIds, p.Kitty, v.Deck)
 		}
 	}
 
@@ -112,20 +123,20 @@ func (v *GameView) View() string {
 func (v *GameView) Enter() tea.Msg {
 	switch v.GameState {
 	case model.CutState:
-		state.CutIndex = v.CutInput.Value()
+		v.CutIndex = v.CutInput.Value()
 		return services.CutDeck
 	case model.DiscardState:
-		p, err := utils.GetPlayerId(state.AccountId, state.ActiveMatch.Players)
+		p, err := utils.GetPlayerId(v.AccountId, v.GameMatch.Players)
 
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
-		state.CurrentHandModifier = model.HandModifier{
-			MatchId:  state.ActiveMatchId,
+
+		services.PutKitty(model.HandModifier{
+			MatchId:  v.GameMatch.Id,
 			PlayerId: p.Id,
 			CardIds:  v.HighlightedIds,
-		}
-		return services.PutKitty
+		})
 	}
 
 	return nil
@@ -138,37 +149,38 @@ func (v *GameView) Update(msg tea.Msg) tea.Cmd {
 	return cmd
 }
 
-func (v *GameView) UpdateState(msg tea.Msg) tea.Cmd {
+func (v *GameView) UpdateState(newState model.GameState) tea.Cmd {
 	var cmd tea.Cmd
 
-	if v.PreviousState == v.GameState {
+	if v.GameState == newState {
 		return nil
 	}
 
-	v.PreviousState = v.GameState
+	v.GameState = newState
 
-	matchMsg := services.GetPlayerMatch()
+	matchMsg := services.GetPlayerMatch(strconv.Itoa(v.MatchId))
 	var match *model.GameMatch
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return nil
 	}
 
-	p := utils.GetPlayerForAccountId(state.AccountId, match)
+	v.GameMatch = match
+	p := utils.GetPlayerForAccountId(v.AccountId, match)
 
 	for _, cardId := range p.Hand {
-		card := utils.GetCardById(cardId)
+		card := utils.GetCardById(cardId, v.Deck)
 		if card != nil {
 			v.Hand = append(v.Hand, *card)
 		}
 	}
 
 	for _, cardId := range p.Kitty {
-		card := utils.GetCardById(cardId)
+		card := utils.GetCardById(cardId, v.Deck)
 		v.Kitty = append(v.Kitty, *card)
 	}
 
 	for _, cardId := range p.Play {
-		card := utils.GetCardById(cardId)
+		card := utils.GetCardById(cardId, v.Deck)
 		v.Play = append(v.Play, *card)
 	}
 

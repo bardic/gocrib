@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/cli/state"
+	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func PostGame() tea.Msg {
-	a := state.CurrentAction
+	a := model.GameAction{}
 	b, err := json.Marshal(a)
 	if err != nil {
 		return err

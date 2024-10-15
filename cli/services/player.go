@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -17,8 +16,8 @@ func PutPlayer(id int) tea.Msg {
 	return url(EndPointPlayer, http.MethodPut, "")
 }
 
-func PutKitty() tea.Msg {
-	b, err := json.Marshal(state.CurrentHandModifier)
+func PutKitty(req model.HandModifier) tea.Msg {
+	b, err := json.Marshal(req)
 	if err != nil {
 		return err
 	}
@@ -26,8 +25,8 @@ func PutKitty() tea.Msg {
 	return url(EndPointKitty, http.MethodPut, string(b))
 }
 
-func PutPlay() tea.Msg {
-	b, err := json.Marshal(state.CurrentHandModifier)
+func PutPlay(req model.HandModifier) tea.Msg {
+	b, err := json.Marshal(req)
 	if err != nil {
 		return err
 	}

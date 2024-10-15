@@ -198,7 +198,9 @@ type ViewStateName uint
 const (
 	LoginView ViewStateName = iota
 	LobbyView
-	GameView
+	CreateGameView
+	JoinGameView
+	InGameView
 	GameOverView
 )
 
@@ -251,4 +253,8 @@ func (p *Player) Eq(c Player) bool {
 	}
 
 	return true
+}
+
+type StateChangeMsg struct {
+	NewState ViewStateName
 }

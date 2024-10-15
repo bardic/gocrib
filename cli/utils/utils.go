@@ -6,7 +6,6 @@ import (
 	"slices"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 	"go.uber.org/zap"
@@ -14,8 +13,8 @@ import (
 
 var Logger *zap.Logger
 
-func GetCardById(id int) *model.Card {
-	for _, card := range state.ActiveDeck.Cards {
+func GetCardById(id int, deck *model.GameDeck) *model.Card {
+	for _, card := range deck.Cards {
 		if card.CardId == id {
 			return &card.Card
 		}
@@ -61,13 +60,11 @@ func GetPlayerId(accountId int, players []model.Player) (*model.Player, error) {
 	return nil, errors.New("no player found")
 }
 
-func CreateGame() tea.Msg {
-	newMatch := services.PostPlayerMatch().([]byte)
+func CreateGame(accountId int) tea.Msg {
+	newMatch := services.PostPlayerMatch(accountId).([]byte)
 
-	var match *model.GameMatch
+	var match *model.MatchDetailsResponse
 	json.Unmarshal(newMatch, &match)
-	state.ActiveMatchId = match.Id
-	state.ActiveMatch = match
 	return match
 }
 

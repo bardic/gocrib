@@ -3,33 +3,31 @@ package services
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
-	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func GetMatchesForPlayerId() tea.Msg {
-	return url(EndPointMatches+"/?id="+strconv.Itoa(state.AccountId), http.MethodGet, "")
+// func GetMatchesForPlayerId() tea.Msg {
+// 	return url(EndPointMatches+"/?id="+strconv.Itoa(state.AccountId), http.MethodGet, "")
+// }
+
+func GetPlayerMatchState(matchId string) tea.Msg {
+	return url(EndPointMatchState+"/?id="+matchId, http.MethodGet, "")
 }
 
-func GetPlayerMatchState() tea.Msg {
-	return url(EndPointMatchState+"/?id="+strconv.Itoa(state.ActiveMatchId), http.MethodGet, "")
-}
-
-func GetPlayerMatch() tea.Msg {
-	return url(EndPointMatch+"/?id="+strconv.Itoa(state.ActiveMatchId), http.MethodGet, "")
+func GetPlayerMatch(matchId string) tea.Msg {
+	return url(EndPointMatch+"/?id="+matchId, http.MethodGet, "")
 }
 
 func GetOpenMatches() tea.Msg {
 	return url(EndPointOpenMatch, http.MethodGet, "")
 }
 
-func JoinMatch() tea.Msg {
+func JoinMatch(playerId, activeMatchId int) tea.Msg {
 	req := model.JoinMatchReq{
-		PlayerId: state.ActivePlayerId,
-		MatchId:  state.ActiveMatchId,
+		PlayerId: playerId,
+		MatchId:  activeMatchId,
 	}
 
 	b, err := json.Marshal(req)
@@ -45,9 +43,9 @@ func PutPlayerMatch(id int) tea.Msg {
 	return url(EndPointMatch, http.MethodPut, "")
 }
 
-func PostPlayerMatch() tea.Msg {
+func PostPlayerMatch(accountId int) tea.Msg {
 	req := model.MatchRequirements{
-		PlayerId:    state.ActivePlayerId,
+		AccountId:   accountId,
 		IsPrivate:   false,
 		EloRangeMin: 1,
 		EloRangeMax: 3000,
@@ -56,11 +54,11 @@ func PostPlayerMatch() tea.Msg {
 	return sendReq(EndPointMatch, http.MethodPost, req)
 }
 
-func CutDeck() tea.Msg {
+func CutDeck(playerId, matchId int, cutIndex string) tea.Msg {
 	req := model.CutDeckReq{
-		PlayerId: state.ActiveMatch.PlayerIds[0],
-		MatchId:  state.ActiveMatchId,
-		CutIndex: state.CutIndex,
+		PlayerId: playerId,
+		MatchId:  matchId,
+		CutIndex: cutIndex,
 	}
 
 	return sendReq(EndPointMatchCutDeck, http.MethodPut, req)

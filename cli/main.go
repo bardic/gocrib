@@ -24,13 +24,13 @@ func main() {
 }
 
 type AppModel struct {
-	currentView  views.IViewState
-	hand         []model.Card
-	kitty        []model.Card
-	play         []model.Card
-	gameState    model.GameState
-	timer        timer.Model
-	timerStarted bool
+	GameInitd      bool
+	ViewStateName  model.ViewStateName
+	ActivePlayerId int
+	accountId      int
+	matchId        int
+	currentView    views.IViewState
+	timer          timer.Model
 }
 
 func (m *AppModel) Init() tea.Cmd {
@@ -40,8 +40,6 @@ func (m *AppModel) Init() tea.Cmd {
 func newModel() *AppModel {
 	m := &AppModel{
 		currentView: &views.LoginView{},
-		hand:        []model.Card{},
-		gameState:   model.NewGameState,
 		timer:       timer.NewWithInterval(time.Hour, time.Second*1),
 	}
 

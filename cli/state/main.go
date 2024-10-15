@@ -1,22 +1,6 @@
 package state
 
-import (
-	"github.com/bardic/gocrib/model"
-	"github.com/charmbracelet/bubbles/textinput"
-)
+// var ViewStateName model.ViewStateName
+// var ActivePlayerId int = 0
 
-var AccountId int
-var ActiveMatchId int
-var ActiveMatch *model.GameMatch
-var ActiveDeck *model.GameDeck
-var CurrentAction model.GameAction
-var CurrentHandModifier model.HandModifier
-
-var CutInput textinput.Model
-var CutIndex string
-var MatchDetailsResponse *model.MatchDetailsResponse
-
-var ViewStateName model.ViewStateName
-var ActivePlayerId int = 0
-
-var GameViewInitialized bool
+// var GameViewInitialized bool

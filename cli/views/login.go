@@ -1,11 +1,10 @@
 package views
 
 import (
-	"strconv"
+	"encoding/json"
 	"strings"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/model"
@@ -43,14 +42,12 @@ func (v *LoginView) View() string {
 func (v *LoginView) Enter() tea.Msg {
 	utils.Logger.Info("Enter")
 	idStr := v.LoginIdField.Value()
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return tea.Quit
-	}
 
-	state.AccountId = id
-	state.ViewStateName = model.LobbyView
-	return services.Login()
+	var accountDetails model.Account
+	msg := services.Login(idStr)
+	json.Unmarshal(msg.([]byte), &accountDetails)
+
+	return accountDetails
 }
 
 func (v *LoginView) Update(msg tea.Msg) tea.Cmd {
