@@ -193,11 +193,6 @@ type Scores struct {
 	Point int
 }
 
-type IViewState interface {
-	Enter()
-	View() string
-}
-
 type ViewStateName uint
 
 const (
@@ -206,10 +201,6 @@ const (
 	GameView
 	GameOverView
 )
-
-var GameTabNames = []string{"Board", "Play", "Hand", "Kitty"}
-
-var LobbyTabNames = []string{"Active Matches", "Open Matches"}
 
 type LobbyViewState uint
 

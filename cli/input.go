@@ -6,6 +6,7 @@ import (
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/state"
 	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -20,81 +21,103 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Cmd {
 		utils.CreateGame()
 		state.ViewStateName = model.GameView
 	case " ":
+		if state.ViewStateName != model.GameView {
+			return nil
+		}
+
+		gameView := m.currentView.(views.GameView)
 		cards := m.hand
-		idx := slices.Index(m.HighlightedIds, cards[m.HighlighedId].Id)
+		idx := slices.Index(gameView.HighlightedIds, cards[gameView.HighlighedId].Id)
 		if idx > -1 {
-			m.HighlightedIds = slices.Delete(m.HighlightedIds, idx, 1)
+			gameView.HighlightedIds = slices.Delete(gameView.HighlightedIds, idx, 1)
 		} else {
-			m.HighlightedIds = append(m.HighlightedIds, cards[m.HighlighedId].Id)
+			gameView.HighlightedIds = append(gameView.HighlightedIds, cards[gameView.HighlighedId].Id)
 		}
 	case "tab":
 		switch state.ViewStateName {
 		case model.LobbyView:
-			m.ActiveLandingTab = m.ActiveLandingTab + 1
-			switch m.ActiveLandingTab {
+			lobbyView := m.currentView.(views.LobbyView)
+
+			lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab + 1
+
+			switch lobbyView.ActiveLandingTab {
 			case 0:
-				m.LobbyViewState = model.OpenMatches
+				lobbyView.LobbyViewState = model.OpenMatches
 			case 1:
-				m.LobbyViewState = model.AvailableMatches
+				lobbyView.LobbyViewState = model.AvailableMatches
 
 			}
 		case model.GameView:
-			m.ActiveTab = m.ActiveTab + 1
-			switch m.ActiveTab {
+			gameView := m.currentView.(views.GameView)
+			gameView.ActiveTab = gameView.ActiveTab + 1
+
+			switch gameView.ActiveTab {
 			case 0:
-				m.GameViewState = model.BoardView
+				gameView.GameViewState = model.BoardView
 			case 1:
-				m.GameViewState = model.PlayView
+				gameView.GameViewState = model.PlayView
 			case 2:
-				m.GameViewState = model.HandView
+				gameView.GameViewState = model.HandView
 			case 3:
-				m.GameViewState = model.KittyView
+				gameView.GameViewState = model.KittyView
 			}
 		}
 	case "shift+tab":
 		switch state.ViewStateName {
 		case model.LobbyView:
-			m.ActiveLandingTab = m.ActiveLandingTab - 1
-			switch m.ActiveLandingTab {
+			lobbyView := m.currentView.(views.LobbyView)
+			lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab - 1
+
+			switch lobbyView.ActiveLandingTab {
 			case 0:
-				m.LobbyViewState = model.OpenMatches
+				lobbyView.LobbyViewState = model.OpenMatches
 			case 1:
-				m.LobbyViewState = model.AvailableMatches
+				lobbyView.LobbyViewState = model.AvailableMatches
 
 			}
 		case model.GameView:
-			m.ActiveTab = m.ActiveTab - 1
-			switch m.ActiveTab {
+			gameView := m.currentView.(views.GameView)
+			gameView.ActiveTab = gameView.ActiveTab - 1
+
+			switch gameView.ActiveTab {
 			case 0:
-				m.GameViewState = model.BoardView
+				gameView.GameViewState = model.BoardView
 			case 1:
-				m.GameViewState = model.PlayView
+				gameView.GameViewState = model.PlayView
 			case 2:
-				m.GameViewState = model.HandView
+				gameView.GameViewState = model.HandView
 			case 3:
-				m.GameViewState = model.KittyView
+				gameView.GameViewState = model.KittyView
 			}
 		}
 	case "right":
+
 		if state.ViewStateName != model.GameView {
 			return nil
 		}
 
-		m.ActiveSlot++
+		gameView := m.currentView.(views.GameView)
 
-		if m.ActiveSlot > len(state.ActiveMatch.Players[0].Play) {
-			m.ActiveSlot = 0
+		gameView.ActiveSlot++
+
+		if gameView.ActiveSlot > len(state.ActiveMatch.Players[0].Play) {
+			gameView.ActiveSlot = 0
 		}
 
-		m.HighlighedId = m.ActiveSlot
+		gameView.HighlighedId = gameView.ActiveSlot
 	case "left":
-		m.ActiveSlot--
-
-		if m.ActiveSlot < 0 {
-			m.ActiveSlot = len(state.ActiveMatch.Players[0].Play) - 1
+		if state.ViewStateName != model.GameView {
+			return nil
 		}
 
-		m.HighlighedId = m.ActiveSlot
+		gameView := m.currentView.(views.GameView)
+		gameView.ActiveSlot--
+
+		if gameView.ActiveSlot < 0 {
+			gameView.ActiveSlot = len(state.ActiveMatch.Players[0].Play) - 1
+		}
+
+		gameView.HighlighedId = gameView.ActiveSlot
 	}
 
 	return nil
@@ -106,8 +129,11 @@ func (m *AppModel) OnEnterDuringPlay() tea.Cmd {
 	}
 
 	state.ViewStateName = model.GameView
+
+	gameView := m.currentView.(views.GameView)
+
 	if m.gameState == model.DiscardState {
-		for _, idx := range m.HighlightedIds {
+		for _, idx := range gameView.HighlightedIds {
 			m.kitty = append(m.kitty, utils.GetCardInHandById(idx, m.hand))
 			m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
 				return c.Id == idx
@@ -120,10 +146,10 @@ func (m *AppModel) OnEnterDuringPlay() tea.Cmd {
 			PlayerId: state.ActiveMatch.PlayerIds[0],
 		}
 
-		m.HighlightedIds = []int{}
+		gameView.HighlightedIds = []int{}
 		return services.PutKitty
 	} else {
-		for _, idx := range m.HighlightedIds {
+		for _, idx := range gameView.HighlightedIds {
 			m.play = append(m.play, utils.GetCardInHandById(idx, m.hand))
 			m.hand = slices.DeleteFunc(m.hand, func(c model.Card) bool {
 				return c.Id == idx
@@ -136,7 +162,7 @@ func (m *AppModel) OnEnterDuringPlay() tea.Cmd {
 			PlayerId: state.ActiveMatch.PlayerIds[0],
 		}
 
-		m.HighlightedIds = []int{}
+		gameView.HighlightedIds = []int{}
 		return services.PutPlay
 	}
 }

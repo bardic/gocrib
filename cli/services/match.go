@@ -53,13 +53,7 @@ func PostPlayerMatch() tea.Msg {
 		EloRangeMax: 3000,
 	}
 
-	b, err := json.Marshal(req)
-
-	if err != nil {
-		return err
-	}
-
-	return url(EndPointMatch, http.MethodPost, string(b))
+	return sendReq(EndPointMatch, http.MethodPost, req)
 }
 
 func CutDeck() tea.Msg {
@@ -69,11 +63,15 @@ func CutDeck() tea.Msg {
 		CutIndex: state.CutIndex,
 	}
 
-	b, err := json.Marshal(req)
+	return sendReq(EndPointMatchCutDeck, http.MethodPut, req)
+}
+
+func sendReq(endPoint string, method string, body interface{}) tea.Msg {
+	b, err := json.Marshal(body)
 
 	if err != nil {
 		return err
 	}
 
-	return url(EndPointMatchCutDeck, http.MethodPut, string(b))
+	return url(endPoint, method, string(b))
 }

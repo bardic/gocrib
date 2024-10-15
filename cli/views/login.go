@@ -15,30 +15,34 @@ import (
 )
 
 type LoginView struct {
+	LoginIdField      textinput.Model
+	IsLoginIdFieldSet bool
 }
 
-var LoginIdField textinput.Model
-var isLoginIdFieldSet bool
+func (view *LoginView) Init() {
 
-func (s LoginView) View() string {
-	doc := strings.Builder{}
-	if !isLoginIdFieldSet {
-		LoginIdField = textinput.New()
-		LoginIdField.CharLimit = 20
-		LoginIdField.Width = 30
-		LoginIdField.Placeholder = "id"
-		isLoginIdFieldSet = true
+	if view.IsLoginIdFieldSet {
+		return
 	}
 
+	view.LoginIdField = textinput.New()
+	view.LoginIdField.CharLimit = 20
+	view.LoginIdField.Width = 30
+	view.LoginIdField.Placeholder = "id"
+	view.IsLoginIdFieldSet = true
+}
+
+func (v *LoginView) View() string {
+	doc := strings.Builder{}
 	doc.WriteString("Login \n")
-	doc.WriteString(LoginIdField.View())
+	doc.WriteString(v.LoginIdField.View())
 
 	return styles.ScreenStyle.Width(100).Align(lipgloss.Center, lipgloss.Center).Render(doc.String())
 }
 
-func (s LoginView) Enter() tea.Msg {
+func (v *LoginView) Enter() tea.Msg {
 	utils.Logger.Info("Enter")
-	idStr := LoginIdField.Value()
+	idStr := v.LoginIdField.Value()
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return tea.Quit
@@ -47,4 +51,12 @@ func (s LoginView) Enter() tea.Msg {
 	state.AccountId = id
 	state.ViewStateName = model.LobbyView
 	return services.Login()
+}
+
+func (v *LoginView) Update(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+
+	v.LoginIdField, cmd = v.LoginIdField.Update(msg)
+
+	return cmd
 }

@@ -16,37 +16,40 @@ import (
 type GameView struct {
 	GameState      model.GameState
 	HighlightedIds []int
-	HighlightId    int
 	Cards          []model.Card
-	ViewModel      ViewModel
+	GameTabNames   []string
+	GameViewState  model.GameViewState
+	ActiveSlot     int
+	ActiveTab      int
+	HighlighedId   int
+	CutInput       textinput.Model
+	gameViewInitd  bool
 }
 
 var focusedModelStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("69"))
 
-var CutInput textinput.Model
-var initd bool
-
-func createInput() {
-	if initd {
+func (v GameView) Init() {
+	view := &v
+	if view.gameViewInitd {
 		return
 	}
 
-	initd = true
+	view.gameViewInitd = true
 
-	CutInput = textinput.New()
-	CutInput.Placeholder = "0"
-	CutInput.CharLimit = 5
-	CutInput.Width = 5
+	view.GameTabNames = []string{"Board", "Play", "Hand", "Kitty"}
+
+	view.CutInput = textinput.New()
+	view.CutInput.Placeholder = "0"
+	view.CutInput.CharLimit = 5
+	view.CutInput.Width = 5
 }
 
 func (v GameView) View() string {
-	createInput()
-
 	doc := strings.Builder{}
 
-	renderedTabs := renderTabs(v.ViewModel.Tabs, v.ViewModel.ActiveTab)
+	renderedTabs := renderTabs(v.GameTabNames, v.ActiveTab)
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
@@ -55,11 +58,11 @@ func (v GameView) View() string {
 	doc.WriteString("\n")
 
 	var view string
-	switch v.ViewModel.GameViewState {
+	switch v.GameViewState {
 	case model.BoardView:
 		if state.ActiveMatch != nil && state.ActiveMatch.GameState == model.CutState {
-			CutInput.Focus()
-			view = CutInput.View() + " \n"
+			v.CutInput.Focus()
+			view = v.CutInput.View() + " \n"
 		} else {
 			view = "\n"
 		}
@@ -78,18 +81,18 @@ func (v GameView) View() string {
 		s := lipgloss.JoinHorizontal(lipgloss.Top, focusedModelStyle.Render(view), focusedModelStyle.Render("59"))
 		view = s
 	case model.PlayView:
-		view = HandView(v.HighlightId, v.HighlightedIds, v.Cards)
+		view = HandView(v.HighlighedId, v.HighlightedIds, v.Cards)
 	case model.HandView:
 		if v.GameState == 0 {
 			view = "Waiting to be dealt"
 		} else {
-			view = HandView(v.HighlightId, v.HighlightedIds, v.Cards)
+			view = HandView(v.HighlighedId, v.HighlightedIds, v.Cards)
 		}
 	case model.KittyView:
 		if len(v.Cards) == 0 {
 			view = "Empty Kitty"
 		} else {
-			view = HandView(v.HighlightId, v.HighlightedIds, v.Cards)
+			view = HandView(v.HighlighedId, v.HighlightedIds, v.Cards)
 		}
 	}
 
@@ -100,7 +103,7 @@ func (v GameView) View() string {
 func (v GameView) Enter() tea.Msg {
 	switch v.GameState {
 	case model.CutState:
-		state.CutIndex = CutInput.Value()
+		state.CutIndex = v.CutInput.Value()
 		return services.CutDeck
 	case model.DiscardState:
 		p, err := utils.GetPlayerId(state.AccountId, state.ActiveMatch.Players)
@@ -116,6 +119,11 @@ func (v GameView) Enter() tea.Msg {
 		return services.PutKitty
 	}
 
+	return nil
+}
+
+func (v GameView) Update(msg tea.Msg) tea.Cmd {
+	v.Init()
 	return nil
 }
 

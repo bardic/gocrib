@@ -17,17 +17,32 @@ import (
 )
 
 type LobbyView struct {
-	ViewModel ViewModel
+	ActiveLandingTab int
+	LobbyViewState   model.LobbyViewState
+	LobbyTabNames    []string
+	LobbyTable       table.Model
+	IsLobbyTableSet  bool
+	lobbyViewInitd   bool
 }
 
-var LobbyTable table.Model
-var isLobbyTableSet bool
+func (v LobbyView) Init() {
+	view := &v
+	if view.lobbyViewInitd {
+		return
+	}
 
-func (s LobbyView) View() string {
+	view.lobbyViewInitd = true
 
+	view.ActiveLandingTab = 0
+	view.LobbyViewState = model.OpenMatches
+	view.LobbyTabNames = []string{"Open Matches", "Available Matches"}
+	v = *view
+}
+
+func (v LobbyView) View() string {
 	doc := strings.Builder{}
 
-	renderedTabs := renderTabs(s.ViewModel.LobbyTabs, s.ViewModel.ActiveLandingTab)
+	renderedTabs := renderTabs(v.LobbyTabNames, v.ActiveLandingTab)
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
@@ -35,23 +50,23 @@ func (s LobbyView) View() string {
 	doc.WriteString(row)
 	doc.WriteString("\n")
 
-	if !isLobbyTableSet {
+	if !v.IsLobbyTableSet {
 		t, err := getActiveView()
 		if err != nil {
 			return err.Error()
 		}
 
-		LobbyTable = t
-		isLobbyTableSet = true
+		v.LobbyTable = t
+		v.IsLobbyTableSet = true
 	}
 
-	doc.WriteString(styles.WindowStyle.Width(100).Render(LobbyTable.View()))
+	doc.WriteString(styles.WindowStyle.Width(100).Render(v.LobbyTable.View()))
 	return doc.String()
 }
 
-func (s LobbyView) Enter() tea.Msg {
+func (v LobbyView) Enter() tea.Msg {
 	utils.Logger.Info("Enter")
-	idStr := LobbyTable.SelectedRow()[0]
+	idStr := v.LobbyTable.SelectedRow()[0]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return tea.Quit
@@ -60,6 +75,16 @@ func (s LobbyView) Enter() tea.Msg {
 	state.ActiveMatchId = id
 	state.ViewStateName = model.GameView
 	return services.JoinMatch()
+}
+
+func (v LobbyView) Update(msg tea.Msg) tea.Cmd {
+	v.Init()
+	v.LobbyTable.Focus()
+
+	updatedField, cmd := v.LobbyTable.Update(msg)
+	v.LobbyTable = updatedField
+
+	return cmd
 }
 
 func getActiveView() (table.Model, error) {
