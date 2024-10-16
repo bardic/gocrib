@@ -23,18 +23,18 @@ import (
 // @Failure      500  {object}  error
 // @Router       /player/player/ [post]
 func NewPlayer(c echo.Context) error {
-	var details int
-	if err := c.Bind(details); err != nil {
+	id := new(int)
+	if err := c.Bind(id); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := NewPlayerQuery(details)
+	p, err := NewPlayerQuery(*id)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, p)
+		return c.JSON(http.StatusOK, p)
 
 }
 

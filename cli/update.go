@@ -32,69 +32,60 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			})
 		case model.MatchDetailsResponse:
-			m.matchId = resp.(model.MatchDetailsResponse).MatchId
+			matchDetails := resp.(model.MatchDetailsResponse)
+			m.matchId = matchDetails.MatchId
 
-			if resp.(model.MatchDetailsResponse).GameState == model.NewGameState {
+			if matchDetails.GameState == model.NewGameState {
 				m.ViewStateName = model.CreateGameView
 				cmds = append(cmds, func() tea.Msg {
-					return model.StateChangeMsg{
-						NewState: model.CreateGameView,
+					return model.GameStateChangeMsg{
+						NewState: model.JoinGameState,
+						MatchId:  m.matchId,
+					}
+				})
+			} else if matchDetails.GameState == model.JoinGameState {
+				m.ViewStateName = model.JoinGameView
+				cmds = append(cmds, func() tea.Msg {
+					return model.GameStateChangeMsg{
+						NewState: model.WaitingState,
+						MatchId:  m.matchId,
 					}
 				})
 			} else {
-				m.ViewStateName = model.JoinGameView
+				m.ViewStateName = model.InGameView
 				cmds = append(cmds, func() tea.Msg {
-					return model.StateChangeMsg{
-						NewState: model.JoinGameView,
+					return model.GameStateChangeMsg{
+						NewState: matchDetails.GameState,
+						MatchId:  m.matchId,
 					}
 				})
 			}
-
 		}
+	case model.GameStateChangeMsg:
+		switch m.ViewStateName {
+		case model.CreateGameView:
+			var cmd tea.Cmd
+			cmd = m.createMatch(msg, model.NewGameState)
+			m.currentView.(*views.GameView).GameState = msg.NewState
+			cmds = append(cmds, cmd)
+		case model.JoinGameView:
+			var cmd tea.Cmd
+			cmd = m.createMatch(msg, model.JoinGameState)
+			m.currentView.(*views.GameView).GameState = msg.NewState
+			cmds = append(cmds, cmd)
+		case model.PlayersReadyView:
+			m.playersReady = true
+			m.ViewStateName = model.InGameView
+		}
+
 	case model.StateChangeMsg:
 		switch msg.NewState {
 		case model.LobbyView:
 			m.currentView = &views.LobbyView{
 				AccountId: m.accountId,
 			}
+			m.ViewStateName = model.LobbyView
 			services.GetOpenMatches()
-		case model.JoinGameView:
-			if !m.GameInitd {
-				m.currentView = &views.GameView{
-					GameState: model.NewGameState, //TODO: This should come from DB
-					AccountId: m.accountId,
-					MatchId:   m.matchId,
-				}
-
-				gameView := m.currentView.(*views.GameView)
-				gameView.Init()
-				gameView.UpdateState(model.WaitingState)
-				m.GameInitd = true
-
-				cmd := m.timer.Init()
-				cmds = append(cmds, cmd)
-
-				m.ViewStateName = model.InGameView
-			}
-
-		case model.CreateGameView:
-			if !m.GameInitd {
-				m.currentView = &views.GameView{
-					GameState: model.NewGameState,
-					AccountId: m.accountId,
-					MatchId:   m.matchId,
-				}
-
-				gameView := m.currentView.(*views.GameView)
-				gameView.Init()
-				gameView.UpdateState(model.NewGameState)
-				m.GameInitd = true
-
-				cmd := m.timer.Init()
-				cmds = append(cmds, cmd)
-
-				m.ViewStateName = model.InGameView
-			}
 		}
 	case timer.TickMsg: // Polling update
 		if m.ViewStateName != model.InGameView {
@@ -118,6 +109,29 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.currentView.Update(msg)
 
 	return m, tea.Batch(cmds...)
+}
+
+func (m *AppModel) createMatch(msg model.GameStateChangeMsg, state model.GameState) tea.Cmd {
+	if m.GameInitd {
+		return nil
+	}
+
+	m.currentView = &views.GameView{
+		GameState: state,
+		AccountId: m.accountId,
+		MatchId:   msg.MatchId,
+	}
+
+	gameView := m.currentView.(*views.GameView)
+	gameView.Init()
+	gameView.UpdateState(model.WaitingState)
+	m.GameInitd = true
+
+	cmd := m.timer.Init()
+
+	m.ViewStateName = model.InGameView
+
+	return cmd
 }
 
 func (m *AppModel) setCards(match *model.GameMatch) {

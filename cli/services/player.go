@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
@@ -34,14 +35,8 @@ func PutPlay(req model.HandModifier) tea.Msg {
 	return url(EndPointPlay, http.MethodPut, string(b))
 }
 
-func PostPlayer(player model.Player) tea.Msg {
-
-	b, err := json.Marshal(player)
-	if err != nil {
-		return err
-	}
-
-	return url(EndPointPlayer, http.MethodPost, string(b))
+func PostPlayer(accountId int) tea.Msg {
+	return url(EndPointPlayer, http.MethodPost, strconv.Itoa(accountId))
 }
 
 func DeletePlayer(ids []int) tea.Msg {

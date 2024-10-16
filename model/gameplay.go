@@ -98,6 +98,7 @@ type GameState uint
 
 const (
 	NewGameState GameState = 1 << iota
+	JoinGameState
 	WaitingState
 	MatchReady
 	DealState
@@ -200,6 +201,7 @@ const (
 	LobbyView
 	CreateGameView
 	JoinGameView
+	PlayersReadyView
 	InGameView
 	GameOverView
 )
@@ -257,4 +259,10 @@ func (p *Player) Eq(c Player) bool {
 
 type StateChangeMsg struct {
 	NewState ViewStateName
+	MatchId  int
+}
+
+type GameStateChangeMsg struct {
+	NewState GameState
+	MatchId  int
 }

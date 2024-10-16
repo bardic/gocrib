@@ -17,6 +17,9 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Msg {
 	case "enter", "view_update":
 		return m.currentView.Enter()
 	case "n":
+		if m.ViewStateName != model.LobbyView {
+			return nil
+		}
 		m.ViewStateName = model.CreateGameView
 		return utils.CreateGame(m.accountId)
 	case " ":
@@ -25,12 +28,17 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		gameView := m.currentView.(*views.GameView)
-		cards := gameView.Hand
-		idx := slices.Index(gameView.HighlightedIds, cards[gameView.HighlighedId].Id)
+		cards := m.getVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
+
+		if len(cards) == 0 {
+			return nil
+		}
+
+		idx := slices.Index(gameView.HighlightedIds, cards[gameView.HighlighedId])
 		if idx > -1 {
-			gameView.HighlightedIds = slices.Delete(gameView.HighlightedIds, idx, 1)
+			gameView.HighlightedIds = slices.Delete(gameView.HighlightedIds, 0, 1)
 		} else {
-			gameView.HighlightedIds = append(gameView.HighlightedIds, cards[gameView.HighlighedId].Id)
+			gameView.HighlightedIds = append(gameView.HighlightedIds, cards[gameView.HighlighedId])
 		}
 	case "tab":
 		switch m.ViewStateName {
@@ -99,7 +107,9 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Msg {
 
 		gameView.ActiveSlot++
 
-		if gameView.ActiveSlot > len(gameView.GameMatch.Players[0].Play) {
+		cards := m.getVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
+
+		if gameView.ActiveSlot > len(cards)-1 {
 			gameView.ActiveSlot = 0
 		}
 
@@ -112,14 +122,32 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Msg {
 		gameView := m.currentView.(*views.GameView)
 		gameView.ActiveSlot--
 
+		cards := m.getVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
+
 		if gameView.ActiveSlot < 0 {
-			gameView.ActiveSlot = len(gameView.GameMatch.Players[0].Play) - 1
+			gameView.ActiveSlot = len(cards) - 1
 		}
 
 		gameView.HighlighedId = gameView.ActiveSlot
 	}
 
 	return nil
+}
+
+func (m *AppModel) getVisibleCards(activeTab int, player model.Player) []int {
+	var cards []int
+	switch activeTab {
+	case 0:
+		cards = nil
+	case 1:
+		cards = player.Play
+	case 2:
+		cards = player.Hand
+	case 3:
+		cards = player.Kitty
+	}
+
+	return cards
 }
 
 func (m *AppModel) OnEnterDuringPlay() {

@@ -89,12 +89,6 @@ func NewMatch(c echo.Context) error {
 		return err
 	}
 
-	err = utils.UpdateMatchState(matchId, model.WaitingState)
-
-	if err != nil {
-		return err
-	}
-
 	// d = *d.Shuffle()
 	// for i := 0; i < 12; i++ {
 	// 	if i%2 == 0 {
@@ -118,5 +112,8 @@ func NewMatch(c echo.Context) error {
 	// 	match.Players[0].Hand = []int{}
 	// }
 
-	return c.JSON(http.StatusOK, matchId)
+	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
+		MatchId:   matchId,
+		GameState: model.NewGameState,
+	})
 }

@@ -31,6 +31,7 @@ type AppModel struct {
 	matchId        int
 	currentView    views.IViewState
 	timer          timer.Model
+	playersReady   bool
 }
 
 func (m *AppModel) Init() tea.Cmd {

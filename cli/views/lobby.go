@@ -72,9 +72,7 @@ func (v *LobbyView) Enter() tea.Msg {
 	}
 
 	v.ActiveMatchId = id
-	accountMsg := services.PostPlayer(model.Player{
-		AccountId: v.AccountId,
-	})
+	accountMsg := services.PostPlayer(v.AccountId)
 
 	var player model.Player
 	err = json.Unmarshal(accountMsg.([]byte), &player)

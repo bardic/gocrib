@@ -99,7 +99,7 @@ func (v *GameView) View() string {
 		view = s
 	case model.PlayView:
 		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
-		view = HandView(v.HighlighedId, v.HighlightedIds, p.Hand, v.Deck)
+		view = HandView(v.HighlighedId, v.HighlightedIds, p.Play, v.Deck)
 	case model.HandView:
 		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
 		if v.GameState == 0 {

@@ -83,7 +83,7 @@ func v1Routes(g *echo.Group) {
 	//Player
 	playerGroup.GET("/gameplaycards", gameplaycard.GetGameplayCards)
 	playerGroup.GET("/player", player.GetPlayer)
-	playerGroup.POST("", player.NewPlayer)
+	playerGroup.POST("/player", player.NewPlayer)
 	playerGroup.PUT("/player", player.UpdatePlayer)
 	playerGroup.PUT("/kitty", player.UpdateKitty)
 	// playerGroup.PUT("/play", player.UpdatePlay)

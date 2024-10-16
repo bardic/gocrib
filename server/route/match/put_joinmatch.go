@@ -31,7 +31,8 @@ func JoinMatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := player.NewPlayerQuery(details.PlayerId)
+	p, err := player.GetPlayerById(details.PlayerId)
+	//p, err := player.NewPlayerQuery(details.PlayerId)
 
 	if err != nil {
 		return err
@@ -43,8 +44,8 @@ func JoinMatch(c echo.Context) error {
 		return err
 	}
 
-	utils.UpdateMatchState(details.MatchId, model.MatchReady)
-	utils.UpdateMatchState(details.MatchId, model.DealState)
+	utils.UpdateMatchState(details.MatchId, model.JoinGameState)
+	//utils.UpdateMatchState(details.MatchId, model.DealState)
 
 	m, err = utils.GetMatch(m.Id)
 
@@ -54,11 +55,11 @@ func JoinMatch(c echo.Context) error {
 
 	game.Deal(m)
 
-	utils.UpdateMatchState(details.MatchId, model.CutState)
+	//utils.UpdateMatchState(details.MatchId, model.CutState)
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
 		MatchId:   m.Id,
-		GameState: m.GameState,
+		GameState: model.JoinGameState,
 	})
 }
 

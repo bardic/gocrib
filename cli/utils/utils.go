@@ -63,9 +63,13 @@ func GetPlayerId(accountId int, players []model.Player) (*model.Player, error) {
 func CreateGame(accountId int) tea.Msg {
 	newMatch := services.PostPlayerMatch(accountId).([]byte)
 
-	var match *model.MatchDetailsResponse
-	json.Unmarshal(newMatch, &match)
-	return match
+	var matchDetails model.MatchDetailsResponse
+	json.Unmarshal(newMatch, &matchDetails)
+
+	return model.MatchDetailsResponse{
+		MatchId:   matchDetails.MatchId,
+		GameState: matchDetails.GameState,
+	}
 }
 
 func GetPlayerForAccountId(id int, match *model.GameMatch) *model.Player {
