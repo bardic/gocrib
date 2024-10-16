@@ -47,7 +47,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ViewStateName = model.JoinGameView
 				cmds = append(cmds, func() tea.Msg {
 					return model.GameStateChangeMsg{
-						NewState: model.WaitingState,
+						NewState: model.JoinGameState,
 						MatchId:  m.matchId,
 					}
 				})
@@ -61,21 +61,50 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				})
 			}
 		}
+	case model.MatchDetailsResponse:
+		matchDetails := msg
+		m.matchId = matchDetails.MatchId
+
+		gameView := m.currentView.(*views.GameView)
+		m.setCards(gameView.GameMatch)
+
+		m.ViewStateName = model.InGameView
+		cmds = append(cmds, func() tea.Msg {
+			return model.GameStateChangeMsg{
+				NewState: matchDetails.GameState,
+				MatchId:  m.matchId,
+			}
+		})
+
 	case model.GameStateChangeMsg:
-		switch m.ViewStateName {
-		case model.CreateGameView:
+		switch msg.NewState {
+		case model.NewGameState:
 			var cmd tea.Cmd
 			cmd = m.createMatch(msg, model.NewGameState)
-			m.currentView.(*views.GameView).GameState = msg.NewState
+			gameView := m.currentView.(*views.GameView)
+			gameView.GameState = model.NewGameState
+			m.setCards(gameView.GameMatch)
 			cmds = append(cmds, cmd)
-		case model.JoinGameView:
+		case model.JoinGameState:
 			var cmd tea.Cmd
 			cmd = m.createMatch(msg, model.JoinGameState)
-			m.currentView.(*views.GameView).GameState = msg.NewState
+			gameView := m.currentView.(*views.GameView)
+			gameView.GameState = model.JoinGameState
+			m.setCards(gameView.GameMatch)
+			p, err := utils.GetPlayerId(m.accountId, gameView.GameMatch.Players)
+			if err != nil {
+				utils.Logger.Sugar().Error(err)
+			}
+			services.PlayerReady(p.Id)
 			cmds = append(cmds, cmd)
-		case model.PlayersReadyView:
+		case model.WaitingState:
 			m.playersReady = true
 			m.ViewStateName = model.InGameView
+			//m.currentView.(*views.GameView).GameState = model.DiscardState
+		case model.CutState:
+			gameView := m.currentView.(*views.GameView)
+			gameView.GameState = model.CutState
+			m.setCards(gameView.GameMatch)
 		}
 
 	case model.StateChangeMsg:
@@ -95,11 +124,15 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
 
-		var matchDetails *model.MatchDetailsResponse
+		var matchDetails model.GameMatch
 		id := m.currentView.(*views.GameView).GameMatch.Id
 		idstr := strconv.Itoa(id)
-		resp := services.GetPlayerMatchState(idstr)
+		resp := services.GetPlayerMatch(idstr)
 		json.Unmarshal(resp.([]byte), &matchDetails)
+
+		gameView := m.currentView.(*views.GameView)
+		gameView.GameMatch = &matchDetails
+		m.setCards(gameView.GameMatch)
 
 		cmds = append(cmds, cmd, func() tea.Msg {
 			return matchDetails

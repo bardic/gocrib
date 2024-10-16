@@ -88,11 +88,12 @@ func PlayCard(details model.HandModifier) (*model.GameMatch, error) {
 
 func ParsePlayer(details model.Player) pgx.NamedArgs {
 	return pgx.NamedArgs{
-		"id":    details.Id,
-		"play":  details.Play,
-		"hand":  details.Hand,
-		"kitty": details.Kitty,
-		"score": details.Score,
-		"art":   details.Art,
+		"id":      details.Id,
+		"play":    details.Play,
+		"hand":    details.Hand,
+		"kitty":   details.Kitty,
+		"score":   details.Score,
+		"isReady": details.IsReady,
+		"art":     details.Art,
 	}
 }

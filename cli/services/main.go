@@ -17,9 +17,10 @@ const (
 	//Game
 	EndPointGame = BaseUrl + "/game/playCard"
 	//Player
-	EndPointPlayer = BaseUrl + "/player/player"
-	EndPointKitty  = BaseUrl + "/player/kitty"
-	EndPointPlay   = BaseUrl + "/player/play"
+	EndPointPlayer      = BaseUrl + "/player/player"
+	EndPointKitty       = BaseUrl + "/player/kitty"
+	EndPointPlay        = BaseUrl + "/player/play"
+	EndPointPlayerReady = BaseUrl + "/player/ready"
 	//History
 	EndPointHistory = BaseUrl + "/history"
 	//Match

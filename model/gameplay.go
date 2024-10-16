@@ -145,6 +145,7 @@ type Player struct {
 	Hand      []int
 	Kitty     []int
 	Score     int
+	IsReady   bool
 	Art       string
 }
 

@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS player (
   hand integer [] NOT NULL,
   kitty integer [] NOT NULL,
   score integer NOT NULL,
+  isReady boolean NOT NULL,
   art varchar(500) NOT NULL
 );

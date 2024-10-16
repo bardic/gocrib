@@ -167,7 +167,7 @@ func (v *GameView) UpdateState(newState model.GameState) tea.Cmd {
 	v.GameMatch = match
 	p := utils.GetPlayerForAccountId(v.AccountId, match)
 
-	for _, cardId := range p.Hand {
+		for _, cardId := range p.Hand {
 		card := utils.GetCardById(cardId, v.Deck)
 		if card != nil {
 			v.Hand = append(v.Hand, *card)

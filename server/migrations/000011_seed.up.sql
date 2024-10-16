@@ -66,6 +66,7 @@ INSERT INTO
         "hand",
         "kitty",
         "score",
+        "isready",
         "art"
     )
 VALUES
@@ -75,6 +76,7 @@ VALUES
         ARRAY [] :: integer [],
         ARRAY [] :: integer [],
         0,
+        false,
         'default.png'
     ),
     (
@@ -83,5 +85,6 @@ VALUES
         ARRAY [] :: integer [],
         ARRAY [] :: integer [],
         0,
+        false,
         'default.png'
     )

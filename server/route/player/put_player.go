@@ -40,7 +40,15 @@ func UpdatePlayer(c echo.Context) error {
 func UpdatePlayerById(player model.Player) (model.Player, error) {
 	args := utils.ParsePlayer(player)
 
-	query := "UPDATE player SET hand = @hand, play = @play, kitty = @kitty, score = @score, art = @art where id = @id"
+	query := `UPDATE player SET 
+		hand = @hand, 
+		play = @play, 
+		kitty = @kitty, 
+		score = @score, 
+		isReady = @isReady,
+		art = @art 
+	where 
+		id = @id`
 
 	db := conn.Pool()
 	defer db.Close()

@@ -52,6 +52,7 @@ func GetPlayerById(id int) (model.Player, error) {
 		&player.Hand,
 		&player.Kitty,
 		&player.Score,
+		&player.IsReady,
 		&player.Art,
 	)
 

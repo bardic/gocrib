@@ -34,7 +34,7 @@ func NewPlayer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-		return c.JSON(http.StatusOK, p)
+	return c.JSON(http.StatusOK, p)
 
 }
 
@@ -46,6 +46,7 @@ func NewPlayerQuery(accountId int) (*model.Player, error) {
 		"kitty":     []int{},
 		"play":      []int{},
 		"score":     0,
+		"isready":   false,
 		"art":       "default.png",
 	}
 
@@ -55,6 +56,7 @@ func NewPlayerQuery(accountId int) (*model.Player, error) {
 			play,
 			kitty,
 			score,
+			isready,
 			art
 		) VALUES (
 			@accountId,
@@ -62,6 +64,7 @@ func NewPlayerQuery(accountId int) (*model.Player, error) {
 			@play,
 			@kitty,
 			@score,
+			@isready,
 			@art
 		)
 		RETURNING id`
