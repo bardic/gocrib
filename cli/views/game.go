@@ -80,7 +80,11 @@ func (v *GameView) View() string {
 	var view string
 	switch v.GameViewState {
 	case model.BoardView:
-		if v.GameMatch.GameState == model.CutState {
+		player, err := utils.GetPlayerId(v.AccountId, v.GameMatch.Players)
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+		if v.GameMatch.GameState == model.CutState && v.GameMatch.CurrentPlayerTurn != player.Id {
 			v.CutInput.Focus()
 			view = v.CutInput.View() + " \n"
 		} else {

@@ -156,9 +156,9 @@ func (m *AppModel) OnEnterDuringPlay() {
 	}
 	gameView := m.currentView.(*views.GameView)
 
-	if gameView.GameMatch.GameState == model.WaitingState {
-		gameView.GameMatch.GameState = model.DiscardState
-	}
+	// if gameView.GameMatch.GameState == model.WaitingState {
+	// 	gameView.GameMatch.GameState = model.DiscardState
+	// }
 
 	m.ViewStateName = model.InGameView
 

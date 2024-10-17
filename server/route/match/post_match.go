@@ -62,7 +62,7 @@ func NewMatch(c echo.Context) error {
 				eloRangeMax,
 				deckId,
 				cutGameCardId,
-				currentPlayerTurn,
+				currentplayerturn,
 				turnPassTimestamps,
 				gameState,
 				art)

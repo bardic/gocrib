@@ -23,50 +23,34 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			break
 		}
 
-		switch resp.(type) {
-		case model.Account:
-			m.accountId = resp.(model.Account).Id
-			cmds = append(cmds, func() tea.Msg {
-				return model.StateChangeMsg{
-					NewState: model.LobbyView,
-				}
-			})
-		case model.MatchDetailsResponse:
-			matchDetails := resp.(model.MatchDetailsResponse)
-			m.matchId = matchDetails.MatchId
-
-			if matchDetails.GameState == model.NewGameState {
-				m.ViewStateName = model.CreateGameView
-				cmds = append(cmds, func() tea.Msg {
-					return model.GameStateChangeMsg{
-						NewState: model.JoinGameState,
-						PlayerId: matchDetails.PlayerId,
-						MatchId:  m.matchId,
-					}
-				})
-			} else if matchDetails.GameState == model.JoinGameState {
-				m.ViewStateName = model.JoinGameView
-				cmds = append(cmds, func() tea.Msg {
-					return model.GameStateChangeMsg{
-						NewState: model.JoinGameState,
-						PlayerId: matchDetails.PlayerId,
-						MatchId:  m.matchId,
-					}
-				})
-			} else {
-				m.ViewStateName = model.InGameView
-				cmds = append(cmds, func() tea.Msg {
-					return model.GameStateChangeMsg{
-						NewState: matchDetails.GameState,
-						PlayerId: matchDetails.PlayerId,
-						MatchId:  m.matchId,
-					}
-				})
+		cmds = append(cmds, func() tea.Msg {
+			return resp
+		})
+	case model.Account:
+		m.accountId = msg.Id
+		cmds = append(cmds, func() tea.Msg {
+			return model.StateChangeMsg{
+				NewState: model.LobbyView,
 			}
-		}
+		})
 	case model.MatchDetailsResponse:
 		matchDetails := msg
 		m.matchId = matchDetails.MatchId
+
+		if matchDetails.GameState == model.NewGameState ||
+			matchDetails.GameState == model.JoinGameState {
+			m.ViewStateName = model.JoinGameView
+			cmds = append(cmds, func() tea.Msg {
+				return model.GameStateChangeMsg{
+					NewState: model.JoinGameState,
+					PlayerId: matchDetails.PlayerId,
+					MatchId:  m.matchId,
+				}
+			})
+
+			break
+		}
+
 		m.ViewStateName = model.InGameView
 		cmds = append(cmds, func() tea.Msg {
 			return model.GameStateChangeMsg{
@@ -75,12 +59,11 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				MatchId:  m.matchId,
 			}
 		})
-
 	case model.GameStateChangeMsg:
 		switch msg.NewState {
 		case model.NewGameState:
 			var cmd tea.Cmd
-			cmd = m.createMatch(msg, model.NewGameState)
+			cmd = m.createMatch(msg)
 			gameView := m.currentView.(*views.GameView)
 			p, err := utils.GetPlayerId(m.accountId, gameView.GameMatch.Players)
 			if err != nil {
@@ -90,13 +73,12 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 		case model.JoinGameState:
 			var cmd tea.Cmd
-			cmd = m.createMatch(msg, model.JoinGameState)
-			m.forcePlayersReady(msg.PlayerId)
+			cmd = m.createMatch(msg)
+			services.PlayerReady(msg.PlayerId)
 			cmds = append(cmds, cmd)
 		case model.WaitingState:
 			m.playersReady = true
 			m.ViewStateName = model.InGameView
-			//m.currentView.(*views.GameView).GameState = model.DiscardState
 		case model.CutState:
 			m.playersReady = true
 			m.ViewStateName = model.InGameView
@@ -111,6 +93,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ViewStateName = model.LobbyView
 			services.GetOpenMatches()
 		}
+
 	case timer.TickMsg: // Polling update
 		if m.ViewStateName != model.InGameView {
 			break
@@ -138,11 +121,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m *AppModel) forcePlayersReady(playerId int) {
-	services.PlayerReady(playerId)
-}
-
-func (m *AppModel) createMatch(msg model.GameStateChangeMsg, state model.GameState) tea.Cmd {
+func (m *AppModel) createMatch(msg model.GameStateChangeMsg) tea.Cmd {
 	if m.GameInitd {
 		return nil
 	}
@@ -154,12 +133,10 @@ func (m *AppModel) createMatch(msg model.GameStateChangeMsg, state model.GameSta
 
 	gameView := m.currentView.(*views.GameView)
 	gameView.Init()
-	//gameView.UpdateState(model.WaitingState)
 	m.GameInitd = true
+	m.ViewStateName = model.InGameView
 
 	cmd := m.timer.Init()
-
-	m.ViewStateName = model.InGameView
 
 	return cmd
 }

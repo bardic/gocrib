@@ -201,7 +201,7 @@ func ParseMatch(details model.GameMatch) pgx.NamedArgs {
 		"deckId":             details.DeckId,
 		"creationDate":       details.CreationDate,
 		"cutGameCardId":      details.CutGameCardId,
-		"currentPlayerTurn":  details.CurrentPlayerTurn,
+		"currentPlayerTurn":  details.PlayerIds[0],
 		"turnPassTimestamps": []string{},
 		"art":                details.Art,
 		"players":            details.Players,
