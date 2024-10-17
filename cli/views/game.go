@@ -19,7 +19,6 @@ type GameView struct {
 	MatchId        int
 	AccountId      int
 	CutIndex       string
-	GameState      model.GameState
 	HighlightedIds []int
 	GameTabNames   []string
 	GameViewState  model.GameViewState
@@ -64,6 +63,10 @@ func (v *GameView) Init() {
 }
 
 func (v *GameView) View() string {
+	if v.GameMatch == nil {
+		return "Loading..."
+	}
+
 	doc := strings.Builder{}
 
 	renderedTabs := renderTabs(v.GameTabNames, v.ActiveTab)
@@ -77,7 +80,7 @@ func (v *GameView) View() string {
 	var view string
 	switch v.GameViewState {
 	case model.BoardView:
-		if v.GameState == model.CutState {
+		if v.GameMatch.GameState == model.CutState {
 			v.CutInput.Focus()
 			view = v.CutInput.View() + " \n"
 		} else {
@@ -102,7 +105,7 @@ func (v *GameView) View() string {
 		view = HandView(v.HighlighedId, v.HighlightedIds, p.Play, v.Deck)
 	case model.HandView:
 		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
-		if v.GameState == 0 {
+		if v.GameMatch.GameState == 0 {
 			view = "Waiting to be dealt"
 		} else {
 			view = HandView(v.HighlighedId, v.HighlightedIds, p.Hand, v.Deck)
@@ -121,7 +124,7 @@ func (v *GameView) View() string {
 }
 
 func (v *GameView) Enter() tea.Msg {
-	switch v.GameState {
+	switch v.GameMatch.GameState {
 	case model.CutState:
 		v.CutIndex = v.CutInput.Value()
 		return services.CutDeck
@@ -149,14 +152,12 @@ func (v *GameView) Update(msg tea.Msg) tea.Cmd {
 	return cmd
 }
 
-func (v *GameView) UpdateState(newState model.GameState) tea.Cmd {
+/*func (v *GameView) UpdateState(newState model.GameState) tea.Cmd {
 	var cmd tea.Cmd
 
-	if v.GameState == newState {
+	if v.GameMatch == nil || v.GameMatch.GameState == newState {
 		return nil
 	}
-
-	v.GameState = newState
 
 	matchMsg := services.GetPlayerMatch(strconv.Itoa(v.MatchId))
 	var match *model.GameMatch
@@ -167,7 +168,7 @@ func (v *GameView) UpdateState(newState model.GameState) tea.Cmd {
 	v.GameMatch = match
 	p := utils.GetPlayerForAccountId(v.AccountId, match)
 
-		for _, cardId := range p.Hand {
+	for _, cardId := range p.Hand {
 		card := utils.GetCardById(cardId, v.Deck)
 		if card != nil {
 			v.Hand = append(v.Hand, *card)
@@ -185,4 +186,4 @@ func (v *GameView) UpdateState(newState model.GameState) tea.Cmd {
 	}
 
 	return cmd
-}
+}*/

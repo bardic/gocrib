@@ -41,31 +41,9 @@ func JoinMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	// // temp force players to ready
-	// _, err = player.ReadyPlayerById(c, p.Id)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// m, err = utils.GetMatch(m.Id)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// //check if players are ready
-	// rdy := utils.PlayersReady(m.Players)
-
-	// gameState := model.JoinGameState
-	// if rdy {
-	// 	game.Deal(m)
-	// }
-
-	// utils.UpdateMatchState(details.MatchId, gameState)
-
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
 		MatchId:   m.Id,
+		PlayerId:  p.Id,
 		GameState: model.JoinGameState,
 	})
 }

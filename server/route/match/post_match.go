@@ -114,6 +114,7 @@ func NewMatch(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
 		MatchId:   matchId,
+		PlayerId:  p.Id,
 		GameState: model.NewGameState,
 	})
 }

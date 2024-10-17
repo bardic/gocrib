@@ -156,13 +156,13 @@ func (m *AppModel) OnEnterDuringPlay() {
 	}
 	gameView := m.currentView.(*views.GameView)
 
-	if gameView.GameState == model.WaitingState {
-		gameView.GameState = model.DiscardState
+	if gameView.GameMatch.GameState == model.WaitingState {
+		gameView.GameMatch.GameState = model.DiscardState
 	}
 
 	m.ViewStateName = model.InGameView
 
-	if gameView.GameState == model.DiscardState {
+	if gameView.GameMatch.GameState == model.DiscardState {
 		for _, idx := range gameView.HighlightedIds {
 			gameView.Kitty = append(gameView.Kitty, utils.GetCardInHandById(idx, gameView.Hand))
 			gameView.Hand = slices.DeleteFunc(gameView.Hand, func(c model.Card) bool {

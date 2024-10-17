@@ -177,6 +177,7 @@ type JoinMatchReq struct {
 
 type MatchDetailsResponse struct {
 	MatchId   int
+	PlayerId  int
 	GameState GameState
 }
 
@@ -265,5 +266,6 @@ type StateChangeMsg struct {
 
 type GameStateChangeMsg struct {
 	NewState GameState
+	PlayerId int
 	MatchId  int
 }

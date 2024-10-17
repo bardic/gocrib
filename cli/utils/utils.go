@@ -66,10 +66,7 @@ func CreateGame(accountId int) tea.Msg {
 	var matchDetails model.MatchDetailsResponse
 	json.Unmarshal(newMatch, &matchDetails)
 
-	return model.MatchDetailsResponse{
-		MatchId:   matchDetails.MatchId,
-		GameState: matchDetails.GameState,
-	}
+	return matchDetails
 }
 
 func GetPlayerForAccountId(id int, match *model.GameMatch) *model.Player {
