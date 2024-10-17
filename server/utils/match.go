@@ -325,3 +325,84 @@ func UpdateMatchCut(cardId, matchId int) error {
 
 	return nil
 }
+
+func UpdateMatch(match model.GameMatch) error {
+	args := ParseMatch(match)
+	query := `UPDATE match SET
+				playerIds = @playerIds,
+				creationDate = @creationDate,
+				privateMatch = @privateMatch,
+				eloRangeMin = @eloRangeMin,
+				eloRangeMax = @eloRangeMax,
+				deckId = @deckId,
+				cutGameCardId = @cutGameCardId,
+				currentPlayerTurn = @currentPlayerTurn,
+				turnPassTimestamps = @turnPassTimestamps,
+				gameState= @gameState,
+				art = @art
+			WHERE id=@id`
+
+	db := conn.Pool()
+	defer db.Close()
+
+	_, err := db.Exec(
+		context.Background(),
+		query,
+		args)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
+	args := pgx.NamedArgs{
+		"matchId":  req.MatchId,
+		"playerId": req.PlayerId,
+	}
+
+	query := `UPDATE match SET
+				playerIds=ARRAY_APPEND(playerIds, @playerId)
+			WHERE id=@matchId`
+
+	db := conn.Pool()
+	defer db.Close()
+
+	_, err := db.Exec(
+		context.Background(),
+		query,
+		args)
+
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := GetMatch(req.MatchId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
+}
+
+func GetDeckById(id int) (model.GameDeck, error) {
+	db := conn.Pool()
+	defer db.Close()
+	var deckId int
+	var cards []model.GameplayCard
+	err := db.QueryRow(context.Background(), "SELECT * FROM deck WHERE id=$1", id).Scan(&deckId, &cards)
+
+	if err != nil {
+		return model.GameDeck{}, err
+	}
+
+	deck := model.GameDeck{
+		Id:    deckId,
+		Cards: cards,
+	}
+
+	return deck, nil
+}

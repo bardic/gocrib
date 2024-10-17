@@ -25,12 +25,12 @@ func GetMatchState(c echo.Context) error {
 	id, err := strconv.Atoi(p)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	m, err := utils.GetMatch(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{

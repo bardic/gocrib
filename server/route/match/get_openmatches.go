@@ -20,7 +20,7 @@ import (
 func GetOpenMatches(c echo.Context) error {
 	v, err := utils.GetOpenMatches()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, v)

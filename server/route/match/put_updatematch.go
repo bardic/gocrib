@@ -1,10 +1,8 @@
 package match
 
 import (
-	"context"
 	"net/http"
 
-	conn "github.com/bardic/cribbage/server/db"
 	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/gocrib/model"
 	"github.com/labstack/echo/v4"
@@ -28,40 +26,9 @@ func UpdateMatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err := updateMatch(*details); err != nil {
-		return err
+	if err := utils.UpdateMatch(*details); err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, "meow")
-}
-
-func updateMatch(match model.GameMatch) error {
-	args := utils.ParseMatch(match)
-	query := `UPDATE match SET
-				playerIds = @playerIds,
-				creationDate = @creationDate,
-				privateMatch = @privateMatch,
-				eloRangeMin = @eloRangeMin,
-				eloRangeMax = @eloRangeMax,
-				deckId = @deckId,
-				cutGameCardId = @cutGameCardId,
-				currentPlayerTurn = @currentPlayerTurn,
-				turnPassTimestamps = @turnPassTimestamps,
-				gameState= @gameState,
-				art = @art
-			WHERE id=@id`
-
-	db := conn.Pool()
-	defer db.Close()
-
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

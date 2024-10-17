@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/cribbage/server/route/deck"
 	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/gocrib/model"
 	"github.com/labstack/echo/v4"
@@ -31,19 +30,19 @@ func CutDeck(c echo.Context) error {
 	m, err := utils.GetMatch(details.MatchId)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	d, err := deck.GetDeckById(m.Id)
+	d, err := utils.GetDeckById(m.Id)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	cutIndex, err := strconv.Atoi(details.CutIndex)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	card := d.Cards[cutIndex]
@@ -53,7 +52,7 @@ func CutDeck(c echo.Context) error {
 	err = utils.UpdateCut(m.Id, card.CardId)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	utils.UpdateMatchState(details.MatchId, model.DiscardState)

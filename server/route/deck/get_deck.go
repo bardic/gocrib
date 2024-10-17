@@ -1,12 +1,10 @@
 package deck
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 
-	conn "github.com/bardic/cribbage/server/db"
-	"github.com/bardic/gocrib/model"
+	"github.com/bardic/cribbage/server/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -26,33 +24,14 @@ func GetDeck(c echo.Context) error {
 	id, err := strconv.Atoi(p)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	deck, err := GetDeckById(id)
+	deck, err := utils.GetDeckById(id)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, deck)
-}
-
-func GetDeckById(id int) (model.GameDeck, error) {
-	db := conn.Pool()
-	defer db.Close()
-	var deckId int
-	var cards []model.GameplayCard
-	err := db.QueryRow(context.Background(), "SELECT * FROM deck WHERE id=$1", id).Scan(&deckId, &cards)
-
-	if err != nil {
-		return model.GameDeck{}, err
-	}
-
-	deck := model.GameDeck{
-		Id:    deckId,
-		Cards: cards,
-	}
-
-	return deck, nil
 }

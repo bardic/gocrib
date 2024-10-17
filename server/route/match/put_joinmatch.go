@@ -1,13 +1,10 @@
 package match
 
 import (
-	"context"
 	"net/http"
 
-	conn "github.com/bardic/cribbage/server/db"
 	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/gocrib/model"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -36,7 +33,7 @@ func JoinMatch(c echo.Context) error {
 	}
 
 	details.PlayerId = p.Id
-	m, err := updatePlayersInMatch(*details)
+	m, err := utils.UpdatePlayersInMatch(*details)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -46,35 +43,4 @@ func JoinMatch(c echo.Context) error {
 		PlayerId:  p.Id,
 		GameState: model.JoinGameState,
 	})
-}
-
-func updatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
-	args := pgx.NamedArgs{
-		"matchId":  req.MatchId,
-		"playerId": req.PlayerId,
-	}
-
-	query := `UPDATE match SET
-				playerIds=ARRAY_APPEND(playerIds, @playerId)
-			WHERE id=@matchId`
-
-	db := conn.Pool()
-	defer db.Close()
-
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
-
-	if err != nil {
-		return nil, err
-	}
-
-	m, err := utils.GetMatch(req.MatchId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return m, nil
 }

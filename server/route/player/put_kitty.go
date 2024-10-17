@@ -32,13 +32,13 @@ func UpdateKitty(c echo.Context) error {
 	m, err := updateKitty(*details)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	err = utils.UpdateGameState(m.Id, model.PlayState)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	m.GameState = model.PlayState

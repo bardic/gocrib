@@ -35,13 +35,13 @@ func NewMatch(c echo.Context) error {
 	d, err := utils.NewDeck()
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	p, err := player.NewPlayerQuery(details.AccountId)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	match := model.GameMatch{}
@@ -86,7 +86,7 @@ func NewMatch(c echo.Context) error {
 		args).Scan(&matchId)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	// d = *d.Shuffle()

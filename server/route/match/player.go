@@ -30,13 +30,13 @@ func UpdatePlay(c echo.Context) error {
 	m, err := utils.UpdatePlay(*details)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	err = utils.UpdateGameState(m.Id, model.OpponentState)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, m)

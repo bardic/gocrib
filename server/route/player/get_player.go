@@ -26,13 +26,13 @@ func GetPlayer(c echo.Context) error {
 	p1Id, err := strconv.Atoi(id)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	p, err := utils.GetPlayerById(p1Id)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, p)

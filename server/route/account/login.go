@@ -33,7 +33,7 @@ func Login(c echo.Context) error {
 	err := db.QueryRow(context.Background(), "SELECT name FROM accounts WHERE id=$1", id).Scan(&name)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	a := model.Account{

@@ -28,7 +28,7 @@ func GetGameplayCards(c echo.Context) error {
 	rows, err := db.Query(context.Background(), "SELECT * FROM gameplaycards NATURAL JOIN cards WHERE gameplaycards.id IN ("+ids+")")
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	v := []model.GameplayCard{}
@@ -38,7 +38,7 @@ func GetGameplayCards(c echo.Context) error {
 
 		err := rows.Scan(&card.Id, &card.CardId, &card.OrigOwner, &card.CurrOwner, &card.State, &card.Value, &card.Suit, &card.Art)
 		if err != nil {
-			return err
+			return c.JSON(http.StatusInternalServerError, err)
 		}
 
 		v = append(v, card)
