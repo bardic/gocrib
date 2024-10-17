@@ -140,24 +140,6 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *AppModel) forcePlayersReady(playerId int) {
 	services.PlayerReady(playerId)
-	// gameView := m.currentView.(*views.GameView)
-	// matchId, err := utils.GetMatchForPlayerId(playerId)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// m, err := utils.GetMatch(matchId)
-
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err)
-	// }
-
-	// p, err := utils.GetPlayerId(m.accountId, gameView.GameMatch.Players)
-	// if err != nil {
-	// 	utils.Logger.Sugar().Error(err)
-	// }
-
 }
 
 func (m *AppModel) createMatch(msg model.GameStateChangeMsg, state model.GameState) tea.Cmd {
