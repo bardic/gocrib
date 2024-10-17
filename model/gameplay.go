@@ -102,8 +102,8 @@ const (
 	WaitingState
 	MatchReady
 	DealState
-	CutState
 	DiscardState
+	CutState
 	PlayState
 	OpponentState
 	KittyState

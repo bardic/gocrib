@@ -2,12 +2,14 @@ package views
 
 import (
 	"encoding/json"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
+
 	"github.com/bardic/gocrib/model"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -154,6 +156,79 @@ func (v *GameView) Update(msg tea.Msg) tea.Cmd {
 	v.CutInput.Focus()
 	v.CutInput, cmd = v.CutInput.Update(msg)
 	return cmd
+}
+
+func (v *GameView) ParseInput(msg tea.KeyMsg) tea.Msg {
+	switch msg.String() {
+	case "ctrl+c", "q":
+		return tea.Quit()
+	case "enter", "view_update":
+		return v.Enter()
+	case " ":
+		cards := utils.GetVisibleCards(v.ActiveTab, v.GameMatch.Players[0])
+
+		if len(cards) == 0 {
+			return nil
+		}
+
+		idx := slices.Index(v.HighlightedIds, cards[v.HighlighedId])
+		if idx > -1 {
+			v.HighlightedIds = slices.Delete(v.HighlightedIds, 0, 1)
+		} else {
+			v.HighlightedIds = append(v.HighlightedIds, cards[v.HighlighedId])
+		}
+	case "tab":
+		v.ActiveTab = v.ActiveTab + 1
+
+		switch v.ActiveTab {
+		case 0:
+			v.GameViewState = model.BoardView
+		case 1:
+			v.GameViewState = model.PlayView
+		case 2:
+			v.GameViewState = model.HandView
+		case 3:
+			v.GameViewState = model.KittyView
+		}
+
+	case "shift+tab":
+		v.ActiveTab = v.ActiveTab - 1
+
+		switch v.ActiveTab {
+		case 0:
+			v.GameViewState = model.BoardView
+		case 1:
+			v.GameViewState = model.PlayView
+		case 2:
+			v.GameViewState = model.HandView
+		case 3:
+			v.GameViewState = model.KittyView
+		}
+
+	case "right":
+		v.ActiveSlot++
+
+		cards := utils.GetVisibleCards(v.ActiveTab, v.GameMatch.Players[0])
+
+		if v.ActiveSlot > len(cards)-1 {
+			v.ActiveSlot = 0
+		}
+
+		v.HighlighedId = v.ActiveSlot
+	case "left":
+
+		v.ActiveSlot--
+
+		cards := utils.GetVisibleCards(v.ActiveTab, v.GameMatch.Players[0])
+
+		if v.ActiveSlot < 0 {
+			v.ActiveSlot = len(cards) - 1
+		}
+
+		v.HighlighedId = v.ActiveSlot
+	}
+
+	return nil
 }
 
 /*func (v *GameView) UpdateState(newState model.GameState) tea.Cmd {

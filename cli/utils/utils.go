@@ -78,3 +78,19 @@ func GetPlayerForAccountId(id int, match *model.GameMatch) *model.Player {
 
 	return nil
 }
+
+func GetVisibleCards(activeTab int, player model.Player) []int {
+	var cards []int
+	switch activeTab {
+	case 0:
+		cards = nil
+	case 1:
+		cards = player.Play
+	case 2:
+		cards = player.Hand
+	case 3:
+		cards = player.Kitty
+	}
+
+	return cards
+}

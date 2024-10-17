@@ -50,6 +50,10 @@ func (v *LoginView) Enter() tea.Msg {
 	return accountDetails
 }
 
+func (v *LoginView) ParseInput(msg tea.KeyMsg) tea.Msg {
+	return msg
+}
+
 func (v *LoginView) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 

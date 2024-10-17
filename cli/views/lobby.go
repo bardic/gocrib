@@ -88,6 +88,10 @@ func (v *LobbyView) Enter() tea.Msg {
 	return matchDetails
 }
 
+func (v *LobbyView) ParseInput(msg tea.KeyMsg) tea.Msg {
+	return msg
+}
+
 func (v *LobbyView) Update(msg tea.Msg) tea.Cmd {
 	v.Init()
 	v.LobbyTable.Focus()

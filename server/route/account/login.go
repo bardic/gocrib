@@ -4,8 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	conn "github.com/bardic/cribbage/server/db"
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
+	conn "github.com/bardic/gocrib/server/db"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,7 +22,7 @@ import (
 // @Failure      500  {object}  error
 // @Router       /account/login/ [post]
 func Login(c echo.Context) error {
-	id := new(int)
+	id := new(int32)
 	if err := c.Bind(id); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
@@ -29,15 +30,21 @@ func Login(c echo.Context) error {
 	db := conn.Pool()
 	defer db.Close()
 
-	var name string
-	err := db.QueryRow(context.Background(), "SELECT name FROM accounts WHERE id=$1", id).Scan(&name)
+	ctx := context.Background()
+
+	q := queries.New(db)
+
+	name, err := q.GetAccount(ctx, *id)
+
+	// var name string
+	// err := db.QueryRow("SELECT name FROM accounts WHERE id=$1", id).Scan(&name)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	a := model.Account{
-		Id:   *id,
+		Id:   int(*id),
 		Name: name,
 	}
 

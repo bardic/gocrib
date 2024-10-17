@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	conn "github.com/bardic/cribbage/server/db"
-	"github.com/bardic/cribbage/server/route/player"
-	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/gocrib/model"
+	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/route/player"
+	"github.com/bardic/gocrib/server/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -88,29 +88,6 @@ func NewMatch(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
-
-	// d = *d.Shuffle()
-	// for i := 0; i < 12; i++ {
-	// 	if i%2 == 0 {
-	// 		match.Players[0].Hand = append(match.Players[0].Hand, d.Cards[i].CardId)
-	// 	} else {
-	// 		match.Players[1].Hand = append(match.Players[1].Hand, d.Cards[i].CardId)
-	// 	}
-	// }
-
-	// match.GameState = model.DiscardState
-
-	// // err = updateMatch(match)
-
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if match.Players[0].Id == details.RequesterId {
-	// 	match.Players[1].Hand = []int{}
-	// } else {
-	// 	match.Players[0].Hand = []int{}
-	// }
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
 		MatchId:   matchId,

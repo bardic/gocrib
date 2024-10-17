@@ -3,7 +3,7 @@ package utils
 import (
 	"context"
 
-	conn "github.com/bardic/cribbage/server/db"
+	conn "github.com/bardic/gocrib/server/db"
 
 	"github.com/bardic/gocrib/model"
 	"github.com/jackc/pgx/v5"
@@ -141,7 +141,7 @@ func ParsePlayer(details model.Player) pgx.NamedArgs {
 
 func Deal(match *model.GameMatch) (*model.GameDeck, error) {
 	deck, err := GetDeckById(match.DeckId)
-
+	deck = *deck.Shuffle()
 	if err != nil {
 		return nil, err
 	}

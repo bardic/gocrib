@@ -28,7 +28,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		gameView := m.currentView.(*views.GameView)
-		cards := m.getVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
+		cards := utils.GetVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
 
 		if len(cards) == 0 {
 			return nil
@@ -107,7 +107,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Msg {
 
 		gameView.ActiveSlot++
 
-		cards := m.getVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
+		cards := utils.GetVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
 
 		if gameView.ActiveSlot > len(cards)-1 {
 			gameView.ActiveSlot = 0
@@ -122,7 +122,7 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Msg {
 		gameView := m.currentView.(*views.GameView)
 		gameView.ActiveSlot--
 
-		cards := m.getVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
+		cards := utils.GetVisibleCards(gameView.ActiveTab, gameView.GameMatch.Players[0])
 
 		if gameView.ActiveSlot < 0 {
 			gameView.ActiveSlot = len(cards) - 1
@@ -134,32 +134,11 @@ func (m *AppModel) parseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func (m *AppModel) getVisibleCards(activeTab int, player model.Player) []int {
-	var cards []int
-	switch activeTab {
-	case 0:
-		cards = nil
-	case 1:
-		cards = player.Play
-	case 2:
-		cards = player.Hand
-	case 3:
-		cards = player.Kitty
-	}
-
-	return cards
-}
-
 func (m *AppModel) OnEnterDuringPlay() {
 	if m.ViewStateName != model.InGameView {
 		return
 	}
 	gameView := m.currentView.(*views.GameView)
-
-	// if gameView.GameMatch.GameState == model.WaitingState {
-	// 	gameView.GameMatch.GameState = model.DiscardState
-	// }
-
 	m.ViewStateName = model.InGameView
 
 	if gameView.GameMatch.GameState == model.DiscardState {

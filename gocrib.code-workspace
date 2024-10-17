@@ -11,6 +11,9 @@
 		{
 			"name": "model",
 			"path": "model"
+		},
+		{
+			"path": "queries"
 		}
 	]
 }

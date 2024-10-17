@@ -5,6 +5,7 @@ import (
 )
 
 type IViewState interface {
+	ParseInput(tea.KeyMsg) tea.Msg
 	Enter() tea.Msg
 	View() string
 	Update(msg tea.Msg) tea.Cmd

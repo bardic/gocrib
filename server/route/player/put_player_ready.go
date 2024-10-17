@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	conn "github.com/bardic/cribbage/server/db"
-	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/gocrib/model"
+	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/utils"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -49,7 +49,7 @@ func PlayerReady(c echo.Context) error {
 
 	if utils.PlayersReady(m.Players) {
 		utils.Deal(m)
-		utils.UpdateGameState(matchId, model.CutState)
+		utils.UpdateGameState(matchId, model.DiscardState)
 	}
 
 	return c.JSON(http.StatusOK, nil)

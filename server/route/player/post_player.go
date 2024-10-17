@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	conn "github.com/bardic/cribbage/server/db"
 	"github.com/bardic/gocrib/model"
+	conn "github.com/bardic/gocrib/server/db"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
