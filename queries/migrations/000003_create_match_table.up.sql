@@ -5,10 +5,10 @@ CREATE TABLE IF NOT EXISTS match (
   privateMatch boolean NOT NULL,
   eloRangeMin int NOT NULL,
   eloRangeMax int NOT NULL,
-  deckId numeric NOT NULL,
+  deckId integer NOT NULL,
   cutGameCardId integer NOT NULL,
   currentPlayerTurn integer NOT NULL,
-  turnPassTimestamps varchar(256) [] NOT NULL,
+  turnPassTimestamps timestamptz [] NOT NULL,
   gameState integer NOT NULL,
   art varchar(256) NOT NULL
 );
