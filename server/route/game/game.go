@@ -6,52 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bardic/cribbage/server/route/deck"
-	"github.com/bardic/cribbage/server/route/player"
 	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/gocrib/model"
 )
-
-func Deal(match *model.GameMatch) (*model.GameDeck, error) {
-	deck, err := deck.GetDeckById(match.DeckId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	players := []model.Player{}
-
-	for _, ids := range match.PlayerIds {
-		player, err := player.GetPlayerById(ids)
-
-		if err != nil {
-			return nil, err
-		}
-
-		players = append(players, player)
-	}
-
-	cardsPerHand := 6
-	if len(players) == 3 {
-		cardsPerHand = 5
-	}
-
-	for i := 0; i < len(players)*cardsPerHand; i++ {
-		var card model.GameplayCard
-		card, deck.Cards = deck.Cards[0], deck.Cards[1:]
-		idx := len(players) - 1 - i%len(players)
-
-		if len(players[idx].Hand) < cardsPerHand {
-			players[idx].Hand = append(players[idx].Hand, card.CardId)
-		}
-	}
-
-	for _, p := range players {
-		player.UpdatePlayerById(p)
-	}
-
-	return &deck, nil
-}
 
 func cardsInPlay(players []model.Player) []int {
 	cardIds := []int{}

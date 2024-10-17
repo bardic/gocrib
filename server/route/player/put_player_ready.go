@@ -18,7 +18,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param details body int true "player id to update"
-// @Success      200  {object}  model.Player
+// @Success      200  {object}  bool
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -29,8 +29,35 @@ func PlayerReady(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	_, err := ReadyPlayerById(c, *details)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	matchId, err := utils.GetMatchForPlayerId(*details)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	m, err := utils.GetMatch(matchId)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	if utils.PlayersReady(m.Players) {
+		utils.Deal(m)
+		utils.UpdateGameState(matchId, model.CutState)
+	}
+
+	return c.JSON(http.StatusOK, nil)
+}
+
+func ReadyPlayerById(c echo.Context, playerId int) (bool, error) {
 	args := pgx.NamedArgs{
-		"id":      details,
+		"id":      playerId,
 		"isReady": true,
 	}
 
@@ -48,53 +75,8 @@ func PlayerReady(c echo.Context) error {
 		args)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return false, err
 	}
 
-	args = pgx.NamedArgs{
-		"id": details,
-	}
-
-	query = `SELECT id, playerids from match WHERE @id = ANY(playerids)`
-
-	var matchId int
-	var playerIds []int
-	err = db.QueryRow(
-		context.Background(),
-		query,
-		args).Scan(&matchId, &playerIds)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	allReady := true
-	for _, playerId := range playerIds {
-		args = pgx.NamedArgs{
-			"id": playerId,
-		}
-		query = `SELECT isReady from player WHERE id = @id`
-
-		var isReady bool
-		err = db.QueryRow(
-			context.Background(),
-			query,
-			args).Scan(&isReady)
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-
-		if !isReady {
-			allReady = false
-			break
-		}
-
-	}
-
-	if allReady {
-		utils.UpdateGameState(matchId, model.CutState)
-	}
-
-	return c.JSON(http.StatusOK, nil)
+	return true, nil
 }

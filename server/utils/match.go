@@ -32,6 +32,7 @@ var matchQuery = `SELECT
 						'hand', p.hand,
 						'kitty', p.kitty,
 						'score', p.score,
+						'isready', p.isready,
 						'art', p.art ))
 				FROM player as p WHERE p.Id = ANY(m.playerIds)))`
 

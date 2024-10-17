@@ -4,6 +4,8 @@ import (
 	"context"
 
 	conn "github.com/bardic/cribbage/server/db"
+	"github.com/bardic/cribbage/server/route/deck"
+
 	"github.com/bardic/gocrib/model"
 	"github.com/jackc/pgx/v5"
 )
@@ -86,6 +88,46 @@ func PlayCard(details model.HandModifier) (*model.GameMatch, error) {
 	return &m[0], nil
 }
 
+func PlayersReady(players []model.Player) bool {
+	ready := true
+
+	if len(players) < 2 {
+		return false
+	}
+
+	for _, p := range players {
+		if !p.IsReady {
+			ready = false
+		}
+	}
+
+	return ready
+}
+
+func GetMatchForPlayerId(playerId int) (int, error) {
+	args := pgx.NamedArgs{
+		"id": playerId,
+	}
+
+	query := `SELECT id from match WHERE @id = ANY(playerids)`
+
+	var matchId int
+
+	db := conn.Pool()
+	defer db.Close()
+
+	err := db.QueryRow(
+		context.Background(),
+		query,
+		args).Scan(&matchId)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return matchId, nil
+}
+
 func ParsePlayer(details model.Player) pgx.NamedArgs {
 	return pgx.NamedArgs{
 		"id":      details.Id,
@@ -96,4 +138,97 @@ func ParsePlayer(details model.Player) pgx.NamedArgs {
 		"isReady": details.IsReady,
 		"art":     details.Art,
 	}
+}
+
+func Deal(match *model.GameMatch) (*model.GameDeck, error) {
+	deck, err := deck.GetDeckById(match.DeckId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	players := []model.Player{}
+
+	for _, ids := range match.PlayerIds {
+		player, err := GetPlayerById(ids)
+
+		if err != nil {
+			return nil, err
+		}
+
+		players = append(players, player)
+	}
+
+	cardsPerHand := 6
+	if len(players) == 3 {
+		cardsPerHand = 5
+	}
+
+	for i := 0; i < len(players)*cardsPerHand; i++ {
+		var card model.GameplayCard
+		card, deck.Cards = deck.Cards[0], deck.Cards[1:]
+		idx := len(players) - 1 - i%len(players)
+
+		if len(players[idx].Hand) < cardsPerHand {
+			players[idx].Hand = append(players[idx].Hand, card.CardId)
+		}
+	}
+
+	for _, p := range players {
+		UpdatePlayerById(p)
+	}
+
+	return &deck, nil
+}
+
+func GetPlayerById(id int) (model.Player, error) {
+	db := conn.Pool()
+	defer db.Close()
+
+	player := model.Player{}
+	err := db.QueryRow(context.Background(), "SELECT * FROM player WHERE id=$1", id).Scan(
+		&player.Id,
+		&player.AccountId,
+		&player.Play,
+		&player.Hand,
+		&player.Kitty,
+		&player.Score,
+		&player.IsReady,
+		&player.Art,
+	)
+
+	if err != nil {
+		return model.Player{}, err
+	}
+
+	return player, nil
+
+}
+
+func UpdatePlayerById(player model.Player) (model.Player, error) {
+	args := ParsePlayer(player)
+
+	query := `UPDATE player SET 
+		hand = @hand, 
+		play = @play, 
+		kitty = @kitty, 
+		score = @score, 
+		isReady = @isReady,
+		art = @art 
+	where 
+		id = @id`
+
+	db := conn.Pool()
+	defer db.Close()
+
+	_, err := db.Exec(
+		context.Background(),
+		query,
+		args)
+
+	if err != nil {
+		return model.Player{}, err
+	}
+
+	return player, nil
 }

@@ -1,10 +1,8 @@
 package player
 
 import (
-	"context"
 	"net/http"
 
-	conn "github.com/bardic/cribbage/server/db"
 	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/gocrib/model"
 	"github.com/labstack/echo/v4"
@@ -28,39 +26,11 @@ func UpdatePlayer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := UpdatePlayerById(*details)
+	p, err := utils.UpdatePlayerById(*details)
 
 	if err != nil {
 		return c.JSON(http.StatusOK, err)
 	}
 
 	return c.JSON(http.StatusOK, p)
-}
-
-func UpdatePlayerById(player model.Player) (model.Player, error) {
-	args := utils.ParsePlayer(player)
-
-	query := `UPDATE player SET 
-		hand = @hand, 
-		play = @play, 
-		kitty = @kitty, 
-		score = @score, 
-		isReady = @isReady,
-		art = @art 
-	where 
-		id = @id`
-
-	db := conn.Pool()
-	defer db.Close()
-
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
-
-	if err != nil {
-		return model.Player{}, err
-	}
-
-	return player, nil
 }

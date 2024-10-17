@@ -878,7 +878,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Player"
+                            "type": "boolean"
                         }
                     },
                     "400": {

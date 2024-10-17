@@ -1,12 +1,10 @@
 package player
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 
-	conn "github.com/bardic/cribbage/server/db"
-	"github.com/bardic/gocrib/model"
+	"github.com/bardic/cribbage/server/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,35 +29,11 @@ func GetPlayer(c echo.Context) error {
 		return err
 	}
 
-	p, err := GetPlayerById(p1Id)
+	p, err := utils.GetPlayerById(p1Id)
 
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusOK, p)
-}
-
-func GetPlayerById(id int) (model.Player, error) {
-	db := conn.Pool()
-	defer db.Close()
-
-	player := model.Player{}
-	err := db.QueryRow(context.Background(), "SELECT * FROM player WHERE id=$1", id).Scan(
-		&player.Id,
-		&player.AccountId,
-		&player.Play,
-		&player.Hand,
-		&player.Kitty,
-		&player.Score,
-		&player.IsReady,
-		&player.Art,
-	)
-
-	if err != nil {
-		return model.Player{}, err
-	}
-
-	return player, nil
-
 }

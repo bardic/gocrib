@@ -5,8 +5,6 @@ import (
 	"net/http"
 
 	conn "github.com/bardic/cribbage/server/db"
-	"github.com/bardic/cribbage/server/route/game"
-	"github.com/bardic/cribbage/server/route/player"
 	"github.com/bardic/cribbage/server/utils"
 	"github.com/bardic/gocrib/model"
 	"github.com/jackc/pgx/v5"
@@ -31,31 +29,40 @@ func JoinMatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := player.GetPlayerById(details.PlayerId)
-	//p, err := player.NewPlayerQuery(details.PlayerId)
+	p, err := utils.GetPlayerById(details.PlayerId)
 
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	details.PlayerId = p.Id
 	m, err := updatePlayersInMatch(*details)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	utils.UpdateMatchState(details.MatchId, model.JoinGameState)
-	//utils.UpdateMatchState(details.MatchId, model.DealState)
+	// // temp force players to ready
+	// _, err = player.ReadyPlayerById(c, p.Id)
 
-	m, err = utils.GetMatch(m.Id)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if err != nil {
-		return err
-	}
+	// m, err = utils.GetMatch(m.Id)
 
-	game.Deal(m)
+	// if err != nil {
+	// 	return err
+	// }
 
-	//utils.UpdateMatchState(details.MatchId, model.CutState)
+	// //check if players are ready
+	// rdy := utils.PlayersReady(m.Players)
+
+	// gameState := model.JoinGameState
+	// if rdy {
+	// 	game.Deal(m)
+	// }
+
+	// utils.UpdateMatchState(details.MatchId, gameState)
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
 		MatchId:   m.Id,
@@ -89,19 +96,6 @@ func updatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 
 	if err != nil {
 		return nil, err
-	}
-
-	isReady, err := utils.IsMatchReadyToStart(m)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if isReady {
-		_, err = game.Deal(m)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return m, nil
