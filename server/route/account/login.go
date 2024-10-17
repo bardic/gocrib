@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/bardic/gocrib/model"
 	"github.com/bardic/gocrib/queries"
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/labstack/echo/v4"
@@ -17,7 +16,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param details body int true "id to login with"
-// @Success      200  {object}  model.Account
+// @Success      200  {object}  queries.Account
 // @Failure      400  {object}  error
 // @Failure      500  {object}  error
 // @Router       /account/login/ [post]
@@ -36,15 +35,12 @@ func Login(c echo.Context) error {
 
 	name, err := q.GetAccount(ctx, *id)
 
-	// var name string
-	// err := db.QueryRow("SELECT name FROM accounts WHERE id=$1", id).Scan(&name)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	a := model.Account{
-		Id:   int(*id),
+	a := queries.Account{
+		ID:   *id,
 		Name: name,
 	}
 

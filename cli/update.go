@@ -8,6 +8,7 @@ import (
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -26,8 +27,8 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, func() tea.Msg {
 			return resp
 		})
-	case model.Account:
-		m.accountId = msg.Id
+	case queries.Account:
+		m.accountId = int(msg.ID)
 		cmds = append(cmds, func() tea.Msg {
 			return model.StateChangeMsg{
 				NewState: model.LobbyView,

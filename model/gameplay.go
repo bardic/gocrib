@@ -149,11 +149,6 @@ type Player struct {
 	Art       string
 }
 
-type Account struct {
-	Id   int
-	Name string
-}
-
 //_Comms_
 
 type MatchRequirements struct {

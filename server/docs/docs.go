@@ -42,7 +42,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Account"
+                            "$ref": "#/definitions/queries.Account"
                         }
                     },
                     "400": {
@@ -898,17 +898,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.Account": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "model.Card": {
             "type": "object",
             "properties": {
@@ -1233,6 +1222,17 @@ const docTemplate = `{
                 "Hearts",
                 "Diamonds"
             ]
+        },
+        "queries.Account": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {

@@ -7,7 +7,7 @@ import (
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -43,7 +43,7 @@ func (v *LoginView) Enter() tea.Msg {
 	utils.Logger.Info("Enter")
 	idStr := v.LoginIdField.Value()
 
-	var accountDetails model.Account
+	var accountDetails queries.Account
 	msg := services.Login(idStr)
 	json.Unmarshal(msg.([]byte), &accountDetails)
 
