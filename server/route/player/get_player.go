@@ -15,7 +15,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param        id    query     string  true  "search for match by barcode"'
-// @Success      200  {object}  model.Player
+// @Success      200  {object}  queries.Player
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error

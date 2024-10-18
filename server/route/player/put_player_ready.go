@@ -4,10 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/utils"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -48,35 +47,25 @@ func PlayerReady(c echo.Context) error {
 	}
 
 	if utils.PlayersReady(m.Players) {
-		utils.Deal(m)
-		utils.UpdateGameState(matchId, model.DiscardState)
+		//TODO : deal is fucked
+		//utils.Deal(m)
+		utils.UpdateGameState(matchId, queries.GamestateDiscardState)
 	}
 
 	return c.JSON(http.StatusOK, nil)
 }
 
 func ReadyPlayerById(c echo.Context, playerId int) (bool, error) {
-	args := pgx.NamedArgs{
-		"id":      playerId,
-		"isReady": true,
-	}
-
-	query := `UPDATE player SET 
-		isReady = @isReady
-	where 
-		id = @id`
-
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	ctx := context.Background()
 
-	if err != nil {
-		return false, err
-	}
+	q.UpdatePlayer(ctx, queries.UpdatePlayerParams{
+		ID:      int32(playerId),
+		Isready: true,
+	})
 
 	return true, nil
 }

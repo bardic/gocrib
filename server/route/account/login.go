@@ -28,20 +28,14 @@ func Login(c echo.Context) error {
 
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
 	ctx := context.Background()
 
-	q := queries.New(db)
-
-	name, err := q.GetAccount(ctx, *id)
+	a, err := q.GetAccount(ctx, *id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	a := queries.Account{
-		ID:   *id,
-		Name: name,
 	}
 
 	return c.JSON(http.StatusOK, a)

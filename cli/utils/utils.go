@@ -51,7 +51,7 @@ func NewLogger() (*zap.Logger, error) {
 	return cfg.Build()
 }
 
-func GetPlayerId(accountId int, players []model.Player) (*model.Player, error) {
+func GetPlayerId(accountId int, players []queries.Player) (*queries.Player, error) {
 	for _, p := range players {
 		if p.AccountId == accountId {
 			return &p, nil
@@ -69,7 +69,7 @@ func CreateGame(accountId int) tea.Msg {
 	return matchDetails
 }
 
-func GetPlayerForAccountId(id int, match *model.GameMatch) *model.Player {
+func GetPlayerForAccountId(id int, match *queries.Match) *queries.Player {
 	for _, player := range match.Players {
 		if player.AccountId == id {
 			return &player
@@ -79,7 +79,7 @@ func GetPlayerForAccountId(id int, match *model.GameMatch) *model.Player {
 	return nil
 }
 
-func GetVisibleCards(activeTab int, player model.Player) []int {
+func GetVisibleCards(activeTab int, player queries.Player) []int {
 	var cards []int
 	switch activeTab {
 	case 0:

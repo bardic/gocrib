@@ -8,5 +8,5 @@ flowchart TD
     SR -- POST --> SM(Server Match)
     SM --> DB[(DB)]
     DB --> SM
-    SM -- model.GameMatch --> MS
+    SM -- queries.Match --> MS
 ```

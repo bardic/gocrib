@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/utils"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,7 +18,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param details body model.HandModifier true "array of ids to add to kitty"
-// @Success      200  {object}  model.GameMatch
+// @Success      200  {object}  queries.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -35,13 +35,13 @@ func UpdateKitty(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = utils.UpdateGameState(m.Id, model.PlayState)
+	err = utils.UpdateGameState(int(m.ID), queries.GamestatePlayState)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m.GameState = model.PlayState
+	m.Gamestate = queries.GamestatePlayState
 
 	return c.JSON(http.StatusOK, m)
 }
@@ -49,34 +49,20 @@ func UpdateKitty(c echo.Context) error {
 func updateKitty(details model.HandModifier) (*model.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	args := pgx.NamedArgs{
-		"matchId": details.MatchId,
-	}
+	ctx := context.Background()
 
-	q := "SELECT currentplayerturn FROM match WHERE id = @matchId"
-
-	var dealerPlayerId int
-	err := db.QueryRow(
-		context.Background(),
-		q,
-		args).Scan(&dealerPlayerId)
+	playerId, err := q.GetCurrentPlayerTurn(ctx, details.MatchId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	args = pgx.NamedArgs{
-		"dealerId": 1,
-		"kitty":    details.CardIds,
-	}
-
-	q = "UPDATE player SET kitty = kitty + @kitty where id = @dealerId"
-
-	_, err = db.Exec(
-		context.Background(),
-		q,
-		args)
+	err = q.UpdateKitty(ctx, queries.UpdateKittyParams{
+		ID:    playerId,
+		Kitty: details.CardIds,
+	})
 
 	if err != nil {
 		return nil, err

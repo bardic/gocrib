@@ -2,58 +2,42 @@ package utils
 
 import (
 	"context"
+	"encoding/json"
+	"math/rand/v2"
 
+	"github.com/bardic/gocrib/queries"
 	conn "github.com/bardic/gocrib/server/db"
 
 	"github.com/bardic/gocrib/model"
-	"github.com/jackc/pgx/v5"
 )
 
-func QueryForCards(ids string) ([]model.GameplayCard, error) {
+func QueryForCards(ids []int32) ([]queries.Gameplaycard, error) {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	rows, err := db.Query(context.Background(), "SELECT * FROM gameplaycards NATURAL JOIN cards WHERE gameplaycards.id IN ("+ids+")")
+	ctx := context.Background()
+
+	cards, err := q.GetGamePlayCards(ctx, ids)
 
 	if err != nil {
-		return []model.GameplayCard{}, err
+		return []queries.Gameplaycard{}, err
 	}
 
-	v := []model.GameplayCard{}
-
-	for rows.Next() {
-		var card model.GameplayCard
-
-		err := rows.Scan(&card.Id, &card.CardId, &card.OrigOwner, &card.CurrOwner, &card.State, &card.Value, &card.Suit, &card.Art)
-		if err != nil {
-			return []model.GameplayCard{}, err
-		}
-
-		v = append(v, card)
-	}
-
-	return v, nil
+	return cards, nil
 }
 
 func UpdatePlay(details model.HandModifier) (*model.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	args := pgx.NamedArgs{
-		"playerId": details.PlayerId,
-		"play":     details.CardIds,
-	}
+	ctx := context.Background()
 
-	q := "UPDATE player SET play = play + @play where id = @playerId"
-
-	_, err := db.Exec(
-		context.Background(),
-		q,
-		args)
-
-	if err != nil {
-		return nil, err
-	}
+	q.UpdateCardsPlayed(ctx, queries.UpdateCardsPlayedParams{
+		Play: details.CardIds,
+		ID:   details.MatchId,
+	})
 
 	return PlayCard(details)
 }
@@ -61,33 +45,31 @@ func UpdatePlay(details model.HandModifier) (*model.GameMatch, error) {
 func PlayCard(details model.HandModifier) (*model.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	args := pgx.NamedArgs{
-		"playerId": details.PlayerId,
-		"cards":    details.CardIds,
-	}
+	ctx := context.Background()
 
-	q := "UPDATE player SET hand = hand - @cards where id = @playerId"
+	q.RemoveCardsFromHand(ctx, queries.RemoveCardsFromHandParams{
+		ID:   details.PlayerId,
+		Hand: details.CardIds,
+	})
 
-	_, err := db.Exec(
-		context.Background(),
-		q,
-		args)
+	b, err := q.GetMatchById(ctx, details.MatchId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	m, err := GetMatches(details.MatchId)
-
+	var match model.GameMatch
+	err = json.Unmarshal(b, &match)
 	if err != nil {
 		return nil, err
 	}
 
-	return &m[0], nil
+	return &match, nil
 }
 
-func PlayersReady(players []model.Player) bool {
+func PlayersReady(players []queries.Player) bool {
 	ready := true
 
 	if len(players) < 2 {
@@ -95,7 +77,7 @@ func PlayersReady(players []model.Player) bool {
 	}
 
 	for _, p := range players {
-		if !p.IsReady {
+		if !p.Isready {
 			ready = false
 		}
 	}
@@ -104,130 +86,144 @@ func PlayersReady(players []model.Player) bool {
 }
 
 func GetMatchForPlayerId(playerId int) (int, error) {
-	args := pgx.NamedArgs{
-		"id": playerId,
-	}
-
-	query := `SELECT id from match WHERE @id = ANY(playerids)`
-
-	var matchId int
-
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	err := db.QueryRow(
-		context.Background(),
-		query,
-		args).Scan(&matchId)
+	ctx := context.Background()
+
+	b, err := q.GetMatchByPlayerId(ctx, int32(playerId))
 
 	if err != nil {
 		return 0, err
 	}
 
-	return matchId, nil
-}
-
-func ParsePlayer(details model.Player) pgx.NamedArgs {
-	return pgx.NamedArgs{
-		"id":      details.Id,
-		"play":    details.Play,
-		"hand":    details.Hand,
-		"kitty":   details.Kitty,
-		"score":   details.Score,
-		"isReady": details.IsReady,
-		"art":     details.Art,
+	var match model.GameMatch
+	err = json.Unmarshal(b, &match)
+	if err != nil {
+		return 0, err
 	}
+
+	return int(match.ID), nil
 }
 
-func Deal(match *model.GameMatch) (*model.GameDeck, error) {
-	deck, err := GetDeckById(match.DeckId)
-	deck = *deck.Shuffle()
+func Deal(match *queries.Match) (*queries.Deck, error) {
+	deck, err := GetDeckById(int(match.Deckid))
+
+	// deck = *deck.Shuffle()
 	if err != nil {
 		return nil, err
 	}
 
-	players := []model.Player{}
+	// players := []queries.Player{}
 
-	for _, ids := range match.PlayerIds {
-		player, err := GetPlayerById(ids)
+	// for _, id := range match.Playerids {
+	// 	player, err := GetPlayerById(int(id))
 
-		if err != nil {
-			return nil, err
-		}
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
 
-		players = append(players, player)
-	}
+	// 	players = append(players, player)
+	// }
 
-	cardsPerHand := 6
-	if len(players) == 3 {
-		cardsPerHand = 5
-	}
+	// cardsPerHand := 6
+	// if len(players) == 3 {
+	// 	cardsPerHand = 5
+	// }
 
-	for i := 0; i < len(players)*cardsPerHand; i++ {
-		var card model.GameplayCard
-		card, deck.Cards = deck.Cards[0], deck.Cards[1:]
-		idx := len(players) - 1 - i%len(players)
+	// for i := 0; i < len(players)*cardsPerHand; i++ {
+	// 	var card queries.Gameplaycard
+	// 	card, deck.Cards = deck.Cards[0], deck.Cards[1:]
+	// 	idx := len(players) - 1 - i%len(players)
 
-		if len(players[idx].Hand) < cardsPerHand {
-			players[idx].Hand = append(players[idx].Hand, card.CardId)
-		}
-	}
+	// 	if len(players[idx].Hand) < cardsPerHand {
+	// 		players[idx].Hand = append(players[idx].Hand, card.Cardid)
+	// 	}
+	// }
 
-	for _, p := range players {
-		UpdatePlayerById(p)
-	}
+	// for _, p := range players {
+	// 	UpdatePlayerById(p)
+	// }
 
 	return &deck, nil
 }
 
-func GetPlayerById(id int) (model.Player, error) {
+func GetPlayerById(id int) (queries.Player, error) {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	player := model.Player{}
-	err := db.QueryRow(context.Background(), "SELECT * FROM player WHERE id=$1", id).Scan(
-		&player.Id,
-		&player.AccountId,
-		&player.Play,
-		&player.Hand,
-		&player.Kitty,
-		&player.Score,
-		&player.IsReady,
-		&player.Art,
-	)
+	ctx := context.Background()
+
+	p, err := q.GetPlayer(ctx, int32(id))
 
 	if err != nil {
-		return model.Player{}, err
+		return queries.Player{}, err
 	}
 
-	return player, nil
-
+	return p, nil
 }
 
-func UpdatePlayerById(player model.Player) (model.Player, error) {
-	args := ParsePlayer(player)
-
-	query := `UPDATE player SET 
-		hand = @hand, 
-		play = @play, 
-		kitty = @kitty, 
-		score = @score, 
-		isReady = @isReady,
-		art = @art 
-	where 
-		id = @id`
-
+func UpdatePlayerById(player queries.Player) (queries.Player, error) {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	ctx := context.Background()
+
+	err := q.UpdatePlayer(ctx, queries.UpdatePlayerParams{
+		Hand:    player.Hand,
+		Play:    player.Play,
+		Kitty:   player.Kitty,
+		Score:   player.Score,
+		Isready: player.Isready,
+		Art:     player.Art,
+	})
 
 	if err != nil {
-		return model.Player{}, err
+		return queries.Player{}, err
 	}
 
 	return player, nil
+}
+
+func Shuffle(d *queries.Deck) *queries.Deck {
+	rand.Shuffle(len(d.Cards), func(i, j int) {
+		d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
+	})
+
+	return d
+}
+
+func Eq(p *queries.Player, c *queries.Player) bool {
+	if p.ID != c.ID {
+		return false
+	}
+
+	if p.Accountid != c.Accountid {
+		return false
+	}
+
+	if p.Score != c.Score {
+		return false
+	}
+
+	if p.Art != c.Art {
+		return false
+	}
+
+	// if !eqIntArr(p.Hand, c.Hand) {
+	// 	return false
+	// }
+
+	// if !eqIntArr(p.Play, c.Play) {
+	// 	return false
+	// }
+
+	// if !eqIntArr(p.Kitty, c.Kitty) {
+	// 	return false
+	// }
+
+	return true
 }

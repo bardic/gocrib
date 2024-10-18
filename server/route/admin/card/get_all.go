@@ -15,7 +15,7 @@ import (
 // @Tags         cards
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  []model.GameplayCard{}
+// @Success      200  {object}  []queries.Gameplaycard{}
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/allcards/ [get]

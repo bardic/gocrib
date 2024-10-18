@@ -4,9 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	conn "github.com/bardic/gocrib/server/db"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,7 +16,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param details body int true "player Object to save"
-// @Success      200  {object}  model.Player
+// @Success      200  {object}  queries.Player
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
@@ -35,56 +34,29 @@ func NewPlayer(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, p)
-
 }
 
-func NewPlayerQuery(accountId int) (*model.Player, error) {
-
-	args := pgx.NamedArgs{
-		"accountId": accountId,
-		"hand":      []int{},
-		"kitty":     []int{},
-		"play":      []int{},
-		"score":     0,
-		"isready":   false,
-		"art":       "default.png",
-	}
-
-	query := `INSERT INTO player (
-			accountid,
-			hand,
-			play,
-			kitty,
-			score,
-			isready,
-			art
-		) VALUES (
-			@accountId,
-			@hand,
-			@play,
-			@kitty,
-			@score,
-			@isready,
-			@art
-		)
-		RETURNING id`
+func NewPlayerQuery(accountId int) (*queries.Player, error) {
 
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	var playerId int
-	err := db.QueryRow(
-		context.Background(),
-		query,
-		args).Scan(&playerId)
+	ctx := context.Background()
+
+	p, err := q.CreatePlayer(ctx, queries.CreatePlayerParams{
+		Accountid: int32(accountId),
+		Hand:      []int32{},
+		Kitty:     []int32{},
+		Play:      []int32{},
+		Score:     0,
+		Isready:   false,
+		Art:       "default.png",
+	})
 
 	if err != nil {
 		return nil, err
 	}
-
-	p := model.Player{}
-	p.Id = playerId
-	p.AccountId = accountId
 
 	return &p, nil
 }

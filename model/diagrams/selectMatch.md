@@ -23,5 +23,5 @@ sequenceDiagram
     SP->>SM: Return new player ID
     SM->>DB: Update players in Match
     DB->>SM: Return update to date match
-    SM->>CM: Return model.GameMatch
+    SM->>CM: Return queries.Match
 ```

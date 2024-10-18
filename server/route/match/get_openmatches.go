@@ -13,7 +13,7 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  []model.GameMatch
+// @Success      200  {object}  []queries.Match
 // @Failure      404  {object}  error
 // @Failure      422  {object}  error
 // @Router       /player/matches/open [get]

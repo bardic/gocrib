@@ -16,7 +16,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param details body model.HandModifier true "array of ids to add to play"
-// @Success      200  {object}  model.GameMatch
+// @Success      200  {object}  queries.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error

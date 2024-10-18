@@ -5,39 +5,38 @@ import (
 	"encoding/json"
 
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	conn "github.com/bardic/gocrib/server/db"
-	"github.com/jackc/pgx/v5"
-	"github.com/labstack/echo/v4"
 )
 
-var matchQuery = `SELECT
-			json_build_object(
-				'id', id,
-				'playerIds', playerIds,
-				'creationDate', creationDate,
-				'privateMatch', privateMatch,
-				'eloRangeMin', eloRangeMin,
-				'eloRangeMax', eloRangeMax,
-				'deckid', deckid,
-				'cutgamecardid', cutgamecardid,
-				'currentplayerturn', currentplayerturn,
-				'turnpasstimestamps', turnpasstimestamps,
-				'art', art,
-				'gameState', gameState,
-				'players', (SELECT json_agg(
-					json_build_object(
-						'id', p.id,
-						'accountid', p.accountid,
-						'play', p.play,
-						'hand', p.hand,
-						'kitty', p.kitty,
-						'score', p.score,
-						'isready', p.isready,
-						'art', p.art ))
-				FROM player as p WHERE p.Id = ANY(m.playerIds)))`
+// var matchQuery = `SELECT
+// 			json_build_object(
+// 				'id', id,
+// 				'playerIds', playerIds,
+// 				'creationDate', creationDate,
+// 				'privateMatch', privateMatch,
+// 				'eloRangeMin', eloRangeMin,
+// 				'eloRangeMax', eloRangeMax,
+// 				'deckid', deckid,
+// 				'cutgamecardid', cutgamecardid,
+// 				'currentplayerturn', currentplayerturn,
+// 				'turnpasstimestamps', turnpasstimestamps,
+// 				'art', art,
+// 				'gameState', gameState,
+// 				'players', (SELECT json_agg(
+// 					json_build_object(
+// 						'id', p.id,
+// 						'accountid', p.accountid,
+// 						'play', p.play,
+// 						'hand', p.hand,
+// 						'kitty', p.kitty,
+// 						'score', p.score,
+// 						'isready', p.isready,
+// 						'art', p.art ))
+// 				FROM player as p WHERE p.Id = ANY(m.playerIds)))`
 
-func CardsInPlay(players []model.Player) []int {
-	play := []int{}
+func CardsInPlay(players []queries.Player) []int32 {
+	play := []int32{}
 	for _, player := range players {
 		play = append(play, player.Play...)
 	}
@@ -45,123 +44,65 @@ func CardsInPlay(players []model.Player) []int {
 	return play
 }
 
-func findMatchInEloRange(req model.MatchRequirements) (model.GameMatch, error) {
-	db := conn.Pool()
-	defer db.Close()
-
-	args := pgx.NamedArgs{"eloMin": req.EloRangeMin, "eloMax": req.EloRangeMax}
-	q := matchQuery + `FROM match 
-	AS m WHERE m.eloRangeMin BETWEEN @eloMin AND @eloMax 
-	OR m.eloRangeMax BETWEEN @eloMin AND @eloMax`
-
-	var match model.GameMatch
-	err := db.QueryRow(
-		context.Background(),
-		q,
-		args).Scan(&match)
-
-	if err != nil && err != pgx.ErrNoRows {
-		return model.GameMatch{}, err
-	}
-
-	return match, nil
-}
-
-func UpdateGameState(matchId int, state model.GameState) error {
-	args := pgx.NamedArgs{
-		"id":        matchId,
-		"gameState": state,
-	}
-	query := `UPDATE match SET
-				gameState=@gameState
-			WHERE id=@id`
+func UpdateGameState(matchId int, state queries.Gamestate) error {
+	// args := pgx.NamedArgs{
+	// 	"id":        matchId,
+	// 	"gameState": state,
+	// }
+	// query := `UPDATE match SET
+	// 			gameState=@gameState
+	// 		WHERE id=@id`
 
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	ctx := context.Background()
 
-	if err != nil {
-		return err
-	}
+	q.UpdateMatch(ctx, queries.UpdateMatchParams{
+		ID:        int32(matchId),
+		Gamestate: state,
+	})
 
 	return nil
-}
-
-func GetMatches(id int) ([]model.GameMatch, error) {
-	db := conn.Pool()
-	defer db.Close()
-
-	var matches []model.GameMatch
-	rows, err := db.Query(
-		context.Background(),
-		matchQuery+`FROM match as m WHERE $1=ANY(m.playerIds)`,
-		id,
-	)
-
-	if err != nil {
-		return []model.GameMatch{}, err
-	}
-
-	for rows.Next() {
-		var match model.GameMatch
-
-		err := rows.Scan(&match)
-		if err != nil {
-
-			return []model.GameMatch{}, &echo.BindingError{}
-		}
-
-		matches = append(matches, match)
-	}
-
-	return matches, nil
 }
 
 func GetMatch(id int) (*model.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	var match *model.GameMatch
-	err := db.QueryRow(
-		context.Background(),
-		matchQuery+" FROM match as m WHERE m.id = $1",
-		id,
-	).Scan(
-		&match,
-	)
+	ctx := context.Background()
+
+	m, err := q.GetMatchById(ctx, int32(id))
 
 	if err != nil {
 		return nil, err
 	}
 
+	var match *model.GameMatch
+	err = json.Unmarshal(m, &match)
+	if err != nil {
+		return nil, err
+	}
 	return match, nil
 }
 
 func GetOpenMatches() ([]model.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	rows, err := db.Query(
-		context.Background(),
-		matchQuery+`FROM match as m`,
-	)
+	ctx := context.Background()
 
-	if err != nil && err != pgx.ErrNoRows {
-		return []model.GameMatch{}, err
-	}
+	matchesData, err := q.GetOpenMatches(ctx)
+	var matches []model.GameMatch
 
-	matches := []model.GameMatch{}
-
-	for rows.Next() {
+	for _, matchData := range matchesData {
 		var match model.GameMatch
-
-		err := rows.Scan(&match)
+		err = json.Unmarshal(matchData, &match)
 		if err != nil {
-			return []model.GameMatch{}, err
+			return nil, err
 		}
 
 		matches = append(matches, match)
@@ -171,17 +112,16 @@ func GetOpenMatches() ([]model.GameMatch, error) {
 }
 
 func UpdateCut(matchId int, cutCardId int) error {
-	args := pgx.NamedArgs{"id": matchId, "cardId": cutCardId}
-
-	query := "UPDATE match SET cutGameCardId = @cardId where id=@id"
-
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	ctx := context.Background()
+
+	err := q.UpdateMatchCut(ctx, queries.UpdateMatchCutParams{
+		ID:            int32(matchId),
+		Cutgamecardid: int32(cutCardId),
+	})
 
 	if err != nil {
 		return err
@@ -190,165 +130,140 @@ func UpdateCut(matchId int, cutCardId int) error {
 	return nil
 }
 
-func ParseMatch(details model.GameMatch) pgx.NamedArgs {
-	return pgx.NamedArgs{
-		"id":                 details.Id,
-		"gameState":          details.GameState,
-		"playerIds":          details.PlayerIds,
-		"privateMatch":       details.PrivateMatch,
-		"eloRangeMin":        details.EloRangeMin,
-		"eloRangeMax":        details.EloRangeMax,
-		"deckId":             details.DeckId,
-		"creationDate":       details.CreationDate,
-		"cutGameCardId":      details.CutGameCardId,
-		"currentPlayerTurn":  details.PlayerIds[0],
-		"turnPassTimestamps": []string{},
-		"art":                details.Art,
-		"players":            details.Players,
-	}
+func NewDeck() (queries.Deck, error) {
+	// db := conn.Pool()
+	// defer db.Close()
+	// q := queries.New(db)
+
+	// ctx := context.Background()
+
+	// cards, err := q.GetCards(ctx)
+
+	// if err != nil {
+	// 	return queries.Deck{}, err
+	// }
+
+	// var cardsBytes [][]byte
+
+	// deck, err := q.CreateDeck(ctx)
+	// db := conn.Pool()
+	// defer db.Close()
+
+	// //rows, err := db.Query(context.Background(), "SELECT * FROM cards") //MEOWCAKES
+
+	// v := []model.Card{}
+
+	// for rows.Next() {
+	// 	var card model.Card
+
+	// 	err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.Art)
+	// 	if err != nil {
+	// 		return model.GameDeck{}, err
+	// 	}
+
+	// 	v = append(v, card)
+	// }
+
+	// if err != nil {
+	// 	return model.GameDeck{}, err
+	// }
+
+	// deck := model.GameDeck{
+	// 	Cards: []queries.Gameplaycard{},
+	// }
+
+	// for _, c := range v {
+	// 	deck.Cards = append(deck.Cards, queries.Gameplaycard{
+	// 		CardId: c.Id,
+	// 		Card:   c,
+	// 		State:  0,
+	// 	})
+	// }
+
+	// b, err := json.Marshal(deck.Cards)
+
+	// if err != nil {
+	// 	return model.GameDeck{}, err
+	// }
+
+	// args := pgx.NamedArgs{"cards": string(b)}
+
+	// //MEOWCAKES 	query := "INSERT INTO deck(cards) VALUES (@cards) RETURNING id"
+
+	// var deckId int
+	// err = db.QueryRow(
+	// 	context.Background(),
+	// 	query,
+	// 	args).Scan(&deckId)
+
+	// if err != nil {
+	// 	return model.GameDeck{}, err
+	// }
+
+	// deck.Id = deckId
+
+	return queries.Deck{}, nil
 }
 
-func NewDeck() (model.GameDeck, error) {
-	db := conn.Pool()
-	defer db.Close()
-
-	rows, err := db.Query(context.Background(), "SELECT * FROM cards")
-
-	v := []model.Card{}
-
-	for rows.Next() {
-		var card model.Card
-
-		err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.Art)
-		if err != nil {
-			return model.GameDeck{}, err
-		}
-
-		v = append(v, card)
-	}
-
-	if err != nil {
-		return model.GameDeck{}, err
-	}
-
-	deck := model.GameDeck{
-		Cards: []model.GameplayCard{},
-	}
-
-	for _, c := range v {
-		deck.Cards = append(deck.Cards, model.GameplayCard{
-			CardId: c.Id,
-			Card:   c,
-			State:  0,
-		})
-	}
-
-	b, err := json.Marshal(deck.Cards)
-
-	if err != nil {
-		return model.GameDeck{}, err
-	}
-
-	args := pgx.NamedArgs{"cards": string(b)}
-
-	query := "INSERT INTO deck(cards) VALUES (@cards) RETURNING id"
-
-	var deckId int
-	err = db.QueryRow(
-		context.Background(),
-		query,
-		args).Scan(&deckId)
-
-	if err != nil {
-		return model.GameDeck{}, err
-	}
-
-	deck.Id = deckId
-
-	return deck, nil
-}
-
-func IsMatchReadyToStart(m *model.GameMatch) (bool, error) {
-	if len(m.Players) == 2 {
+func IsMatchReadyToStart(m *queries.Match) (bool, error) {
+	if len(m.Playerids) == 2 {
 		return true, nil
 	}
 
 	return false, nil
 }
 
-func UpdateMatchState(matchId int, state model.GameState) error {
-	args := pgx.NamedArgs{
-		"id":        matchId,
-		"gameState": state,
-	}
-
-	query := `UPDATE match SET
-					gameState= @gameState
-				WHERE id=@id`
-
+func UpdateMatchState(matchId int, state queries.Gamestate) error {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	ctx := context.Background()
 
-	if err != nil {
-		return err
-	}
+	q.UpdateMatch(ctx, queries.UpdateMatchParams{
+		ID:        int32(matchId),
+		Gamestate: state,
+	})
 
 	return nil
 }
 
 func UpdateMatchCut(cardId, matchId int) error {
-	args := pgx.NamedArgs{
-		"id":            matchId,
-		"cutGameCardId": cardId,
-	}
-
-	query := `UPDATE match SET
-					cutGameCardId= @cutGameCardId
-				WHERE id=@id`
-
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	ctx := context.Background()
 
-	if err != nil {
-		return err
-	}
+	q.UpdateMatchCut(ctx, queries.UpdateMatchCutParams{
+		ID:            int32(matchId),
+		Cutgamecardid: int32(cardId),
+	})
 
 	return nil
 }
 
-func UpdateMatch(match model.GameMatch) error {
-	args := ParseMatch(match)
-	query := `UPDATE match SET
-				playerIds = @playerIds,
-				creationDate = @creationDate,
-				privateMatch = @privateMatch,
-				eloRangeMin = @eloRangeMin,
-				eloRangeMax = @eloRangeMax,
-				deckId = @deckId,
-				cutGameCardId = @cutGameCardId,
-				currentPlayerTurn = @currentPlayerTurn,
-				turnPassTimestamps = @turnPassTimestamps,
-				gameState= @gameState,
-				art = @art
-			WHERE id=@id`
-
+func UpdateMatch(match queries.Match) error {
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	ctx := context.Background()
+
+	err := q.UpdateMatch(ctx, queries.UpdateMatchParams{
+		ID:                 match.ID,
+		Playerids:          match.Playerids,
+		Creationdate:       match.Creationdate,
+		Privatematch:       match.Privatematch,
+		Elorangemin:        match.Elorangemin,
+		Elorangemax:        match.Elorangemax,
+		Deckid:             match.Deckid,
+		Cutgamecardid:      match.Cutgamecardid,
+		Currentplayerturn:  match.Currentplayerturn,
+		Turnpasstimestamps: match.Turnpasstimestamps,
+		Gamestate:          match.Gamestate,
+		Art:                match.Art,
+	})
 
 	if err != nil {
 		return err
@@ -358,51 +273,50 @@ func UpdateMatch(match model.GameMatch) error {
 }
 
 func UpdatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
-	args := pgx.NamedArgs{
-		"matchId":  req.MatchId,
-		"playerId": req.PlayerId,
-	}
-
-	query := `UPDATE match SET
-				playerIds=ARRAY_APPEND(playerIds, @playerId)
-			WHERE id=@matchId`
-
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	_, err := db.Exec(
-		context.Background(),
-		query,
-		args)
+	ctx := context.Background()
 
-	if err != nil {
-		return nil, err
-	}
-
-	m, err := GetMatch(req.MatchId)
+	err := q.UpdatePlayersInMatch(ctx, queries.UpdatePlayersInMatchParams{
+		ID:          int32(req.MatchId),
+		ArrayAppend: &req.PlayerId,
+	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	return m, nil
+	m, err := q.GetMatchById(ctx, int32(req.MatchId))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var match *model.GameMatch
+	err = json.Unmarshal(m, &match)
+	if err != nil {
+		return nil, err
+	}
+
+	return match, nil
 }
 
-func GetDeckById(id int) (model.GameDeck, error) {
+func GetDeckById(id int) (queries.Deck, error) {
+
+	//TODO : DECKS NEED TO BE REIMPLEMENTED
 	db := conn.Pool()
 	defer db.Close()
-	var deckId int
-	var cards []model.GameplayCard
-	err := db.QueryRow(context.Background(), "SELECT * FROM deck WHERE id=$1", id).Scan(&deckId, &cards)
+	q := queries.New(db)
+
+	ctx := context.Background()
+
+	d, err := q.GetDeck(ctx, int32(id))
 
 	if err != nil {
-		return model.GameDeck{}, err
+		return queries.Deck{}, err
 	}
 
-	deck := model.GameDeck{
-		Id:    deckId,
-		Cards: cards,
-	}
-
-	return deck, nil
+	return d, nil
 }

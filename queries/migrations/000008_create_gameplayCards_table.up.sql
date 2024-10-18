@@ -1,17 +1,8 @@
-CREATE TYPE GameState AS ENUM (
-  'NewGameState',
-  'JoinGameState',
-  'WaitingState',
-  'MatchReady',
-  'DealState',
-  'DiscardState',
-  'CutState',
-  'PlayState',
-  'OpponentState',
-  'KittyState',
-  'GameWonState',
-  'GameLostState',
-  'MaxGameState'
+CREATE TYPE CardState AS ENUM (
+  'Deck',
+  'Hand',
+  'Play',
+  'Kitty'
 );
 
 CREATE TABLE IF NOT EXISTS gameplayCards (
@@ -19,5 +10,5 @@ CREATE TABLE IF NOT EXISTS gameplayCards (
   cardId integer NOT NULL,
   origOwner integer,
   currOwner integer,
-  state GameState NOT NULL
+  state CardState NOT NULL
 );

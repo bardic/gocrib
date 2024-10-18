@@ -11,6 +11,50 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Cardstate string
+
+const (
+	CardstateDeck  Cardstate = "Deck"
+	CardstateHand  Cardstate = "Hand"
+	CardstatePlay  Cardstate = "Play"
+	CardstateKitty Cardstate = "Kitty"
+)
+
+func (e *Cardstate) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = Cardstate(s)
+	case string:
+		*e = Cardstate(s)
+	default:
+		return fmt.Errorf("unsupported scan type for Cardstate: %T", src)
+	}
+	return nil
+}
+
+type NullCardstate struct {
+	Cardstate Cardstate
+	Valid     bool // Valid is true if Cardstate is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullCardstate) Scan(value interface{}) error {
+	if value == nil {
+		ns.Cardstate, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.Cardstate.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullCardstate) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.Cardstate), nil
+}
+
 type Cardsuit string
 
 const (
@@ -197,7 +241,7 @@ type Gameplaycard struct {
 	Cardid    int32
 	Origowner pgtype.Int4
 	Currowner pgtype.Int4
-	State     Gamestate
+	State     Cardstate
 }
 
 type Match struct {
@@ -211,7 +255,7 @@ type Match struct {
 	Cutgamecardid      int32
 	Currentplayerturn  int32
 	Turnpasstimestamps []pgtype.Timestamptz
-	Gamestate          int32
+	Gamestate          Gamestate
 	Art                string
 }
 

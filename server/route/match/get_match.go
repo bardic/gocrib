@@ -15,7 +15,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param        id    query     string  true  "search for match by id"'
-// @Success      200  {object}  model.GameMatch
+// @Success      200  {object}  queries.Match
 // @Failure      404  {object}  error
 // @Failure      422  {object}  error
 // @Router       /player/match/ [get]

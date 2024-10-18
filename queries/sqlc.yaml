@@ -8,3 +8,6 @@ sql:
         package: "queries"
         out: "queries"
         sql_package: "pgx/v5"
+        overrides:
+          - db_type: "integer"
+            go_type: "int"

@@ -161,7 +161,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.GameMatch"
+                            "$ref": "#/definitions/queries.Match"
                         }
                     },
                     "400": {
@@ -247,7 +247,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.GameplayCard"
+                                "$ref": "#/definitions/queries.Gameplaycard"
                             }
                         }
                     },
@@ -289,7 +289,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.GameplayCard"
+                                "$ref": "#/definitions/queries.Gameplaycard"
                             }
                         }
                     },
@@ -331,7 +331,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.GameMatch"
+                            "$ref": "#/definitions/queries.Match"
                         }
                     },
                     "400": {
@@ -405,7 +405,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.GameMatch"
+                            "$ref": "#/definitions/queries.Match"
                         }
                     }
                 ],
@@ -413,7 +413,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.GameMatch"
+                            "$ref": "#/definitions/queries.Match"
                         }
                     },
                     "400": {
@@ -621,7 +621,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.GameMatch"
+                                "$ref": "#/definitions/queries.Match"
                             }
                         }
                     },
@@ -663,7 +663,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.GameMatch"
+                            "$ref": "#/definitions/queries.Match"
                         }
                     },
                     "400": {
@@ -706,7 +706,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Player"
+                            "$ref": "#/definitions/queries.Player"
                         }
                     },
                     "400": {
@@ -741,7 +741,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Player"
+                            "$ref": "#/definitions/queries.Player"
                         }
                     }
                 ],
@@ -749,7 +749,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Player"
+                            "$ref": "#/definitions/queries.Player"
                         }
                     },
                     "400": {
@@ -792,7 +792,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Player"
+                            "$ref": "#/definitions/queries.Player"
                         }
                     },
                     "400": {
@@ -833,7 +833,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Player"
+                            "$ref": "#/definitions/queries.Player"
                         }
                     },
                     "400": {
@@ -985,7 +985,7 @@ const docTemplate = `{
                 "cards": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.GameplayCard"
+                        "$ref": "#/definitions/queries.Gameplaycard"
                     }
                 },
                 "id": {
@@ -993,7 +993,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.GameMatch": {
+        "queries.Match": {
             "type": "object",
             "properties": {
                 "art": {
@@ -1032,7 +1032,7 @@ const docTemplate = `{
                 "players": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Player"
+                        "$ref": "#/definitions/queries.Player"
                     }
                 },
                 "privateMatch": {
@@ -1079,7 +1079,7 @@ const docTemplate = `{
                 "MaxGameState"
             ]
         },
-        "model.GameplayCard": {
+        "queries.Gameplaycard": {
             "type": "object",
             "properties": {
                 "Art": {
@@ -1170,7 +1170,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Player": {
+        "queries.Player": {
             "type": "object",
             "properties": {
                 "accountid": {

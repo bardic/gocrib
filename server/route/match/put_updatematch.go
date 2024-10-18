@@ -3,7 +3,6 @@ package match
 import (
 	"net/http"
 
-	"github.com/bardic/gocrib/model"
 	"github.com/bardic/gocrib/server/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -14,14 +13,14 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param details body model.GameMatch true "match Object to update"
-// @Success      200  {object}  model.GameMatch
+// @Param details body queries.Match true "match Object to update"
+// @Success      200  {object}  queries.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/match/ [put]
 func UpdateMatch(c echo.Context) error {
-	details := new(model.GameMatch)
+	details := new(queries.Match)
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

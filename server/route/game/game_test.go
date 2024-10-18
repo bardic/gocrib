@@ -162,7 +162,7 @@ package game
 // 	match := model.Match{
 // 		CardsInPlay:       []int{11, 24, 37, 2},
 // 		CurrentPlayerTurn: 0,
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   0,
 // 				Hand: []int{2, 3, 4, 5},
@@ -184,7 +184,7 @@ package game
 // 	match := model.Match{
 // 		CardsInPlay:       []int{10, 24, 37, 2},
 // 		CurrentPlayerTurn: 0,
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   0,
 // 				Hand: []int{2, 3, 4, 5},
@@ -206,7 +206,7 @@ package game
 // 	match := model.Match{
 // 		CardsInPlay:       []int{11, 24, 37, 2},
 // 		CurrentPlayerTurn: 0,
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   0,
 // 				Hand: []int{2, 3, 4, 5},
@@ -228,7 +228,7 @@ package game
 // 	match := model.Match{
 // 		CardsInPlay:       []int{11, 24, 37, 2},
 // 		CurrentPlayerTurn: 0,
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   0,
 // 				Hand: []int{2, 3, 4, 25},
@@ -252,7 +252,7 @@ package game
 // 			10,
 // 			5,
 // 		},
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{1, 2, 3, 4},
@@ -278,7 +278,7 @@ package game
 // 			5,
 // 			6,
 // 		},
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{1, 2, 3, 4},
@@ -304,7 +304,7 @@ package game
 // 			11,
 // 			13,
 // 		},
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{11, 12, 13, 24},
@@ -330,7 +330,7 @@ package game
 // 			11,
 // 			12,
 // 		},
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{11, 12, 13, 24},
@@ -355,7 +355,7 @@ package game
 // 			10,
 // 			36,
 // 		},
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{11, 12, 13, 24},
@@ -382,7 +382,7 @@ package game
 // 			8,
 // 			9,
 // 		},
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{1, 2, 3, 4},
@@ -408,7 +408,7 @@ package game
 // 			7,
 // 			6,
 // 		},
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{11, 12, 13, 24},
@@ -435,7 +435,7 @@ package game
 // 			3,
 // 			4,
 // 		},
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{11, 12, 13, 24},
@@ -459,7 +459,7 @@ package game
 // 	match := model.Match{
 // 		CardsInPlay:   []int{},
 // 		CutGameCardId: 11,
-// 		Players: []model.Player{
+// 		Players: []queries.Player{
 // 			{
 // 				Id:   1,
 // 				Hand: []int{10, 11, 12, 23},

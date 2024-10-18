@@ -74,7 +74,7 @@ func (v *LobbyView) Enter() tea.Msg {
 	v.ActiveMatchId = id
 	accountMsg := services.PostPlayer(v.AccountId)
 
-	var player model.Player
+	var player queries.Player
 	err = json.Unmarshal(accountMsg.([]byte), &player)
 
 	if err != nil {
@@ -115,7 +115,7 @@ func getActiveView() (table.Model, error) {
 
 	m := getOpenMatches()
 
-	var matches []model.GameMatch
+	var matches []queries.Match
 	err := json.Unmarshal(m.([]byte), &matches)
 
 	if err != nil {

@@ -28,7 +28,7 @@ func TestNewMatch(t *testing.T) {
 		t.Fatalf(`meow`)
 	}
 
-	var m model.GameMatch
+	var m queries.Match
 	json.Unmarshal(rec.Body.Bytes(), &m)
 
 	if m.Id == 0 {

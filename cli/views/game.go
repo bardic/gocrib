@@ -33,7 +33,7 @@ type GameView struct {
 	Hand           []model.Card
 	Kitty          []model.Card
 	Play           []model.Card
-	GameMatch      *model.GameMatch
+	GameMatch      *queries.Match
 }
 
 var focusedModelStyle = lipgloss.NewStyle().
@@ -46,7 +46,7 @@ func (v *GameView) Init() {
 	}
 
 	matchMsg := services.GetPlayerMatch(strconv.Itoa(v.MatchId))
-	var match *model.GameMatch
+	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
 	}
@@ -239,7 +239,7 @@ func (v *GameView) ParseInput(msg tea.KeyMsg) tea.Msg {
 	}
 
 	matchMsg := services.GetPlayerMatch(strconv.Itoa(v.MatchId))
-	var match *model.GameMatch
+	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return nil
 	}

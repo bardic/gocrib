@@ -44,7 +44,7 @@ func NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	match := model.GameMatch{}
+	match := queries.Match{}
 	match.DeckId = d.Id
 
 	match.PlayerIds = []int{p.Id}
@@ -55,29 +55,30 @@ func NewMatch(c echo.Context) error {
 
 	args := utils.ParseMatch(match)
 
-	query := `INSERT INTO match(
-				playerIds,
-				privateMatch,
-				eloRangeMin,
-				eloRangeMax,
-				deckId,
-				cutGameCardId,
-				currentplayerturn,
-				turnPassTimestamps,
-				gameState,
-				art)
-			VALUES (
-				@playerIds,
-				@privateMatch,
-				@eloRangeMin,
-				@eloRangeMax,
-				@deckId,
-				@cutGameCardId,
-				@currentPlayerTurn,
-				@turnPassTimestamps,
-				@gameState,
-				@art)
-			RETURNING id`
+	//MEOWCAKES
+	// query := `INSERT INTO match(
+	// 			playerIds,
+	// 			privateMatch,
+	// 			eloRangeMin,
+	// 			eloRangeMax,
+	// 			deckId,
+	// 			cutGameCardId,
+	// 			currentplayerturn,
+	// 			turnPassTimestamps,
+	// 			gameState,
+	// 			art)
+	// 		VALUES (
+	// 			@playerIds,
+	// 			@privateMatch,
+	// 			@eloRangeMin,
+	// 			@eloRangeMax,
+	// 			@deckId,
+	// 			@cutGameCardId,
+	// 			@currentPlayerTurn,
+	// 			@turnPassTimestamps,
+	// 			@gameState,
+	// 			@art)
+	// 		RETURNING id`
 
 	var matchId int
 	err = db.QueryRow(

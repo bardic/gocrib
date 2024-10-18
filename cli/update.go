@@ -103,7 +103,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
 
-		var matchDetails model.GameMatch
+		var matchDetails queries.Match
 		idstr := strconv.Itoa(m.matchId)
 		resp := services.GetPlayerMatch(idstr)
 		json.Unmarshal(resp.([]byte), &matchDetails)
@@ -142,7 +142,7 @@ func (m *AppModel) createMatch(msg model.GameStateChangeMsg) tea.Cmd {
 	return cmd
 }
 
-func (m *AppModel) setCards(match *model.GameMatch) {
+func (m *AppModel) setCards(match *queries.Match) {
 	gameView := m.currentView.(*views.GameView)
 	gameView.Hand = []model.Card{}
 	gameView.Kitty = []model.Card{}
