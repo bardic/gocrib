@@ -11,20 +11,42 @@ import (
 	"github.com/bardic/gocrib/model"
 )
 
-func QueryForCards(ids []int32) ([]queries.Gameplaycard, error) {
+func QueryForCards(ids []int32) ([]model.GameCard, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
 
 	ctx := context.Background()
 
-	cards, err := q.GetGamePlayCards(ctx, ids)
+	matchCards, err := q.GetMatchCards(ctx, ids)
+	baseCards, err := q.GetCards(ctx)
+
+	cards := []model.GameCard{}
+
+	for _, matchCard := range matchCards {
+		card := GetCardByIdFromCards(int(matchCard.ID), baseCards)
+		cards = append(cards, model.GameCard{
+			Matchcard: matchCard,
+			Card:      card,
+		})
+	}
 
 	if err != nil {
-		return []queries.Gameplaycard{}, err
+		return []model.GameCard{}, err
 	}
 
 	return cards, nil
+}
+
+func GetCardByIdFromCards(cardId int, cards []queries.Card) queries.Card {
+	for _, c := range cards {
+		if c.ID == int32(cardId) {
+			return c
+		}
+	}
+
+	return queries.Card{}
+
 }
 
 func UpdatePlay(details model.HandModifier) (*model.GameMatch, error) {
@@ -133,7 +155,7 @@ func Deal(match *queries.Match) (*queries.Deck, error) {
 	// }
 
 	// for i := 0; i < len(players)*cardsPerHand; i++ {
-	// 	var card queries.Gameplaycard
+	// 	var card queries.Card
 	// 	card, deck.Cards = deck.Cards[0], deck.Cards[1:]
 	// 	idx := len(players) - 1 - i%len(players)
 

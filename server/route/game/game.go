@@ -5,11 +5,12 @@ import (
 	"sort"
 
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	"github.com/bardic/gocrib/server/utils"
 )
 
-func cardsInPlay(players []queries.Player) []int {
-	cardIds := []int{}
+func cardsInPlay(players []queries.Player) []int32 {
+	cardIds := []int32{}
 	for _, p := range players {
 		cardIds = append(cardIds, p.Hand...)
 	}
@@ -17,7 +18,7 @@ func cardsInPlay(players []queries.Player) []int {
 	return cardIds
 }
 
-func countPegs(m queries.Match) (model.ScoreResults, error) {
+func countPegs(m model.GameMatch) (model.ScoreResults, error) {
 	res := model.ScoreResults{}
 
 	r, err := scanForThirtyOne(cardsInPlay(m.Players))
@@ -26,7 +27,7 @@ func countPegs(m queries.Match) (model.ScoreResults, error) {
 	}
 	res.Results = append(res.Results, r...)
 
-	if len(m.TurnPassTimestamps) == 0 {
+	if len(m.Turnpasstimestamps) == 0 {
 		r, err = scanJackOnCut(m)
 		if err != nil {
 			return model.ScoreResults{}, err
@@ -61,7 +62,7 @@ func countPegs(m queries.Match) (model.ScoreResults, error) {
 	return model.ScoreResults{Results: res.Results}, nil
 }
 
-func countHand(m queries.Match) (model.ScoreResults, error) {
+func countHand(m model.GameMatch) (model.ScoreResults, error) {
 	res := model.ScoreResults{}
 
 	r, err := scanForThirtyOne(cardsInPlay(m.Players))
@@ -109,13 +110,13 @@ func countHand(m queries.Match) (model.ScoreResults, error) {
 	return model.ScoreResults{Results: res.Results}, nil
 }
 
-func scanForFlush(cardIdsInHand []int) ([]model.Scores, error) {
+func scanForFlush(cardIdsInHand []int32) ([]model.Scores, error) {
 	gameplayCardsInHand, err := getGameplayCardsForIds(cardIdsInHand)
 	if err != nil {
 		return []model.Scores{}, err
 	}
 
-	var flushSuit *model.Suit
+	var flushSuit *queries.Cardsuit
 	matchesFlush := true
 	for _, card := range gameplayCardsInHand {
 		if flushSuit == nil {
@@ -136,28 +137,28 @@ func scanForFlush(cardIdsInHand []int) ([]model.Scores, error) {
 	return []model.Scores{}, nil
 }
 
-func discardCard(match queries.Match) (model.ScoreResults, error) {
+func discardCard(match model.GameMatch) (model.ScoreResults, error) {
 	return model.ScoreResults{Results: []model.Scores{
 		{
-			Cards: []queries.Gameplaycard{},
+			Cards: []model.GameCard{},
 			Point: 0,
 		},
 	}}, nil
 }
 
-func cutDeck(m queries.Match, cutCardId int) (model.ScoreResults, error) {
+func cutDeck(m model.GameMatch, cutCardId int) (model.ScoreResults, error) {
 
-	utils.UpdateCut(m.Id, cutCardId)
+	utils.UpdateCut(int(m.ID), cutCardId)
 
 	return model.ScoreResults{Results: []model.Scores{
 		{
-			Cards: []queries.Gameplaycard{},
+			Cards: []model.GameCard{},
 			Point: 0,
 		},
 	}}, nil
 }
 
-func scanForRuns(cardIdsInPlay []int) ([]model.Scores, error) {
+func scanForRuns(cardIdsInPlay []int32) ([]model.Scores, error) {
 	gameplayCardsInPlay, err := getGameplayCardsForIds(cardIdsInPlay)
 	if err != nil {
 		return []model.Scores{}, err
@@ -173,11 +174,18 @@ func scanForRuns(cardIdsInPlay []int) ([]model.Scores, error) {
 		return pointsFound, nil
 	}
 
-	if gameplayCardsInPlay[0].Value+1 == gameplayCardsInPlay[1].Value &&
-		gameplayCardsInPlay[1].Value+1 == gameplayCardsInPlay[2].Value {
+	gameCard1 := gameplayCardsInPlay[0]
+	gameCard2 := gameplayCardsInPlay[1]
+	gameCard3 := gameplayCardsInPlay[2]
+
+	details1 := cardDetails(gameCard1.Value)
+	details2 := cardDetails(gameCard2.Value)
+	details3 := cardDetails(gameCard3.Value)
+
+	if details1.Value+1 == details2.Value && details2.Value+1 == details3.Value {
 
 		pointsFound = []model.Scores{{
-			Cards: []queries.Gameplaycard{gameplayCardsInPlay[0], gameplayCardsInPlay[1], gameplayCardsInPlay[2]},
+			Cards: []model.GameCard{gameCard1, gameCard2, gameCard3},
 			Point: 3,
 		}}
 
@@ -185,19 +193,22 @@ func scanForRuns(cardIdsInPlay []int) ([]model.Scores, error) {
 			return pointsFound, nil
 		}
 
-		if gameplayCardsInPlay[2].Value+1 == gameplayCardsInPlay[3].Value {
+		gameCard4 := gameplayCardsInPlay[3]
+		details4 := cardDetails(gameCard4.Value)
+
+		if details3.Value+1 == details4.Value {
 			pointsFound = []model.Scores{{
-				Cards: []queries.Gameplaycard{gameplayCardsInPlay[0], gameplayCardsInPlay[1], gameplayCardsInPlay[2], gameplayCardsInPlay[3]},
+				Cards: []model.GameCard{gameCard1, gameCard2, gameCard3, gameCard4},
 				Point: 4,
 			}}
 		}
 	}
 
-	if gameplayCardsInPlay[0].Value+1 == gameplayCardsInPlay[1].Value &&
-		gameplayCardsInPlay[1].Value+1 == gameplayCardsInPlay[3].Value {
+	if details1.Value+1 == details2.Value &&
+		details2.Value+1 == details3.Value {
 
 		pointsFound = append(pointsFound, model.Scores{
-			Cards: []queries.Gameplaycard{gameplayCardsInPlay[0], gameplayCardsInPlay[1], gameplayCardsInPlay[3]},
+			Cards: []model.GameCard{gameCard1, gameCard2, gameCard3},
 			Point: 3,
 		})
 	}
@@ -205,7 +216,89 @@ func scanForRuns(cardIdsInPlay []int) ([]model.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanForMatchingKinds(cardIdsInPlay []int) ([]model.Scores, error) {
+func cardDetails(cardValue queries.Cardvalue) model.GameCardDetails {
+	switch cardValue {
+	case queries.CardvalueAce:
+
+		return model.GameCardDetails{
+			Value: 1,
+			Order: 1,
+		}
+	case queries.CardvalueTwo:
+		return model.GameCardDetails{
+			Value: 2,
+			Order: 2,
+		}
+	case queries.CardvalueThree:
+		return model.GameCardDetails{
+			Value: 3,
+			Order: 3,
+		}
+	case queries.CardvalueFour:
+		return model.GameCardDetails{
+			Value: 4,
+			Order: 4,
+		}
+	case queries.CardvalueFive:
+		return model.GameCardDetails{
+			Value: 5,
+			Order: 5,
+		}
+	case queries.CardvalueSix:
+		return model.GameCardDetails{
+			Value: 6,
+			Order: 6,
+		}
+	case queries.CardvalueSeven:
+		return model.GameCardDetails{
+			Value: 7,
+			Order: 7,
+		}
+	case queries.CardvalueEight:
+		return model.GameCardDetails{
+			Value: 8,
+			Order: 8,
+		}
+	case queries.CardvalueNine:
+		return model.GameCardDetails{
+			Value: 9,
+			Order: 9,
+		}
+	case queries.CardvalueTen:
+		return model.GameCardDetails{
+			Value: 10,
+			Order: 10,
+		}
+	case queries.CardvalueJack:
+		return model.GameCardDetails{
+			Value: 10,
+			Order: 11,
+		}
+	case queries.CardvalueQueen:
+		return model.GameCardDetails{
+			Value: 10,
+			Order: 12,
+		}
+	case queries.CardvalueKing:
+		return model.GameCardDetails{
+			Value: 10,
+			Order: 13,
+		}
+	case queries.CardvalueJoker:
+		return model.GameCardDetails{
+			Value: 0,
+			Order: 0,
+		}
+	}
+
+	return model.GameCardDetails{
+		Value: 0,
+		Order: 0,
+	}
+
+}
+
+func scanForMatchingKinds(cardIdsInPlay []int32) ([]model.Scores, error) {
 	gameplayCardsInPlay, err := getGameplayCardsForIds(cardIdsInPlay)
 	if err != nil {
 		return []model.Scores{}, err
@@ -221,9 +314,15 @@ func scanForMatchingKinds(cardIdsInPlay []int) ([]model.Scores, error) {
 		return pointsFound, nil
 	}
 
-	if gameplayCardsInPlay[0].Value == gameplayCardsInPlay[1].Value {
+	gameCard1 := gameplayCardsInPlay[0]
+	gameCard2 := gameplayCardsInPlay[1]
+
+	details1 := cardDetails(gameCard1.Value)
+	details2 := cardDetails(gameCard2.Value)
+
+	if details1.Value == details2.Value {
 		pointsFound = append(pointsFound, model.Scores{
-			Cards: []queries.Gameplaycard{gameplayCardsInPlay[0], gameplayCardsInPlay[1]},
+			Cards: []model.GameCard{gameCard1, gameCard2},
 			Point: 2,
 		})
 	}
@@ -232,16 +331,19 @@ func scanForMatchingKinds(cardIdsInPlay []int) ([]model.Scores, error) {
 		return pointsFound, nil
 	}
 
-	if gameplayCardsInPlay[0].Value == gameplayCardsInPlay[2].Value {
+	gameCard3 := gameplayCardsInPlay[2]
+	details3 := cardDetails(gameCard3.Value)
+
+	if details1.Value == details3.Value {
 		pointsFound = append(pointsFound, model.Scores{
-			Cards: []queries.Gameplaycard{gameplayCardsInPlay[0], gameplayCardsInPlay[2]},
+			Cards: []model.GameCard{gameCard1, gameCard3},
 			Point: 2,
 		})
 	}
 
-	if gameplayCardsInPlay[1].Value == gameplayCardsInPlay[2].Value {
+	if details2.Value == details3.Value {
 		pointsFound = append(pointsFound, model.Scores{
-			Cards: []queries.Gameplaycard{gameplayCardsInPlay[1], gameplayCardsInPlay[2]},
+			Cards: []model.GameCard{gameCard2, gameCard3},
 			Point: 2,
 		})
 	}
@@ -250,23 +352,26 @@ func scanForMatchingKinds(cardIdsInPlay []int) ([]model.Scores, error) {
 		return pointsFound, nil
 	}
 
-	if gameplayCardsInPlay[0].Value == gameplayCardsInPlay[3].Value {
+	gameCard4 := gameplayCardsInPlay[3]
+	details4 := cardDetails(gameCard4.Value)
+
+	if details1.Value == details4.Value {
 		pointsFound = append(pointsFound, model.Scores{
-			Cards: []queries.Gameplaycard{gameplayCardsInPlay[0], gameplayCardsInPlay[3]},
+			Cards: []model.GameCard{gameCard1, gameCard4},
 			Point: 2,
 		})
 	}
 
-	if gameplayCardsInPlay[1].Value == gameplayCardsInPlay[3].Value {
+	if details2.Value == details4.Value {
 		pointsFound = append(pointsFound, model.Scores{
-			Cards: []queries.Gameplaycard{gameplayCardsInPlay[1], gameplayCardsInPlay[3]},
+			Cards: []model.GameCard{gameCard2, gameCard4},
 			Point: 2,
 		})
 	}
 
-	if gameplayCardsInPlay[2].Value == gameplayCardsInPlay[3].Value {
+	if details3.Value == details4.Value {
 		pointsFound = append(pointsFound, model.Scores{
-			Cards: []queries.Gameplaycard{gameplayCardsInPlay[2], gameplayCardsInPlay[3]},
+			Cards: []model.GameCard{gameCard3, gameCard4},
 			Point: 2,
 		})
 	}
@@ -274,7 +379,7 @@ func scanForMatchingKinds(cardIdsInPlay []int) ([]model.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanForFifthteens(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
+func scanForFifthteens(gameplayCardsIdsInPlay []int32) ([]model.Scores, error) {
 	cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
 	if err != nil {
 		return []model.Scores{}, err
@@ -285,9 +390,13 @@ func scanForFifthteens(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
 	//find if any combination of cardsInPlay equals 15
 	for i := 0; i < len(cardsInPlay); i++ {
 		for j := i; j < len(cardsInPlay); j++ {
-			if cardsInPlay[i].Value+cardsInPlay[j].Value == 15 {
+			details1 := cardDetails(cardsInPlay[i].Value)
+			details2 := cardDetails(cardsInPlay[j].Value)
+			// details3 := cardDetails(cardsInPlay[k].Value)
+
+			if details1.Value+details2.Value == 15 {
 				pointsFound = append(pointsFound, model.Scores{
-					Cards: []queries.Gameplaycard{cardsInPlay[i], cardsInPlay[j]},
+					Cards: []model.GameCard{cardsInPlay[i], cardsInPlay[j]},
 					Point: 2,
 				})
 			}
@@ -301,9 +410,13 @@ func scanForFifthteens(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
 	for i := 0; i < len(cardsInPlay); i++ {
 		for j := i; j < len(cardsInPlay); j++ {
 			for k := j; k < len(cardsInPlay); k++ {
-				if cardsInPlay[i].Value+cardsInPlay[j].Value+cardsInPlay[k].Value == 15 && i != j && j != k {
+				details1 := cardDetails(cardsInPlay[i].Value)
+				details2 := cardDetails(cardsInPlay[j].Value)
+				details3 := cardDetails(cardsInPlay[k].Value)
+
+				if details1.Value+details2.Value+details3.Value == 15 && i != j && j != k {
 					pointsFound = append(pointsFound, model.Scores{
-						Cards: []queries.Gameplaycard{cardsInPlay[i], cardsInPlay[j], cardsInPlay[k]},
+						Cards: []model.GameCard{cardsInPlay[i], cardsInPlay[j], cardsInPlay[k]},
 						Point: 2,
 					})
 				}
@@ -314,21 +427,23 @@ func scanForFifthteens(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanRightJackCut(gameplayCardsIdsInPlay []int, match queries.Match) ([]model.Scores, error) {
+func scanRightJackCut(gameplayCardsIdsInPlay []int32, match model.GameMatch) ([]model.Scores, error) {
 	cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
 	if err != nil {
 		return []model.Scores{}, err
 	}
 
-	cut, err := getGameplayCardsForIds([]int{match.CutGameCardId})
+	cut, err := getGameplayCardsForIds([]int32{match.Cutgamecardid})
 	if err != nil {
 		return []model.Scores{}, err
 	}
 
 	for i := 0; i < len(cardsInPlay); i++ {
-		if cardsInPlay[i].Value == 11 && cardsInPlay[i].Suit == cut[0].Suit {
+		details1 := cardDetails(cardsInPlay[i].Value)
+
+		if details1.Value == 11 && cardsInPlay[i].Suit == cut[0].Suit {
 			return []model.Scores{{
-				Cards: []queries.Gameplaycard{cardsInPlay[0], cardsInPlay[1]},
+				Cards: []model.GameCard{cardsInPlay[0], cardsInPlay[1]},
 				Point: 1,
 			}}, nil
 		}
@@ -337,33 +452,37 @@ func scanRightJackCut(gameplayCardsIdsInPlay []int, match queries.Match) ([]mode
 	return []model.Scores{}, nil
 }
 
-func getGameplayCardsForIds(ids []int) ([]queries.Gameplaycard, error) {
+func getGameplayCardsForIds(ids []int32) ([]model.GameCard, error) {
 	if len(ids) == 0 {
-		return []queries.Gameplaycard{}, nil
+		return []model.GameCard{}, nil
 	}
 
 	// string_ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(ids)), ","), "[]")
 	cards, err := utils.QueryForCards(ids)
 	if err != nil {
-		return []queries.Gameplaycard{}, err
+		return []model.GameCard{}, err
 	}
 	return cards, nil
 }
 
-func scanForThirtyOne(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
+func scanForThirtyOne(gameplayCardsIdsInPlay []int32) ([]model.Scores, error) {
 	cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
 	if err != nil {
 		return []model.Scores{}, err
 	}
 
-	plays := []queries.Gameplaycard{}
+	plays := []model.GameCard{}
 	pointsFound := []model.Scores{}
 
 	if len(cardsInPlay) < 3 {
 		return pointsFound, nil
 	}
 
-	if cardsInPlay[0].Value+cardsInPlay[1].Value+cardsInPlay[2].Value == 31 {
+	details1 := cardDetails(cardsInPlay[0].Value)
+	details2 := cardDetails(cardsInPlay[1].Value)
+	details3 := cardDetails(cardsInPlay[2].Value)
+
+	if details1.Value+details2.Value+details3.Value == 31 {
 		pointsFound = append(pointsFound, model.Scores{
 			Cards: plays,
 			Point: 2,
@@ -374,28 +493,30 @@ func scanForThirtyOne(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
 		return pointsFound, nil
 	}
 
-	if cardsInPlay[0].Value+cardsInPlay[1].Value+cardsInPlay[3].Value == 31 {
+	details4 := cardDetails(cardsInPlay[3].Value)
+
+	if details1.Value+details2.Value+details4.Value == 31 {
 		pointsFound = append(pointsFound, model.Scores{
 			Cards: plays,
 			Point: 2,
 		})
 	}
 
-	if cardsInPlay[0].Value+cardsInPlay[2].Value+cardsInPlay[3].Value == 31 {
+	if details1.Value+details3.Value+details4.Value == 31 {
 		pointsFound = append(pointsFound, model.Scores{
 			Cards: plays,
 			Point: 2,
 		})
 	}
 
-	if cardsInPlay[1].Value+cardsInPlay[2].Value+cardsInPlay[3].Value == 31 {
+	if details2.Value+details3.Value+details4.Value == 31 {
 		pointsFound = append(pointsFound, model.Scores{
 			Cards: plays,
 			Point: 2,
 		})
 	}
 
-	if cardsInPlay[0].Value+cardsInPlay[1].Value+cardsInPlay[2].Value+cardsInPlay[3].Value == 31 {
+	if details1.Value+details2.Value+details3.Value+details4.Value == 31 {
 		pointsFound = append(pointsFound, model.Scores{
 			Cards: plays,
 			Point: 2,
@@ -405,7 +526,7 @@ func scanForThirtyOne(gameplayCardsIdsInPlay []int) ([]model.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanForLastCard(m queries.Match) ([]model.Scores, error) {
+func scanForLastCard(m model.GameMatch) ([]model.Scores, error) {
 	if len(m.Players) < 2 {
 		return []model.Scores{}, errors.New("too few players")
 	}
@@ -430,19 +551,22 @@ func scanForLastCard(m queries.Match) ([]model.Scores, error) {
 
 	total := 0
 	for _, card := range cardsInPlay {
-		total = total + int(card.Value)
+		details := cardDetails(card.Value)
+		total = total + details.Value
 	}
 
 	playerOneCanPlay := false
 	for _, card := range playerOneCards {
-		if int(card.Value)+total <= 31 {
+		details := cardDetails(card.Value)
+		if int(details.Value)+total <= 31 {
 			playerOneCanPlay = true
 		}
 	}
 
 	playerTwoCanPlay := false
 	for _, card := range playerTwoCards {
-		if int(card.Value)+total <= 31 {
+		details := cardDetails(card.Value)
+		if int(details.Value)+total <= 31 {
 			playerTwoCanPlay = true
 		}
 	}
@@ -458,15 +582,17 @@ func scanForLastCard(m queries.Match) ([]model.Scores, error) {
 	return []model.Scores{}, nil
 }
 
-func scanJackOnCut(match queries.Match) ([]model.Scores, error) {
-	cardsInPlay, err := getGameplayCardsForIds([]int{match.CutGameCardId})
+func scanJackOnCut(match model.GameMatch) ([]model.Scores, error) {
+	cardsInPlay, err := getGameplayCardsForIds([]int32{match.Cutgamecardid})
 	if err != nil || len(cardsInPlay) == 0 {
 		return []model.Scores{}, err
 	}
 
-	if cardsInPlay[0].Value == 11 {
+	details := cardDetails(cardsInPlay[0].Value)
+
+	if details.Order == 11 {
 		return []model.Scores{{
-			Cards: []queries.Gameplaycard{},
+			Cards: []model.GameCard{},
 			Point: 2,
 		}}, nil
 	}

@@ -75,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Card"
+                            "$ref": "#/definitions/queries.Card"
                         }
                     }
                 ],
@@ -83,7 +83,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Card"
+                            "$ref": "#/definitions/queries.Card"
                         }
                     },
                     "400": {
@@ -114,7 +114,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Card"
+                            "$ref": "#/definitions/queries.Card"
                         }
                     }
                 ],
@@ -122,7 +122,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Card"
+                            "$ref": "#/definitions/queries.Card"
                         }
                     },
                     "400": {
@@ -211,7 +211,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Card"
+                            "$ref": "#/definitions/queries.Card"
                         }
                     },
                     "400": {
@@ -247,7 +247,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/queries.Gameplaycard"
+                                "$ref": "#/definitions/queries.Card"
                             }
                         }
                     },
@@ -289,7 +289,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/queries.Gameplaycard"
+                                "$ref": "#/definitions/queries.Card"
                             }
                         }
                     },
@@ -621,7 +621,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/queries.Match"
+                                "$ref": "#/definitions/model.GameMatch"
                             }
                         }
                     },
@@ -898,73 +898,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.Card": {
-            "type": "object",
-            "properties": {
-                "Art": {
-                    "type": "string"
-                },
-                "Id": {
-                    "type": "integer"
-                },
-                "Suit": {
-                    "$ref": "#/definitions/model.Suit"
-                },
-                "Value": {
-                    "$ref": "#/definitions/model.CardValue"
-                }
-            }
-        },
-        "model.CardState": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "Deck",
-                "Hand",
-                "Play",
-                "Kitty"
-            ]
-        },
-        "model.CardValue": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13
-            ],
-            "x-enum-varnames": [
-                "Ace",
-                "Two",
-                "Three",
-                "Four",
-                "Five",
-                "Six",
-                "Seven",
-                "Eight",
-                "Nine",
-                "Ten",
-                "Jack",
-                "Queen",
-                "King",
-                "Joker"
-            ]
-        },
         "model.CutDeckReq": {
             "type": "object",
             "properties": {
@@ -979,13 +912,42 @@ const docTemplate = `{
                 }
             }
         },
+        "model.GameCard": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "cardid": {
+                    "type": "integer"
+                },
+                "currowner": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "origowner": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "state": {
+                    "$ref": "#/definitions/queries.Cardstate"
+                },
+                "suit": {
+                    "$ref": "#/definitions/queries.Cardsuit"
+                },
+                "value": {
+                    "$ref": "#/definitions/queries.Cardvalue"
+                }
+            }
+        },
         "model.GameDeck": {
             "type": "object",
             "properties": {
                 "cards": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/queries.Gameplaycard"
+                        "$ref": "#/definitions/model.GameCard"
                     }
                 },
                 "id": {
@@ -993,37 +955,37 @@ const docTemplate = `{
                 }
             }
         },
-        "queries.Match": {
+        "model.GameMatch": {
             "type": "object",
             "properties": {
                 "art": {
                     "type": "string"
                 },
-                "creationDate": {
-                    "type": "string"
+                "creationdate": {
+                    "$ref": "#/definitions/pgtype.Timestamptz"
                 },
-                "currentPlayerTurn": {
+                "currentplayerturn": {
                     "type": "integer"
                 },
-                "cutGameCardId": {
+                "cutgamecardid": {
                     "type": "integer"
                 },
-                "deckId": {
+                "deckid": {
                     "type": "integer"
                 },
-                "eloRangeMax": {
+                "elorangemax": {
                     "type": "integer"
                 },
-                "eloRangeMin": {
+                "elorangemin": {
                     "type": "integer"
                 },
-                "gameState": {
-                    "$ref": "#/definitions/model.GameState"
+                "gamestate": {
+                    "$ref": "#/definitions/queries.Gamestate"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "playerIds": {
+                "playerids": {
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -1035,76 +997,14 @@ const docTemplate = `{
                         "$ref": "#/definitions/queries.Player"
                     }
                 },
-                "privateMatch": {
+                "privatematch": {
                     "type": "boolean"
                 },
-                "turnPassTimestamps": {
+                "turnpasstimestamps": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/pgtype.Timestamptz"
                     }
-                }
-            }
-        },
-        "model.GameState": {
-            "type": "integer",
-            "enum": [
-                1,
-                2,
-                4,
-                8,
-                16,
-                32,
-                64,
-                128,
-                256,
-                512,
-                1024,
-                2048,
-                4096
-            ],
-            "x-enum-varnames": [
-                "NewGameState",
-                "JoinGameState",
-                "WaitingState",
-                "MatchReady",
-                "DealState",
-                "DiscardState",
-                "CutState",
-                "PlayState",
-                "OpponentState",
-                "KittyState",
-                "GameWonState",
-                "GameLostState",
-                "MaxGameState"
-            ]
-        },
-        "queries.Gameplaycard": {
-            "type": "object",
-            "properties": {
-                "Art": {
-                    "type": "string"
-                },
-                "Id": {
-                    "type": "integer"
-                },
-                "Suit": {
-                    "$ref": "#/definitions/model.Suit"
-                },
-                "Value": {
-                    "$ref": "#/definitions/model.CardValue"
-                },
-                "cardId": {
-                    "type": "integer"
-                },
-                "currOwner": {
-                    "type": "integer"
-                },
-                "origOwner": {
-                    "type": "integer"
-                },
-                "state": {
-                    "$ref": "#/definitions/model.CardState"
                 }
             }
         },
@@ -1140,7 +1040,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "gameState": {
-                    "$ref": "#/definitions/model.GameState"
+                    "$ref": "#/definitions/queries.Gamestate"
                 },
                 "matchId": {
                     "type": "integer"
@@ -1170,6 +1070,217 @@ const docTemplate = `{
                 }
             }
         },
+        "pgtype.InfinityModifier": {
+            "type": "integer",
+            "enum": [
+                1,
+                0,
+                -1
+            ],
+            "x-enum-varnames": [
+                "Infinity",
+                "Finite",
+                "NegativeInfinity"
+            ]
+        },
+        "pgtype.Int4": {
+            "type": "object",
+            "properties": {
+                "int32": {
+                    "type": "integer"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "pgtype.Timestamptz": {
+            "type": "object",
+            "properties": {
+                "infinityModifier": {
+                    "$ref": "#/definitions/pgtype.InfinityModifier"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "queries.Account": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "queries.Card": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "suit": {
+                    "$ref": "#/definitions/queries.Cardsuit"
+                },
+                "value": {
+                    "$ref": "#/definitions/queries.Cardvalue"
+                }
+            }
+        },
+        "queries.Cardstate": {
+            "type": "string",
+            "enum": [
+                "Deck",
+                "Hand",
+                "Play",
+                "Kitty"
+            ],
+            "x-enum-varnames": [
+                "CardstateDeck",
+                "CardstateHand",
+                "CardstatePlay",
+                "CardstateKitty"
+            ]
+        },
+        "queries.Cardsuit": {
+            "type": "string",
+            "enum": [
+                "Spades",
+                "Clubs",
+                "Hearts",
+                "Diamonds"
+            ],
+            "x-enum-varnames": [
+                "CardsuitSpades",
+                "CardsuitClubs",
+                "CardsuitHearts",
+                "CardsuitDiamonds"
+            ]
+        },
+        "queries.Cardvalue": {
+            "type": "string",
+            "enum": [
+                "Ace",
+                "Two",
+                "Three",
+                "Four",
+                "Five",
+                "Six",
+                "Seven",
+                "Eight",
+                "Nine",
+                "Ten",
+                "Jack",
+                "Queen",
+                "King",
+                "Joker"
+            ],
+            "x-enum-varnames": [
+                "CardvalueAce",
+                "CardvalueTwo",
+                "CardvalueThree",
+                "CardvalueFour",
+                "CardvalueFive",
+                "CardvalueSix",
+                "CardvalueSeven",
+                "CardvalueEight",
+                "CardvalueNine",
+                "CardvalueTen",
+                "CardvalueJack",
+                "CardvalueQueen",
+                "CardvalueKing",
+                "CardvalueJoker"
+            ]
+        },
+        "queries.Gamestate": {
+            "type": "string",
+            "enum": [
+                "NewGameState",
+                "JoinGameState",
+                "WaitingState",
+                "MatchReady",
+                "DealState",
+                "DiscardState",
+                "CutState",
+                "PlayState",
+                "OpponentState",
+                "KittyState",
+                "GameWonState",
+                "GameLostState",
+                "MaxGameState"
+            ],
+            "x-enum-varnames": [
+                "GamestateNewGameState",
+                "GamestateJoinGameState",
+                "GamestateWaitingState",
+                "GamestateMatchReady",
+                "GamestateDealState",
+                "GamestateDiscardState",
+                "GamestateCutState",
+                "GamestatePlayState",
+                "GamestateOpponentState",
+                "GamestateKittyState",
+                "GamestateGameWonState",
+                "GamestateGameLostState",
+                "GamestateMaxGameState"
+            ]
+        },
+        "queries.Match": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "creationdate": {
+                    "$ref": "#/definitions/pgtype.Timestamptz"
+                },
+                "currentplayerturn": {
+                    "type": "integer"
+                },
+                "cutgamecardid": {
+                    "type": "integer"
+                },
+                "deckid": {
+                    "type": "integer"
+                },
+                "elorangemax": {
+                    "type": "integer"
+                },
+                "elorangemin": {
+                    "type": "integer"
+                },
+                "gamestate": {
+                    "$ref": "#/definitions/queries.Gamestate"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "playerids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "privatematch": {
+                    "type": "boolean"
+                },
+                "turnpasstimestamps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pgtype.Timestamptz"
+                    }
+                }
+            }
+        },
         "queries.Player": {
             "type": "object",
             "properties": {
@@ -1188,7 +1299,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "isReady": {
+                "isready": {
                     "type": "boolean"
                 },
                 "kitty": {
@@ -1205,32 +1316,6 @@ const docTemplate = `{
                 },
                 "score": {
                     "type": "integer"
-                }
-            }
-        },
-        "model.Suit": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "Spades",
-                "Clubs",
-                "Hearts",
-                "Diamonds"
-            ]
-        },
-        "queries.Account": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
                 }
             }
         }

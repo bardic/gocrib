@@ -6,6 +6,7 @@ require github.com/charmbracelet/bubbletea v1.1.1
 
 require (
 	github.com/bardic/gocrib/model v0.0.0
+	github.com/bardic/gocrib/queries v0.0.0
 	go.uber.org/zap v1.27.0
 )
 
@@ -24,7 +25,7 @@ replace github.com/bardic/gocrib/queries => ../queries/queries
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/bardic/gocrib/queries v0.0.0-00010101000000-000000000000
+	github.com/bardic/gocrib/queries v0.0.0
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/lipgloss v0.13.0
 	github.com/charmbracelet/x/ansi v0.2.3 // indirect

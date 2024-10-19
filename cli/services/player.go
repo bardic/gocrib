@@ -43,6 +43,6 @@ func DeletePlayer(ids []int) tea.Msg {
 	return url(EndPointPlayer, http.MethodDelete, "")
 }
 
-func PlayerReady(playerId int) tea.Msg {
-	return url(EndPointPlayerReady, http.MethodPut, strconv.Itoa(playerId))
+func PlayerReady(playerId int32) tea.Msg {
+	return url(EndPointPlayerReady, http.MethodPut, strconv.Itoa(int(playerId)))
 }

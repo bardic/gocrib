@@ -5,9 +5,10 @@ import (
 	"net/http"
 
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/route/player"
-	"github.com/bardic/gocrib/server/utils"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,12 +32,9 @@ func NewMatch(c echo.Context) error {
 
 	db := conn.Pool()
 	defer db.Close()
+	q := queries.New(db)
 
-	d, err := utils.NewDeck()
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	ctx := context.Background()
 
 	p, err := player.NewPlayerQuery(details.AccountId)
 
@@ -44,55 +42,26 @@ func NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	match := queries.Match{}
-	match.DeckId = d.Id
-
-	match.PlayerIds = []int{p.Id}
-	match.EloRangeMin = details.EloRangeMin
-	match.EloRangeMax = details.EloRangeMax
-	match.PrivateMatch = details.IsPrivate
-	match.GameState = model.NewGameState
-
-	args := utils.ParseMatch(match)
-
-	//MEOWCAKES
-	// query := `INSERT INTO match(
-	// 			playerIds,
-	// 			privateMatch,
-	// 			eloRangeMin,
-	// 			eloRangeMax,
-	// 			deckId,
-	// 			cutGameCardId,
-	// 			currentplayerturn,
-	// 			turnPassTimestamps,
-	// 			gameState,
-	// 			art)
-	// 		VALUES (
-	// 			@playerIds,
-	// 			@privateMatch,
-	// 			@eloRangeMin,
-	// 			@eloRangeMax,
-	// 			@deckId,
-	// 			@cutGameCardId,
-	// 			@currentPlayerTurn,
-	// 			@turnPassTimestamps,
-	// 			@gameState,
-	// 			@art)
-	// 		RETURNING id`
-
-	var matchId int
-	err = db.QueryRow(
-		context.Background(),
-		query,
-		args).Scan(&matchId)
+	m, err := q.CreateMatch(ctx, queries.CreateMatchParams{
+		Playerids:          []int32{p.ID},
+		Privatematch:       false,
+		Elorangemin:        0,
+		Elorangemax:        0,
+		Deckid:             0,
+		Cutgamecardid:      0,
+		Currentplayerturn:  0,
+		Turnpasstimestamps: []pgtype.Timestamptz{},
+		Gamestate:          queries.GamestateNewGameState,
+		Art:                "default.png",
+	})
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
-		MatchId:   matchId,
-		PlayerId:  p.Id,
-		GameState: model.NewGameState,
+		MatchId:   int(m.ID),
+		PlayerId:  int(p.ID),
+		GameState: m.Gamestate,
 	})
 }

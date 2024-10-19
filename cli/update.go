@@ -38,14 +38,14 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		matchDetails := msg
 		m.matchId = matchDetails.MatchId
 
-		if matchDetails.GameState == model.NewGameState ||
-			matchDetails.GameState == model.JoinGameState {
+		if matchDetails.GameState == queries.GamestateNewGameState ||
+			matchDetails.GameState == queries.GamestateJoinGameState {
 			m.ViewStateName = model.JoinGameView
 			cmds = append(cmds, func() tea.Msg {
 				return model.GameStateChangeMsg{
-					NewState: model.JoinGameState,
-					PlayerId: matchDetails.PlayerId,
-					MatchId:  m.matchId,
+					NewState: queries.GamestateJoinGameState,
+					PlayerId: int32(matchDetails.PlayerId),
+					MatchId:  int32(m.matchId),
 				}
 			})
 
@@ -56,13 +56,14 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, func() tea.Msg {
 			return model.GameStateChangeMsg{
 				NewState: matchDetails.GameState,
-				PlayerId: matchDetails.PlayerId,
-				MatchId:  m.matchId,
+				PlayerId: int32(matchDetails.PlayerId),
+				MatchId:  int32(m.matchId),
 			}
 		})
 	case model.GameStateChangeMsg:
 		switch msg.NewState {
-		case model.NewGameState:
+		case queries.GamestateNewGameState:
+
 			var cmd tea.Cmd
 			cmd = m.createMatch(msg)
 			gameView := m.currentView.(*views.GameView)
@@ -70,17 +71,17 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				utils.Logger.Sugar().Error(err)
 			}
-			services.PlayerReady(p.Id)
+			services.PlayerReady(p.ID)
 			cmds = append(cmds, cmd)
-		case model.JoinGameState:
+		case queries.GamestateJoinGameState:
 			var cmd tea.Cmd
 			cmd = m.createMatch(msg)
 			services.PlayerReady(msg.PlayerId)
 			cmds = append(cmds, cmd)
-		case model.WaitingState:
+		case queries.GamestateWaitingState:
 			m.playersReady = true
 			m.ViewStateName = model.InGameView
-		case model.CutState:
+		case queries.GamestateCutState:
 			m.playersReady = true
 			m.ViewStateName = model.InGameView
 		}
@@ -103,7 +104,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
 
-		var matchDetails queries.Match
+		var matchDetails model.GameMatch
 		idstr := strconv.Itoa(m.matchId)
 		resp := services.GetPlayerMatch(idstr)
 		json.Unmarshal(resp.([]byte), &matchDetails)
@@ -129,7 +130,7 @@ func (m *AppModel) createMatch(msg model.GameStateChangeMsg) tea.Cmd {
 
 	m.currentView = &views.GameView{
 		AccountId: m.accountId,
-		MatchId:   msg.MatchId,
+		MatchId:   int(msg.MatchId),
 	}
 
 	gameView := m.currentView.(*views.GameView)
@@ -142,11 +143,11 @@ func (m *AppModel) createMatch(msg model.GameStateChangeMsg) tea.Cmd {
 	return cmd
 }
 
-func (m *AppModel) setCards(match *queries.Match) {
+func (m *AppModel) setCards(match *model.GameMatch) {
 	gameView := m.currentView.(*views.GameView)
-	gameView.Hand = []model.Card{}
-	gameView.Kitty = []model.Card{}
-	gameView.Play = []model.Card{}
+	gameView.Hand = []queries.Card{}
+	gameView.Kitty = []queries.Card{}
+	gameView.Play = []queries.Card{}
 
 	p := utils.GetPlayerForAccountId(m.accountId, match)
 

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,7 +32,7 @@ func TestNewMatch(t *testing.T) {
 	var m queries.Match
 	json.Unmarshal(rec.Body.Bytes(), &m)
 
-	if m.Id == 0 {
+	if m.ID == 0 {
 		t.Fatalf(`meow`)
 	}
 }

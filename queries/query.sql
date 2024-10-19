@@ -150,8 +150,8 @@ UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1) WHERE id=$2;
 -- name: GetDeck :one
 SELECT deck.* FROM deck WHERE id=$1 LIMIT 1;
 
--- name: GetGamePlayCards :many
-SELECT gameplaycards.* FROM gameplaycards NATURAL JOIN cards WHERE gameplaycards.id IN ($1::int[]);
+-- name: GetMatchCards :many
+SELECT matchcards.* FROM matchcards NATURAL JOIN cards WHERE matchcards.id IN ($1::int[]);
 
 -- name: UpdateCardsPlayed :exec
 UPDATE player SET play = play + $1 where id = $2;
@@ -176,7 +176,7 @@ UPDATE player SET
 	where 
 		id = $7;
 
--- name: CreateMatch :exec
+-- name: CreateMatch :one
 INSERT INTO match(
 				playerIds,
 				privateMatch,
@@ -199,7 +199,7 @@ INSERT INTO match(
 				$8,
 				$9,
 				$10)
-			RETURNING id;
+			RETURNING *;
 
 -- name: CreatePlayer :one
 INSERT INTO player (

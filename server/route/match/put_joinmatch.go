@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	"github.com/bardic/gocrib/server/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -32,15 +33,15 @@ func JoinMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	details.PlayerId = p.Id
+	details.PlayerId = int(p.ID)
 	m, err := utils.UpdatePlayersInMatch(*details)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
-		MatchId:   m.Id,
-		PlayerId:  p.Id,
-		GameState: model.JoinGameState,
+		MatchId:   int(m.ID),
+		PlayerId:  int(p.ID),
+		GameState: queries.GamestateJoinGameState,
 	})
 }

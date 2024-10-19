@@ -236,14 +236,6 @@ type Deck struct {
 	Cards []byte
 }
 
-type Gameplaycard struct {
-	ID        int32
-	Cardid    int32
-	Origowner pgtype.Int4
-	Currowner pgtype.Int4
-	State     Cardstate
-}
-
 type Match struct {
 	ID                 int32
 	Playerids          []int32
@@ -257,6 +249,14 @@ type Match struct {
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
 	Art                string
+}
+
+type Matchcard struct {
+	ID        int32
+	Cardid    int32
+	Origowner pgtype.Int4
+	Currowner pgtype.Int4
+	State     Cardstate
 }
 
 type Matchhistory struct {

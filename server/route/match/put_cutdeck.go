@@ -2,10 +2,8 @@ package match
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/server/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,39 +21,39 @@ import (
 // @Router       /player/match/cut [put]
 func CutDeck(c echo.Context) error {
 	details := new(model.CutDeckReq)
-	if err := c.Bind(details); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
+	// if err := c.Bind(details); err != nil {
+	// 	return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	// }
 
-	m, err := utils.GetMatch(details.MatchId)
+	// m, err := utils.GetMatch(details.MatchId)
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err)
+	// }
 
-	d, err := utils.GetDeckById(m.Id)
+	// d, err := utils.GetDeckById(int(m.ID))
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err)
+	// }
 
-	cutIndex, err := strconv.Atoi(details.CutIndex)
+	// cutIndex, err := strconv.Atoi(details.CutIndex)
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err)
+	// }
 
-	card := d.Cards[cutIndex]
+	// card := d.Cards[cutIndex]
 
-	m.CutGameCardId = card.CardId
+	// m.Cutgamecardid = card
 
-	err = utils.UpdateCut(m.Id, card.CardId)
+	// err = utils.UpdateCut(int(m.ID), card.CardID)
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err)
+	// }
 
-	utils.UpdateMatchState(details.MatchId, model.DiscardState)
+	// utils.UpdateMatchState(details.MatchId, model.DiscardState)
 
 	return c.JSON(http.StatusOK, details.MatchId)
 }

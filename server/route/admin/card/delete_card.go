@@ -14,7 +14,7 @@ import (
 // @Produce      json
 // @Param        barcode    query     string  true  "search for card by barcode"'
 // @Param        storeId    query     string  true  "Store in which the barcode was found"'
-// @Success      200  {object}  model.Card
+// @Success      200  {object}  queries.Card
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error

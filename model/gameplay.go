@@ -4,86 +4,9 @@ import (
 	"github.com/bardic/gocrib/queries"
 )
 
-// _Cards_
-
-// type CardValue int
-
-// const (
-// 	Ace CardValue = iota
-// 	Two
-// 	Three
-// 	Four
-// 	Five
-// 	Six
-// 	Seven
-// 	Eight
-// 	Nine
-// 	Ten
-// 	Jack
-// 	Queen
-// 	King
-// 	Joker
-// )
-
-// type Suit int
-
-// const (
-// 	Spades Suit = iota
-// 	Clubs
-// 	Hearts
-// 	Diamonds
-// )
-
-// type CardState int
-
-// const (
-// 	Deck CardState = iota
-// 	Hand
-// 	Play
-// 	Kitty
-// )
-
-// type Card struct {
-// 	Id    int       `json:"Id"`
-// 	Value CardValue `json:"Value"`
-// 	Suit  Suit      `json:"Suit"`
-// 	Art   string    `json:"Art"`
-// }
-
 type Cards struct {
 	Cards []queries.Card `json:"Cards"`
 }
-
-// _Game_
-
-// type GameplayCard struct {
-// 	Card
-// 	CardId    int
-// 	OrigOwner int
-// 	CurrOwner int
-// 	State     CardState
-// }
-
-// type GameDeck struct {
-// 	Id    int
-// 	Cards []GameplayCard `json:"cards"`
-// }
-
-// type GameMatch struct {
-// 	Id                 int       `json:"id"`
-// 	PlayerIds          []int     `json:"playerIds"`
-// 	PrivateMatch       bool      `json:"privateMatch"`
-// 	EloRangeMin        int       `json:"eloRangeMin"`
-// 	EloRangeMax        int       `json:"eloRangeMax"`
-// 	CreationDate       time.Time `json:"creationDate"`
-// 	DeckId             int       `json:"deckId"`
-// 	CutGameCardId      int       `json:"cutGameCardId"`
-// 	CurrentPlayerTurn  int       `json:"currentPlayerTurn"`
-// 	TurnPassTimestamps []string  `json:"turnPassTimestamps"`
-// 	GameState          GameState `json:"gameState"`
-// 	Art                string    `json:"art "`
-// 	Players            []Player
-// }
 
 type GameMatch struct {
 	queries.Match
@@ -92,26 +15,18 @@ type GameMatch struct {
 
 type GameDeck struct {
 	queries.Deck
-	Cards []queries.Gameplaycard
+	Cards []GameCard
 }
 
-// type GameState uint
+type GameCard struct {
+	queries.Matchcard
+	queries.Card
+}
 
-// const (
-// 	NewGameState GameState = 1 << iota
-// 	JoinGameState
-// 	WaitingState
-// 	MatchReady
-// 	DealState
-// 	DiscardState
-// 	CutState
-// 	PlayState
-// 	OpponentState
-// 	KittyState
-// 	GameWonState
-// 	GameLostState
-// 	MaxGameState
-// )
+type GameCardDetails struct {
+	Value int
+	Order int
+}
 
 type GameActionType int
 
@@ -136,19 +51,6 @@ const (
 	HandView
 	KittyView
 )
-
-// _Player_
-
-// type Player struct {
-// 	Id        int
-// 	AccountId int `json:"accountid"`
-// 	Play      []int
-// 	Hand      []int
-// 	Kitty     []int
-// 	Score     int
-// 	IsReady   bool
-// 	Art       string
-// }
 
 //_Comms_
 
@@ -188,7 +90,7 @@ type ScoreResults struct {
 }
 
 type Scores struct {
-	Cards []queries.Gameplaycard
+	Cards []GameCard
 	Point int
 }
 
@@ -211,18 +113,6 @@ const (
 	AvailableMatches
 )
 
-func eqIntArr(a, b []int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
 type StateChangeMsg struct {
 	NewState ViewStateName
 	MatchId  int
@@ -230,6 +120,6 @@ type StateChangeMsg struct {
 
 type GameStateChangeMsg struct {
 	NewState queries.Gamestate
-	PlayerId int
-	MatchId  int
+	PlayerId int32
+	MatchId  int32
 }

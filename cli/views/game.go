@@ -11,6 +11,7 @@ import (
 	"github.com/bardic/gocrib/cli/utils"
 
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -21,7 +22,7 @@ type GameView struct {
 	MatchId        int
 	AccountId      int
 	CutIndex       string
-	HighlightedIds []int
+	HighlightedIds []int32
 	GameTabNames   []string
 	GameViewState  model.GameViewState
 	ActiveSlot     int
@@ -30,10 +31,10 @@ type GameView struct {
 	CutInput       textinput.Model
 	Deck           *model.GameDeck
 	DeckId         int
-	Hand           []model.Card
-	Kitty          []model.Card
-	Play           []model.Card
-	GameMatch      *queries.Match
+	Hand           []queries.Card
+	Kitty          []queries.Card
+	Play           []queries.Card
+	GameMatch      *model.GameMatch
 }
 
 var focusedModelStyle = lipgloss.NewStyle().
@@ -58,7 +59,7 @@ func (v *GameView) Init() {
 	v.CutInput.CharLimit = 5
 	v.CutInput.Width = 5
 
-	deckByte := services.GetDeckById(match.DeckId).([]byte)
+	deckByte := services.GetDeckById(int(match.Deckid)).([]byte)
 	var deck model.GameDeck
 	json.Unmarshal(deckByte, &deck)
 	v.Deck = &deck
@@ -86,7 +87,7 @@ func (v *GameView) View() string {
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
-		if v.GameMatch.GameState == model.CutState && v.GameMatch.CurrentPlayerTurn != player.Id {
+		if v.GameMatch.Gamestate == queries.GamestateCutState && v.GameMatch.Currentplayerturn != player.ID {
 			v.CutInput.Focus()
 			view = v.CutInput.View() + " \n"
 		} else {
@@ -111,7 +112,7 @@ func (v *GameView) View() string {
 		view = HandView(v.HighlighedId, v.HighlightedIds, p.Play, v.Deck)
 	case model.HandView:
 		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
-		if v.GameMatch.GameState == 0 {
+		if v.GameMatch.Gamestate == queries.GamestateWaitingState {
 			view = "Waiting to be dealt"
 		} else {
 			view = HandView(v.HighlighedId, v.HighlightedIds, p.Hand, v.Deck)
@@ -130,11 +131,11 @@ func (v *GameView) View() string {
 }
 
 func (v *GameView) Enter() tea.Msg {
-	switch v.GameMatch.GameState {
-	case model.CutState:
+	switch v.GameMatch.Gamestate {
+	case queries.GamestateCutState:
 		v.CutIndex = v.CutInput.Value()
 		return services.CutDeck
-	case model.DiscardState:
+	case queries.GamestateDiscardState:
 		p, err := utils.GetPlayerId(v.AccountId, v.GameMatch.Players)
 
 		if err != nil {
@@ -142,8 +143,8 @@ func (v *GameView) Enter() tea.Msg {
 		}
 
 		services.PutKitty(model.HandModifier{
-			MatchId:  v.GameMatch.Id,
-			PlayerId: p.Id,
+			MatchId:  v.GameMatch.ID,
+			PlayerId: p.ID,
 			CardIds:  v.HighlightedIds,
 		})
 	}

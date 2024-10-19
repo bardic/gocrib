@@ -7,6 +7,7 @@ import (
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -141,34 +142,34 @@ func (m *AppModel) OnEnterDuringPlay() {
 	gameView := m.currentView.(*views.GameView)
 	m.ViewStateName = model.InGameView
 
-	if gameView.GameMatch.GameState == model.DiscardState {
+	if gameView.GameMatch.Gamestate == queries.GamestateCutState {
 		for _, idx := range gameView.HighlightedIds {
 			gameView.Kitty = append(gameView.Kitty, utils.GetCardInHandById(idx, gameView.Hand))
-			gameView.Hand = slices.DeleteFunc(gameView.Hand, func(c model.Card) bool {
-				return c.Id == idx
+			gameView.Hand = slices.DeleteFunc(gameView.Hand, func(c queries.Card) bool {
+				return c.ID == idx
 			})
 		}
 
-		gameView.HighlightedIds = []int{}
+		gameView.HighlightedIds = []int32{}
 
 		services.PutKitty(model.HandModifier{
-			MatchId:  gameView.GameMatch.Id,
+			MatchId:  gameView.GameMatch.ID,
 			CardIds:  utils.GetIdsFromCards(gameView.Kitty),
-			PlayerId: gameView.GameMatch.PlayerIds[0],
+			PlayerId: gameView.GameMatch.Playerids[0],
 		})
 	} else {
 		for _, idx := range gameView.HighlightedIds {
 			gameView.Play = append(gameView.Play, utils.GetCardInHandById(idx, gameView.Hand))
-			gameView.Hand = slices.DeleteFunc(gameView.Hand, func(c model.Card) bool {
-				return c.Id == idx
+			gameView.Hand = slices.DeleteFunc(gameView.Hand, func(c queries.Card) bool {
+				return c.ID == idx
 			})
 		}
 
-		gameView.HighlightedIds = []int{}
+		gameView.HighlightedIds = []int32{}
 		services.PutPlay(model.HandModifier{
-			MatchId:  gameView.GameMatch.Id,
+			MatchId:  gameView.GameMatch.ID,
 			CardIds:  utils.GetIdsFromCards(gameView.Play),
-			PlayerId: gameView.GameMatch.PlayerIds[0],
+			PlayerId: gameView.GameMatch.Playerids[0],
 		})
 	}
 }

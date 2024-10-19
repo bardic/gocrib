@@ -88,7 +88,7 @@ func GetMatch(id int) (*model.GameMatch, error) {
 	return match, nil
 }
 
-func GetOpenMatches() ([]model.GameMatch, error) {
+func GetOpenMatches() ([]queries.Match, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -96,10 +96,15 @@ func GetOpenMatches() ([]model.GameMatch, error) {
 	ctx := context.Background()
 
 	matchesData, err := q.GetOpenMatches(ctx)
-	var matches []model.GameMatch
+
+	if err != nil {
+		return nil, err
+	}
+
+	var matches []queries.Match
 
 	for _, matchData := range matchesData {
-		var match model.GameMatch
+		var match queries.Match
 		err = json.Unmarshal(matchData, &match)
 		if err != nil {
 			return nil, err
@@ -151,10 +156,10 @@ func NewDeck() (queries.Deck, error) {
 
 	// //rows, err := db.Query(context.Background(), "SELECT * FROM cards") //MEOWCAKES
 
-	// v := []model.Card{}
+	// v := []queries.Card{}
 
 	// for rows.Next() {
-	// 	var card model.Card
+	// 	var card queries.Card
 
 	// 	err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.Art)
 	// 	if err != nil {
@@ -169,11 +174,11 @@ func NewDeck() (queries.Deck, error) {
 	// }
 
 	// deck := model.GameDeck{
-	// 	Cards: []queries.Gameplaycard{},
+	// 	Cards: []queries.Card{},
 	// }
 
 	// for _, c := range v {
-	// 	deck.Cards = append(deck.Cards, queries.Gameplaycard{
+	// 	deck.Cards = append(deck.Cards, queries.Card{
 	// 		CardId: c.Id,
 	// 		Card:   c,
 	// 		State:  0,

@@ -34,7 +34,7 @@ func GetMatchState(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
-		MatchId:   m.Id,
-		GameState: m.GameState,
+		MatchId:   int(m.ID),
+		GameState: m.Gamestate,
 	})
 }

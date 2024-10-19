@@ -20,7 +20,7 @@ func (q *Queries) CreateDeck(ctx context.Context, cards []byte) error {
 	return err
 }
 
-const createMatch = `-- name: CreateMatch :exec
+const createMatch = `-- name: CreateMatch :one
 INSERT INTO match(
 				playerIds,
 				privateMatch,
@@ -43,7 +43,7 @@ INSERT INTO match(
 				$8,
 				$9,
 				$10)
-			RETURNING id
+			RETURNING id, playerids, creationdate, privatematch, elorangemin, elorangemax, deckid, cutgamecardid, currentplayerturn, turnpasstimestamps, gamestate, art
 `
 
 type CreateMatchParams struct {
@@ -59,8 +59,8 @@ type CreateMatchParams struct {
 	Art                string
 }
 
-func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) error {
-	_, err := q.db.Exec(ctx, createMatch,
+func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) (Match, error) {
+	row := q.db.QueryRow(ctx, createMatch,
 		arg.Playerids,
 		arg.Privatematch,
 		arg.Elorangemin,
@@ -72,7 +72,22 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) error 
 		arg.Gamestate,
 		arg.Art,
 	)
-	return err
+	var i Match
+	err := row.Scan(
+		&i.ID,
+		&i.Playerids,
+		&i.Creationdate,
+		&i.Privatematch,
+		&i.Elorangemin,
+		&i.Elorangemax,
+		&i.Deckid,
+		&i.Cutgamecardid,
+		&i.Currentplayerturn,
+		&i.Turnpasstimestamps,
+		&i.Gamestate,
+		&i.Art,
+	)
+	return i, err
 }
 
 const createPlayer = `-- name: CreatePlayer :one
@@ -192,36 +207,6 @@ func (q *Queries) GetDeck(ctx context.Context, id int32) (Deck, error) {
 	return i, err
 }
 
-const getGamePlayCards = `-- name: GetGamePlayCards :many
-SELECT gameplaycards.id, gameplaycards.cardid, gameplaycards.origowner, gameplaycards.currowner, gameplaycards.state FROM gameplaycards NATURAL JOIN cards WHERE gameplaycards.id IN ($1::int[])
-`
-
-func (q *Queries) GetGamePlayCards(ctx context.Context, dollar_1 []int32) ([]Gameplaycard, error) {
-	rows, err := q.db.Query(ctx, getGamePlayCards, dollar_1)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Gameplaycard
-	for rows.Next() {
-		var i Gameplaycard
-		if err := rows.Scan(
-			&i.ID,
-			&i.Cardid,
-			&i.Origowner,
-			&i.Currowner,
-			&i.State,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getMatchById = `-- name: GetMatchById :one
 SELECT
     json_build_object(
@@ -312,6 +297,36 @@ func (q *Queries) GetMatchByPlayerId(ctx context.Context, dollar_1 int32) ([]byt
 	var json_build_object []byte
 	err := row.Scan(&json_build_object)
 	return json_build_object, err
+}
+
+const getMatchCards = `-- name: GetMatchCards :many
+SELECT matchcards.id, matchcards.cardid, matchcards.origowner, matchcards.currowner, matchcards.state FROM matchcards NATURAL JOIN cards WHERE matchcards.id IN ($1::int[])
+`
+
+func (q *Queries) GetMatchCards(ctx context.Context, dollar_1 []int32) ([]Matchcard, error) {
+	rows, err := q.db.Query(ctx, getMatchCards, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Matchcard
+	for rows.Next() {
+		var i Matchcard
+		if err := rows.Scan(
+			&i.ID,
+			&i.Cardid,
+			&i.Origowner,
+			&i.Currowner,
+			&i.State,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getMatchIdForPlayerId = `-- name: GetMatchIdForPlayerId :one

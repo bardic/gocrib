@@ -3,6 +3,7 @@ package match
 import (
 	"net/http"
 
+	"github.com/bardic/gocrib/queries"
 	"github.com/bardic/gocrib/server/utils"
 
 	"github.com/bardic/gocrib/model"
@@ -33,7 +34,7 @@ func UpdatePlay(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = utils.UpdateGameState(m.Id, model.OpponentState)
+	err = utils.UpdateGameState(int(m.ID), queries.GamestateOpponentState)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

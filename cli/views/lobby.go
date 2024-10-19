@@ -10,9 +10,11 @@ import (
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type LobbyView struct {
@@ -82,7 +84,7 @@ func (v *LobbyView) Enter() tea.Msg {
 	}
 
 	var matchDetails model.MatchDetailsResponse
-	msg := services.JoinMatch(player.Id, id)
+	msg := services.JoinMatch(int(player.ID), id)
 	json.Unmarshal(msg.([]byte), &matchDetails)
 
 	return matchDetails
@@ -115,7 +117,7 @@ func getActiveView() (table.Model, error) {
 
 	m := getOpenMatches()
 
-	var matches []queries.Match
+	var matches []model.GameMatch
 	err := json.Unmarshal(m.([]byte), &matches)
 
 	if err != nil {
@@ -124,20 +126,20 @@ func getActiveView() (table.Model, error) {
 
 	rows := []table.Row{}
 	for _, m := range matches {
-		l := len(m.TurnPassTimestamps)
-		lastTurnTimestamp := ""
+		l := len(m.Turnpasstimestamps)
+		var lastTurnTimestamp pgtype.Timestamptz
 		if l > 0 {
-			lastTurnTimestamp = m.TurnPassTimestamps[l-1]
+			lastTurnTimestamp = m.Turnpasstimestamps[l-1]
 		}
 
 		rows = append(rows, table.Row{
-			fmt.Sprintf("%v", m.Id),
-			fmt.Sprintf("%v", m.PlayerIds),
-			fmt.Sprintf("%v", m.PrivateMatch),
-			m.CreationDate.String(),
-			fmt.Sprintf("%v", m.CurrentPlayerTurn),
-			lastTurnTimestamp,
-			fmt.Sprintf("%v", m.GameState),
+			fmt.Sprintf("%v", m.ID),
+			fmt.Sprintf("%v", m.Playerids),
+			fmt.Sprintf("%v", m.Privatematch),
+			m.Creationdate.Time.String(),
+			fmt.Sprintf("%v", m.Currentplayerturn),
+			lastTurnTimestamp.Time.String(),
+			fmt.Sprintf("%v", m.Gamestate),
 		})
 	}
 

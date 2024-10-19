@@ -7,37 +7,38 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	tea "github.com/charmbracelet/bubbletea"
 	"go.uber.org/zap"
 )
 
 var Logger *zap.Logger
 
-func GetCardById(id int, deck *model.GameDeck) *model.Card {
+func GetCardById(id int32, deck *model.GameDeck) *queries.Card {
 	for _, card := range deck.Cards {
-		if card.CardId == id {
+		if card.Cardid == id {
 			return &card.Card
 		}
 	}
 	return nil
 }
 
-func GetIdsFromCards(c []model.Card) []int {
-	ids := []int{}
+func GetIdsFromCards(c []queries.Card) []int32 {
+	ids := []int32{}
 	for _, card := range c {
-		ids = append(ids, card.Id)
+		ids = append(ids, card.ID)
 	}
 
 	return ids
 }
 
-func GetCardInHandById(id int, hand []model.Card) model.Card {
-	idx := slices.IndexFunc(hand, func(c model.Card) bool {
-		return c.Id == id
+func GetCardInHandById(id int32, hand []queries.Card) queries.Card {
+	idx := slices.IndexFunc(hand, func(c queries.Card) bool {
+		return c.ID == id
 	})
 
 	if idx == -1 {
-		return model.Card{}
+		return queries.Card{}
 	}
 
 	return hand[idx]
@@ -53,7 +54,7 @@ func NewLogger() (*zap.Logger, error) {
 
 func GetPlayerId(accountId int, players []queries.Player) (*queries.Player, error) {
 	for _, p := range players {
-		if p.AccountId == accountId {
+		if int(p.Accountid) == accountId {
 			return &p, nil
 		}
 	}
@@ -69,9 +70,9 @@ func CreateGame(accountId int) tea.Msg {
 	return matchDetails
 }
 
-func GetPlayerForAccountId(id int, match *queries.Match) *queries.Player {
+func GetPlayerForAccountId(id int, match *model.GameMatch) *queries.Player {
 	for _, player := range match.Players {
-		if player.AccountId == id {
+		if int(player.Accountid) == id {
 			return &player
 		}
 	}
@@ -79,8 +80,8 @@ func GetPlayerForAccountId(id int, match *queries.Match) *queries.Player {
 	return nil
 }
 
-func GetVisibleCards(activeTab int, player queries.Player) []int {
-	var cards []int
+func GetVisibleCards(activeTab int, player queries.Player) []int32 {
+	var cards []int32
 	switch activeTab {
 	case 0:
 		cards = nil
