@@ -233,7 +233,7 @@ type Chatmessage struct {
 
 type Deck struct {
 	ID    int32
-	Cards []byte
+	Cards []int32
 }
 
 type Match struct {

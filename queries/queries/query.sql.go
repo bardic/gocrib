@@ -11,13 +11,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createDeck = `-- name: CreateDeck :exec
-INSERT INTO deck(cards) VALUES ($1) RETURNING id
+const createDeck = `-- name: CreateDeck :one
+INSERT INTO deck(cards) VALUES ($1) RETURNING id, cards
 `
 
-func (q *Queries) CreateDeck(ctx context.Context, cards []byte) error {
-	_, err := q.db.Exec(ctx, createDeck, cards)
-	return err
+func (q *Queries) CreateDeck(ctx context.Context, cards []int32) (Deck, error) {
+	row := q.db.QueryRow(ctx, createDeck, cards)
+	var i Deck
+	err := row.Scan(&i.ID, &i.Cards)
+	return i, err
 }
 
 const createMatch = `-- name: CreateMatch :one
@@ -431,6 +433,21 @@ func (q *Queries) RemoveCardsFromHand(ctx context.Context, arg RemoveCardsFromHa
 	return err
 }
 
+const startMatch = `-- name: StartMatch :exec
+UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1), deckid=$2 WHERE id=$3
+`
+
+type StartMatchParams struct {
+	ArrayAppend interface{}
+	Deckid      int32
+	ID          int32
+}
+
+func (q *Queries) StartMatch(ctx context.Context, arg StartMatchParams) error {
+	_, err := q.db.Exec(ctx, startMatch, arg.ArrayAppend, arg.Deckid, arg.ID)
+	return err
+}
+
 const uodateGameState = `-- name: UodateGameState :exec
 UPDATE match SET gameState= $1 WHERE id=$2
 `
@@ -596,19 +613,5 @@ type UpdatePlayerReadyParams struct {
 
 func (q *Queries) UpdatePlayerReady(ctx context.Context, arg UpdatePlayerReadyParams) error {
 	_, err := q.db.Exec(ctx, updatePlayerReady, arg.Isready, arg.ID)
-	return err
-}
-
-const updatePlayersInMatch = `-- name: UpdatePlayersInMatch :exec
-UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1) WHERE id=$2
-`
-
-type UpdatePlayersInMatchParams struct {
-	ArrayAppend interface{}
-	ID          int32
-}
-
-func (q *Queries) UpdatePlayersInMatch(ctx context.Context, arg UpdatePlayersInMatchParams) error {
-	_, err := q.db.Exec(ctx, updatePlayersInMatch, arg.ArrayAppend, arg.ID)
 	return err
 }

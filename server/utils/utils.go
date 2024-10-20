@@ -130,43 +130,43 @@ func GetMatchForPlayerId(playerId int) (int, error) {
 }
 
 func Deal(match *queries.Match) (*queries.Deck, error) {
-	deck, err := GetDeckById(int(match.Deckid))
+	deck, err := GetDeckById(match.Deckid)
 
 	// deck = *deck.Shuffle()
 	if err != nil {
 		return nil, err
 	}
 
-	// players := []queries.Player{}
+	players := []queries.Player{}
 
-	// for _, id := range match.Playerids {
-	// 	player, err := GetPlayerById(int(id))
+	for _, id := range match.Playerids {
+		player, err := GetPlayerById(int(id))
 
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
+		if err != nil {
+			return nil, err
+		}
 
-	// 	players = append(players, player)
-	// }
+		players = append(players, player)
+	}
 
-	// cardsPerHand := 6
-	// if len(players) == 3 {
-	// 	cardsPerHand = 5
-	// }
+	cardsPerHand := 6
+	if len(players) == 3 {
+		cardsPerHand = 5
+	}
 
-	// for i := 0; i < len(players)*cardsPerHand; i++ {
-	// 	var card queries.Card
-	// 	card, deck.Cards = deck.Cards[0], deck.Cards[1:]
-	// 	idx := len(players) - 1 - i%len(players)
+	for i := 0; i < len(players)*cardsPerHand; i++ {
+		var cardId int32
+		cardId, deck.Cards = deck.Cards[0], deck.Cards[1:]
+		idx := len(players) - 1 - i%len(players)
 
-	// 	if len(players[idx].Hand) < cardsPerHand {
-	// 		players[idx].Hand = append(players[idx].Hand, card.Cardid)
-	// 	}
-	// }
+		if len(players[idx].Hand) < cardsPerHand {
+			players[idx].Hand = append(players[idx].Hand, cardId)
+		}
+	}
 
-	// for _, p := range players {
-	// 	UpdatePlayerById(p)
-	// }
+	for _, p := range players {
+		UpdatePlayerById(p)
+	}
 
 	return &deck, nil
 }

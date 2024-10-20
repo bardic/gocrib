@@ -27,7 +27,7 @@ func GetDeck(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	deck, err := utils.GetDeckById(id)
+	deck, err := utils.GetDeckById(int32(id))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

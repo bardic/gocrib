@@ -4,10 +4,6 @@ import (
 	"github.com/bardic/gocrib/queries"
 )
 
-type Cards struct {
-	Cards []queries.Card `json:"Cards"`
-}
-
 type GameMatch struct {
 	queries.Match
 	Players []queries.Player

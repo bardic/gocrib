@@ -9,32 +9,6 @@ import (
 	conn "github.com/bardic/gocrib/server/db"
 )
 
-// var matchQuery = `SELECT
-// 			json_build_object(
-// 				'id', id,
-// 				'playerIds', playerIds,
-// 				'creationDate', creationDate,
-// 				'privateMatch', privateMatch,
-// 				'eloRangeMin', eloRangeMin,
-// 				'eloRangeMax', eloRangeMax,
-// 				'deckid', deckid,
-// 				'cutgamecardid', cutgamecardid,
-// 				'currentplayerturn', currentplayerturn,
-// 				'turnpasstimestamps', turnpasstimestamps,
-// 				'art', art,
-// 				'gameState', gameState,
-// 				'players', (SELECT json_agg(
-// 					json_build_object(
-// 						'id', p.id,
-// 						'accountid', p.accountid,
-// 						'play', p.play,
-// 						'hand', p.hand,
-// 						'kitty', p.kitty,
-// 						'score', p.score,
-// 						'isready', p.isready,
-// 						'art', p.art ))
-// 				FROM player as p WHERE p.Id = ANY(m.playerIds)))`
-
 func CardsInPlay(players []queries.Player) []int32 {
 	play := []int32{}
 	for _, player := range players {
@@ -45,14 +19,6 @@ func CardsInPlay(players []queries.Player) []int32 {
 }
 
 func UpdateGameState(matchId int, state queries.Gamestate) error {
-	// args := pgx.NamedArgs{
-	// 	"id":        matchId,
-	// 	"gameState": state,
-	// }
-	// query := `UPDATE match SET
-	// 			gameState=@gameState
-	// 		WHERE id=@id`
-
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -136,78 +102,31 @@ func UpdateCut(matchId int, cutCardId int) error {
 }
 
 func NewDeck() (queries.Deck, error) {
-	// db := conn.Pool()
-	// defer db.Close()
-	// q := queries.New(db)
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
 
-	// ctx := context.Background()
+	ctx := context.Background()
 
-	// cards, err := q.GetCards(ctx)
+	cards, err := q.GetCards(ctx)
 
-	// if err != nil {
-	// 	return queries.Deck{}, err
-	// }
+	if err != nil {
+		return queries.Deck{}, err
+	}
 
-	// var cardsBytes [][]byte
+	//get card ids
+	var cardIds []int32
+	for _, card := range cards {
+		cardIds = append(cardIds, card.ID)
+	}
 
-	// deck, err := q.CreateDeck(ctx)
-	// db := conn.Pool()
-	// defer db.Close()
+	deck, err := q.CreateDeck(ctx, cardIds)
 
-	// //rows, err := db.Query(context.Background(), "SELECT * FROM cards") //MEOWCAKES
+	if err != nil {
+		return queries.Deck{}, err
+	}
 
-	// v := []queries.Card{}
-
-	// for rows.Next() {
-	// 	var card queries.Card
-
-	// 	err := rows.Scan(&card.Id, &card.Value, &card.Suit, &card.Art)
-	// 	if err != nil {
-	// 		return model.GameDeck{}, err
-	// 	}
-
-	// 	v = append(v, card)
-	// }
-
-	// if err != nil {
-	// 	return model.GameDeck{}, err
-	// }
-
-	// deck := model.GameDeck{
-	// 	Cards: []queries.Card{},
-	// }
-
-	// for _, c := range v {
-	// 	deck.Cards = append(deck.Cards, queries.Card{
-	// 		CardId: c.Id,
-	// 		Card:   c,
-	// 		State:  0,
-	// 	})
-	// }
-
-	// b, err := json.Marshal(deck.Cards)
-
-	// if err != nil {
-	// 	return model.GameDeck{}, err
-	// }
-
-	// args := pgx.NamedArgs{"cards": string(b)}
-
-	// //MEOWCAKES 	query := "INSERT INTO deck(cards) VALUES (@cards) RETURNING id"
-
-	// var deckId int
-	// err = db.QueryRow(
-	// 	context.Background(),
-	// 	query,
-	// 	args).Scan(&deckId)
-
-	// if err != nil {
-	// 	return model.GameDeck{}, err
-	// }
-
-	// deck.Id = deckId
-
-	return queries.Deck{}, nil
+	return deck, nil
 }
 
 func IsMatchReadyToStart(m *queries.Match) (bool, error) {
@@ -284,9 +203,16 @@ func UpdatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 
 	ctx := context.Background()
 
-	err := q.UpdatePlayersInMatch(ctx, queries.UpdatePlayersInMatchParams{
+	deck, err := NewDeck()
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = q.StartMatch(ctx, queries.StartMatchParams{
 		ID:          int32(req.MatchId),
-		ArrayAppend: &req.PlayerId,
+		Deckid:      deck.ID,
+		ArrayAppend: req.PlayerId,
 	})
 
 	if err != nil {
@@ -308,16 +234,14 @@ func UpdatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 	return match, nil
 }
 
-func GetDeckById(id int) (queries.Deck, error) {
-
-	//TODO : DECKS NEED TO BE REIMPLEMENTED
+func GetDeckById(id int32) (queries.Deck, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
 
 	ctx := context.Background()
 
-	d, err := q.GetDeck(ctx, int32(id))
+	d, err := q.GetDeck(ctx, id)
 
 	if err != nil {
 		return queries.Deck{}, err

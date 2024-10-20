@@ -120,8 +120,8 @@ UPDATE match SET cutGameCardId = @cardId where id=$1;
 -- name: GetCards :many
 SELECT cards.* FROM cards;
 
--- name: CreateDeck :exec
-INSERT INTO deck(cards) VALUES ($1) RETURNING id;
+-- name: CreateDeck :one
+INSERT INTO deck(cards) VALUES ($1) RETURNING *;
 
 -- name: UodateGameState :exec
 UPDATE match SET gameState= $1 WHERE id=$2;
@@ -144,8 +144,8 @@ UPDATE match SET
 	art = $11
 WHERE id=$12;
 
--- name: UpdatePlayersInMatch :exec
-UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1) WHERE id=$2;
+-- name: StartMatch :exec
+UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1), deckid=$2 WHERE id=$3;
 
 -- name: GetDeck :one
 SELECT deck.* FROM deck WHERE id=$1 LIMIT 1;
