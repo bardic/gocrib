@@ -53,20 +53,28 @@ func updateKitty(details model.HandModifier) (*model.GameMatch, error) {
 
 	ctx := context.Background()
 
-	playerId, err := q.GetCurrentPlayerTurn(ctx, details.MatchId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = q.UpdateKitty(ctx, queries.UpdateKittyParams{
-		ID:    playerId,
+	err := q.UpdateKitty(ctx, queries.UpdateKittyParams{
+		ID:    details.PlayerId,
 		Kitty: details.CardIds,
 	})
 
 	if err != nil {
 		return nil, err
 	}
+	err = q.RemoveCardsFromHand(ctx, queries.RemoveCardsFromHandParams{
+		ID:   details.PlayerId,
+		Hand: details.CardIds,
+	})
 
-	return utils.PlayCard(details)
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := utils.GetMatch(int(details.MatchId))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
 }

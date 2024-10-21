@@ -474,6 +474,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/player/match/cards/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Get match cards by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search for match by id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/queries.GetGameCardsForMatchRow"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/player/match/cut": {
             "put": {
                 "consumes": [

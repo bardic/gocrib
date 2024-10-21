@@ -15,7 +15,7 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param        id   w query     string  true  "search for match by id"'
+// @Param        id    query     string  true  "search for match by id"'
 // @Success      200  {object}  model.MatchDetailsResponse
 // @Failure      404  {object}  error
 // @Failure      422  {object}  error
