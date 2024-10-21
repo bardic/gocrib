@@ -21,3 +21,7 @@ func GetGameplayCardsByIds(ids []int) tea.Msg {
 	s, _ := json.Marshal(ids)
 	return url(EndPointGameplayCardsByIds+strings.Trim(string(s), "[]"), http.MethodGet, "")
 }
+
+func GetGampleCardsForMatch(matchId int) tea.Msg {
+	return url(EndPointGameplayCardsByMatch+strconv.Itoa(matchId), http.MethodGet, "")
+}

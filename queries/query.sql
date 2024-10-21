@@ -235,3 +235,15 @@ UPDATE player SET isReady = $1 WHERE id = $2;
 
 -- name: UpdateKitty :exec
 UPDATE player SET kitty = kitty + $1 where id = $2;
+
+-- name: UpdateMatchWithDeckId :exec
+UPDATE match SET deckid = $1 where id = $2;
+
+-- name: CreateMatchCards :one
+INSERT INTO matchcards (match_id, cardid, origowner, currowner, state) VALUES ($1, $2, $3, $4, $5) RETURNING *;
+
+-- name: GetGameCardsForMatch :many
+SELECT  sqlc.embed(m), sqlc.embed(c)
+FROM matchcards m
+JOIN cards c ON (m.cardId = c.id)
+WHERE m.match_id = $1;

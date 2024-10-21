@@ -16,7 +16,7 @@ var Logger *zap.Logger
 
 func GetCardById(id int32, deck *model.GameDeck) *queries.Card {
 	for _, card := range deck.Cards {
-		if card.Cardid == id {
+		if card.Matchcard.Cardid == id {
 			return &card.Card
 		}
 	}

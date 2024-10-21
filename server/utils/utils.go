@@ -153,7 +153,11 @@ func Deal(match *model.GameMatch) (*queries.Deck, error) {
 	}
 
 	for _, p := range match.Players {
-		UpdatePlayerById(p)
+		_, err := UpdatePlayerById(p)
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &deck, nil
@@ -189,6 +193,7 @@ func UpdatePlayerById(player queries.Player) (queries.Player, error) {
 		Score:   player.Score,
 		Isready: player.Isready,
 		Art:     player.Art,
+		ID:      player.ID,
 	})
 
 	if err != nil {

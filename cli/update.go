@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/bardic/gocrib/cli/services"
@@ -81,6 +82,10 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case queries.GamestateWaitingState:
 			m.playersReady = true
 			m.ViewStateName = model.InGameView
+		case queries.GamestateDiscardState:
+			m.playersReady = true
+			m.ViewStateName = model.InGameView
+			fmt.Println("Discard State")
 		case queries.GamestateCutState:
 			m.playersReady = true
 			m.ViewStateName = model.InGameView
@@ -97,22 +102,29 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case timer.TickMsg: // Polling update
-		if m.ViewStateName != model.InGameView {
-			break
-		}
-
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
+
+		if m.ViewStateName != model.InGameView {
+			cmds = append(cmds, cmd)
+			break
+		}
 
 		var match queries.Match
 		idstr := strconv.Itoa(m.matchId)
 		resp := services.GetPlayerMatch(idstr)
-		json.Unmarshal(resp.([]byte), &match)
+		err := json.Unmarshal(resp.([]byte), &match)
+
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
 
 		gameView := m.currentView.(*views.GameView)
 
 		if gameView.GameMatch != nil {
 			if match.Gamestate == gameView.GameMatch.Gamestate {
+				cmds = append(cmds, cmd)
+				m.setCards(gameView.GameMatch)
 				break
 			}
 		}
@@ -124,8 +136,38 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Players: players,
 		}
 
+		deckByte := services.GetDeckById(int(match.Deckid)).([]byte)
+		var deck queries.Deck
+		err = json.Unmarshal(deckByte, &deck)
+
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+
+		//gameCards, err := q.GetGameCardsForMatch(ctx, m.ID)
+		var gameCards []queries.GetGameCardsForMatchRow
+		cardsMsg := services.GetGampleCardsForMatch(int(match.ID))
+		err = json.Unmarshal(cardsMsg.([]byte), &gameCards)
+
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+
+		// gameCards, err :=
+
+		gameDeck := &model.GameDeck{
+			Deck:  deck,
+			Cards: gameCards,
+		}
+
+		gameView.Deck = gameDeck
+
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+
 		gameView.GameMatch = gameMatch
-		if gameMatch.Gamestate == queries.GamestateDealState {
+		if gameMatch.Gamestate == queries.GamestateDiscardState {
 			m.setCards(gameView.GameMatch)
 		}
 

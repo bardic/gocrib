@@ -220,6 +220,15 @@ func UpdatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
 		return nil, err
 	}
 
+	err = q.UpdateMatchWithDeckId(ctx, queries.UpdateMatchWithDeckIdParams{
+		ID:     int32(req.MatchId),
+		Deckid: deck.ID,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
 	m, err := q.GetMatchById(ctx, int32(req.MatchId))
 
 	if err != nil {

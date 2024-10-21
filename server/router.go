@@ -96,6 +96,7 @@ func v1Routes(g *echo.Group) {
 	playerGroup.PUT("/match", match.UpdateMatch)
 	playerGroup.PUT("/match/join", match.JoinMatch)
 	playerGroup.PUT("/match/cut", match.CutDeck)
+	playerGroup.GET("/match/cards", match.GetGameCardsForMatch)
 
 	playerGroup.GET("/match/deck", deck.GetDeck)
 	// History

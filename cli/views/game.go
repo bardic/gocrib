@@ -63,10 +63,15 @@ func (v *GameView) Init() {
 	v.CutInput.CharLimit = 5
 	v.CutInput.Width = 5
 
-	deckByte := services.GetDeckById(int(match.Deckid)).([]byte)
-	var deck model.GameDeck
-	json.Unmarshal(deckByte, &deck)
-	v.Deck = &deck
+	// deckByte := services.GetDeckById(int(match.Deckid)).([]byte)
+	// var deck model.GameDeck
+	// err := json.Unmarshal(deckByte, &deck)
+
+	// if err != nil {
+	// 	utils.Logger.Sugar().Error(err)
+	// }
+
+	// v.Deck = &deck
 }
 
 func (v *GameView) View() string {

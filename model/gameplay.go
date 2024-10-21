@@ -11,7 +11,7 @@ type GameMatch struct {
 
 type GameDeck struct {
 	queries.Deck
-	Cards []GameCard
+	Cards []queries.GetGameCardsForMatchRow
 }
 
 type GameCard struct {

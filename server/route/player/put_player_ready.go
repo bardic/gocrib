@@ -7,6 +7,7 @@ import (
 	"github.com/bardic/gocrib/queries"
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/utils"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -28,6 +29,12 @@ func PlayerReady(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
+
+	ctx := context.Background()
+
 	_, err := ReadyPlayerById(c, *details)
 
 	if err != nil {
@@ -45,6 +52,76 @@ func PlayerReady(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
+
+	deck, err := utils.NewDeck()
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	matchCards := []queries.Matchcard{}
+
+	for _, id := range deck.Cards {
+		matchCard, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
+			MatchID:   int32(matchId),
+			Cardid:    id,
+			State:     queries.CardstateDeck,
+			Origowner: pgtype.Int4{Int32: 0},
+			Currowner: pgtype.Int4{Int32: 0},
+		})
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		matchCards = append(matchCards, matchCard)
+	}
+
+	//gameCards, err := q.GetGameCardsForMatch(ctx, m.ID)
+
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, err)
+	// }
+
+	//q.GetMatchCards(ctx
+
+	// matchCards := []queries.Matchcard{}
+
+	// for _, card := range deck.Cards {
+	// 	matchCard, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
+	// 		MatchID: int32(matchId),
+	// 		Cardid:  card,
+	// 	})
+
+	// 	if err != nil {
+	// 		return c.JSON(http.StatusInternalServerError, err)
+	// 	}
+
+	// 	matchCards = append(matchCards, matchCard)
+	// }
+
+	// gameCards := []model.GameCard{}
+
+	// for _, card := range matchCards {
+	// 	gameCard := model.GameCard{
+	// 		Matchcard: card,
+	// 		Card.
+
+	// gameDeck := model.GameDeck{
+	// 	Deck:  deck,
+	// 	Cards: gameCards,
+	// }
+
+	err = q.UpdateMatchWithDeckId(ctx, queries.UpdateMatchWithDeckIdParams{
+		ID:     int32(matchId),
+		Deckid: int32(deck.ID),
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	m.Deckid = deck.ID
 
 	if utils.PlayersReady(m.Players) {
 		utils.Deal(m)

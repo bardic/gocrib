@@ -912,42 +912,13 @@ const docTemplate = `{
                 }
             }
         },
-        "model.GameCard": {
-            "type": "object",
-            "properties": {
-                "art": {
-                    "type": "string"
-                },
-                "cardid": {
-                    "type": "integer"
-                },
-                "currowner": {
-                    "$ref": "#/definitions/pgtype.Int4"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "origowner": {
-                    "$ref": "#/definitions/pgtype.Int4"
-                },
-                "state": {
-                    "$ref": "#/definitions/queries.Cardstate"
-                },
-                "suit": {
-                    "$ref": "#/definitions/queries.Cardsuit"
-                },
-                "value": {
-                    "$ref": "#/definitions/queries.Cardvalue"
-                }
-            }
-        },
         "model.GameDeck": {
             "type": "object",
             "properties": {
                 "cards": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.GameCard"
+                        "$ref": "#/definitions/queries.GetGameCardsForMatchRow"
                     }
                 },
                 "id": {
@@ -1234,6 +1205,17 @@ const docTemplate = `{
                 "GamestateMaxGameState"
             ]
         },
+        "queries.GetGameCardsForMatchRow": {
+            "type": "object",
+            "properties": {
+                "card": {
+                    "$ref": "#/definitions/queries.Card"
+                },
+                "matchcard": {
+                    "$ref": "#/definitions/queries.Matchcard"
+                }
+            }
+        },
         "queries.Match": {
             "type": "object",
             "properties": {
@@ -1278,6 +1260,29 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/pgtype.Timestamptz"
                     }
+                }
+            }
+        },
+        "queries.Matchcard": {
+            "type": "object",
+            "properties": {
+                "cardid": {
+                    "type": "integer"
+                },
+                "currowner": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "matchID": {
+                    "type": "integer"
+                },
+                "origowner": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "state": {
+                    "$ref": "#/definitions/queries.Cardstate"
                 }
             }
         },

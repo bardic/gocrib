@@ -253,6 +253,7 @@ type Match struct {
 
 type Matchcard struct {
 	ID        int32
+	MatchID   int32
 	Cardid    int32
 	Origowner pgtype.Int4
 	Currowner pgtype.Int4
