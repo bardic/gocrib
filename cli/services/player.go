@@ -9,8 +9,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func GetPlayer() tea.Msg {
-	return url(EndPointPlayer, http.MethodGet, "")
+func GetPlayer(playerId int32) tea.Msg {
+	id := int(playerId)
+	pid := strconv.Itoa(id)
+
+	return url(EndPointPlayer+"/?id="+pid, http.MethodGet, "")
 }
 
 func PutPlayer(id int) tea.Msg {

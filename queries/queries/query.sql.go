@@ -567,7 +567,23 @@ func (q *Queries) UpdateMatchCut(ctx context.Context, arg UpdateMatchCutParams) 
 	return err
 }
 
-const updatePlayer = `-- name: UpdatePlayer :exec
+const updateMatchState = `-- name: UpdateMatchState :exec
+UPDATE match SET
+	gameState= $1
+WHERE id=$2
+`
+
+type UpdateMatchStateParams struct {
+	Gamestate Gamestate
+	ID        int32
+}
+
+func (q *Queries) UpdateMatchState(ctx context.Context, arg UpdateMatchStateParams) error {
+	_, err := q.db.Exec(ctx, updateMatchState, arg.Gamestate, arg.ID)
+	return err
+}
+
+const updatePlayer = `-- name: UpdatePlayer :one
 UPDATE player SET 
 		hand = $1, 
 		play = $2, 
@@ -575,8 +591,9 @@ UPDATE player SET
 		score = $4, 
 		isReady = $5,
 		art = $6 
-	where 
+	WHERE 
 		id = $7
+    RETURNING id, accountid, play, hand, kitty, score, isready, art
 `
 
 type UpdatePlayerParams struct {
@@ -589,8 +606,8 @@ type UpdatePlayerParams struct {
 	ID      int32
 }
 
-func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) error {
-	_, err := q.db.Exec(ctx, updatePlayer,
+func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Player, error) {
+	row := q.db.QueryRow(ctx, updatePlayer,
 		arg.Hand,
 		arg.Play,
 		arg.Kitty,
@@ -599,7 +616,18 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) erro
 		arg.Art,
 		arg.ID,
 	)
-	return err
+	var i Player
+	err := row.Scan(
+		&i.ID,
+		&i.Accountid,
+		&i.Play,
+		&i.Hand,
+		&i.Kitty,
+		&i.Score,
+		&i.Isready,
+		&i.Art,
+	)
+	return i, err
 }
 
 const updatePlayerReady = `-- name: UpdatePlayerReady :exec

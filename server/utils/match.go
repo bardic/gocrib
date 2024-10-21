@@ -25,10 +25,11 @@ func UpdateGameState(matchId int, state queries.Gamestate) error {
 
 	ctx := context.Background()
 
-	q.UpdateMatch(ctx, queries.UpdateMatchParams{
-		ID:        int32(matchId),
-		Gamestate: state,
-	})
+	err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: int32(matchId)})
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

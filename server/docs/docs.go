@@ -696,7 +696,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for match by barcode",
+                        "description": "search for match by id",
                         "name": "id",
                         "in": "query",
                         "required": true

@@ -129,7 +129,7 @@ func GetMatchForPlayerId(playerId int) (int, error) {
 	return int(match.ID), nil
 }
 
-func Deal(match *queries.Match) (*queries.Deck, error) {
+func Deal(match *model.GameMatch) (*queries.Deck, error) {
 	deck, err := GetDeckById(match.Deckid)
 
 	// deck = *deck.Shuffle()
@@ -137,34 +137,22 @@ func Deal(match *queries.Match) (*queries.Deck, error) {
 		return nil, err
 	}
 
-	players := []queries.Player{}
-
-	for _, id := range match.Playerids {
-		player, err := GetPlayerById(int(id))
-
-		if err != nil {
-			return nil, err
-		}
-
-		players = append(players, player)
-	}
-
 	cardsPerHand := 6
-	if len(players) == 3 {
+	if len(match.Players) == 3 {
 		cardsPerHand = 5
 	}
 
-	for i := 0; i < len(players)*cardsPerHand; i++ {
+	for i := 0; i < len(match.Players)*cardsPerHand; i++ {
 		var cardId int32
 		cardId, deck.Cards = deck.Cards[0], deck.Cards[1:]
-		idx := len(players) - 1 - i%len(players)
+		idx := len(match.Players) - 1 - i%len(match.Players)
 
-		if len(players[idx].Hand) < cardsPerHand {
-			players[idx].Hand = append(players[idx].Hand, cardId)
+		if len(match.Players[idx].Hand) < cardsPerHand {
+			match.Players[idx].Hand = append(match.Players[idx].Hand, cardId)
 		}
 	}
 
-	for _, p := range players {
+	for _, p := range match.Players {
 		UpdatePlayerById(p)
 	}
 
@@ -194,7 +182,7 @@ func UpdatePlayerById(player queries.Player) (queries.Player, error) {
 
 	ctx := context.Background()
 
-	err := q.UpdatePlayer(ctx, queries.UpdatePlayerParams{
+	p, err := q.UpdatePlayer(ctx, queries.UpdatePlayerParams{
 		Hand:    player.Hand,
 		Play:    player.Play,
 		Kitty:   player.Kitty,
@@ -207,7 +195,7 @@ func UpdatePlayerById(player queries.Player) (queries.Player, error) {
 		return queries.Player{}, err
 	}
 
-	return player, nil
+	return p, nil
 }
 
 func Shuffle(d *queries.Deck) *queries.Deck {

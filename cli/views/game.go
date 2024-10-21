@@ -46,6 +46,10 @@ func (v *GameView) Init() {
 		return
 	}
 
+	v.Hand = []queries.Card{}
+	v.Kitty = []queries.Card{}
+	v.Play = []queries.Card{}
+
 	matchMsg := services.GetPlayerMatch(strconv.Itoa(v.MatchId))
 	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {

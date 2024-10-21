@@ -104,23 +104,56 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.timer, cmd = m.timer.Update(msg)
 
-		var matchDetails model.GameMatch
+		var match queries.Match
 		idstr := strconv.Itoa(m.matchId)
 		resp := services.GetPlayerMatch(idstr)
-		json.Unmarshal(resp.([]byte), &matchDetails)
+		json.Unmarshal(resp.([]byte), &match)
 
 		gameView := m.currentView.(*views.GameView)
-		gameView.GameMatch = &matchDetails
-		m.setCards(gameView.GameMatch)
+
+		if gameView.GameMatch != nil {
+			if match.Gamestate == gameView.GameMatch.Gamestate {
+				break
+			}
+		}
+
+		players := m.getPlayers(match)
+
+		gameMatch := &model.GameMatch{
+			Match:   match,
+			Players: players,
+		}
+
+		gameView.GameMatch = gameMatch
+		if gameMatch.Gamestate == queries.GamestateDealState {
+			m.setCards(gameView.GameMatch)
+		}
 
 		cmds = append(cmds, cmd, func() tea.Msg {
-			return matchDetails
+			return gameMatch
 		})
 	}
 
 	m.currentView.Update(msg)
 
 	return m, tea.Batch(cmds...)
+}
+
+func (m *AppModel) getPlayers(match queries.Match) []queries.Player {
+	players := []queries.Player{}
+
+	for _, playerId := range match.Playerids {
+		//get player for each playerid from services
+		resp := services.GetPlayer(playerId)
+		var player queries.Player
+		err := json.Unmarshal(resp.([]byte), &player)
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+		players = append(players, player)
+	}
+
+	return players
 }
 
 func (m *AppModel) createMatch(msg model.GameStateChangeMsg) tea.Cmd {
@@ -145,9 +178,6 @@ func (m *AppModel) createMatch(msg model.GameStateChangeMsg) tea.Cmd {
 
 func (m *AppModel) setCards(match *model.GameMatch) {
 	gameView := m.currentView.(*views.GameView)
-	gameView.Hand = []queries.Card{}
-	gameView.Kitty = []queries.Card{}
-	gameView.Play = []queries.Card{}
 
 	p := utils.GetPlayerForAccountId(m.accountId, match)
 

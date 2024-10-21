@@ -47,8 +47,7 @@ func PlayerReady(c echo.Context) error {
 	}
 
 	if utils.PlayersReady(m.Players) {
-		//TODO : deal is fucked
-		//utils.Deal(m)
+		utils.Deal(m)
 		utils.UpdateGameState(matchId, queries.GamestateDiscardState)
 	}
 
@@ -62,10 +61,14 @@ func ReadyPlayerById(c echo.Context, playerId int) (bool, error) {
 
 	ctx := context.Background()
 
-	q.UpdatePlayer(ctx, queries.UpdatePlayerParams{
+	err := q.UpdatePlayerReady(ctx, queries.UpdatePlayerReadyParams{
 		ID:      int32(playerId),
 		Isready: true,
 	})
+
+	if err != nil {
+		return false, err
+	}
 
 	return true, nil
 }

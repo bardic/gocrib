@@ -144,6 +144,11 @@ UPDATE match SET
 	art = $11
 WHERE id=$12;
 
+-- name: UpdateMatchState :exec
+UPDATE match SET
+	gameState= $1
+WHERE id=$2;
+
 -- name: StartMatch :exec
 UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1), deckid=$2 WHERE id=$3;
 
@@ -165,7 +170,7 @@ SELECT id from match WHERE $1 = ANY(playerids) LIMIT 1;
 -- name: GetPlayer :one
 SELECT player.* FROM player WHERE id=$1 LIMIT 1;
 
--- name: UpdatePlayer :exec
+-- name: UpdatePlayer :one
 UPDATE player SET 
 		hand = $1, 
 		play = $2, 
@@ -173,8 +178,9 @@ UPDATE player SET
 		score = $4, 
 		isReady = $5,
 		art = $6 
-	where 
-		id = $7;
+	WHERE 
+		id = $7
+    RETURNING *;
 
 -- name: CreateMatch :one
 INSERT INTO match(
