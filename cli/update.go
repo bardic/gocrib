@@ -144,7 +144,6 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			utils.Logger.Sugar().Error(err)
 		}
 
-		//gameCards, err := q.GetGameCardsForMatch(ctx, m.ID)
 		var gameCards []queries.GetGameCardsForMatchRow
 		cardsMsg := services.GetGampleCardsForMatch(int(match.ID))
 		err = json.Unmarshal(cardsMsg.([]byte), &gameCards)
@@ -152,8 +151,6 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
-
-		// gameCards, err :=
 
 		gameDeck := &model.GameDeck{
 			Deck:  deck,

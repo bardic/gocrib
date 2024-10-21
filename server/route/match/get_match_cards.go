@@ -21,7 +21,6 @@ import (
 // @Failure      404  {object}  error
 // @Failure      422  {object}  error
 // @Router       /player/match/cards/ [get]
-
 func GetGameCardsForMatch(c echo.Context) error {
 	p := c.Request().URL.Query().Get("id")
 	id, err := strconv.Atoi(p)

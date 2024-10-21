@@ -59,10 +59,8 @@ func PlayerReady(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	matchCards := []queries.Matchcard{}
-
 	for _, id := range deck.Cards {
-		matchCard, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
+		_, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
 			MatchID:   int32(matchId),
 			Cardid:    id,
 			State:     queries.CardstateDeck,
@@ -74,43 +72,7 @@ func PlayerReady(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
-		matchCards = append(matchCards, matchCard)
 	}
-
-	//gameCards, err := q.GetGameCardsForMatch(ctx, m.ID)
-
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err)
-	// }
-
-	//q.GetMatchCards(ctx
-
-	// matchCards := []queries.Matchcard{}
-
-	// for _, card := range deck.Cards {
-	// 	matchCard, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
-	// 		MatchID: int32(matchId),
-	// 		Cardid:  card,
-	// 	})
-
-	// 	if err != nil {
-	// 		return c.JSON(http.StatusInternalServerError, err)
-	// 	}
-
-	// 	matchCards = append(matchCards, matchCard)
-	// }
-
-	// gameCards := []model.GameCard{}
-
-	// for _, card := range matchCards {
-	// 	gameCard := model.GameCard{
-	// 		Matchcard: card,
-	// 		Card.
-
-	// gameDeck := model.GameDeck{
-	// 	Deck:  deck,
-	// 	Cards: gameCards,
-	// }
 
 	err = q.UpdateMatchWithDeckId(ctx, queries.UpdateMatchWithDeckIdParams{
 		ID:     int32(matchId),
