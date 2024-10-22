@@ -41,16 +41,14 @@ func PlayerReady(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	matchId, err := utils.GetMatchForPlayerId(*details)
+	match, err := utils.GetMatchForPlayerId(*details)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m, err := utils.GetMatch(matchId)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+	if len(match.Players) != 2 {
+		return c.JSON(http.StatusOK, nil)
 	}
 
 	deck, err := utils.NewDeck()
@@ -61,7 +59,7 @@ func PlayerReady(c echo.Context) error {
 
 	for _, id := range deck.Cards {
 		_, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
-			MatchID:   int32(matchId),
+			MatchID:   match.ID,
 			Cardid:    id,
 			State:     queries.CardstateDeck,
 			Origowner: pgtype.Int4{Int32: 0},
@@ -71,11 +69,10 @@ func PlayerReady(c echo.Context) error {
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-
 	}
 
 	err = q.UpdateMatchWithDeckId(ctx, queries.UpdateMatchWithDeckIdParams{
-		ID:     int32(matchId),
+		ID:     match.ID,
 		Deckid: int32(deck.ID),
 	})
 
@@ -83,11 +80,11 @@ func PlayerReady(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m.Deckid = deck.ID
+	match.Deckid = deck.ID
 
-	if utils.PlayersReady(m.Players) {
-		utils.Deal(m)
-		utils.UpdateGameState(matchId, queries.GamestateDiscardState)
+	if utils.PlayersReady(match.Players) {
+		utils.Deal(match)
+		utils.UpdateGameState(int(match.ID), queries.GamestateDiscardState)
 	}
 
 	return c.JSON(http.StatusOK, nil)

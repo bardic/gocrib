@@ -34,13 +34,14 @@ func JoinMatch(c echo.Context) error {
 	}
 
 	details.PlayerId = int(p.ID)
-	m, err := utils.UpdatePlayersInMatch(*details)
+
+	err = utils.UpdatePlayersInMatch(*details)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
-		MatchId:   int(m.ID),
+		MatchId:   int(details.MatchId),
 		PlayerId:  int(p.ID),
 		GameState: queries.GamestateJoinGameState,
 	})

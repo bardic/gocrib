@@ -63,20 +63,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 	case model.GameStateChangeMsg:
 		switch msg.NewState {
-		case queries.GamestateNewGameState:
-
-			var cmd tea.Cmd
-			cmd = m.createMatch(msg)
-			gameView := m.currentView.(*views.GameView)
-			p, err := utils.GetPlayerId(m.accountId, gameView.GameMatch.Players)
-			if err != nil {
-				utils.Logger.Sugar().Error(err)
-			}
-			services.PlayerReady(p.ID)
-			cmds = append(cmds, cmd)
 		case queries.GamestateJoinGameState:
 			var cmd tea.Cmd
-			cmd = m.createMatch(msg)
+			cmd = m.createMatchView(msg)
 			services.PlayerReady(msg.PlayerId)
 			cmds = append(cmds, cmd)
 		case queries.GamestateWaitingState:
@@ -195,7 +184,7 @@ func (m *AppModel) getPlayers(match queries.Match) []queries.Player {
 	return players
 }
 
-func (m *AppModel) createMatch(msg model.GameStateChangeMsg) tea.Cmd {
+func (m *AppModel) createMatchView(msg model.GameStateChangeMsg) tea.Cmd {
 	if m.GameInitd {
 		return nil
 	}

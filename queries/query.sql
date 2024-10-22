@@ -149,8 +149,11 @@ UPDATE match SET
 	gameState= $1
 WHERE id=$2;
 
--- name: StartMatch :exec
-UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1), deckid=$2 WHERE id=$3;
+-- -- name: StartMatch :exec
+-- UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1), deckid=$2 WHERE id=$3;
+
+-- name: UpdatePlayersInMatch :exec
+UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1) WHERE id=$2;
 
 -- name: GetDeck :one
 SELECT deck.* FROM deck WHERE id=$1 LIMIT 1;

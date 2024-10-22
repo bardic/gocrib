@@ -107,7 +107,7 @@ func PlayersReady(players []queries.Player) bool {
 	return ready
 }
 
-func GetMatchForPlayerId(playerId int) (int, error) {
+func GetMatchForPlayerId(playerId int) (*model.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -117,16 +117,16 @@ func GetMatchForPlayerId(playerId int) (int, error) {
 	b, err := q.GetMatchByPlayerId(ctx, int32(playerId))
 
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	var match model.GameMatch
+	var match *model.GameMatch
 	err = json.Unmarshal(b, &match)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return int(match.ID), nil
+	return match, nil
 }
 
 func Deal(match *model.GameMatch) (*queries.Deck, error) {

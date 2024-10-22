@@ -197,51 +197,23 @@ func UpdateMatch(match queries.Match) error {
 	return nil
 }
 
-func UpdatePlayersInMatch(req model.JoinMatchReq) (*model.GameMatch, error) {
+func UpdatePlayersInMatch(req model.JoinMatchReq) error {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
 
 	ctx := context.Background()
 
-	deck, err := NewDeck()
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = q.StartMatch(ctx, queries.StartMatchParams{
+	err := q.UpdatePlayersInMatch(ctx, queries.UpdatePlayersInMatchParams{
 		ID:          int32(req.MatchId),
-		Deckid:      deck.ID,
-		ArrayAppend: req.PlayerId,
+		ArrayAppend: int32(req.PlayerId),
 	})
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	err = q.UpdateMatchWithDeckId(ctx, queries.UpdateMatchWithDeckIdParams{
-		ID:     int32(req.MatchId),
-		Deckid: deck.ID,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	m, err := q.GetMatchById(ctx, int32(req.MatchId))
-
-	if err != nil {
-		return nil, err
-	}
-
-	var match *model.GameMatch
-	err = json.Unmarshal(m, &match)
-	if err != nil {
-		return nil, err
-	}
-
-	return match, nil
+	return nil
 }
 
 func GetDeckById(id int32) (queries.Deck, error) {
