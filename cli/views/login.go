@@ -39,19 +39,20 @@ func (v *LoginView) View() string {
 	return styles.ScreenStyle.Width(100).Align(lipgloss.Center, lipgloss.Center).Render(doc.String())
 }
 
-func (v *LoginView) Enter() tea.Msg {
-	utils.Logger.Info("Enter")
-	idStr := v.LoginIdField.Value()
-
-	var accountDetails queries.Account
-	msg := services.Login(idStr)
-	json.Unmarshal(msg.([]byte), &accountDetails)
-
-	return accountDetails
-}
-
 func (v *LoginView) ParseInput(msg tea.KeyMsg) tea.Msg {
-	return msg
+	switch msg.String() {
+	case "enter", "view_update":
+		utils.Logger.Info("Enter")
+		idStr := v.LoginIdField.Value()
+
+		var accountDetails queries.Account
+		msg := services.Login(idStr)
+		json.Unmarshal(msg.([]byte), &accountDetails)
+
+		return accountDetails
+	}
+
+	return nil
 }
 
 func (v *LoginView) Update(msg tea.Msg) tea.Cmd {

@@ -65,33 +65,55 @@ func (v *LobbyView) View() string {
 	return doc.String()
 }
 
-func (v *LobbyView) Enter() tea.Msg {
-	utils.Logger.Info("Enter")
-	idStr := v.LobbyTable.SelectedRow()[0]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return tea.Quit
-	}
-
-	v.ActiveMatchId = id
-	accountMsg := services.PostPlayer(v.AccountId)
-
-	var player queries.Player
-	err = json.Unmarshal(accountMsg.([]byte), &player)
-
-	if err != nil {
-		return tea.Quit
-	}
-
-	var matchDetails model.MatchDetailsResponse
-	msg := services.JoinMatch(int(player.ID), id)
-	json.Unmarshal(msg.([]byte), &matchDetails)
-
-	return matchDetails
-}
-
 func (v *LobbyView) ParseInput(msg tea.KeyMsg) tea.Msg {
-	return msg
+	switch msg.String() {
+	case "enter", "view_update":
+		utils.Logger.Info("Enter")
+		idStr := v.LobbyTable.SelectedRow()[0]
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return tea.Quit
+		}
+
+		v.ActiveMatchId = id
+		accountMsg := services.PostPlayer(v.AccountId)
+
+		var player queries.Player
+		err = json.Unmarshal(accountMsg.([]byte), &player)
+
+		if err != nil {
+			return tea.Quit
+		}
+
+		var matchDetails model.MatchDetailsResponse
+		msg := services.JoinMatch(int(player.ID), id)
+		json.Unmarshal(msg.([]byte), &matchDetails)
+
+		return matchDetails
+	case "n":
+		return utils.CreateGame(v.AccountId)
+	case "tab":
+
+		v.ActiveLandingTab = v.ActiveLandingTab + 1
+
+		switch v.ActiveLandingTab {
+		case 0:
+			v.LobbyViewState = model.OpenMatches
+		case 1:
+			v.LobbyViewState = model.AvailableMatches
+		}
+	case "shift+tab":
+		v.ActiveLandingTab = v.ActiveLandingTab - 1
+
+		switch v.ActiveLandingTab {
+		case 0:
+			v.LobbyViewState = model.OpenMatches
+		case 1:
+			v.LobbyViewState = model.AvailableMatches
+		}
+	}
+
+	return nil
 }
 
 func (v *LobbyView) Update(msg tea.Msg) tea.Cmd {

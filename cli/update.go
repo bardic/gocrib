@@ -20,7 +20,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	//Parse msg
 	switch msg := msg.(type) {
 	case tea.KeyMsg: //User input
-		resp := m.parseInput(msg)
+		gameView := m.currentView
+		resp := gameView.ParseInput(msg)
+
 		if resp == nil {
 			break
 		}
