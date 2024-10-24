@@ -137,27 +137,6 @@ func scanForFlush(cardIdsInHand []int32) ([]model.Scores, error) {
 	return []model.Scores{}, nil
 }
 
-func discardCard(match model.GameMatch) (model.ScoreResults, error) {
-	return model.ScoreResults{Results: []model.Scores{
-		{
-			Cards: []model.GameCard{},
-			Point: 0,
-		},
-	}}, nil
-}
-
-func cutDeck(m model.GameMatch, cutCardId int) (model.ScoreResults, error) {
-
-	utils.UpdateCut(int(m.ID), cutCardId)
-
-	return model.ScoreResults{Results: []model.Scores{
-		{
-			Cards: []model.GameCard{},
-			Point: 0,
-		},
-	}}, nil
-}
-
 func scanForRuns(cardIdsInPlay []int32) ([]model.Scores, error) {
 	gameplayCardsInPlay, err := getGameplayCardsForIds(cardIdsInPlay)
 	if err != nil {

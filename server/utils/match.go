@@ -9,15 +9,6 @@ import (
 	conn "github.com/bardic/gocrib/server/db"
 )
 
-func CardsInPlay(players []queries.Player) []int32 {
-	play := []int32{}
-	for _, player := range players {
-		play = append(play, player.Play...)
-	}
-
-	return play
-}
-
 func UpdateGameState(matchId int, state queries.Gamestate) error {
 	db := conn.Pool()
 	defer db.Close()
@@ -83,25 +74,6 @@ func GetOpenMatches() ([]queries.Match, error) {
 	return matches, nil
 }
 
-func UpdateCut(matchId int, cutCardId int) error {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx := context.Background()
-
-	err := q.UpdateMatchCut(ctx, queries.UpdateMatchCutParams{
-		ID:            int32(matchId),
-		Cutgamecardid: int32(cutCardId),
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func NewDeck() (queries.Deck, error) {
 	db := conn.Pool()
 	defer db.Close()
@@ -128,44 +100,6 @@ func NewDeck() (queries.Deck, error) {
 	}
 
 	return deck, nil
-}
-
-func IsMatchReadyToStart(m *queries.Match) (bool, error) {
-	if len(m.Playerids) == 2 {
-		return true, nil
-	}
-
-	return false, nil
-}
-
-func UpdateMatchState(matchId int, state queries.Gamestate) error {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx := context.Background()
-
-	q.UpdateMatch(ctx, queries.UpdateMatchParams{
-		ID:        int32(matchId),
-		Gamestate: state,
-	})
-
-	return nil
-}
-
-func UpdateMatchCut(cardId, matchId int) error {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx := context.Background()
-
-	q.UpdateMatchCut(ctx, queries.UpdateMatchCutParams{
-		ID:            int32(matchId),
-		Cutgamecardid: int32(cardId),
-	})
-
-	return nil
 }
 
 func UpdateMatch(match queries.Match) error {

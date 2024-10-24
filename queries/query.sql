@@ -250,3 +250,15 @@ SELECT  sqlc.embed(m), sqlc.embed(c)
 FROM matchcards m
 JOIN cards c ON (m.cardId = c.id)
 WHERE m.match_id = $1;
+
+-- name: PassTurn :exec
+UPDATE match m
+SET currentplayerturn = 
+    (SELECT 
+        CASE WHEN array_position(playerids, currentplayerturn)=1 THEN playerids[2]
+            ELSE playerids[1]
+        END
+        FROM match 
+        WHERE m.id = $1
+    )            
+WHERE m.id = $1;

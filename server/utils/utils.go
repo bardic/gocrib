@@ -58,7 +58,7 @@ func UpdatePlay(details model.HandModifier) (*model.GameMatch, error) {
 
 	q.UpdateCardsPlayed(ctx, queries.UpdateCardsPlayedParams{
 		Play: details.CardIds,
-		ID:   details.MatchId,
+		ID:   details.PlayerId,
 	})
 
 	return PlayCard(details)
@@ -241,4 +241,8 @@ func Eq(p *queries.Player, c *queries.Player) bool {
 	// }
 
 	return true
+}
+
+func passTurn() {
+	
 }

@@ -62,16 +62,6 @@ func (v *GameView) Init() {
 	v.CutInput.Placeholder = "0"
 	v.CutInput.CharLimit = 5
 	v.CutInput.Width = 5
-
-	// deckByte := services.GetDeckById(int(match.Deckid)).([]byte)
-	// var deck model.GameDeck
-	// err := json.Unmarshal(deckByte, &deck)
-
-	// if err != nil {
-	// 	utils.Logger.Sugar().Error(err)
-	// }
-
-	// v.Deck = &deck
 }
 
 func (v *GameView) View() string {
@@ -143,7 +133,8 @@ func (v *GameView) Enter() tea.Msg {
 	switch v.GameMatch.Gamestate {
 	case queries.GamestateCutState:
 		v.CutIndex = v.CutInput.Value()
-		return services.CutDeck
+		resp := services.CutDeck(v.AccountId, v.MatchId, v.CutIndex)
+		return resp
 	case queries.GamestateDiscardState:
 		p, err := utils.GetPlayerId(v.AccountId, v.GameMatch.Players)
 
@@ -156,6 +147,22 @@ func (v *GameView) Enter() tea.Msg {
 			PlayerId: p.ID,
 			CardIds:  v.HighlightedIds,
 		})
+
+		v.HighlightedIds = []int32{}
+	case queries.GamestatePlayState:
+		p, err := utils.GetPlayerId(v.AccountId, v.GameMatch.Players)
+
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+
+		services.PutPlay(model.HandModifier{
+			MatchId:  v.GameMatch.ID,
+			PlayerId: p.ID,
+			CardIds:  v.HighlightedIds,
+		})
+
+		v.HighlightedIds = []int32{}
 	}
 
 	return nil

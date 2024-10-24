@@ -1,9 +1,11 @@
 package match
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/bardic/gocrib/queries"
+	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/utils"
 
 	"github.com/bardic/gocrib/model"
@@ -39,6 +41,14 @@ func UpdatePlay(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
+
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
+
+	ctx := context.Background()
+
+	q.PassTurn(ctx, m.ID)
 
 	return c.JSON(http.StatusOK, m)
 }

@@ -495,6 +495,24 @@ func (q *Queries) GetPlayer(ctx context.Context, id int32) (Player, error) {
 	return i, err
 }
 
+const passTurn = `-- name: PassTurn :exec
+UPDATE match m
+SET currentplayerturn = 
+    (SELECT 
+        CASE WHEN array_position(playerids, currentplayerturn)=1 THEN playerids[2]
+            ELSE playerids[1]
+        END
+        FROM match 
+        WHERE m.id = $1
+    )            
+WHERE m.id = $1
+`
+
+func (q *Queries) PassTurn(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, passTurn, id)
+	return err
+}
+
 const removeCardsFromHand = `-- name: RemoveCardsFromHand :exec
 UPDATE player SET hand = hand - $1 where id = $2
 `
