@@ -31,7 +31,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return resp
 		})
 	case queries.Account:
-		m.accountId = int(msg.ID)
+		m.account = &msg
 		cmds = append(cmds, func() tea.Msg {
 			return model.StateChangeMsg{
 				NewState: model.LobbyView,
@@ -86,7 +86,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.NewState {
 		case model.LobbyView:
 			m.currentView = &views.LobbyView{
-				AccountId: m.accountId,
+				AccountId: m.account.ID,
 			}
 			m.ViewStateName = model.LobbyView
 			services.GetOpenMatches()
@@ -105,7 +105,6 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		idstr := strconv.Itoa(m.matchId)
 		resp := services.GetPlayerMatch(idstr)
 		err := json.Unmarshal(resp.([]byte), &match)
-
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
@@ -126,6 +125,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Match:   match,
 			Players: players,
 		}
+
+		p := utils.GetPlayerForAccountId(m.account.ID, gameMatch)
+		gameView.LocalPlayer = p
 
 		deckByte := services.GetDeckById(int(match.Deckid)).([]byte)
 		var deck queries.Deck
@@ -192,8 +194,8 @@ func (m *AppModel) createMatchView(msg model.GameStateChangeMsg) tea.Cmd {
 	}
 
 	m.currentView = &views.GameView{
-		AccountId: m.accountId,
-		MatchId:   int(msg.MatchId),
+		Account: m.account,
+		MatchId: msg.MatchId,
 	}
 
 	gameView := m.currentView.(*views.GameView)
@@ -209,7 +211,7 @@ func (m *AppModel) createMatchView(msg model.GameStateChangeMsg) tea.Cmd {
 func (m *AppModel) setCards(match *model.GameMatch) {
 	gameView := m.currentView.(*views.GameView)
 
-	p := utils.GetPlayerForAccountId(m.accountId, match)
+	p := utils.GetPlayerForAccountId(m.account.ID, match)
 
 	for _, cardId := range p.Hand {
 		card := utils.GetCardById(cardId, gameView.Deck)

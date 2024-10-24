@@ -9,14 +9,14 @@ import (
 	conn "github.com/bardic/gocrib/server/db"
 )
 
-func UpdateGameState(matchId int, state queries.Gamestate) error {
+func UpdateGameState(matchId int32, state queries.Gamestate) error {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
 
 	ctx := context.Background()
 
-	err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: int32(matchId)})
+	err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: matchId})
 
 	if err != nil {
 		return err

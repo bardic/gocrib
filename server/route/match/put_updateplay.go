@@ -36,7 +36,7 @@ func UpdatePlay(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = utils.UpdateGameState(int(m.ID), queries.GamestateOpponentState)
+	err = utils.UpdateGameState(m.ID, queries.GamestateOpponentState)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -48,7 +48,11 @@ func UpdatePlay(c echo.Context) error {
 
 	ctx := context.Background()
 
-	q.PassTurn(ctx, m.ID)
+	err = q.PassTurn(ctx, m.ID)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
 
 	return c.JSON(http.StatusOK, m)
 }

@@ -84,7 +84,7 @@ func PlayerReady(c echo.Context) error {
 
 	if utils.PlayersReady(match.Players) {
 		utils.Deal(match)
-		utils.UpdateGameState(int(match.ID), queries.GamestateDiscardState)
+		utils.UpdateGameState(match.ID, queries.GamestateDiscardState)
 	}
 
 	return c.JSON(http.StatusOK, nil)

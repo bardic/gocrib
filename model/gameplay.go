@@ -51,16 +51,16 @@ const (
 //_Comms_
 
 type MatchRequirements struct {
-	PlayerId    int
-	AccountId   int
+	PlayerId    int32
+	AccountId   int32
 	IsPrivate   bool
-	EloRangeMin int
-	EloRangeMax int
+	EloRangeMin int32
+	EloRangeMax int32
 }
 
 type CutDeckReq struct {
-	PlayerId int
-	MatchId  int
+	PlayerId int32
+	MatchId  int32
 	CutIndex string
 }
 

@@ -43,7 +43,7 @@ func PutPlayerMatch(id int) tea.Msg {
 	return url(EndPointMatch, http.MethodPut, "")
 }
 
-func PostPlayerMatch(accountId int) tea.Msg {
+func PostPlayerMatch(accountId int32) tea.Msg {
 	req := model.MatchRequirements{
 		AccountId:   accountId,
 		IsPrivate:   false,
@@ -54,7 +54,7 @@ func PostPlayerMatch(accountId int) tea.Msg {
 	return sendReq(EndPointMatch, http.MethodPost, req)
 }
 
-func CutDeck(playerId, matchId int, cutIndex string) tea.Msg {
+func CutDeck(playerId, matchId int32, cutIndex string) tea.Msg {
 	req := model.CutDeckReq{
 		PlayerId: playerId,
 		MatchId:  matchId,

@@ -18,14 +18,14 @@ import (
 )
 
 type LobbyView struct {
-	AccountId        int
+	AccountId        int32
 	ActiveLandingTab int
 	LobbyViewState   model.LobbyViewState
 	LobbyTabNames    []string
 	LobbyTable       table.Model
 	IsLobbyTableSet  bool
 	lobbyViewInitd   bool
-	ActiveMatchId    int
+	ActiveMatchId    int32
 }
 
 func (v *LobbyView) Init() {
@@ -47,7 +47,7 @@ func (v *LobbyView) View() string {
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
-	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────────────────────────────────┐")
+	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "────────────────────────────────────────────────────────────────┐")
 	doc.WriteString(row)
 	doc.WriteString("\n")
 
@@ -75,7 +75,7 @@ func (v *LobbyView) ParseInput(msg tea.KeyMsg) tea.Msg {
 			return tea.Quit
 		}
 
-		v.ActiveMatchId = id
+		v.ActiveMatchId = int32(id)
 		accountMsg := services.PostPlayer(v.AccountId)
 
 		var player queries.Player

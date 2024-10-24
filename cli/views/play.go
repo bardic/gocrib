@@ -9,13 +9,12 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type HandView struct {
+type PlayerView struct {
 	HandModel
 }
 
-func (v *HandView) View() string {
+func (v *PlayerView) View() string {
 	s := ""
-
 	cardViews := make([]string, 0)
 	for i := 0; i < len(v.cards); i++ {
 		c := utils.GetCardById(v.cards[i], v.deck)
@@ -42,10 +41,10 @@ func (v *HandView) View() string {
 	return s
 }
 
-func (v *HandView) BuildHeader() string {
+func (v *PlayerView) BuildHeader() string {
 	return ""
 }
 
-func (v *HandView) BuildFooter() string {
+func (v *PlayerView) BuildFooter() string {
 	return ""
 }

@@ -38,8 +38,8 @@ func PutPlay(req model.HandModifier) tea.Msg {
 	return url(EndPointPlay, http.MethodPut, string(b))
 }
 
-func PostPlayer(accountId int) tea.Msg {
-	return url(EndPointPlayer, http.MethodPost, strconv.Itoa(accountId))
+func PostPlayer(accountId int32) tea.Msg {
+	return url(EndPointPlayer, http.MethodPost, strconv.Itoa(int(accountId)))
 }
 
 func DeletePlayer(ids []int) tea.Msg {

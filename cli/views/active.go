@@ -6,5 +6,5 @@ import (
 )
 
 func ActiveView() string {
-	return styles.ScreenStyle.Width(100).Align(lipgloss.Center, lipgloss.Center).Render("Active View")
+	return styles.WindowStyle.Align(lipgloss.Center, lipgloss.Center).Render("Active View")
 }

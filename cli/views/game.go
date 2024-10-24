@@ -19,8 +19,8 @@ import (
 
 type GameView struct {
 	Initd          bool
-	MatchId        int
-	AccountId      int
+	MatchId        int32
+	Account        *queries.Account
 	CutIndex       string
 	HighlightedIds []int32
 	GameTabNames   []string
@@ -30,16 +30,16 @@ type GameView struct {
 	HighlighedId   int
 	CutInput       textinput.Model
 	Deck           *model.GameDeck
-	DeckId         int
+	DeckId         int32
 	Hand           []queries.Card
 	Kitty          []queries.Card
 	Play           []queries.Card
 	GameMatch      *model.GameMatch
+	LocalPlayer    *queries.Player
 }
 
-var focusedModelStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("69"))
+var boardRowLen int = 50
+var boardEndRowLen int = 31
 
 func (v *GameView) Init() {
 	if v.Initd {
@@ -50,7 +50,7 @@ func (v *GameView) Init() {
 	v.Kitty = []queries.Card{}
 	v.Play = []queries.Card{}
 
-	matchMsg := services.GetPlayerMatch(strconv.Itoa(v.MatchId))
+	matchMsg := services.GetPlayerMatch(strconv.Itoa(int(v.MatchId)))
 	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
@@ -70,73 +70,92 @@ func (v *GameView) View() string {
 	}
 
 	doc := strings.Builder{}
-
 	renderedTabs := renderTabs(v.GameTabNames, v.ActiveTab)
+	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))
+	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────────────────────────────────┐"))
+	viewBuilder := strings.Builder{}
 
-	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
-	doc.WriteString(row)
-	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────────────────────────────────┐")
-	doc.WriteString(row)
-	doc.WriteString("\n")
-
-	var view string
 	switch v.GameViewState {
+
 	case model.BoardView:
-		player, err := utils.GetPlayerId(v.AccountId, v.GameMatch.Players)
+		player, err := utils.GetPlayerById(v.Account.ID, v.GameMatch.Players)
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
 		if v.GameMatch.Gamestate == queries.GamestateCutState && v.GameMatch.Currentplayerturn != player.ID {
 			v.CutInput.Focus()
-			view = v.CutInput.View() + " \n"
+			viewBuilder.WriteString(v.CutInput.View() + " \n")
 		} else {
-			view = "\n"
+			viewBuilder.WriteString("\n")
 		}
 
-		view = view + `
-	○•○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		
-	○•○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		
-	----- ----- ----- ----- ----- ----- ----- ----- ----- -----		
-	○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		
-	○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○		
-	----- ----- ----- ----- ----- ----- ----- ----- ----- -----		
-	○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○
-	○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○○○○○ ○
-`
+		//Row 1
+		viewBuilder.WriteString(utils.DrawRow(v.GameMatch.Players, boardRowLen, 0))
+		//Row 2
+		viewBuilder.WriteString(utils.DrawRow(v.GameMatch.Players, boardRowLen, boardRowLen))
+		//Row 3
+		viewBuilder.WriteString(utils.DrawRow(v.GameMatch.Players, boardEndRowLen, boardRowLen*2))
 
-		s := lipgloss.JoinHorizontal(lipgloss.Top, focusedModelStyle.Render(view), focusedModelStyle.Render("59"))
-		view = s
 	case model.PlayView:
-		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
-		view = HandView(v.HighlighedId, v.HighlightedIds, p.Play, v.Deck)
+		hand := v.createHandView()
+		playerView := PlayerView{
+			HandModel: hand,
+		}
+		viewBuilder.WriteString(playerView.View())
 	case model.HandView:
-		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
+		hand := v.createHandView()
+		handView := HandView{
+			HandModel: hand,
+		}
+
 		if v.GameMatch.Gamestate == queries.GamestateWaitingState {
-			view = "Waiting to be dealt"
+			viewBuilder.WriteString("Waiting to be dealt")
 		} else {
-			view = HandView(v.HighlighedId, v.HighlightedIds, p.Hand, v.Deck)
+			viewBuilder.WriteString(handView.View())
 		}
 	case model.KittyView:
-		p := utils.GetPlayerForAccountId(v.AccountId, v.GameMatch)
-		if len(p.Kitty) == 0 {
-			view = "Empty Kitty"
+		hand := v.createHandView()
+		kittyView := KittyView{
+			HandModel: hand,
+		}
+
+		if len(hand.player.Kitty) == 0 {
+			viewBuilder.WriteString("Empty Kitty")
 		} else {
-			view = HandView(v.HighlighedId, v.HighlightedIds, p.Kitty, v.Deck)
+			viewBuilder.WriteString(kittyView.View())
 		}
 	}
 
-	doc.WriteString(styles.WindowStyle.Width(100).Render(view))
+	doc.WriteString(styles.WindowStyle.Render(viewBuilder.String()))
+	doc.WriteString(utils.BuildFooter())
 	return doc.String()
+}
+
+func (v *GameView) createHandView() HandModel {
+
+	p := utils.GetPlayerForAccountId(v.Account.ID, v.GameMatch)
+
+	hand := HandModel{
+		currentTurnPlayerId: v.GameMatch.Currentplayerturn,
+		selectedCardId:      v.HighlighedId,
+		selectedCardIds:     v.HighlightedIds,
+		cards:               p.Play,
+		deck:                v.Deck,
+		player:              p,
+		account:             v.Account,
+	}
+
+	return hand
 }
 
 func (v *GameView) Enter() tea.Msg {
 	switch v.GameMatch.Gamestate {
 	case queries.GamestateCutState:
 		v.CutIndex = v.CutInput.Value()
-		resp := services.CutDeck(v.AccountId, v.MatchId, v.CutIndex)
+		resp := services.CutDeck(v.Account.ID, v.MatchId, v.CutIndex)
 		return resp
 	case queries.GamestateDiscardState:
-		p, err := utils.GetPlayerId(v.AccountId, v.GameMatch.Players)
+		p, err := utils.GetPlayerById(v.Account.ID, v.GameMatch.Players)
 
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
@@ -150,7 +169,7 @@ func (v *GameView) Enter() tea.Msg {
 
 		v.HighlightedIds = []int32{}
 	case queries.GamestatePlayState:
-		p, err := utils.GetPlayerId(v.AccountId, v.GameMatch.Players)
+		p, err := utils.GetPlayerById(v.Account.ID, v.GameMatch.Players)
 
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
@@ -247,39 +266,3 @@ func (v *GameView) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 	return nil
 }
-
-/*func (v *GameView) UpdateState(newState model.GameState) tea.Cmd {
-	var cmd tea.Cmd
-
-	if v.GameMatch == nil || v.GameMatch.GameState == newState {
-		return nil
-	}
-
-	matchMsg := services.GetPlayerMatch(strconv.Itoa(v.MatchId))
-	var match *queries.Match
-	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
-		return nil
-	}
-
-	v.GameMatch = match
-	p := utils.GetPlayerForAccountId(v.AccountId, match)
-
-	for _, cardId := range p.Hand {
-		card := utils.GetCardById(cardId, v.Deck)
-		if card != nil {
-			v.Hand = append(v.Hand, *card)
-		}
-	}
-
-	for _, cardId := range p.Kitty {
-		card := utils.GetCardById(cardId, v.Deck)
-		v.Kitty = append(v.Kitty, *card)
-	}
-
-	for _, cardId := range p.Play {
-		card := utils.GetCardById(cardId, v.Deck)
-		v.Play = append(v.Play, *card)
-	}
-
-	return cmd
-}*/

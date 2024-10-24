@@ -22,7 +22,7 @@ import (
 // @Failure      500  {object}  error
 // @Router       /player/player/ [post]
 func NewPlayer(c echo.Context) error {
-	id := new(int)
+	id := new(int32)
 	if err := c.Bind(id); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -36,7 +36,7 @@ func NewPlayer(c echo.Context) error {
 	return c.JSON(http.StatusOK, p)
 }
 
-func NewPlayerQuery(accountId int) (*queries.Player, error) {
+func NewPlayerQuery(accountId int32) (*queries.Player, error) {
 
 	db := conn.Pool()
 	defer db.Close()
@@ -45,7 +45,7 @@ func NewPlayerQuery(accountId int) (*queries.Player, error) {
 	ctx := context.Background()
 
 	p, err := q.CreatePlayer(ctx, queries.CreatePlayerParams{
-		Accountid: int32(accountId),
+		Accountid: accountId,
 		Hand:      []int32{},
 		Kitty:     []int32{},
 		Play:      []int32{},

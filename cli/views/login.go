@@ -36,7 +36,7 @@ func (v *LoginView) View() string {
 	doc.WriteString("Login \n")
 	doc.WriteString(v.LoginIdField.View())
 
-	return styles.ScreenStyle.Width(100).Align(lipgloss.Center, lipgloss.Center).Render(doc.String())
+	return styles.WindowStyle.Align(lipgloss.Center, lipgloss.Center).Render(doc.String())
 }
 
 func (v *LoginView) ParseInput(msg tea.KeyMsg) tea.Msg {

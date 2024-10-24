@@ -9,11 +9,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type HandView struct {
+type KittyView struct {
 	HandModel
 }
 
-func (v *HandView) View() string {
+func (v *KittyView) View() string {
 	s := ""
 
 	cardViews := make([]string, 0)
@@ -42,10 +42,10 @@ func (v *HandView) View() string {
 	return s
 }
 
-func (v *HandView) BuildHeader() string {
+func (v *KittyView) BuildHeader() string {
 	return ""
 }
 
-func (v *HandView) BuildFooter() string {
+func (v *KittyView) BuildFooter() string {
 	return ""
 }

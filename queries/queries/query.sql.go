@@ -499,11 +499,16 @@ const passTurn = `-- name: PassTurn :exec
 UPDATE match m
 SET currentplayerturn = 
     (SELECT 
-        CASE WHEN array_position(playerids, currentplayerturn)=1 THEN playerids[2]
-            ELSE playerids[1]
+    CASE WHEN 
+            array_position(playerids, currentplayerturn)=
+            array_length(playerids,1)
+        THEN 
+            playerids[1]
+        ELSE 
+            playerids[array_position(playerids, currentplayerturn)+1]
         END
-        FROM match 
-        WHERE m.id = $1
+    FROM match m
+    WHERE m.id = $1
     )            
 WHERE m.id = $1
 `

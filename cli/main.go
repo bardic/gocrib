@@ -6,6 +6,7 @@ import (
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -27,9 +28,9 @@ type AppModel struct {
 	GameInitd      bool
 	ViewStateName  model.ViewStateName
 	ActivePlayerId int
-	accountId      int
+	account        *queries.Account
 	matchId        int
-	currentView    views.IViewState
+	currentView    views.IView
 	timer          timer.Model
 	playersReady   bool
 }
