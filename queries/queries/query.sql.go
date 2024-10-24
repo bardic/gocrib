@@ -532,20 +532,6 @@ func (q *Queries) RemoveCardsFromHand(ctx context.Context, arg RemoveCardsFromHa
 	return err
 }
 
-const uodateGameState = `-- name: UodateGameState :exec
-UPDATE match SET gameState= $1 WHERE id=$2
-`
-
-type UodateGameStateParams struct {
-	Gamestate Gamestate
-	ID        int32
-}
-
-func (q *Queries) UodateGameState(ctx context.Context, arg UodateGameStateParams) error {
-	_, err := q.db.Exec(ctx, uodateGameState, arg.Gamestate, arg.ID)
-	return err
-}
-
 const updateAccount = `-- name: UpdateAccount :exec
 UPDATE match SET cutGameCardId = $2 where id=$1
 `
@@ -571,6 +557,20 @@ type UpdateCardsPlayedParams struct {
 
 func (q *Queries) UpdateCardsPlayed(ctx context.Context, arg UpdateCardsPlayedParams) error {
 	_, err := q.db.Exec(ctx, updateCardsPlayed, arg.Play, arg.ID)
+	return err
+}
+
+const updateGameState = `-- name: UpdateGameState :exec
+UPDATE match SET gameState= $1 WHERE id=$2
+`
+
+type UpdateGameStateParams struct {
+	Gamestate Gamestate
+	ID        int32
+}
+
+func (q *Queries) UpdateGameState(ctx context.Context, arg UpdateGameStateParams) error {
+	_, err := q.db.Exec(ctx, updateGameState, arg.Gamestate, arg.ID)
 	return err
 }
 

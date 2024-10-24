@@ -1,4 +1,4 @@
-package views
+package active
 
 import (
 	"github.com/bardic/gocrib/cli/styles"

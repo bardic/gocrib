@@ -7,7 +7,8 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
+	"github.com/bardic/gocrib/cli/views/game"
+	"github.com/bardic/gocrib/cli/views/lobby"
 	"github.com/bardic/gocrib/model"
 	"github.com/bardic/gocrib/queries"
 	"github.com/charmbracelet/bubbles/timer"
@@ -85,7 +86,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case model.StateChangeMsg:
 		switch msg.NewState {
 		case model.LobbyView:
-			m.currentView = &views.LobbyView{
+			m.currentView = &lobby.LobbyView{
 				AccountId: m.account.ID,
 			}
 			m.ViewStateName = model.LobbyView
@@ -109,7 +110,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			utils.Logger.Sugar().Error(err)
 		}
 
-		gameView := m.currentView.(*views.GameView)
+		gameView := m.currentView.(*game.GameView)
 
 		if gameView.GameMatch != nil {
 			if match.Gamestate == gameView.GameMatch.Gamestate {
@@ -193,12 +194,12 @@ func (m *AppModel) createMatchView(msg model.GameStateChangeMsg) tea.Cmd {
 		return nil
 	}
 
-	m.currentView = &views.GameView{
+	m.currentView = &game.GameView{
 		Account: m.account,
 		MatchId: msg.MatchId,
 	}
 
-	gameView := m.currentView.(*views.GameView)
+	gameView := m.currentView.(*game.GameView)
 	gameView.Init()
 	m.GameInitd = true
 	m.ViewStateName = model.InGameView
@@ -209,7 +210,7 @@ func (m *AppModel) createMatchView(msg model.GameStateChangeMsg) tea.Cmd {
 }
 
 func (m *AppModel) setCards(match *model.GameMatch) {
-	gameView := m.currentView.(*views.GameView)
+	gameView := m.currentView.(*game.GameView)
 
 	p := utils.GetPlayerForAccountId(m.account.ID, match)
 

@@ -1,4 +1,4 @@
-package views
+package lobby
 
 import (
 	"encoding/json"
@@ -43,7 +43,7 @@ func (v *LobbyView) Init() {
 func (v *LobbyView) View() string {
 	doc := strings.Builder{}
 
-	renderedTabs := renderTabs(v.LobbyTabNames, v.ActiveLandingTab)
+	renderedTabs := utils.RenderTabs(v.LobbyTabNames, v.ActiveLandingTab)
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)

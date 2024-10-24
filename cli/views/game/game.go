@@ -1,4 +1,4 @@
-package views
+package game
 
 import (
 	"encoding/json"
@@ -9,6 +9,10 @@ import (
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/views"
+	"github.com/bardic/gocrib/cli/views/hand"
+	"github.com/bardic/gocrib/cli/views/kitty"
+	"github.com/bardic/gocrib/cli/views/play"
 
 	"github.com/bardic/gocrib/model"
 	"github.com/bardic/gocrib/queries"
@@ -70,7 +74,7 @@ func (v *GameView) View() string {
 	}
 
 	doc := strings.Builder{}
-	renderedTabs := renderTabs(v.GameTabNames, v.ActiveTab)
+	renderedTabs := utils.RenderTabs(v.GameTabNames, v.ActiveTab)
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────────────────────────────────┐"))
 	viewBuilder := strings.Builder{}
@@ -98,14 +102,14 @@ func (v *GameView) View() string {
 
 	case model.PlayView:
 		hand := v.createHandView()
-		playerView := PlayerView{
+		playerView := play.PlayerView{
 			HandModel: hand,
 		}
 		viewBuilder.WriteString(playerView.View())
 	case model.HandView:
-		hand := v.createHandView()
-		handView := HandView{
-			HandModel: hand,
+		h := v.createHandView()
+		handView := hand.HandView{
+			HandModel: h,
 		}
 
 		if v.GameMatch.Gamestate == queries.GamestateWaitingState {
@@ -115,11 +119,11 @@ func (v *GameView) View() string {
 		}
 	case model.KittyView:
 		hand := v.createHandView()
-		kittyView := KittyView{
+		kittyView := kitty.KittyView{
 			HandModel: hand,
 		}
 
-		if len(hand.player.Kitty) == 0 {
+		if len(hand.Player.Kitty) == 0 {
 			viewBuilder.WriteString("Empty Kitty")
 		} else {
 			viewBuilder.WriteString(kittyView.View())
@@ -131,18 +135,17 @@ func (v *GameView) View() string {
 	return doc.String()
 }
 
-func (v *GameView) createHandView() HandModel {
+func (v *GameView) createHandView() views.HandModel {
 
 	p := utils.GetPlayerForAccountId(v.Account.ID, v.GameMatch)
 
-	hand := HandModel{
-		currentTurnPlayerId: v.GameMatch.Currentplayerturn,
-		selectedCardId:      v.HighlighedId,
-		selectedCardIds:     v.HighlightedIds,
-		cards:               p.Play,
-		deck:                v.Deck,
-		player:              p,
-		account:             v.Account,
+	hand := views.HandModel{
+		CurrentTurnPlayerId: v.GameMatch.Currentplayerturn,
+		SelectedCardId:      v.HighlighedId,
+		SelectedCardIds:     v.HighlightedIds,
+		Deck:                v.Deck,
+		Player:              p,
+		Account:             v.Account,
 	}
 
 	return hand

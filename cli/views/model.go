@@ -6,6 +6,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type IController interface {
+	GetView() IView
+}
+
 type IView interface {
 	ParseInput(tea.KeyMsg) tea.Msg
 	View() string
@@ -19,11 +23,10 @@ type IHandView interface {
 }
 
 type HandModel struct {
-	currentTurnPlayerId int32
-	selectedCardId      int
-	selectedCardIds     []int32
-	cards               []int32
-	deck                *model.GameDeck
-	player              *queries.Player
-	account             *queries.Account
+	CurrentTurnPlayerId int32
+	SelectedCardId      int
+	SelectedCardIds     []int32
+	Deck                *model.GameDeck
+	Player              *queries.Player
+	Account             *queries.Account
 }

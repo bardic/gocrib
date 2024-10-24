@@ -123,7 +123,7 @@ SELECT cards.* FROM cards;
 -- name: CreateDeck :one
 INSERT INTO deck(cards) VALUES ($1) RETURNING *;
 
--- name: UodateGameState :exec
+-- name: UpdateGameState :exec
 UPDATE match SET gameState= $1 WHERE id=$2;
 
 -- name: UpdateMatchCut :exec

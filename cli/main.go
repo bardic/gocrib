@@ -5,6 +5,7 @@ import (
 
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/views"
+	"github.com/bardic/gocrib/cli/views/login"
 	"github.com/bardic/gocrib/model"
 	"github.com/bardic/gocrib/queries"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -13,7 +14,6 @@ import (
 )
 
 func main() {
-
 	utils.Logger, _ = utils.NewLogger()
 	defer utils.Logger.Sync() // flushes buffer, if any
 
@@ -41,11 +41,11 @@ func (m *AppModel) Init() tea.Cmd {
 
 func newModel() *AppModel {
 	m := &AppModel{
-		currentView: &views.LoginView{},
+		currentView: &login.LoginView{},
 		timer:       timer.NewWithInterval(time.Hour, time.Second*1),
 	}
 
-	m.currentView.(*views.LoginView).Init()
+	m.currentView.(*login.LoginView).Init()
 
 	return m
 }
