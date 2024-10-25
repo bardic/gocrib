@@ -91,7 +91,7 @@ func PlayCard(details model.HandModifier) (*model.GameMatch, error) {
 	return &match, nil
 }
 
-func PlayersReady(players []queries.Player) bool {
+func PlayersReady(players []*queries.Player) bool {
 	ready := true
 
 	if len(players) < 2 {
@@ -127,6 +127,22 @@ func GetMatchForPlayerId(playerId int) (*model.GameMatch, error) {
 	}
 
 	return match, nil
+}
+
+func GetDeckById(id int32) (queries.Deck, error) {
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
+
+	ctx := context.Background()
+
+	d, err := q.GetDeck(ctx, id)
+
+	if err != nil {
+		return queries.Deck{}, err
+	}
+
+	return d, nil
 }
 
 func Deal(match *model.GameMatch) (*queries.Deck, error) {
@@ -179,7 +195,7 @@ func GetPlayerById(id int) (queries.Player, error) {
 	return p, nil
 }
 
-func UpdatePlayerById(player queries.Player) (queries.Player, error) {
+func UpdatePlayerById(player *queries.Player) (queries.Player, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -244,5 +260,5 @@ func Eq(p *queries.Player, c *queries.Player) bool {
 }
 
 func passTurn() {
-	
+
 }

@@ -8,9 +8,9 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
+	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
 	"github.com/bardic/gocrib/queries"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"go.uber.org/zap"
 )
@@ -64,7 +64,7 @@ func GetPlayerById(accountId int32, players []queries.Player) (*queries.Player, 
 	return nil, errors.New("no player found")
 }
 
-func CreateGame(accountId int32) tea.Msg {
+func CreateGame(accountId int32) model.MatchDetailsResponse {
 	newMatch := services.PostPlayerMatch(accountId).([]byte)
 
 	var matchDetails model.MatchDetailsResponse
@@ -76,7 +76,7 @@ func CreateGame(accountId int32) tea.Msg {
 func GetPlayerForAccountId(id int32, match *model.GameMatch) *queries.Player {
 	for _, player := range match.Players {
 		if player.Accountid == id {
-			return &player
+			return player
 		}
 	}
 
@@ -98,10 +98,6 @@ func GetVisibleCards(activeTab int, player queries.Player) []int32 {
 
 	return cards
 }
-
-// func BuildPlayerInfo(player *queries.Player) string {
-// 	return lipgloss.PlaceHorizontal(100, lipgloss.Right, lipgloss.NewStyle().PaddingRight(10).Render("\nPlayer Info\n"))
-// }
 
 func BuildFooter() string {
 	return "\n\ntab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
@@ -133,7 +129,7 @@ const (
 	Empty  PegState = "○"
 )
 
-func DrawRow(players []queries.Player, pegsToDraw, scoreOffet int) string {
+func DrawRow(players []*queries.Player, pegsToDraw, scoreOffet int) string {
 	viewBuilder := strings.Builder{}
 	for _, player := range players {
 		viewBuilder.WriteString("\n")
@@ -154,7 +150,7 @@ func DrawRow(players []queries.Player, pegsToDraw, scoreOffet int) string {
 	return viewBuilder.String()
 }
 
-func RenderTabs(tabs []string, activeTab int) []string {
+func RenderTabs(tabs []views.Tab, activeTab int) []string {
 	var renderedTabs []string
 
 	for i, t := range tabs {
@@ -177,7 +173,7 @@ func RenderTabs(tabs []string, activeTab int) []string {
 		}
 
 		style = style.Border(border)
-		renderedTabs = append(renderedTabs, style.Render(t))
+		renderedTabs = append(renderedTabs, style.Render(t.Title))
 	}
 
 	return renderedTabs

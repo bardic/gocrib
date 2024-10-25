@@ -3,14 +3,13 @@ package lobby
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -20,7 +19,7 @@ import (
 type LobbyView struct {
 	AccountId        int32
 	ActiveLandingTab int
-	LobbyViewState   model.LobbyViewState
+	LobbyViewState   model.ViewState
 	LobbyTabNames    []string
 	LobbyTable       table.Model
 	IsLobbyTableSet  bool
@@ -40,10 +39,19 @@ func (v *LobbyView) Init() {
 	v.LobbyTabNames = []string{"Open Matches", "Available Matches"}
 }
 
-func (v *LobbyView) View() string {
+func (v *LobbyView) Render() string {
 	doc := strings.Builder{}
 
-	renderedTabs := utils.RenderTabs(v.LobbyTabNames, v.ActiveLandingTab)
+	renderedTabs := utils.RenderTabs([]views.Tab{
+		{
+			Title:    "Lobby",
+			TabState: model.OpenMatches,
+		},
+		{
+			Title:    "Active",
+			TabState: model.AvailableMatches,
+		},
+	}, v.ActiveLandingTab)
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
@@ -63,57 +71,6 @@ func (v *LobbyView) View() string {
 
 	doc.WriteString(styles.WindowStyle.Width(100).Render(v.LobbyTable.View()))
 	return doc.String()
-}
-
-func (v *LobbyView) ParseInput(msg tea.KeyMsg) tea.Msg {
-	switch msg.String() {
-	case "enter", "view_update":
-		utils.Logger.Info("Enter")
-		idStr := v.LobbyTable.SelectedRow()[0]
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			return tea.Quit
-		}
-
-		v.ActiveMatchId = int32(id)
-		accountMsg := services.PostPlayer(v.AccountId)
-
-		var player queries.Player
-		err = json.Unmarshal(accountMsg.([]byte), &player)
-
-		if err != nil {
-			return tea.Quit
-		}
-
-		var matchDetails model.MatchDetailsResponse
-		msg := services.JoinMatch(int(player.ID), id)
-		json.Unmarshal(msg.([]byte), &matchDetails)
-
-		return matchDetails
-	case "n":
-		return utils.CreateGame(v.AccountId)
-	case "tab":
-
-		v.ActiveLandingTab = v.ActiveLandingTab + 1
-
-		switch v.ActiveLandingTab {
-		case 0:
-			v.LobbyViewState = model.OpenMatches
-		case 1:
-			v.LobbyViewState = model.AvailableMatches
-		}
-	case "shift+tab":
-		v.ActiveLandingTab = v.ActiveLandingTab - 1
-
-		switch v.ActiveLandingTab {
-		case 0:
-			v.LobbyViewState = model.OpenMatches
-		case 1:
-			v.LobbyViewState = model.AvailableMatches
-		}
-	}
-
-	return nil
 }
 
 func (v *LobbyView) Update(msg tea.Msg) tea.Cmd {

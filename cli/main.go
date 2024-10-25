@@ -13,6 +13,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type AppModel struct {
+	GameInitd         bool
+	ViewStateName     model.ViewStateName
+	ActivePlayerId    int
+	account           *queries.Account
+	matchId           int
+	currentController views.IController
+	timer             timer.Model
+}
+
 func main() {
 	utils.Logger, _ = utils.NewLogger()
 	defer utils.Logger.Sync() // flushes buffer, if any
@@ -24,28 +34,17 @@ func main() {
 	}
 }
 
-type AppModel struct {
-	GameInitd      bool
-	ViewStateName  model.ViewStateName
-	ActivePlayerId int
-	account        *queries.Account
-	matchId        int
-	currentView    views.IView
-	timer          timer.Model
-	playersReady   bool
-}
-
 func (m *AppModel) Init() tea.Cmd {
 	return textinput.Blink
 }
 
 func newModel() *AppModel {
 	m := &AppModel{
-		currentView: &login.LoginView{},
-		timer:       timer.NewWithInterval(time.Hour, time.Second*1),
+		currentController: &login.LoginController{},
+		timer:             timer.NewWithInterval(time.Hour, time.Second*1),
 	}
 
-	m.currentView.(*login.LoginView).Init()
+	m.currentController.Init()
 
 	return m
 }

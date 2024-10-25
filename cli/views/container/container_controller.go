@@ -1,0 +1,143 @@
+package container
+
+import (
+	"encoding/json"
+
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/views"
+	"github.com/bardic/gocrib/cli/views/board"
+	"github.com/bardic/gocrib/cli/views/play"
+	"github.com/bardic/gocrib/model"
+	"github.com/bardic/gocrib/queries"
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+type ContainerController struct {
+	views.Controller
+	subview views.IController
+}
+
+func (gc *ContainerController) GetState() views.ControllerState {
+	return views.LoginControllerState
+}
+
+func (gc *ContainerController) Init() {
+	containerModel := gc.Model.(*ContainerModel)
+	gc.View = &ContainerView{
+		activeTab: containerModel.ActiveTab,
+		tabs: []views.Tab{
+			{
+				Title:    "Board",
+				TabState: model.BoardView,
+			},
+			{
+				Title:    "Play",
+				TabState: model.PlayView,
+			},
+			{
+				Title:    "Hand",
+				TabState: model.HandView,
+			},
+			{
+				Title:    "Kitty",
+				TabState: model.KittyView,
+			},
+		},
+	}
+
+	gc.ChangeTab(0)
+}
+
+func (gc *ContainerController) Render() string {
+	return gc.View.Render() + "\n" + gc.subview.Render()
+}
+
+func (v *ContainerController) Update(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	var cmds []tea.Cmd
+
+	cmds = append(cmds, cmd)
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg: //User input
+		resp := v.ParseInput(msg)
+
+		if resp == nil {
+			break
+		}
+
+		cmds = append(cmds, func() tea.Msg {
+			return resp
+		})
+	case model.ChangeTabMsg:
+		v.ChangeTab(msg.TabIndex)
+	}
+
+	return tea.Batch(cmds...)
+}
+
+func (v *ContainerController) ParseInput(msg tea.KeyMsg) tea.Msg {
+	containerModel := v.Model.(*ContainerModel)
+	containerView := v.View.(*ContainerView)
+
+	switch msg.String() {
+	case "ctrl+c", "q":
+		return tea.Quit()
+	case "tab":
+		containerModel.ActiveTab = containerModel.ActiveTab + 1
+		containerModel.State = containerView.tabs[containerModel.ActiveTab].TabState
+
+	case "shift+tab":
+		containerModel.ActiveTab = containerModel.ActiveTab - 1
+		containerModel.State = containerView.tabs[containerModel.ActiveTab].TabState
+	}
+	return model.ChangeTabMsg{
+		TabIndex: containerModel.ActiveTab,
+	}
+}
+
+func (gc *ContainerController) ChangeTab(tabIndex int) {
+	containerModel := gc.Model.(*ContainerModel)
+
+	switch tabIndex {
+	case 0:
+		gc.subview = &board.BoardController{
+			Controller: views.Controller{
+				Model: board.BoardModel{
+					ViewModel: views.ViewModel{
+						Name: "Game",
+					},
+					LocalPlayerId: containerModel.Match.Players[0].ID,
+					GameMatch:     containerModel.Match,
+				},
+			},
+		}
+	case 1:
+		services.GetGampleCardsForMatch(containerModel.Match.ID)
+
+		var deck *queries.Deck
+		resp := services.GetDeckById(containerModel.Match.Deckid)
+		err := json.Unmarshal(resp.([]byte), &deck)
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+
+		gc.subview = &play.PlayController{
+			Controller: views.Controller{
+				Model: play.PlayModel{
+					ViewModel: views.ViewModel{
+						Name: "Play",
+					},
+					ActiveSlotId: 0,
+					HighlighedId: 0,
+					Cards:        containerModel.Match.Players[0].Play,
+					Deck:         deck,
+				},
+				View: &play.PlayView{},
+			},
+		}
+	}
+
+	gc.subview.Init()
+}

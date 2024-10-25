@@ -150,18 +150,3 @@ func UpdatePlayersInMatch(req model.JoinMatchReq) error {
 	return nil
 }
 
-func GetDeckById(id int32) (queries.Deck, error) {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx := context.Background()
-
-	d, err := q.GetDeck(ctx, id)
-
-	if err != nil {
-		return queries.Deck{}, err
-	}
-
-	return d, nil
-}

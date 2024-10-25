@@ -26,7 +26,7 @@ func UpdatePlayer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := utils.UpdatePlayerById(*details)
+	p, err := utils.UpdatePlayerById(details)
 
 	if err != nil {
 		return c.JSON(http.StatusOK, err)

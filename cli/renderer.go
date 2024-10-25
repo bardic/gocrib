@@ -5,5 +5,5 @@ import (
 )
 
 func (m *AppModel) View() string {
-	return styles.ViewStyle.Render(m.currentView.View())
+	return styles.ViewStyle.Render(m.currentController.Render())
 }

@@ -22,6 +22,6 @@ func GetGameplayCardsByIds(ids []int) tea.Msg {
 	return url(EndPointGameplayCardsByIds+strings.Trim(string(s), "[]"), http.MethodGet, "")
 }
 
-func GetGampleCardsForMatch(matchId int) tea.Msg {
-	return url(EndPointGameplayCardsByMatch+strconv.Itoa(matchId), http.MethodGet, "")
+func GetGampleCardsForMatch(matchId int32) tea.Msg {
+	return url(EndPointGameplayCardsByMatch+strconv.Itoa(int(matchId)), http.MethodGet, "")
 }

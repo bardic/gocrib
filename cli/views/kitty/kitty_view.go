@@ -12,14 +12,15 @@ import (
 
 type KittyView struct {
 	views.HandModel
+	SelectedCardId int
 }
 
 func (v *KittyView) View() string {
 	s := ""
-
 	cardViews := make([]string, 0)
-	for i := 0; i < len(v.Player.Kitty); i++ {
-		c := utils.GetCardById(v.Player.Kitty[i], v.Deck)
+
+	for i := 0; i < len(v.CardsToDisplay); i++ {
+		c := utils.GetCardById(v.CardsToDisplay[i], v.Deck)
 		view := fmt.Sprintf("%v%v", utils.GetCardSuit(c), c.Value)
 
 		if slices.Contains(v.SelectedCardIds, c.ID) {

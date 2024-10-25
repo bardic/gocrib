@@ -6,7 +6,7 @@ import (
 
 type GameMatch struct {
 	queries.Match
-	Players []queries.Player
+	Players []*queries.Player
 }
 
 type GameDeck struct {
@@ -39,14 +39,14 @@ type GameAction struct {
 	CardsIds []int
 }
 
-type GameViewState uint
+// type GameViewState uint
 
-const (
-	BoardView GameViewState = iota
-	PlayView
-	HandView
-	KittyView
-)
+// const (
+// 	BoardView GameViewState = iota
+// 	PlayView
+// 	HandView
+// 	KittyView
+// )
 
 //_Comms_
 
@@ -102,11 +102,15 @@ const (
 	GameOverView
 )
 
-type LobbyViewState uint
+type ViewState uint
 
 const (
-	OpenMatches LobbyViewState = iota
+	OpenMatches ViewState = iota
 	AvailableMatches
+	BoardView
+	PlayView
+	HandView
+	KittyView
 )
 
 type StateChangeMsg struct {
@@ -118,4 +122,8 @@ type GameStateChangeMsg struct {
 	NewState queries.Gamestate
 	PlayerId int32
 	MatchId  int32
+}
+
+type ChangeTabMsg struct {
+	TabIndex int
 }

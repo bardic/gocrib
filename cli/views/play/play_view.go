@@ -1,4 +1,4 @@
-package hand
+package play
 
 import (
 	"fmt"
@@ -10,16 +10,21 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type HandView struct {
+type PlayView struct {
 	views.HandModel
+	SelectedCardId int
 }
 
-func (v *HandView) View() string {
-	s := ""
+func (v *PlayView) Init() {
+	v.SelectedCardId = 0
+}
 
+func (v *PlayView) Render() string {
+	s := ""
 	cardViews := make([]string, 0)
-	for i := 0; i < len(v.Player.Hand); i++ {
-		c := utils.GetCardById(v.Player.Hand[i], v.Deck)
+
+	for i := 0; i < len(v.CardsToDisplay); i++ {
+		c := utils.GetCardById(v.CardsToDisplay[i], v.Deck)
 		view := fmt.Sprintf("%v%v", utils.GetCardSuit(c), c.Value)
 
 		if slices.Contains(v.SelectedCardIds, c.ID) {
@@ -41,10 +46,10 @@ func (v *HandView) View() string {
 	return s
 }
 
-func (v *HandView) BuildHeader() string {
+func (v *PlayView) BuildHeader() string {
 	return ""
 }
 
-func (v *HandView) BuildFooter() string {
+func (v *PlayView) BuildFooter() string {
 	return ""
 }

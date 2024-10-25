@@ -9,7 +9,7 @@ import (
 	"github.com/bardic/gocrib/server/utils"
 )
 
-func cardsInPlay(players []queries.Player) []int32 {
+func cardsInPlay(players []*queries.Player) []int32 {
 	cardIds := []int32{}
 	for _, p := range players {
 		cardIds = append(cardIds, p.Hand...)

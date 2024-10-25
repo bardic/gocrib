@@ -2,18 +2,28 @@ package views
 
 import (
 	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type ControllerState int
+
+const (
+	LoginControllerState ControllerState = iota
+	LobbyControllerState
+	BoardControllerState
+)
+
 type IController interface {
-	GetView() IView
+	Init()
+	Render() string
+	ParseInput(tea.KeyMsg) tea.Msg
+	Update(msg tea.Msg) tea.Cmd
+	GetState() ControllerState
 }
 
 type IView interface {
-	ParseInput(tea.KeyMsg) tea.Msg
-	View() string
-	Update(msg tea.Msg) tea.Cmd
+	Render() string
+	Init()
 }
 
 type IHandView interface {
@@ -24,9 +34,24 @@ type IHandView interface {
 
 type HandModel struct {
 	CurrentTurnPlayerId int32
-	SelectedCardId      int
+	CardsToDisplay      []int32
 	SelectedCardIds     []int32
 	Deck                *model.GameDeck
-	Player              *queries.Player
-	Account             *queries.Account
+}
+
+type IViewModel interface {
+}
+
+type ViewModel struct {
+	Name string
+}
+
+type Controller struct {
+	View  IView
+	Model IViewModel
+}
+
+type Tab struct {
+	Title    string
+	TabState model.ViewState
 }
