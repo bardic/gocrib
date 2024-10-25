@@ -1,35 +1,63 @@
-package hand
+package playerhand
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/styles"
+	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/views"
 	"github.com/bardic/gocrib/model"
 	"github.com/bardic/gocrib/queries"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
-type HandController struct {
+type PlayerHandController struct {
 	views.Controller
 }
 
-func (gc *HandController) GetState() views.ControllerState {
+func (gc *PlayerHandController) GetState() views.ControllerState {
 	return views.LoginControllerState
 }
 
-func (hc *HandController) Init() {
+func (hc *PlayerHandController) Init() {
 
 }
-func (hc *HandController) Render() string {
-	return ""
+
+func (gc *PlayerHandController) Render() string {
+	playModel := gc.Model.(*PlayerHandModel)
+
+	s := ""
+	cardViews := make([]string, 0)
+	for i := 0; i < len(playModel.Cards); i++ {
+		c := utils.GetCardById(playModel.Cards[i], playModel.Deck)
+		view := fmt.Sprintf("%v%v", utils.GetCardSuit(c), c.Value)
+
+		if slices.Contains(playModel.Cards, c.ID) {
+			if i == playModel.HighlighedId {
+				cardViews = append(cardViews, styles.SelectedFocusedStyle.Render(view))
+			} else {
+				cardViews = append(cardViews, styles.SelectedStyle.Render(view))
+			}
+		} else {
+			if i == playModel.HighlighedId {
+				cardViews = append(cardViews, styles.FocusedModelStyle.Render(view))
+			} else {
+				cardViews = append(cardViews, styles.ModelStyle.Render(view))
+			}
+		}
+	}
+
+	s += lipgloss.JoinHorizontal(lipgloss.Top, cardViews...)
+
+	// s += styles.HelpStyle.Render(utils.BuildSubtext(v.player, v.account, utils.IsPlayerTurn(v.player.ID, v.currentTurnPlayerId)))
+	return s
 }
 
-func (hc *HandController) InitView() {
-
-}
-func (hc *HandController) ParseInput(msg tea.KeyMsg) tea.Msg {
-	handModel := hc.Model.(*HandModel)
+func (hc *PlayerHandController) ParseInput(msg tea.KeyMsg) tea.Msg {
+	handModel := hc.Model.(*PlayerHandModel)
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit()
@@ -79,6 +107,6 @@ func (hc *HandController) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 	return nil
 }
-func (hc *HandController) Update(msg tea.Msg) tea.Cmd {
+func (hc *PlayerHandController) Update(msg tea.Msg) tea.Cmd {
 	return nil
 }

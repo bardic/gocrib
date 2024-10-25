@@ -1,4 +1,4 @@
-package hand
+package playerhand
 
 import (
 	"fmt"
@@ -10,12 +10,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type HandView struct {
+type PlayerHandView struct {
 	views.HandModel
 	SelectedCardId int
 }
 
-func (v *HandView) View() string {
+func (v *PlayerHandView) Init() {
+	v.SelectedCardId = 0
+}
+
+func (v *PlayerHandView) Render() string {
 	s := ""
 	cardViews := make([]string, 0)
 
@@ -42,10 +46,10 @@ func (v *HandView) View() string {
 	return s
 }
 
-func (v *HandView) BuildHeader() string {
+func (v *PlayerHandView) BuildHeader() string {
 	return ""
 }
 
-func (v *HandView) BuildFooter() string {
+func (v *PlayerHandView) BuildFooter() string {
 	return ""
 }

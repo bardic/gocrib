@@ -15,7 +15,11 @@ type KittyView struct {
 	SelectedCardId int
 }
 
-func (v *KittyView) View() string {
+func (v *KittyView) Init() {
+	v.SelectedCardId = 0
+}
+
+func (v *KittyView) Render() string {
 	s := ""
 	cardViews := make([]string, 0)
 
