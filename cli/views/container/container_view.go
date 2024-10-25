@@ -3,8 +3,9 @@ package container
 import (
 	"strings"
 
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
+	"cli/utils"
+	"cli/views"
+
 	"github.com/charmbracelet/lipgloss"
 )
 

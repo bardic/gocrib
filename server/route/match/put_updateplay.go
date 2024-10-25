@@ -4,11 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/bardic/gocrib/queries"
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/utils"
+	"queries"
+	conn "server/db"
+	"server/utils"
 
-	"github.com/bardic/gocrib/model"
+	"model"
+
 	"github.com/labstack/echo/v4"
 )
 

@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/model"
+	"cli/services"
+	"cli/styles"
+	"cli/utils"
+	"cli/views"
+	"model"
+
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"

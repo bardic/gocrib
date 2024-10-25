@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/queries"
-	conn "github.com/bardic/gocrib/server/db"
+	"queries"
+	conn "server/db"
+
 	"github.com/labstack/echo/v4"
 )
 

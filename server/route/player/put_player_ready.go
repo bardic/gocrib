@@ -4,14 +4,15 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/bardic/gocrib/queries"
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/utils"
+	"queries"
+	conn "server/db"
+	"server/utils"
+
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
-// Create godoc
+// PlayerReady Create godoc
 // @Summary      Update player to mark as ready
 // @Description
 // @Tags         players

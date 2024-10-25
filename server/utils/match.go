@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
-	conn "github.com/bardic/gocrib/server/db"
+	"model"
+	"queries"
+	conn "server/db"
 )
 
 func UpdateGameState(matchId int32, state queries.Gamestate) error {
@@ -149,4 +149,3 @@ func UpdatePlayersInMatch(req model.JoinMatchReq) error {
 
 	return nil
 }
-

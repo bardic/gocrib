@@ -1,4 +1,4 @@
-module cribbagequeries
+module queries
 
 go 1.23.2
 

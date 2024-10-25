@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/bardic/gocrib/queries"
+	"queries"
 )
 
 type GameMatch struct {

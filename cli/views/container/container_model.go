@@ -1,8 +1,8 @@
 package container
 
 import (
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/model"
+	"cli/views"
+	"model"
 )
 
 type ContainerModel struct {

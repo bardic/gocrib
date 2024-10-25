@@ -4,10 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/route/player"
+	"model"
+	"queries"
+	conn "server/db"
+	"server/route/player"
+
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )

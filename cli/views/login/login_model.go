@@ -1,7 +1,7 @@
 package login
 
 import (
-	"github.com/bardic/gocrib/cli/views"
+	"cli/views"
 )
 
 type LoginModel struct {

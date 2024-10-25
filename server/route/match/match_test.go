@@ -6,8 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
+	"model"
+	"queries"
+
 	"github.com/labstack/echo/v4"
 )
 

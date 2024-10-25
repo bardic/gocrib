@@ -3,10 +3,11 @@ package login
 import (
 	"encoding/json"
 
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/queries"
+	"cli/services"
+	"cli/utils"
+	"cli/views"
+	"queries"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 

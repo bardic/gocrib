@@ -1,14 +1,6 @@
-module github.com/bardic/gocrib/server
+module server
 
 go 1.23.2
-
-require github.com/bardic/gocrib/model v0.0.0
-
-require github.com/bardic/gocrib/queries v0.0.0
-
-replace github.com/bardic/gocrib/model => ../model
-
-replace github.com/bardic/gocrib/queries => ../queries/queries
 
 require (
 	github.com/labstack/echo/v4 v4.12.0

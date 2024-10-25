@@ -3,8 +3,9 @@ package match
 import (
 	"net/http"
 
-	"github.com/bardic/gocrib/queries"
-	"github.com/bardic/gocrib/server/utils"
+	"queries"
+	"server/utils"
+
 	"github.com/labstack/echo/v4"
 )
 

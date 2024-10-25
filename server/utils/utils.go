@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"math/rand/v2"
 
-	"github.com/bardic/gocrib/queries"
-	conn "github.com/bardic/gocrib/server/db"
+	"queries"
+	conn "server/db"
 
-	"github.com/bardic/gocrib/model"
+	"model"
 )
 
 func QueryForCards(ids []int32) ([]model.GameCard, error) {

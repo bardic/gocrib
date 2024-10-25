@@ -6,11 +6,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
+	"cli/services"
+	"cli/styles"
+	"cli/views"
+	"model"
+	"queries"
+
 	"github.com/charmbracelet/lipgloss"
 	"go.uber.org/zap"
 )

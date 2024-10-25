@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
+	"cli/styles"
+	"cli/utils"
+	"cli/views"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -51,7 +52,7 @@ func (gc *PlayController) Render() string {
 
 	// s += styles.HelpStyle.Render(utils.BuildSubtext(v.player, v.account, utils.IsPlayerTurn(v.player.ID, v.currentTurnPlayerId)))
 	return s
-}	
+}
 
 func (hc *PlayController) ParseInput(msg tea.KeyMsg) tea.Msg {
 	playModel := hc.Model.(*PlayModel)

@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
+	"cli/services"
+	"cli/utils"
+	"cli/views"
+	"model"
+	"queries"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -59,7 +60,7 @@ func (v *LobbyController) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		return model.StateChangeMsg{
-			NewState: model.CreateGameView,
+			NewState: model.JoinGameView,
 			MatchId:  matchDetails.MatchId,
 		}
 	case "n":

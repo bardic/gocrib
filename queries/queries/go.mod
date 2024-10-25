@@ -1,4 +1,4 @@
-module github.com/bardic/gocrib/queries
+module queries
 
 go 1.23.2
 

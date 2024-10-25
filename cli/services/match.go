@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bardic/gocrib/model"
+	"model"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 

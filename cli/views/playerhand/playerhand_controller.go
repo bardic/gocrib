@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
+	"cli/services"
+	"cli/styles"
+	"cli/utils"
+	"cli/views"
+	"model"
+	"queries"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )

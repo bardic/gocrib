@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/utils"
+	"model"
+	"queries"
+	conn "server/db"
+	"server/utils"
+
 	"github.com/labstack/echo/v4"
 )
 

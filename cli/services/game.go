@@ -2,10 +2,10 @@ package services
 
 import (
 	"encoding/json"
+	"model"
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

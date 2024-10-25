@@ -3,7 +3,8 @@ package login
 import (
 	"strings"
 
-	"github.com/bardic/gocrib/cli/styles"
+	"cli/styles"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )

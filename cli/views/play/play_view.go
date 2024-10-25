@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
+	"cli/styles"
+	"cli/utils"
+	"cli/views"
+
 	"github.com/charmbracelet/lipgloss"
 )
 

@@ -1,12 +1,10 @@
-module github.com/bardic/gocrib/cli
+module cli
 
 go 1.23.2
 
 require github.com/charmbracelet/bubbletea v1.1.1
 
 require (
-	github.com/bardic/gocrib/model v0.0.0
-	github.com/bardic/gocrib/queries v0.0.0
 	github.com/jackc/pgx/v5 v5.7.1
 	go.uber.org/zap v1.27.0
 )
@@ -18,10 +16,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
 )
-
-replace github.com/bardic/gocrib/model => ../model
-
-replace github.com/bardic/gocrib/queries => ../queries/queries
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect

@@ -1,7 +1,7 @@
 package lobby
 
 import (
-	"github.com/bardic/gocrib/cli/views"
+	"cli/views"
 )
 
 type LobbyModel struct {

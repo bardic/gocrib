@@ -3,14 +3,15 @@ package container
 import (
 	"encoding/json"
 
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/cli/views/board"
-	"github.com/bardic/gocrib/cli/views/kitty"
-	"github.com/bardic/gocrib/cli/views/play"
-	"github.com/bardic/gocrib/cli/views/playerhand"
-	"github.com/bardic/gocrib/model"
+	"cli/services"
+	"cli/utils"
+	"cli/views"
+	"cli/views/board"
+	"cli/views/kitty"
+	"cli/views/play"
+	"cli/views/playerhand"
+	"model"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -51,7 +52,10 @@ func (gc *ContainerController) Init() {
 }
 
 func (gc *ContainerController) Render() string {
-	return gc.View.Render() + "\n" + gc.subview.Render()
+	containerHeader := gc.View.Render()
+	viewRender := gc.subview.Render()
+
+	return containerHeader + "\n" + viewRender
 }
 
 func (v *ContainerController) Update(msg tea.Msg) tea.Cmd {
@@ -140,7 +144,7 @@ func (gc *ContainerController) ChangeTab(tabIndex int) {
 					ActiveSlotIdx:       0,
 					HighlighedId:        0,
 					HighlightedSlotIdxs: []int{},
-					Cards:               containerModel.Match.Players[0].Play,
+					Cards:               containerModel.Match.Players[0].Hand,
 					Deck:                deck,
 				},
 				View: &play.PlayView{

@@ -3,11 +3,12 @@ package main
 import (
 	"time"
 
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/cli/views/login"
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
+	"cli/utils"
+	"cli/views"
+	"cli/views/login"
+	"model"
+	"queries"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"

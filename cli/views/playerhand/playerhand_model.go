@@ -1,9 +1,9 @@
 package playerhand
 
 import (
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
+	"cli/views"
+	"model"
+	"queries"
 )
 
 type PlayerHandModel struct {

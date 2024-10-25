@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/server/utils"
+	"model"
+	"server/utils"
+
 	"github.com/labstack/echo/v4"
 )
 

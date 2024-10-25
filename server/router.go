@@ -1,14 +1,15 @@
 package main
 
 import (
-	_ "github.com/bardic/gocrib/server/docs"
+	_ "server/docs"
 
-	"github.com/bardic/gocrib/server/route/account"
-	"github.com/bardic/gocrib/server/route/admin/card"
-	"github.com/bardic/gocrib/server/route/deck"
-	"github.com/bardic/gocrib/server/route/gameplaycard"
-	"github.com/bardic/gocrib/server/route/match"
-	"github.com/bardic/gocrib/server/route/player"
+	"server/route/account"
+	"server/route/admin/card"
+	"server/route/deck"
+	"server/route/gameplaycard"
+	"server/route/match"
+	"server/route/player"
+
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 

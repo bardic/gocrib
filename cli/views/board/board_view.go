@@ -5,11 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/utils"
+	"cli/services"
+	"cli/styles"
+	"cli/utils"
 
-	"github.com/bardic/gocrib/queries"
+	"queries"
+
 	"github.com/charmbracelet/bubbles/textinput"
 )
 

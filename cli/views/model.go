@@ -1,7 +1,8 @@
 package views
 
 import (
-	"github.com/bardic/gocrib/model"
+	"model"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 

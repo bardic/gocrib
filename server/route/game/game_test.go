@@ -4,7 +4,7 @@ package game
 // 	"fmt"
 // 	"testing"
 
-// 	"github.com/bardic/gocrib/model"
+// 	"model"
 // )
 
 // // TestHelloName calls greetings.Hello with a name, checking

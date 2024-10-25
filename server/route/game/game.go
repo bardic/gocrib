@@ -4,9 +4,9 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
-	"github.com/bardic/gocrib/server/utils"
+	"model"
+	"queries"
+	"server/utils"
 )
 
 func cardsInPlay(players []*queries.Player) []int32 {

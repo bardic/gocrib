@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/views"
-	"github.com/bardic/gocrib/cli/views/container"
-	"github.com/bardic/gocrib/cli/views/lobby"
-	"github.com/bardic/gocrib/model"
-	"github.com/bardic/gocrib/queries"
+	"cli/services"
+	"cli/utils"
+	"cli/views"
+	"cli/views/container"
+	"cli/views/lobby"
+	"model"
+	"queries"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -34,6 +35,9 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ViewStateName = model.LobbyView
 
 			services.GetOpenMatches()
+		case model.JoinGameView:
+
+			fallthrough
 		case model.CreateGameView:
 			m.matchId = msg.MatchId
 
@@ -41,6 +45,18 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			idstr := strconv.Itoa(msg.MatchId)
 			resp := services.GetPlayerMatch(idstr)
 			err := json.Unmarshal(resp.([]byte), &match)
+			if err != nil {
+				utils.Logger.Sugar().Error(err)
+			}
+
+			for _, player := range match.Players {
+				if !player.Isready {
+					services.PlayerReady(player.ID)
+				}
+			}
+
+			resp = services.GetPlayerMatch(idstr)
+			err = json.Unmarshal(resp.([]byte), &match)
 			if err != nil {
 				utils.Logger.Sugar().Error(err)
 			}
@@ -74,6 +90,7 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			ctrl := m.currentController.(*container.ContainerController)
 			ctrl.Init()
+
 		}
 	}
 

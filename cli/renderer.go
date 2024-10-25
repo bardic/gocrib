@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/bardic/gocrib/cli/styles"
+	"cli/styles"
 )
 
 func (m *AppModel) View() string {
