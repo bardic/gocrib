@@ -1,0 +1,932 @@
+basePath: /v1
+definitions:
+  model.CutDeckReq:
+    properties:
+      cutIndex:
+        type: string
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
+  model.GameDeck:
+    properties:
+      cards:
+        items:
+          $ref: '#/definitions/queries.GetGameCardsForMatchRow'
+        type: array
+      id:
+        type: integer
+    type: object
+  model.GameMatch:
+    properties:
+      art:
+        type: string
+      creationdate:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      currentplayerturn:
+        type: integer
+      cutgamecardid:
+        type: integer
+      deckid:
+        type: integer
+      elorangemax:
+        type: integer
+      elorangemin:
+        type: integer
+      gamestate:
+        $ref: '#/definitions/queries.Gamestate'
+      id:
+        type: integer
+      playerids:
+        items:
+          type: integer
+        type: array
+      players:
+        items:
+          $ref: '#/definitions/queries.Player'
+        type: array
+      privatematch:
+        type: boolean
+      turnpasstimestamps:
+        items:
+          $ref: '#/definitions/pgtype.Timestamptz'
+        type: array
+    type: object
+  model.HandModifier:
+    properties:
+      cardIds:
+        items:
+          type: integer
+        type: array
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
+  model.JoinMatchReq:
+    properties:
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
+  model.MatchDetailsResponse:
+    properties:
+      gameState:
+        $ref: '#/definitions/queries.Gamestate'
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
+  model.MatchRequirements:
+    properties:
+      accountId:
+        type: integer
+      eloRangeMax:
+        type: integer
+      eloRangeMin:
+        type: integer
+      isPrivate:
+        type: boolean
+      playerId:
+        type: integer
+    type: object
+  pgtype.InfinityModifier:
+    enum:
+    - 1
+    - 0
+    - -1
+    type: integer
+    x-enum-varnames:
+    - Infinity
+    - Finite
+    - NegativeInfinity
+  pgtype.Int4:
+    properties:
+      int32:
+        type: integer
+      valid:
+        type: boolean
+    type: object
+  pgtype.Timestamptz:
+    properties:
+      infinityModifier:
+        $ref: '#/definitions/pgtype.InfinityModifier'
+      time:
+        type: string
+      valid:
+        type: boolean
+    type: object
+  queries.Account:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  queries.Card:
+    properties:
+      art:
+        type: string
+      id:
+        type: integer
+      suit:
+        $ref: '#/definitions/queries.Cardsuit'
+      value:
+        $ref: '#/definitions/queries.Cardvalue'
+    type: object
+  queries.Cardstate:
+    enum:
+    - Deck
+    - Hand
+    - Play
+    - Kitty
+    type: string
+    x-enum-varnames:
+    - CardstateDeck
+    - CardstateHand
+    - CardstatePlay
+    - CardstateKitty
+  queries.Cardsuit:
+    enum:
+    - Spades
+    - Clubs
+    - Hearts
+    - Diamonds
+    type: string
+    x-enum-varnames:
+    - CardsuitSpades
+    - CardsuitClubs
+    - CardsuitHearts
+    - CardsuitDiamonds
+  queries.Cardvalue:
+    enum:
+    - Ace
+    - Two
+    - Three
+    - Four
+    - Five
+    - Six
+    - Seven
+    - Eight
+    - Nine
+    - Ten
+    - Jack
+    - Queen
+    - King
+    - Joker
+    type: string
+    x-enum-varnames:
+    - CardvalueAce
+    - CardvalueTwo
+    - CardvalueThree
+    - CardvalueFour
+    - CardvalueFive
+    - CardvalueSix
+    - CardvalueSeven
+    - CardvalueEight
+    - CardvalueNine
+    - CardvalueTen
+    - CardvalueJack
+    - CardvalueQueen
+    - CardvalueKing
+    - CardvalueJoker
+  queries.Gamestate:
+    enum:
+    - NewGameState
+    - JoinGameState
+    - WaitingState
+    - MatchReady
+    - DealState
+    - DiscardState
+    - CutState
+    - PlayState
+    - OpponentState
+    - KittyState
+    - GameWonState
+    - GameLostState
+    - MaxGameState
+    type: string
+    x-enum-varnames:
+    - GamestateNewGameState
+    - GamestateJoinGameState
+    - GamestateWaitingState
+    - GamestateMatchReady
+    - GamestateDealState
+    - GamestateDiscardState
+    - GamestateCutState
+    - GamestatePlayState
+    - GamestateOpponentState
+    - GamestateKittyState
+    - GamestateGameWonState
+    - GamestateGameLostState
+    - GamestateMaxGameState
+  queries.GetGameCardsForMatchRow:
+    properties:
+      card:
+        $ref: '#/definitions/queries.Card'
+      matchcard:
+        $ref: '#/definitions/queries.Matchcard'
+    type: object
+  queries.Match:
+    properties:
+      art:
+        type: string
+      creationdate:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      currentplayerturn:
+        type: integer
+      cutgamecardid:
+        type: integer
+      deckid:
+        type: integer
+      elorangemax:
+        type: integer
+      elorangemin:
+        type: integer
+      gamestate:
+        $ref: '#/definitions/queries.Gamestate'
+      id:
+        type: integer
+      playerids:
+        items:
+          type: integer
+        type: array
+      privatematch:
+        type: boolean
+      turnpasstimestamps:
+        items:
+          $ref: '#/definitions/pgtype.Timestamptz'
+        type: array
+    type: object
+  queries.Matchcard:
+    properties:
+      cardid:
+        type: integer
+      currowner:
+        $ref: '#/definitions/pgtype.Int4'
+      id:
+        type: integer
+      matchID:
+        type: integer
+      origowner:
+        $ref: '#/definitions/pgtype.Int4'
+      state:
+        $ref: '#/definitions/queries.Cardstate'
+    type: object
+  queries.Player:
+    properties:
+      accountid:
+        type: integer
+      art:
+        type: string
+      hand:
+        items:
+          type: integer
+        type: array
+      id:
+        type: integer
+      isready:
+        type: boolean
+      kitty:
+        items:
+          type: integer
+        type: array
+      play:
+        items:
+          type: integer
+        type: array
+      score:
+        type: integer
+    type: object
+host: localhost:1323
+info:
+  contact: {}
+  description: cribbage rest server
+  title: cribbage server
+  version: 0.0.2
+paths:
+  /account/login/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: id to login with
+        in: body
+        name: details
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Account'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Login
+      tags:
+      - account
+  /admin/card/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: card Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/queries.Card'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Card'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new card
+      tags:
+      - cards
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: card Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/queries.Card'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Card'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update card by id
+      tags:
+      - cards
+  /admin/match/:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by barcode
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get match by barcode
+      tags:
+      - match
+  /card/:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for card by barcode
+        in: query
+        name: barcode
+        required: true
+        type: string
+      - description: Store in which the barcode was found
+        in: query
+        name: storeId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Card'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get card by barcode
+      tags:
+      - cards
+  /player/allcards/:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/queries.Card'
+            type: array
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get all cards
+      tags:
+      - cards
+  /player/gameplaycards/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: csv of ids
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/queries.Card'
+            type: array
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get cards by ids
+      tags:
+      - cards
+  /player/kitty:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: array of ids to add to kitty
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.HandModifier'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update kitty with ids
+      tags:
+      - match
+  /player/match/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MatchDetailsResponse'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get match by id
+      tags:
+      - match
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: MatchRequirements
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.MatchRequirements'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new match
+      tags:
+      - match
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match Object to update
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/queries.Match'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update match by id
+      tags:
+      - match
+  /player/match/cards/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/queries.GetGameCardsForMatchRow'
+            type: array
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get match cards by id
+      tags:
+      - match
+  /player/match/cut:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Deck index that is to become the cut
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.CutDeckReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Cut deck by index
+      tags:
+      - match
+  /player/match/deck/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for deck by id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GameDeck'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get deck by id
+      tags:
+      - deck
+  /player/match/join:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match Object to update
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.JoinMatchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MatchDetailsResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Join match by id
+      tags:
+      - match
+  /player/matches/open:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.GameMatch'
+            type: array
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get match by id
+      tags:
+      - match
+  /player/play:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: array of ids to add to play
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/model.HandModifier'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update play with ids
+      tags:
+      - match
+  /player/player/:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by barcode
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Player'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get player by barcode
+      tags:
+      - players
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Player'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get player by barcode
+      tags:
+      - players
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: player Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Player'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new player
+      tags:
+      - players
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: player Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/queries.Player'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Player'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update player by barcode
+      tags:
+      - players
+  /player/ready:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: player id to update
+        in: body
+        name: details
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update player to mark as ready
+      tags:
+      - players
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
