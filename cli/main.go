@@ -5,16 +5,16 @@ import (
 
 	"cli/utils"
 	"cli/view/login"
+	cliVO "cli/vo"
 	"queries"
 	"vo"
-	cliVO "cli/vo"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type AppModel struct {
+type CLI struct {
 	GameInitd         bool
 	ViewStateName     vo.ViewStateName
 	ActivePlayerId    int
@@ -35,12 +35,12 @@ func main() {
 	}
 }
 
-func (m *AppModel) Init() tea.Cmd {
+func (m *CLI) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func newModel() *AppModel {
-	m := &AppModel{
+func newModel() *CLI {
+	m := &CLI{
 		currentController: &login.LoginController{},
 		timer:             timer.NewWithInterval(time.Hour, time.Second*1),
 	}
