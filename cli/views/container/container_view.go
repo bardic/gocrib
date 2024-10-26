@@ -10,7 +10,7 @@ import (
 )
 
 type ContainerView struct {
-	activeTab int
+	ActiveTab int
 	tabs      []views.Tab
 }
 
@@ -33,7 +33,7 @@ func (v *ContainerView) Init() {
 
 func (v *ContainerView) Render() string {
 	doc := strings.Builder{}
-	renderedTabs := utils.RenderTabs(v.tabs, v.activeTab)
+	renderedTabs := utils.RenderTabs(v.tabs, v.ActiveTab)
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────────────────────────────────┐"))
 

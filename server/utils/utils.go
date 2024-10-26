@@ -94,15 +94,15 @@ func PlayCard(details model.HandModifier) (*model.GameMatch, error) {
 func PlayersReady(players []*queries.Player) bool {
 	ready := true
 
-	if len(players) < 2 {
-		return false
-	}
+	// if len(players) < 2 {
+	// 	return false
+	// }
 
-	for _, p := range players {
-		if !p.Isready {
-			ready = false
-		}
-	}
+	// for _, p := range players {
+	// 	if !p.Isready {
+	// 		ready = false
+	// 	}
+	// }
 
 	return ready
 }

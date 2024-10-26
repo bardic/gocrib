@@ -1,4 +1,4 @@
-package play
+package card
 
 import (
 	"fmt"
@@ -11,16 +11,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type PlayView struct {
-	views.HandModel
+type CardView struct {
+	*views.HandModel
 	SelectedCardId int
 }
 
-func (v *PlayView) Init() {
+func (v *CardView) Init() {
 	v.SelectedCardId = 0
 }
 
-func (v *PlayView) Render() string {
+func (v *CardView) Render() string {
 	s := ""
 	cardViews := make([]string, 0)
 
@@ -47,10 +47,10 @@ func (v *PlayView) Render() string {
 	return s
 }
 
-func (v *PlayView) BuildHeader() string {
+func (v *CardView) BuildHeader() string {
 	return ""
 }
 
-func (v *PlayView) BuildFooter() string {
+func (v *CardView) BuildFooter() string {
 	return ""
 }

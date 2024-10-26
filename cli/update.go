@@ -64,7 +64,6 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.currentController = &container.ContainerController{
 				Controller: views.Controller{
 					Model: &container.ContainerModel{
-						ActiveTab: 0,
 						Tabs: []views.Tab{
 							{
 								Title:    "Board",

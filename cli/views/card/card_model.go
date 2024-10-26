@@ -1,4 +1,4 @@
-package kitty
+package card
 
 import (
 	"cli/views"
@@ -6,8 +6,8 @@ import (
 	"queries"
 )
 
-type KittyModel struct {
-	views.ViewModel
+type CardModel struct {
+	*views.ViewModel
 	State               queries.Gamestate
 	Cards               []int32
 	ActiveSlotIdx       int

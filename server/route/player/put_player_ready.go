@@ -48,9 +48,9 @@ func PlayerReady(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	if len(match.Players) != 2 {
-		return c.JSON(http.StatusOK, nil)
-	}
+	// if len(match.Players) != 2 {
+	// 	return c.JSON(http.StatusOK, nil)
+	// }
 
 	deck, err := utils.NewDeck()
 
