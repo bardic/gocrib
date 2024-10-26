@@ -323,7 +323,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.HandModifier"
+                            "$ref": "#/definitions/vo.HandModifier"
                         }
                     }
                 ],
@@ -374,7 +374,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.MatchDetailsResponse"
+                            "$ref": "#/definitions/vo.MatchDetailsResponse"
                         }
                     },
                     "404": {
@@ -448,7 +448,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.MatchRequirements"
+                            "$ref": "#/definitions/vo.MatchRequirements"
                         }
                     }
                 ],
@@ -535,7 +535,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.CutDeckReq"
+                            "$ref": "#/definitions/vo.CutDeckReq"
                         }
                     }
                 ],
@@ -586,7 +586,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.GameDeck"
+                            "$ref": "#/definitions/vo.GameDeck"
                         }
                     },
                     "404": {
@@ -619,7 +619,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.JoinMatchReq"
+                            "$ref": "#/definitions/vo.JoinMatchReq"
                         }
                     }
                 ],
@@ -627,7 +627,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.MatchDetailsResponse"
+                            "$ref": "#/definitions/vo.MatchDetailsResponse"
                         }
                     },
                     "400": {
@@ -663,7 +663,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.GameMatch"
+                                "$ref": "#/definitions/vo.GameMatch"
                             }
                         }
                     },
@@ -697,7 +697,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.HandModifier"
+                            "$ref": "#/definitions/vo.HandModifier"
                         }
                     }
                 ],
@@ -940,149 +940,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.CutDeckReq": {
-            "type": "object",
-            "properties": {
-                "cutIndex": {
-                    "type": "string"
-                },
-                "matchId": {
-                    "type": "integer"
-                },
-                "playerId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.GameDeck": {
-            "type": "object",
-            "properties": {
-                "cards": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/queries.GetGameCardsForMatchRow"
-                    }
-                },
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.GameMatch": {
-            "type": "object",
-            "properties": {
-                "art": {
-                    "type": "string"
-                },
-                "creationdate": {
-                    "$ref": "#/definitions/pgtype.Timestamptz"
-                },
-                "currentplayerturn": {
-                    "type": "integer"
-                },
-                "cutgamecardid": {
-                    "type": "integer"
-                },
-                "deckid": {
-                    "type": "integer"
-                },
-                "elorangemax": {
-                    "type": "integer"
-                },
-                "elorangemin": {
-                    "type": "integer"
-                },
-                "gamestate": {
-                    "$ref": "#/definitions/queries.Gamestate"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "playerids": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "players": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/queries.Player"
-                    }
-                },
-                "privatematch": {
-                    "type": "boolean"
-                },
-                "turnpasstimestamps": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/pgtype.Timestamptz"
-                    }
-                }
-            }
-        },
-        "model.HandModifier": {
-            "type": "object",
-            "properties": {
-                "cardIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "matchId": {
-                    "type": "integer"
-                },
-                "playerId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.JoinMatchReq": {
-            "type": "object",
-            "properties": {
-                "matchId": {
-                    "type": "integer"
-                },
-                "playerId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.MatchDetailsResponse": {
-            "type": "object",
-            "properties": {
-                "gameState": {
-                    "$ref": "#/definitions/queries.Gamestate"
-                },
-                "matchId": {
-                    "type": "integer"
-                },
-                "playerId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.MatchRequirements": {
-            "type": "object",
-            "properties": {
-                "accountId": {
-                    "type": "integer"
-                },
-                "eloRangeMax": {
-                    "type": "integer"
-                },
-                "eloRangeMin": {
-                    "type": "integer"
-                },
-                "isPrivate": {
-                    "type": "boolean"
-                },
-                "playerId": {
-                    "type": "integer"
-                }
-            }
-        },
         "pgtype.InfinityModifier": {
             "type": "integer",
             "enum": [
@@ -1362,6 +1219,149 @@ const docTemplate = `{
                     }
                 },
                 "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "vo.CutDeckReq": {
+            "type": "object",
+            "properties": {
+                "cutIndex": {
+                    "type": "string"
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "playerId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "vo.GameDeck": {
+            "type": "object",
+            "properties": {
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/queries.GetGameCardsForMatchRow"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "vo.GameMatch": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "creationdate": {
+                    "$ref": "#/definitions/pgtype.Timestamptz"
+                },
+                "currentplayerturn": {
+                    "type": "integer"
+                },
+                "cutgamecardid": {
+                    "type": "integer"
+                },
+                "deckid": {
+                    "type": "integer"
+                },
+                "elorangemax": {
+                    "type": "integer"
+                },
+                "elorangemin": {
+                    "type": "integer"
+                },
+                "gamestate": {
+                    "$ref": "#/definitions/queries.Gamestate"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "playerids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "players": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/queries.Player"
+                    }
+                },
+                "privatematch": {
+                    "type": "boolean"
+                },
+                "turnpasstimestamps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pgtype.Timestamptz"
+                    }
+                }
+            }
+        },
+        "vo.HandModifier": {
+            "type": "object",
+            "properties": {
+                "cardIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "playerId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "vo.JoinMatchReq": {
+            "type": "object",
+            "properties": {
+                "matchId": {
+                    "type": "integer"
+                },
+                "playerId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "vo.MatchDetailsResponse": {
+            "type": "object",
+            "properties": {
+                "gameState": {
+                    "$ref": "#/definitions/queries.Gamestate"
+                },
+                "matchId": {
+                    "type": "integer"
+                },
+                "playerId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "vo.MatchRequirements": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "eloRangeMax": {
+                    "type": "integer"
+                },
+                "eloRangeMin": {
+                    "type": "integer"
+                },
+                "isPrivate": {
+                    "type": "boolean"
+                },
+                "playerId": {
                     "type": "integer"
                 }
             }

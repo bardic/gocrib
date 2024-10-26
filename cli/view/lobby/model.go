@@ -1,11 +1,11 @@
 package lobby
 
 import (
-	"cli/views"
+	cliVO "cli/vo"
 )
 
-type LobbyModel struct {
-	views.ViewModel
+type Model struct {
+	cliVO.ViewModel
 	ActiveMatchId int32
 	AccountId     int32
 }

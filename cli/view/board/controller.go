@@ -2,23 +2,23 @@ package board
 
 import (
 	"cli/services"
-	"cli/views"
+	cliVO "cli/vo"
 	"queries"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type BoardController struct {
-	views.Controller
+type Controller struct {
+	cliVO.Controller
 }
 
-func (ctrl *BoardController) GetState() views.ControllerState {
-	return views.BoardControllerState
+func (ctrl *Controller) GetState() cliVO.ControllerState {
+	return cliVO.BoardControllerState
 }
 
-func (ctrl *BoardController) Init() {
-	boardModel := ctrl.Model.(BoardModel)
-	ctrl.View = &BoardView{
+func (ctrl *Controller) Init() {
+	boardModel := ctrl.Model.(Model)
+	ctrl.View = &View{
 		matchId:              boardModel.GameMatch.ID,
 		players:              boardModel.GameMatch.Players,
 		state:                queries.GamestateCutState,
@@ -29,19 +29,19 @@ func (ctrl *BoardController) Init() {
 	ctrl.View.Init()
 }
 
-func (ctrl *BoardController) Render() string {
+func (ctrl *Controller) Render() string {
 	return ctrl.View.Render()
 }
 
-func (ctrl *BoardController) Update(msg tea.Msg) tea.Cmd {
-	gameView := ctrl.View.(*BoardView)
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+	gameView := ctrl.View.(*View)
 	var cmd tea.Cmd
 	gameView.cutInput.Focus()
 	gameView.cutInput, cmd = gameView.cutInput.Update(msg)
 	return cmd
 }
 
-func (ctrl *BoardController) ParseInput(msg tea.KeyMsg) tea.Msg {
+func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit()
@@ -52,9 +52,9 @@ func (ctrl *BoardController) ParseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func (ctrl *BoardController) Enter() tea.Msg {
-	boardView := ctrl.View.(*BoardView)
-	boardModel := ctrl.Model.(*BoardModel)
+func (ctrl *Controller) Enter() tea.Msg {
+	boardView := ctrl.View.(*View)
+	boardModel := ctrl.Model.(*Model)
 	switch boardModel.GameMatch.Gamestate {
 	case queries.GamestateCutState:
 		boardModel.CutIndex = boardView.cutInput.Value()

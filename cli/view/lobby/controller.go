@@ -6,32 +6,32 @@ import (
 
 	"cli/services"
 	"cli/utils"
-	"cli/views"
-	"model"
+	cliVO "cli/vo"
 	"queries"
+	"vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type LobbyController struct {
-	views.Controller
+type Controller struct {
+	cliVO.Controller
 }
 
-func (gc *LobbyController) GetState() views.ControllerState {
-	return views.LobbyControllerState
+func (ctrl *Controller) GetState() cliVO.ControllerState {
+	return cliVO.LobbyControllerState
 }
 
-func (gc *LobbyController) Init() {
-	gc.Model = LobbyModel{}
-	gc.View = &LobbyView{}
+func (ctrl *Controller) Init() {
+	ctrl.Model = Model{}
+	ctrl.View = &View{}
 }
-func (gc *LobbyController) Render() string {
-	return gc.View.Render()
+func (ctrl *Controller) Render() string {
+	return ctrl.View.Render()
 }
 
-func (v *LobbyController) ParseInput(msg tea.KeyMsg) tea.Msg {
-	lobbyView := v.View.(*LobbyView)
-	lobbyModel := v.Model.(LobbyModel)
+func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
+	lobbyView := ctrl.View.(*View)
+	lobbyModel := ctrl.Model.(Model)
 
 	switch msg.String() {
 	case "enter", "view_update":
@@ -51,7 +51,7 @@ func (v *LobbyController) ParseInput(msg tea.KeyMsg) tea.Msg {
 			return tea.Quit
 		}
 
-		var matchDetails model.MatchDetailsResponse
+		var matchDetails vo.MatchDetailsResponse
 		msg := services.JoinMatch(int(player.ID), id)
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
 
@@ -59,15 +59,15 @@ func (v *LobbyController) ParseInput(msg tea.KeyMsg) tea.Msg {
 			return tea.Quit
 		}
 
-		return model.StateChangeMsg{
-			NewState: model.JoinGameView,
+		return vo.StateChangeMsg{
+			NewState: vo.JoinGameView,
 			MatchId:  matchDetails.MatchId,
 		}
 	case "n":
 		match := utils.CreateGame(lobbyModel.AccountId)
 
-		return model.StateChangeMsg{
-			NewState: model.CreateGameView,
+		return vo.StateChangeMsg{
+			NewState: vo.CreateGameView,
 			MatchId:  match.MatchId,
 		}
 	case "tab":
@@ -76,29 +76,29 @@ func (v *LobbyController) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 		switch lobbyView.ActiveLandingTab {
 		case 0:
-			lobbyView.LobbyViewState = model.OpenMatches
+			lobbyView.LobbyViewState = vo.OpenMatches
 		case 1:
-			lobbyView.LobbyViewState = model.AvailableMatches
+			lobbyView.LobbyViewState = vo.AvailableMatches
 		}
 	case "shift+tab":
 		lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab - 1
 
 		switch lobbyView.ActiveLandingTab {
 		case 0:
-			lobbyView.LobbyViewState = model.OpenMatches
+			lobbyView.LobbyViewState = vo.OpenMatches
 		case 1:
-			lobbyView.LobbyViewState = model.AvailableMatches
+			lobbyView.LobbyViewState = vo.AvailableMatches
 		}
 	}
 
 	return nil
 }
 
-func (v *LobbyController) Update(msg tea.Msg) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	lobbyView := v.View.(*LobbyView)
+	lobbyView := ctrl.View.(*View)
 	lobbyView.LobbyTable.Focus()
 
 	updatedField, cmd := lobbyView.LobbyTable.Update(msg)
@@ -108,7 +108,7 @@ func (v *LobbyController) Update(msg tea.Msg) tea.Cmd {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg: //User input
-		resp := v.ParseInput(msg)
+		resp := ctrl.ParseInput(msg)
 
 		if resp == nil {
 			break

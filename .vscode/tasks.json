@@ -27,9 +27,6 @@
                     "endsPattern": "43000" // success if matched
                 }
             },
-            "dependsOn": [
-                "logs"
-            ]
         },
         {
             "label": "swag",

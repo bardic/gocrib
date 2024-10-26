@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"model"
+	"vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -26,7 +26,7 @@ func GetOpenMatches() tea.Msg {
 }
 
 func JoinMatch(playerId, activeMatchId int) tea.Msg {
-	req := model.JoinMatchReq{
+	req := vo.JoinMatchReq{
 		PlayerId: playerId,
 		MatchId:  activeMatchId,
 	}
@@ -45,7 +45,7 @@ func PutPlayerMatch(id int) tea.Msg {
 }
 
 func PostPlayerMatch(accountId int32) tea.Msg {
-	req := model.MatchRequirements{
+	req := vo.MatchRequirements{
 		AccountId:   accountId,
 		IsPrivate:   false,
 		EloRangeMin: 1,
@@ -56,7 +56,7 @@ func PostPlayerMatch(accountId int32) tea.Msg {
 }
 
 func CutDeck(playerId, matchId int32, cutIndex string) tea.Msg {
-	req := model.CutDeckReq{
+	req := vo.CutDeckReq{
 		PlayerId: playerId,
 		MatchId:  matchId,
 		CutIndex: cutIndex,

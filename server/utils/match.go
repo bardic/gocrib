@@ -3,10 +3,9 @@ package utils
 import (
 	"context"
 	"encoding/json"
-
-	"model"
 	"queries"
 	conn "server/db"
+	"vo"
 )
 
 func UpdateGameState(matchId int32, state queries.Gamestate) error {
@@ -25,7 +24,7 @@ func UpdateGameState(matchId int32, state queries.Gamestate) error {
 	return nil
 }
 
-func GetMatch(id int) (*model.GameMatch, error) {
+func GetMatch(id int) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -38,7 +37,7 @@ func GetMatch(id int) (*model.GameMatch, error) {
 		return nil, err
 	}
 
-	var match *model.GameMatch
+	var match *vo.GameMatch
 	err = json.Unmarshal(m, &match)
 	if err != nil {
 		return nil, err
@@ -131,7 +130,7 @@ func UpdateMatch(match queries.Match) error {
 	return nil
 }
 
-func UpdatePlayersInMatch(req model.JoinMatchReq) error {
+func UpdatePlayersInMatch(req vo.JoinMatchReq) error {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)

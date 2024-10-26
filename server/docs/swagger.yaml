@@ -1,98 +1,5 @@
 basePath: /v1
 definitions:
-  model.CutDeckReq:
-    properties:
-      cutIndex:
-        type: string
-      matchId:
-        type: integer
-      playerId:
-        type: integer
-    type: object
-  model.GameDeck:
-    properties:
-      cards:
-        items:
-          $ref: '#/definitions/queries.GetGameCardsForMatchRow'
-        type: array
-      id:
-        type: integer
-    type: object
-  model.GameMatch:
-    properties:
-      art:
-        type: string
-      creationdate:
-        $ref: '#/definitions/pgtype.Timestamptz'
-      currentplayerturn:
-        type: integer
-      cutgamecardid:
-        type: integer
-      deckid:
-        type: integer
-      elorangemax:
-        type: integer
-      elorangemin:
-        type: integer
-      gamestate:
-        $ref: '#/definitions/queries.Gamestate'
-      id:
-        type: integer
-      playerids:
-        items:
-          type: integer
-        type: array
-      players:
-        items:
-          $ref: '#/definitions/queries.Player'
-        type: array
-      privatematch:
-        type: boolean
-      turnpasstimestamps:
-        items:
-          $ref: '#/definitions/pgtype.Timestamptz'
-        type: array
-    type: object
-  model.HandModifier:
-    properties:
-      cardIds:
-        items:
-          type: integer
-        type: array
-      matchId:
-        type: integer
-      playerId:
-        type: integer
-    type: object
-  model.JoinMatchReq:
-    properties:
-      matchId:
-        type: integer
-      playerId:
-        type: integer
-    type: object
-  model.MatchDetailsResponse:
-    properties:
-      gameState:
-        $ref: '#/definitions/queries.Gamestate'
-      matchId:
-        type: integer
-      playerId:
-        type: integer
-    type: object
-  model.MatchRequirements:
-    properties:
-      accountId:
-        type: integer
-      eloRangeMax:
-        type: integer
-      eloRangeMin:
-        type: integer
-      isPrivate:
-        type: boolean
-      playerId:
-        type: integer
-    type: object
   pgtype.InfinityModifier:
     enum:
     - 1
@@ -299,6 +206,99 @@ definitions:
           type: integer
         type: array
       score:
+        type: integer
+    type: object
+  vo.CutDeckReq:
+    properties:
+      cutIndex:
+        type: string
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
+  vo.GameDeck:
+    properties:
+      cards:
+        items:
+          $ref: '#/definitions/queries.GetGameCardsForMatchRow'
+        type: array
+      id:
+        type: integer
+    type: object
+  vo.GameMatch:
+    properties:
+      art:
+        type: string
+      creationdate:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      currentplayerturn:
+        type: integer
+      cutgamecardid:
+        type: integer
+      deckid:
+        type: integer
+      elorangemax:
+        type: integer
+      elorangemin:
+        type: integer
+      gamestate:
+        $ref: '#/definitions/queries.Gamestate'
+      id:
+        type: integer
+      playerids:
+        items:
+          type: integer
+        type: array
+      players:
+        items:
+          $ref: '#/definitions/queries.Player'
+        type: array
+      privatematch:
+        type: boolean
+      turnpasstimestamps:
+        items:
+          $ref: '#/definitions/pgtype.Timestamptz'
+        type: array
+    type: object
+  vo.HandModifier:
+    properties:
+      cardIds:
+        items:
+          type: integer
+        type: array
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
+  vo.JoinMatchReq:
+    properties:
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
+  vo.MatchDetailsResponse:
+    properties:
+      gameState:
+        $ref: '#/definitions/queries.Gamestate'
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
+  vo.MatchRequirements:
+    properties:
+      accountId:
+        type: integer
+      eloRangeMax:
+        type: integer
+      eloRangeMin:
+        type: integer
+      isPrivate:
+        type: boolean
+      playerId:
         type: integer
     type: object
 host: localhost:1323
@@ -511,7 +511,7 @@ paths:
         name: details
         required: true
         schema:
-          $ref: '#/definitions/model.HandModifier'
+          $ref: '#/definitions/vo.HandModifier'
       produces:
       - application/json
       responses:
@@ -547,7 +547,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.MatchDetailsResponse'
+            $ref: '#/definitions/vo.MatchDetailsResponse'
         "404":
           description: Not Found
           schema: {}
@@ -566,7 +566,7 @@ paths:
         name: details
         required: true
         schema:
-          $ref: '#/definitions/model.MatchRequirements'
+          $ref: '#/definitions/vo.MatchRequirements'
       produces:
       - application/json
       responses:
@@ -653,7 +653,7 @@ paths:
         name: details
         required: true
         schema:
-          $ref: '#/definitions/model.CutDeckReq'
+          $ref: '#/definitions/vo.CutDeckReq'
       produces:
       - application/json
       responses:
@@ -689,7 +689,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.GameDeck'
+            $ref: '#/definitions/vo.GameDeck'
         "404":
           description: Not Found
           schema: {}
@@ -709,14 +709,14 @@ paths:
         name: details
         required: true
         schema:
-          $ref: '#/definitions/model.JoinMatchReq'
+          $ref: '#/definitions/vo.JoinMatchReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.MatchDetailsResponse'
+            $ref: '#/definitions/vo.MatchDetailsResponse'
         "400":
           description: Bad Request
           schema: {}
@@ -740,7 +740,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.GameMatch'
+              $ref: '#/definitions/vo.GameMatch'
             type: array
         "404":
           description: Not Found
@@ -761,7 +761,7 @@ paths:
         name: details
         required: true
         schema:
-          $ref: '#/definitions/model.HandModifier'
+          $ref: '#/definitions/vo.HandModifier'
       produces:
       - application/json
       responses:

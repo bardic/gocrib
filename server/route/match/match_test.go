@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"model"
 	"queries"
+	"vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,7 +18,7 @@ func TestNewMatch(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.Set("details", model.MatchRequirements{
+	c.Set("details", vo.MatchRequirements{
 		EloRangeMin: 0,
 		EloRangeMax: 500,
 		IsPrivate:   false,
@@ -56,7 +56,7 @@ func TestMatch(t *testing.T) {
 	// rec2 := httptest.NewRecorder()
 	// c2 := e.NewContext(req, rec)
 
-	// var match model.Match
+	// var match vo.Match
 	// json.Unmarshal([]byte(rec2.Body.String()), &match)
 
 	// err = GetDeck(c2)

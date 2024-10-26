@@ -6,11 +6,11 @@ import (
 
 	"cli/services"
 	"cli/utils"
-	"cli/views"
-	"cli/views/container"
-	"cli/views/lobby"
-	"model"
+	"cli/view/container"
+	"cli/view/lobby"
+	cliVO "cli/vo"
 	"queries"
+	"vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -23,25 +23,25 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case queries.Account:
 		m.account = &msg
 		cmds = append(cmds, func() tea.Msg {
-			return model.StateChangeMsg{
-				NewState: model.LobbyView,
+			return vo.StateChangeMsg{
+				NewState: vo.LobbyView,
 			}
 		})
-	case model.StateChangeMsg:
+	case vo.StateChangeMsg:
 		switch msg.NewState {
-		case model.LobbyView:
-			m.currentController = &lobby.LobbyController{}
+		case vo.LobbyView:
+			m.currentController = &lobby.Controller{}
 			m.currentController.Init()
-			m.ViewStateName = model.LobbyView
+			m.ViewStateName = vo.LobbyView
 
 			services.GetOpenMatches()
-		case model.JoinGameView:
+		case vo.JoinGameView:
 
 			fallthrough
-		case model.CreateGameView:
+		case vo.CreateGameView:
 			m.matchId = msg.MatchId
 
-			var match *model.GameMatch
+			var match *vo.GameMatch
 			idstr := strconv.Itoa(msg.MatchId)
 			resp := services.GetPlayerMatch(idstr)
 			err := json.Unmarshal(resp.([]byte), &match)
@@ -61,41 +61,41 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				utils.Logger.Sugar().Error(err)
 			}
 
-			containerModel := &container.ContainerModel{
-				Tabs: []views.Tab{
+			containerModel := &container.Model{
+				Tabs: []cliVO.Tab{
 					{
 						Title:    "Board",
-						TabState: model.BoardView,
+						TabState: vo.BoardView,
 					},
 					{
 						Title:    "Play",
-						TabState: model.PlayView,
+						TabState: vo.PlayView,
 					},
 					{
 						Title:    "Hand",
-						TabState: model.HandView,
+						TabState: vo.HandView,
 					},
 					{
 						Title:    "Kitty",
-						TabState: model.KittyView,
+						TabState: vo.KittyView,
 					},
 				},
 				Match: match,
 			}
 
-			containerView := &container.ContainerView{
+			containerView := &container.View{
 				ActiveTab: containerModel.ActiveTab,
 				Tabs:      containerModel.Tabs,
 			}
 
-			m.currentController = &container.ContainerController{
-				Controller: views.Controller{
+			m.currentController = &container.Controller{
+				Controller: cliVO.Controller{
 					Model: containerModel,
 					View:  containerView,
 				},
 			}
 
-			ctrl := m.currentController.(*container.ContainerController)
+			ctrl := m.currentController.(*container.Controller)
 			ctrl.Init()
 
 		}

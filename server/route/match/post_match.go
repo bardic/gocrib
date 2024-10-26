@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	"model"
 	"queries"
 	conn "server/db"
 	"server/route/player"
+	"vo"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
@@ -19,14 +19,14 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param details body model.MatchRequirements true "MatchRequirements"
+// @Param details body vo.MatchRequirements true "MatchRequirements"
 // @Success      200  {object}  int
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/match/ [post]
 func NewMatch(c echo.Context) error {
-	details := new(model.MatchRequirements)
+	details := new(vo.MatchRequirements)
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -60,7 +60,7 @@ func NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
+	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
 		MatchId:   int(m.ID),
 		PlayerId:  int(p.ID),
 		GameState: m.Gamestate,

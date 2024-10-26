@@ -4,7 +4,7 @@ package game
 // 	"fmt"
 // 	"testing"
 
-// 	"model"
+// 	"vo"
 // )
 
 // // TestHelloName calls greetings.Hello with a name, checking
@@ -137,7 +137,7 @@ package game
 
 // func TestRightJack(t *testing.T) {
 // 	hand := []int{7, 8, 1, 11}
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CutGameCardId: 1,
 // 	}
 
@@ -148,7 +148,7 @@ package game
 // }
 
 // func TestJackOnCut(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CutGameCardId: 11,
 // 	}
 
@@ -159,7 +159,7 @@ package game
 // }
 
 // func TestLastCard(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay:       []int{11, 24, 37, 2},
 // 		CurrentPlayerTurn: 0,
 // 		Players: []queries.Player{
@@ -181,7 +181,7 @@ package game
 // }
 
 // func TestIsNotLastCard(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay:       []int{10, 24, 37, 2},
 // 		CurrentPlayerTurn: 0,
 // 		Players: []queries.Player{
@@ -203,7 +203,7 @@ package game
 // }
 
 // func TestFlush(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay:       []int{11, 24, 37, 2},
 // 		CurrentPlayerTurn: 0,
 // 		Players: []queries.Player{
@@ -225,7 +225,7 @@ package game
 // }
 
 // func TestNoFlush(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay:       []int{11, 24, 37, 2},
 // 		CurrentPlayerTurn: 0,
 // 		Players: []queries.Player{
@@ -247,7 +247,7 @@ package game
 // }
 
 // func TestPeggingWithFithteens(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay: []int{
 // 			10,
 // 			5,
@@ -272,7 +272,7 @@ package game
 // }
 
 // func TestPeggingWithRunAndFithteens(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay: []int{
 // 			4,
 // 			5,
@@ -298,7 +298,7 @@ package game
 // }
 
 // func TestPeggingLastCard(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay: []int{
 // 			9,
 // 			11,
@@ -324,7 +324,7 @@ package game
 // }
 
 // func TestPeggingLastCardAndThirtyOne(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay: []int{
 // 			8,
 // 			11,
@@ -350,7 +350,7 @@ package game
 // }
 
 // func TestPeggingMakingKinds(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay: []int{
 // 			10,
 // 			36,
@@ -375,7 +375,7 @@ package game
 // }
 
 // func TestPeggingNoRun(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay: []int{
 // 			5,
 // 			3,
@@ -402,7 +402,7 @@ package game
 // }
 
 // func TestPeggingRun(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay: []int{
 // 			5,
 // 			7,
@@ -428,7 +428,7 @@ package game
 // }
 
 // func TestPeggingRunOfFour(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay: []int{
 // 			1,
 // 			2,
@@ -456,7 +456,7 @@ package game
 // }
 
 // func TestPeggingJackOnCut(t *testing.T) {
-// 	match := model.Match{
+// 	match := vo.Match{
 // 		CardsInPlay:   []int{},
 // 		CutGameCardId: 11,
 // 		Players: []queries.Player{

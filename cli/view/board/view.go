@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"cli/services"
-	"cli/styles"
 	"cli/utils"
 
 	"queries"
@@ -14,7 +13,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 )
 
-type BoardView struct {
+type View struct {
 	cutInput             textinput.Model
 	isLoading            bool //This should just be a state
 	state                queries.Gamestate
@@ -27,43 +26,43 @@ type BoardView struct {
 var boardRowLen int = 50
 var boardEndRowLen int = 31
 
-func (v *BoardView) Init() {
-	matchMsg := services.GetPlayerMatch(strconv.Itoa(int(v.matchId)))
+func (view *View) Init() {
+	matchMsg := services.GetPlayerMatch(strconv.Itoa(int(view.matchId)))
 	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
 	}
 
-	v.cutInput = textinput.New()
-	v.cutInput.Placeholder = "0"
-	v.cutInput.CharLimit = 5
-	v.cutInput.Width = 5
-	v.isLoading = false
+	view.cutInput = textinput.New()
+	view.cutInput.Placeholder = "0"
+	view.cutInput.CharLimit = 5
+	view.cutInput.Width = 5
+	view.isLoading = false
 }
 
-func (v *BoardView) Render() string {
-	if v.isLoading {
+func (view *View) Render() string {
+	if view.isLoading {
 		return "Loading..."
 	}
 
 	doc := strings.Builder{}
 	viewBuilder := strings.Builder{}
 
-	if v.state == queries.GamestateCutState && v.currentTurnsPlayerid != v.localPlayer.ID {
-		v.cutInput.Focus()
-		viewBuilder.WriteString(v.cutInput.View() + " \n")
+	if view.state == queries.GamestateCutState && view.currentTurnsPlayerid != view.localPlayer.ID {
+		view.cutInput.Focus()
+		viewBuilder.WriteString(view.cutInput.View() + " \n")
 	} else {
 		viewBuilder.WriteString("\n")
 	}
 
 	//Row 1
-	viewBuilder.WriteString(utils.DrawRow(v.players, boardRowLen, 0))
+	viewBuilder.WriteString(utils.DrawRow(view.players, boardRowLen, 0))
 	//Row 2
-	viewBuilder.WriteString(utils.DrawRow(v.players, boardRowLen, boardRowLen))
+	viewBuilder.WriteString(utils.DrawRow(view.players, boardRowLen, boardRowLen))
 	//Row 3
-	viewBuilder.WriteString(utils.DrawRow(v.players, boardEndRowLen, boardRowLen*2))
+	viewBuilder.WriteString(utils.DrawRow(view.players, boardEndRowLen, boardRowLen*2))
 
-	doc.WriteString(styles.WindowStyle.Render(viewBuilder.String()))
+	doc.WriteString(viewBuilder.String())
 	doc.WriteString(utils.BuildFooter())
 
 	return doc.String()

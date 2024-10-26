@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"cli/utils"
-	"cli/views"
-	"cli/views/login"
-	"model"
+	"cli/view/login"
 	"queries"
+	"vo"
+	cliVO "cli/vo"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/timer"
@@ -16,11 +16,11 @@ import (
 
 type AppModel struct {
 	GameInitd         bool
-	ViewStateName     model.ViewStateName
+	ViewStateName     vo.ViewStateName
 	ActivePlayerId    int
 	account           *queries.Account
 	matchId           int
-	currentController views.IController
+	currentController cliVO.IController
 	timer             timer.Model
 }
 

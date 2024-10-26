@@ -1,15 +1,15 @@
 package board
 
 import (
-	"cli/views"
-	"model"
+	cliVO "cli/vo"
 	"queries"
+	"vo"
 )
 
-type BoardModel struct {
-	views.ViewModel
+type Model struct {
+	cliVO.ViewModel
 	Account       *queries.Account
 	CutIndex      string
-	GameMatch     *model.GameMatch
+	GameMatch     *vo.GameMatch
 	LocalPlayerId int32
 }

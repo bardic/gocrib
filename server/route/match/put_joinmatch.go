@@ -3,9 +3,9 @@ package match
 import (
 	"net/http"
 
-	"model"
 	"queries"
 	"server/utils"
+	"vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,14 +16,14 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param details body model.JoinMatchReq true "match Object to update"
-// @Success      200  {object}  model.MatchDetailsResponse
+// @Param details body vo.JoinMatchReq true "match Object to update"
+// @Success      200  {object}  vo.MatchDetailsResponse
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/match/join [put]
 func JoinMatch(c echo.Context) error {
-	details := new(model.JoinMatchReq)
+	details := new(vo.JoinMatchReq)
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -41,7 +41,7 @@ func JoinMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, model.MatchDetailsResponse{
+	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
 		MatchId:   int(details.MatchId),
 		PlayerId:  int(p.ID),
 		GameState: queries.GamestateJoinGameState,

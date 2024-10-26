@@ -8,9 +8,9 @@ import (
 
 	"cli/services"
 	"cli/styles"
-	"cli/views"
-	"model"
+	cliVO "cli/vo"
 	"queries"
+	"vo"
 
 	"github.com/charmbracelet/lipgloss"
 	"go.uber.org/zap"
@@ -18,7 +18,7 @@ import (
 
 var Logger *zap.Logger
 
-func GetCardById(id int32, deck *model.GameDeck) *queries.Card {
+func GetCardById(id int32, deck *vo.GameDeck) *queries.Card {
 	for _, card := range deck.Cards {
 		if card.Matchcard.Cardid == id {
 			return &card.Card
@@ -65,16 +65,16 @@ func GetPlayerById(accountId int32, players []queries.Player) (*queries.Player, 
 	return nil, errors.New("no player found")
 }
 
-func CreateGame(accountId int32) model.MatchDetailsResponse {
+func CreateGame(accountId int32) vo.MatchDetailsResponse {
 	newMatch := services.PostPlayerMatch(accountId).([]byte)
 
-	var matchDetails model.MatchDetailsResponse
+	var matchDetails vo.MatchDetailsResponse
 	json.Unmarshal(newMatch, &matchDetails)
 
 	return matchDetails
 }
 
-func GetPlayerForAccountId(id int32, match *model.GameMatch) *queries.Player {
+func GetPlayerForAccountId(id int32, match *vo.GameMatch) *queries.Player {
 	for _, player := range match.Players {
 		if player.Accountid == id {
 			return player
@@ -151,7 +151,7 @@ func DrawRow(players []*queries.Player, pegsToDraw, scoreOffet int) string {
 	return viewBuilder.String()
 }
 
-func RenderTabs(tabs []views.Tab, activeTab int) []string {
+func RenderTabs(tabs []cliVO.Tab, activeTab int) []string {
 	var renderedTabs []string
 
 	for i, t := range tabs {

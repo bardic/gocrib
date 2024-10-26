@@ -30,19 +30,24 @@ var (
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(lipgloss.Color("69"))
 
-	HelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
+	HelpStyle = lipgloss.
+			NewStyle().
+			Foreground(lipgloss.Color("241"))
 
-	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
-	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
+	ViewStyle = lipgloss.
+			NewStyle().
+			Padding(1, 2, 1, 2)
 
-	ViewStyle        = lipgloss.NewStyle().Padding(1, 2, 1, 2)
-	highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	highlightColor = lipgloss.
+			AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+
 	InactiveTabStyle = lipgloss.NewStyle().
 				Border(inactiveTabBorder, true).
 				BorderForeground(highlightColor).
 				Padding(0, 1)
 
-	ActiveTabStyle = InactiveTabStyle.Border(activeTabBorder, true)
+	ActiveTabStyle = InactiveTabStyle.
+			Border(activeTabBorder, true)
 
 	WindowStyle = lipgloss.NewStyle().
 			BorderForeground(highlightColor).
@@ -50,7 +55,10 @@ var (
 			Border(lipgloss.NormalBorder()).
 			BorderTop(false).
 			Width(100).
-			Height(10)
+			Height(15)
+
+	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
+	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
 )
 
 func tabBorderWithBottom(left, middle, right string) lipgloss.Border {

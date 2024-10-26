@@ -8,7 +8,7 @@ import (
 	conn "server/db"
 	"server/utils"
 
-	"model"
+	"vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,14 +19,14 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param details body model.HandModifier true "array of ids to add to play"
+// @Param details body vo.HandModifier true "array of ids to add to play"
 // @Success      200  {object}  queries.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/play [put]
 func UpdatePlay(c echo.Context) error {
-	details := &model.HandModifier{}
+	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

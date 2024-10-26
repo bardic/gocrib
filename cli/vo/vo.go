@@ -1,7 +1,7 @@
-package views
+package vo
 
 import (
-	"model"
+	"vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -37,7 +37,7 @@ type HandModel struct {
 	CurrentTurnPlayerId int32
 	CardsToDisplay      []int32
 	SelectedCardIds     []int32
-	Deck                *model.GameDeck
+	Deck                *vo.GameDeck
 }
 
 type IViewModel interface {
@@ -54,5 +54,5 @@ type Controller struct {
 
 type Tab struct {
 	Title    string
-	TabState model.ViewState
+	TabState vo.ViewState
 }

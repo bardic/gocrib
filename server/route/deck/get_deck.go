@@ -16,7 +16,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param        id    query     string  true  "search for deck by id"'
-// @Success      200  {object}  model.GameDeck
+// @Success      200  {object}  vo.GameDeck
 // @Failure      404  {object}  error
 // @Failure      422  {object}  error
 // @Router       /player/match/deck/ [get]
@@ -30,7 +30,7 @@ func GetDeck(c echo.Context) error {
 
 	deck, err := utils.GetDeckById(int32(id))
 
-		if err != nil {
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 

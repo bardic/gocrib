@@ -5,7 +5,7 @@ RUN go mod download
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 RUN go get -u github.com/swaggo/echo-swagger
 
-COPY model ./model
+COPY vo ./vo
 COPY route ./route
 COPY *.go ./
 

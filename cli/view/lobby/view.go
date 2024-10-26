@@ -8,8 +8,8 @@ import (
 	"cli/services"
 	"cli/styles"
 	"cli/utils"
-	"cli/views"
-	"model"
+	cliVO "cli/vo"
+	"vo"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,10 +17,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type LobbyView struct {
+type View struct {
 	AccountId        int32
 	ActiveLandingTab int
-	LobbyViewState   model.ViewState
+	LobbyViewState   vo.ViewState
 	LobbyTabNames    []string
 	LobbyTable       table.Model
 	IsLobbyTableSet  bool
@@ -28,31 +28,31 @@ type LobbyView struct {
 	ActiveMatchId    int32
 }
 
-func (v *LobbyView) Init() {
-	if v.lobbyViewInitd {
+func (view *View) Init() {
+	if view.lobbyViewInitd {
 		return
 	}
 
-	v.lobbyViewInitd = true
+	view.lobbyViewInitd = true
 
-	v.ActiveLandingTab = 0
-	v.LobbyViewState = model.OpenMatches
-	v.LobbyTabNames = []string{"Open Matches", "Available Matches"}
+	view.ActiveLandingTab = 0
+	view.LobbyViewState = vo.OpenMatches
+	view.LobbyTabNames = []string{"Open Matches", "Available Matches"}
 }
 
-func (v *LobbyView) Render() string {
+func (view *View) Render() string {
 	doc := strings.Builder{}
 
-	renderedTabs := utils.RenderTabs([]views.Tab{
+	renderedTabs := utils.RenderTabs([]cliVO.Tab{
 		{
 			Title:    "Lobby",
-			TabState: model.OpenMatches,
+			TabState: vo.OpenMatches,
 		},
 		{
 			Title:    "Active",
-			TabState: model.AvailableMatches,
+			TabState: vo.AvailableMatches,
 		},
-	}, v.ActiveLandingTab)
+	}, view.ActiveLandingTab)
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
@@ -60,26 +60,26 @@ func (v *LobbyView) Render() string {
 	doc.WriteString(row)
 	doc.WriteString("\n")
 
-	if !v.IsLobbyTableSet {
+	if !view.IsLobbyTableSet {
 		t, err := getActiveView()
 		if err != nil {
 			return err.Error()
 		}
 
-		v.LobbyTable = t
-		v.IsLobbyTableSet = true
+		view.LobbyTable = t
+		view.IsLobbyTableSet = true
 	}
 
-	doc.WriteString(styles.WindowStyle.Width(100).Render(v.LobbyTable.View()))
+	doc.WriteString(styles.WindowStyle.Width(100).Render(view.LobbyTable.View()))
 	return doc.String()
 }
 
-func (v *LobbyView) Update(msg tea.Msg) tea.Cmd {
-	v.Init()
-	v.LobbyTable.Focus()
+func (view *View) Update(msg tea.Msg) tea.Cmd {
+	view.Init()
+	view.LobbyTable.Focus()
 
-	updatedField, cmd := v.LobbyTable.Update(msg)
-	v.LobbyTable = updatedField
+	updatedField, cmd := view.LobbyTable.Update(msg)
+	view.LobbyTable = updatedField
 
 	return cmd
 }
@@ -97,7 +97,7 @@ func getActiveView() (table.Model, error) {
 
 	m := getOpenMatches()
 
-	var matches []model.GameMatch
+	var matches []vo.GameMatch
 	err := json.Unmarshal(m.([]byte), &matches)
 
 	if err != nil {

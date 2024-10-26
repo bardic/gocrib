@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"model"
+	"vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -21,7 +21,7 @@ func PutPlayer(id int) tea.Msg {
 	return url(EndPointPlayer, http.MethodPut, "")
 }
 
-func PutKitty(req model.HandModifier) tea.Msg {
+func PutKitty(req vo.HandModifier) tea.Msg {
 	b, err := json.Marshal(req)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func PutKitty(req model.HandModifier) tea.Msg {
 	return url(EndPointKitty, http.MethodPut, string(b))
 }
 
-func PutPlay(req model.HandModifier) tea.Msg {
+func PutPlay(req vo.HandModifier) tea.Msg {
 	b, err := json.Marshal(req)
 	if err != nil {
 		return err

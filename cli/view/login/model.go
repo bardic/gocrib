@@ -1,9 +1,9 @@
 package login
 
 import (
-	"cli/views"
+	cliVO "cli/vo"
 )
 
 type LoginModel struct {
-	views.ViewModel
+	cliVO.ViewModel
 }

@@ -8,10 +8,10 @@ import (
 	"queries"
 	conn "server/db"
 
-	"model"
+	"vo"
 )
 
-func QueryForCards(ids []int32) ([]model.GameCard, error) {
+func QueryForCards(ids []int32) ([]vo.GameCard, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -19,20 +19,25 @@ func QueryForCards(ids []int32) ([]model.GameCard, error) {
 	ctx := context.Background()
 
 	matchCards, err := q.GetMatchCards(ctx, ids)
+
+	if err != nil {
+		return []vo.GameCard{}, err
+	}
+
 	baseCards, err := q.GetCards(ctx)
 
-	cards := []model.GameCard{}
+	if err != nil {
+		return []vo.GameCard{}, err
+	}
+
+	cards := []vo.GameCard{}
 
 	for _, matchCard := range matchCards {
 		card := GetCardByIdFromCards(int(matchCard.ID), baseCards)
-		cards = append(cards, model.GameCard{
+		cards = append(cards, vo.GameCard{
 			Matchcard: matchCard,
 			Card:      card,
 		})
-	}
-
-	if err != nil {
-		return []model.GameCard{}, err
 	}
 
 	return cards, nil
@@ -49,7 +54,7 @@ func GetCardByIdFromCards(cardId int, cards []queries.Card) queries.Card {
 
 }
 
-func UpdatePlay(details model.HandModifier) (*model.GameMatch, error) {
+func UpdatePlay(details vo.HandModifier) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -64,7 +69,7 @@ func UpdatePlay(details model.HandModifier) (*model.GameMatch, error) {
 	return PlayCard(details)
 }
 
-func PlayCard(details model.HandModifier) (*model.GameMatch, error) {
+func PlayCard(details vo.HandModifier) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -82,7 +87,7 @@ func PlayCard(details model.HandModifier) (*model.GameMatch, error) {
 		return nil, err
 	}
 
-	var match model.GameMatch
+	var match vo.GameMatch
 	err = json.Unmarshal(b, &match)
 	if err != nil {
 		return nil, err
@@ -107,7 +112,7 @@ func PlayersReady(players []*queries.Player) bool {
 	return ready
 }
 
-func GetMatchForPlayerId(playerId int) (*model.GameMatch, error) {
+func GetMatchForPlayerId(playerId int) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -120,7 +125,7 @@ func GetMatchForPlayerId(playerId int) (*model.GameMatch, error) {
 		return nil, err
 	}
 
-	var match *model.GameMatch
+	var match *vo.GameMatch
 	err = json.Unmarshal(b, &match)
 	if err != nil {
 		return nil, err
@@ -145,7 +150,7 @@ func GetDeckById(id int32) (queries.Deck, error) {
 	return d, nil
 }
 
-func Deal(match *model.GameMatch) (*queries.Deck, error) {
+func Deal(match *vo.GameMatch) (*queries.Deck, error) {
 	deck, err := GetDeckById(match.Deckid)
 
 	// deck = *deck.Shuffle()
@@ -244,21 +249,5 @@ func Eq(p *queries.Player, c *queries.Player) bool {
 		return false
 	}
 
-	// if !eqIntArr(p.Hand, c.Hand) {
-	// 	return false
-	// }
-
-	// if !eqIntArr(p.Play, c.Play) {
-	// 	return false
-	// }
-
-	// if !eqIntArr(p.Kitty, c.Kitty) {
-	// 	return false
-	// }
-
 	return true
-}
-
-func passTurn() {
-
 }

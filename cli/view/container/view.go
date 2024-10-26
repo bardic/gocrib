@@ -4,23 +4,23 @@ import (
 	"strings"
 
 	"cli/utils"
-	"cli/views"
+	cliVO "cli/vo"
 
 	"github.com/charmbracelet/lipgloss"
 )
 
-type ContainerView struct {
+type View struct {
 	ActiveTab int
-	Tabs      []views.Tab
+	Tabs      []cliVO.Tab
 }
 
-func (v *ContainerView) Init() {
+func (view *View) Init() {
 
 }
 
-func (v *ContainerView) Render() string {
+func (view *View) Render() string {
 	doc := strings.Builder{}
-	renderedTabs := utils.RenderTabs(v.Tabs, v.ActiveTab)
+	renderedTabs := utils.RenderTabs(view.Tabs, view.ActiveTab)
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────────────────────────────────┐"))
 

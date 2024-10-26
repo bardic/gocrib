@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"model"
 	"queries"
 	conn "server/db"
 	"server/utils"
+	"vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -20,14 +20,14 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param details body model.CutDeckReq true "Deck index that is to become the cut"
+// @Param details body vo.CutDeckReq true "Deck index that is to become the cut"
 // @Success      200  {object}  int
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/match/cut [put]
 func CutDeck(c echo.Context) error {
-	details := new(model.CutDeckReq)
+	details := new(vo.CutDeckReq)
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

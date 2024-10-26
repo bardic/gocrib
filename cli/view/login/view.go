@@ -26,10 +26,10 @@ func (view *LoginView) Init() {
 	view.isLoginIdFieldSet = true
 }
 
-func (v *LoginView) Render() string {
+func (view *LoginView) Render() string {
 	doc := strings.Builder{}
 	doc.WriteString("Login \n")
-	doc.WriteString(v.loginIdField.View())
+	doc.WriteString(view.loginIdField.View())
 
 	return styles.WindowStyle.Align(lipgloss.Center, lipgloss.Center).Render(doc.String())
 }

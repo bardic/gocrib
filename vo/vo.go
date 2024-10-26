@@ -1,4 +1,4 @@
-package model
+package vo
 
 import (
 	"queries"
@@ -38,15 +38,6 @@ type GameAction struct {
 	Type     GameActionType
 	CardsIds []int
 }
-
-// type GameViewState uint
-
-// const (
-// 	BoardView GameViewState = iota
-// 	PlayView
-// 	HandView
-// 	KittyView
-// )
 
 //_Comms_
 

@@ -7,39 +7,39 @@ import (
 	"cli/services"
 	"cli/styles"
 	"cli/utils"
-	"cli/views"
-	"cli/views/board"
-	"cli/views/card"
-	"model"
+	"cli/view/board"
+	"cli/view/card"
+	cliVO "cli/vo"
+	"vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type ContainerController struct {
-	views.Controller
-	subview views.IController
+type Controller struct {
+	cliVO.Controller
+	subview cliVO.IController
 }
 
-func (cc *ContainerController) GetState() views.ControllerState {
-	return views.LoginControllerState
+func (ctrl *Controller) GetState() cliVO.ControllerState {
+	return cliVO.LoginControllerState
 }
 
-func (cc *ContainerController) Init() {
-	cc.ChangeTab(0)
+func (ctrl *Controller) Init() {
+	ctrl.ChangeTab(0)
 }
 
-func (cc *ContainerController) Render() string {
-	containerHeader := cc.View.Render()
-	viewRender := cc.subview.Render()
+func (ctrl *Controller) Render() string {
+	containerHeader := ctrl.View.Render()
+	viewRender := ctrl.subview.Render()
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
 }
 
-func (cc *ContainerController) Update(msg tea.Msg) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	subView := cc.subview
+	subView := ctrl.subview
 
 	subView.Update(msg)
 
@@ -47,7 +47,7 @@ func (cc *ContainerController) Update(msg tea.Msg) tea.Cmd {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg: //User input
-		resp := cc.ParseInput(msg)
+		resp := ctrl.ParseInput(msg)
 
 		if resp == nil {
 			break
@@ -56,17 +56,17 @@ func (cc *ContainerController) Update(msg tea.Msg) tea.Cmd {
 		cmds = append(cmds, func() tea.Msg {
 			return resp
 		})
-	case model.ChangeTabMsg:
-		cc.ChangeTab(msg.TabIndex)
+	case vo.ChangeTabMsg:
+		ctrl.ChangeTab(msg.TabIndex)
 	}
 
 	return tea.Batch(cmds...)
 }
 
-func (cc *ContainerController) ParseInput(msg tea.KeyMsg) tea.Msg {
-	containerModel := cc.Model.(*ContainerModel)
-	containerView := cc.View.(*ContainerView)
-	subView := cc.subview
+func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
+	containerModel := ctrl.Model.(*Model)
+	containerView := ctrl.View.(*View)
+	subView := ctrl.subview
 
 	subView.ParseInput(msg)
 
@@ -79,7 +79,7 @@ func (cc *ContainerController) ParseInput(msg tea.KeyMsg) tea.Msg {
 			containerView.ActiveTab = 0
 		}
 		containerModel.State = containerView.Tabs[containerView.ActiveTab].TabState
-		return model.ChangeTabMsg{
+		return vo.ChangeTabMsg{
 			TabIndex: containerView.ActiveTab,
 		}
 
@@ -91,7 +91,7 @@ func (cc *ContainerController) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		containerModel.State = containerView.Tabs[containerView.ActiveTab].TabState
-		return model.ChangeTabMsg{
+		return vo.ChangeTabMsg{
 			TabIndex: containerView.ActiveTab,
 		}
 	}
@@ -99,12 +99,12 @@ func (cc *ContainerController) ParseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func (cc *ContainerController) ChangeTab(tabIndex int) {
-	containerModel := cc.Model.(*ContainerModel)
+func (ctrl *Controller) ChangeTab(tabIndex int) {
+	containerModel := ctrl.Model.(*Model)
 
-	gameDeck := cc.getGameDeck(containerModel)
+	gameDeck := ctrl.getGameDeck(containerModel)
 
-	handModel := &views.HandModel{
+	handModel := &cliVO.HandModel{
 		CurrentTurnPlayerId: containerModel.Match.Players[0].ID,
 		CardsToDisplay:      containerModel.Match.Players[0].Hand,
 		SelectedCardIds:     []int32{},
@@ -113,10 +113,10 @@ func (cc *ContainerController) ChangeTab(tabIndex int) {
 
 	switch tabIndex {
 	case 0:
-		cc.subview = &board.BoardController{
-			Controller: views.Controller{
-				Model: board.BoardModel{
-					ViewModel: views.ViewModel{
+		ctrl.subview = &board.Controller{
+			Controller: cliVO.Controller{
+				Model: board.Model{
+					ViewModel: cliVO.ViewModel{
 						Name: "Game",
 					},
 					LocalPlayerId: containerModel.Match.Players[0].ID,
@@ -126,50 +126,50 @@ func (cc *ContainerController) ChangeTab(tabIndex int) {
 		}
 	case 1:
 		services.GetGampleCardsForMatch(containerModel.Match.ID)
-		cc.subview = cc.CreateController("Play",
+		ctrl.subview = ctrl.CreateController("Play",
 			handModel,
 			gameDeck)
 	case 2:
 		services.GetGampleCardsForMatch(containerModel.Match.ID)
-		cc.subview = cc.CreateController("Hand",
+		ctrl.subview = ctrl.CreateController("Hand",
 			handModel,
 			gameDeck)
 	case 3:
 		services.GetGampleCardsForMatch(containerModel.Match.ID)
-		cc.subview = cc.CreateController("Kitty",
+		ctrl.subview = ctrl.CreateController("Kitty",
 			handModel,
 			gameDeck)
 	}
 
-	cc.subview.Init()
+	ctrl.subview.Init()
 }
 
-func (cc *ContainerController) CreateController(name string, handModel *views.HandModel, gameDeck *model.GameDeck) views.IController {
-	m := &card.CardModel{
-		ViewModel: &views.ViewModel{
+func (ctrl *Controller) CreateController(name string, handModel *cliVO.HandModel, gameDeck *vo.GameDeck) cliVO.IController {
+	m := &card.Model{
+		ViewModel: &cliVO.ViewModel{
 			Name: name,
 		},
-		ActiveSlotIdx:       0,
-		HighlighedId:        0,
-		HighlightedSlotIdxs: []int32{},
-		Deck:                gameDeck,
-		HandModel:           handModel,
-		SelectedCardId:      0,
+		ActiveSlotIndex:        0,
+		HighlighedId:           0,
+		HighlightedSlotIndexes: []int32{},
+		Deck:                   gameDeck,
+		HandModel:              handModel,
+		SelectedCardId:         0,
 	}
 
-	v := &card.CardView{
+	v := &card.View{
 		SelectedCardId: m.SelectedCardId,
 		HandModel:      m.HandModel,
 	}
 
-	return &card.CardController{
-		Controller: &views.Controller{
+	return &card.Controller{
+		Controller: &cliVO.Controller{
 			Model: m,
 			View:  v,
 		},
 	}
 }
-func (cc *ContainerController) getGameDeck(containerModel *ContainerModel) *model.GameDeck {
+func (ctrl *Controller) getGameDeck(containerModel *Model) *vo.GameDeck {
 	var deck *queries.Deck
 	resp := services.GetDeckById(containerModel.Match.Deckid)
 	err := json.Unmarshal(resp.([]byte), &deck)
@@ -184,7 +184,7 @@ func (cc *ContainerController) getGameDeck(containerModel *ContainerModel) *mode
 		utils.Logger.Sugar().Error(err)
 	}
 
-	return &model.GameDeck{
+	return &vo.GameDeck{
 		Deck:  deck,
 		Cards: gameCards,
 	}

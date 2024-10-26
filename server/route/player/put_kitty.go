@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"model"
+	"vo"
 	"queries"
 	conn "server/db"
 	"server/utils"
@@ -18,14 +18,14 @@ import (
 // @Tags         match
 // @Accept       json
 // @Produce      json
-// @Param details body model.HandModifier true "array of ids to add to kitty"
+// @Param details body vo.HandModifier true "array of ids to add to kitty"
 // @Success      200  {object}  queries.Match
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/kitty [put]
 func UpdateKitty(c echo.Context) error {
-	details := &model.HandModifier{}
+	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -47,7 +47,7 @@ func UpdateKitty(c echo.Context) error {
 	return c.JSON(http.StatusOK, m)
 }
 
-func updateKitty(details model.HandModifier) (*model.GameMatch, error) {
+func updateKitty(details vo.HandModifier) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)

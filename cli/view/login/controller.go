@@ -5,23 +5,23 @@ import (
 
 	"cli/services"
 	"cli/utils"
-	"cli/views"
+	cliVO "cli/vo"
 	"queries"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type LoginController struct {
-	views.Controller
+	cliVO.Controller
 }
 
-func (ctrl *LoginController) GetState() views.ControllerState {
-	return views.LoginControllerState
+func (ctrl *LoginController) GetState() cliVO.ControllerState {
+	return cliVO.LoginControllerState
 }
 
 func (ctrl *LoginController) Init() {
 	ctrl.Model = LoginModel{
-		views.ViewModel{
+		cliVO.ViewModel{
 			Name: "Login",
 		},
 	}

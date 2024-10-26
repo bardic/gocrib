@@ -2,15 +2,15 @@ package services
 
 import (
 	"encoding/json"
-	"model"
 	"net/http"
 	"strconv"
+	"vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func PostGame() tea.Msg {
-	a := model.GameAction{}
+	a := vo.GameAction{}
 	b, err := json.Marshal(a)
 	if err != nil {
 		return err
