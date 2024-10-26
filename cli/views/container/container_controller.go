@@ -39,6 +39,10 @@ func (cc *ContainerController) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
+	subView := cc.subview
+
+	subView.Update(msg)
+
 	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
@@ -62,21 +66,37 @@ func (cc *ContainerController) Update(msg tea.Msg) tea.Cmd {
 func (cc *ContainerController) ParseInput(msg tea.KeyMsg) tea.Msg {
 	containerModel := cc.Model.(*ContainerModel)
 	containerView := cc.View.(*ContainerView)
+	subView := cc.subview
+
+	subView.ParseInput(msg)
 
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "tab":
 		containerView.ActiveTab = containerView.ActiveTab + 1
+		if containerView.ActiveTab >= len(containerView.Tabs) {
+			containerView.ActiveTab = 0
+		}
 		containerModel.State = containerView.Tabs[containerView.ActiveTab].TabState
+		return model.ChangeTabMsg{
+			TabIndex: containerView.ActiveTab,
+		}
 
 	case "shift+tab":
 		containerView.ActiveTab = containerView.ActiveTab - 1
+
+		if containerView.ActiveTab < 0 {
+			containerView.ActiveTab = len(containerView.Tabs) - 1
+		}
+
 		containerModel.State = containerView.Tabs[containerView.ActiveTab].TabState
+		return model.ChangeTabMsg{
+			TabIndex: containerView.ActiveTab,
+		}
 	}
-	return model.ChangeTabMsg{
-		TabIndex: containerView.ActiveTab,
-	}
+
+	return nil
 }
 
 func (cc *ContainerController) ChangeTab(tabIndex int) {
@@ -131,7 +151,7 @@ func (cc *ContainerController) CreateController(name string, handModel *views.Ha
 		},
 		ActiveSlotIdx:       0,
 		HighlighedId:        0,
-		HighlightedSlotIdxs: []int{},
+		HighlightedSlotIdxs: []int32{},
 		Deck:                gameDeck,
 		HandModel:           handModel,
 		SelectedCardId:      0,

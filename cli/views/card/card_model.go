@@ -13,6 +13,6 @@ type CardModel struct {
 	ActiveSlotIdx       int
 	SelectedCardId      int
 	HighlighedId        int
-	HighlightedSlotIdxs []int
+	HighlightedSlotIdxs []int32
 	Deck                *model.GameDeck
 }

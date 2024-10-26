@@ -2,6 +2,7 @@ package card
 
 import (
 	"cli/views"
+	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -35,6 +36,7 @@ func (cc *CardController) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		cardModel.HighlighedId = cardModel.ActiveSlotIdx //Highlighed id is to be hnalded by view
+
 	case "left":
 		cardModel.ActiveSlotIdx--
 
@@ -43,7 +45,19 @@ func (cc *CardController) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		cardModel.HighlighedId = cardModel.ActiveSlotIdx
+	case " ":
+		idx := slices.Index(
+			cardModel.HighlightedSlotIdxs,
+			cardModel.CardsToDisplay[cardModel.HighlighedId])
+		if idx > -1 {
+			cardModel.HighlightedSlotIdxs = slices.Delete(cardModel.HighlightedSlotIdxs, 0, 1)
+		} else {
+			cardModel.HighlightedSlotIdxs = append(cardModel.HighlightedSlotIdxs, cardModel.CardsToDisplay[cardModel.HighlighedId])
+		}
 	}
+
+	cardView.SelectedCardId = cardModel.ActiveSlotIdx
+	cardView.SelectedCardIds = cardModel.HighlightedSlotIdxs
 
 	return nil
 }
