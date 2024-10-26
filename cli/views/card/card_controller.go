@@ -25,11 +25,12 @@ func (cc *CardController) Render() string {
 
 func (cc *CardController) ParseInput(msg tea.KeyMsg) tea.Msg {
 	cardModel := cc.Model.(*CardModel)
+	cardView := cc.View.(*CardView)
 	switch msg.String() {
 	case "right":
 		cardModel.ActiveSlotIdx++
 
-		if cardModel.ActiveSlotIdx > len(cardModel.Cards)-1 {
+		if cardModel.ActiveSlotIdx > len(cardView.CardsToDisplay)-1 {
 			cardModel.ActiveSlotIdx = 0
 		}
 
@@ -38,7 +39,7 @@ func (cc *CardController) ParseInput(msg tea.KeyMsg) tea.Msg {
 		cardModel.ActiveSlotIdx--
 
 		if cardModel.ActiveSlotIdx < 0 {
-			cardModel.ActiveSlotIdx = len(cardModel.Cards) - 1
+			cardModel.ActiveSlotIdx = len(cardView.CardsToDisplay) - 1
 		}
 
 		cardModel.HighlighedId = cardModel.ActiveSlotIdx

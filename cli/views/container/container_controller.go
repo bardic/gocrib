@@ -20,44 +20,22 @@ type ContainerController struct {
 	subview views.IController
 }
 
-func (gc *ContainerController) GetState() views.ControllerState {
+func (cc *ContainerController) GetState() views.ControllerState {
 	return views.LoginControllerState
 }
 
-func (gc *ContainerController) Init() {
-	gc.View = &ContainerView{
-		ActiveTab: 0,
-		tabs: []views.Tab{
-			{
-				Title:    "Board",
-				TabState: model.BoardView,
-			},
-			{
-				Title:    "Play",
-				TabState: model.PlayView,
-			},
-			{
-				Title:    "Hand",
-				TabState: model.HandView,
-			},
-			{
-				Title:    "Kitty",
-				TabState: model.KittyView,
-			},
-		},
-	}
-
-	gc.ChangeTab(0)
+func (cc *ContainerController) Init() {
+	cc.ChangeTab(0)
 }
 
-func (gc *ContainerController) Render() string {
-	containerHeader := gc.View.Render()
-	viewRender := gc.subview.Render()
+func (cc *ContainerController) Render() string {
+	containerHeader := cc.View.Render()
+	viewRender := cc.subview.Render()
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
 }
 
-func (v *ContainerController) Update(msg tea.Msg) tea.Cmd {
+func (cc *ContainerController) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
@@ -65,7 +43,7 @@ func (v *ContainerController) Update(msg tea.Msg) tea.Cmd {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg: //User input
-		resp := v.ParseInput(msg)
+		resp := cc.ParseInput(msg)
 
 		if resp == nil {
 			break
@@ -75,36 +53,36 @@ func (v *ContainerController) Update(msg tea.Msg) tea.Cmd {
 			return resp
 		})
 	case model.ChangeTabMsg:
-		v.ChangeTab(msg.TabIndex)
+		cc.ChangeTab(msg.TabIndex)
 	}
 
 	return tea.Batch(cmds...)
 }
 
-func (v *ContainerController) ParseInput(msg tea.KeyMsg) tea.Msg {
-	containerModel := v.Model.(*ContainerModel)
-	containerView := v.View.(*ContainerView)
+func (cc *ContainerController) ParseInput(msg tea.KeyMsg) tea.Msg {
+	containerModel := cc.Model.(*ContainerModel)
+	containerView := cc.View.(*ContainerView)
 
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "tab":
 		containerView.ActiveTab = containerView.ActiveTab + 1
-		containerModel.State = containerView.tabs[containerView.ActiveTab].TabState
+		containerModel.State = containerView.Tabs[containerView.ActiveTab].TabState
 
 	case "shift+tab":
 		containerView.ActiveTab = containerView.ActiveTab - 1
-		containerModel.State = containerView.tabs[containerView.ActiveTab].TabState
+		containerModel.State = containerView.Tabs[containerView.ActiveTab].TabState
 	}
 	return model.ChangeTabMsg{
 		TabIndex: containerView.ActiveTab,
 	}
 }
 
-func (gc *ContainerController) ChangeTab(tabIndex int) {
-	containerModel := gc.Model.(*ContainerModel)
+func (cc *ContainerController) ChangeTab(tabIndex int) {
+	containerModel := cc.Model.(*ContainerModel)
 
-	gameDeck := gc.getGameDeck(containerModel)
+	gameDeck := cc.getGameDeck(containerModel)
 
 	handModel := &views.HandModel{
 		CurrentTurnPlayerId: containerModel.Match.Players[0].ID,
@@ -115,7 +93,7 @@ func (gc *ContainerController) ChangeTab(tabIndex int) {
 
 	switch tabIndex {
 	case 0:
-		gc.subview = &board.BoardController{
+		cc.subview = &board.BoardController{
 			Controller: views.Controller{
 				Model: board.BoardModel{
 					ViewModel: views.ViewModel{
@@ -128,48 +106,50 @@ func (gc *ContainerController) ChangeTab(tabIndex int) {
 		}
 	case 1:
 		services.GetGampleCardsForMatch(containerModel.Match.ID)
-		gc.CreateController("Play",
-			containerModel.Match.Players[0].Kitty,
+		cc.subview = cc.CreateController("Play",
 			handModel,
 			gameDeck)
 	case 2:
 		services.GetGampleCardsForMatch(containerModel.Match.ID)
-		gc.CreateController("Hand",
-			containerModel.Match.Players[0].Hand,
+		cc.subview = cc.CreateController("Hand",
 			handModel,
 			gameDeck)
 	case 3:
 		services.GetGampleCardsForMatch(containerModel.Match.ID)
-		gc.CreateController("Kitty",
-			containerModel.Match.Players[0].Kitty,
+		cc.subview = cc.CreateController("Kitty",
 			handModel,
 			gameDeck)
 	}
 
-	gc.subview.Init()
+	cc.subview.Init()
 }
 
-func (gc *ContainerController) CreateController(name string, cards []int32, handModel *views.HandModel, gameDeck *model.GameDeck) views.IController {
+func (cc *ContainerController) CreateController(name string, handModel *views.HandModel, gameDeck *model.GameDeck) views.IController {
+	m := &card.CardModel{
+		ViewModel: &views.ViewModel{
+			Name: name,
+		},
+		ActiveSlotIdx:       0,
+		HighlighedId:        0,
+		HighlightedSlotIdxs: []int{},
+		Deck:                gameDeck,
+		HandModel:           handModel,
+		SelectedCardId:      0,
+	}
+
+	v := &card.CardView{
+		SelectedCardId: m.SelectedCardId,
+		HandModel:      m.HandModel,
+	}
+
 	return &card.CardController{
 		Controller: &views.Controller{
-			Model: &card.CardModel{
-				ViewModel: &views.ViewModel{
-					Name: name,
-				},
-				ActiveSlotIdx:       0,
-				HighlighedId:        0,
-				HighlightedSlotIdxs: []int{},
-				Cards:               cards,
-				Deck:                gameDeck,
-			},
-			View: &card.CardView{
-				SelectedCardId: 0,
-				HandModel:      handModel,
-			},
+			Model: m,
+			View:  v,
 		},
 	}
 }
-func (gc *ContainerController) getGameDeck(containerModel *ContainerModel) *model.GameDeck {
+func (cc *ContainerController) getGameDeck(containerModel *ContainerModel) *model.GameDeck {
 	var deck *queries.Deck
 	resp := services.GetDeckById(containerModel.Match.Deckid)
 	err := json.Unmarshal(resp.([]byte), &deck)

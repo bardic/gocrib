@@ -61,29 +61,37 @@ func (m *AppModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				utils.Logger.Sugar().Error(err)
 			}
 
+			containerModel := &container.ContainerModel{
+				Tabs: []views.Tab{
+					{
+						Title:    "Board",
+						TabState: model.BoardView,
+					},
+					{
+						Title:    "Play",
+						TabState: model.PlayView,
+					},
+					{
+						Title:    "Hand",
+						TabState: model.HandView,
+					},
+					{
+						Title:    "Kitty",
+						TabState: model.KittyView,
+					},
+				},
+				Match: match,
+			}
+
+			containerView := &container.ContainerView{
+				ActiveTab: containerModel.ActiveTab,
+				Tabs:      containerModel.Tabs,
+			}
+
 			m.currentController = &container.ContainerController{
 				Controller: views.Controller{
-					Model: &container.ContainerModel{
-						Tabs: []views.Tab{
-							{
-								Title:    "Board",
-								TabState: model.BoardView,
-							},
-							{
-								Title:    "Play",
-								TabState: model.PlayView,
-							},
-							{
-								Title:    "Hand",
-								TabState: model.HandView,
-							},
-							{
-								Title:    "Kitty",
-								TabState: model.KittyView,
-							},
-						},
-						Match: match,
-					},
+					Model: containerModel,
+					View:  containerView,
 				},
 			}
 

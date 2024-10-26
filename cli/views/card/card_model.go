@@ -8,9 +8,10 @@ import (
 
 type CardModel struct {
 	*views.ViewModel
+	*views.HandModel
 	State               queries.Gamestate
-	Cards               []int32
 	ActiveSlotIdx       int
+	SelectedCardId      int
 	HighlighedId        int
 	HighlightedSlotIdxs []int
 	Deck                *model.GameDeck
