@@ -3,6 +3,7 @@ package player
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"queries"
 	conn "server/db"
@@ -34,7 +35,8 @@ func PlayerReady(c echo.Context) error {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	_, err := ReadyPlayerById(c, *details)
 
@@ -96,7 +98,8 @@ func ReadyPlayerById(c echo.Context, playerId int) (bool, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	err := q.UpdatePlayerReady(ctx, queries.UpdatePlayerReadyParams{
 		ID:      int32(playerId),

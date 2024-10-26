@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"queries"
 	conn "server/db"
@@ -31,7 +32,8 @@ func Login(c echo.Context) error {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	a, err := q.GetAccount(ctx, *id)
 

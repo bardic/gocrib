@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"queries"
 	conn "server/db"
+	"time"
 	"vo"
 )
 
@@ -13,7 +14,8 @@ func UpdateGameState(matchId int32, state queries.Gamestate) error {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: matchId})
 
@@ -29,7 +31,8 @@ func GetMatch(id int) (*vo.GameMatch, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	m, err := q.GetMatchById(ctx, int32(id))
 
@@ -50,7 +53,8 @@ func GetOpenMatches() ([]queries.Match, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	matchesData, err := q.GetOpenMatches(ctx)
 
@@ -78,7 +82,8 @@ func NewDeck() (queries.Deck, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	cards, err := q.GetCards(ctx)
 
@@ -106,7 +111,8 @@ func UpdateMatch(match queries.Match) error {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	err := q.UpdateMatch(ctx, queries.UpdateMatchParams{
 		ID:                 match.ID,
@@ -135,7 +141,8 @@ func UpdatePlayersInMatch(req vo.JoinMatchReq) error {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	err := q.UpdatePlayersInMatch(ctx, queries.UpdatePlayersInMatchParams{
 		ID:          int32(req.MatchId),

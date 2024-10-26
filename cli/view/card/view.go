@@ -21,8 +21,8 @@ func (view *View) Init() {
 }
 
 func (view *View) Render() string {
-	s := ""
-	cardViews := make([]string, 0)
+	var s string
+	var cardViews []string
 
 	for i := 0; i < len(view.CardsToDisplay); i++ {
 		c := utils.GetCardById(view.CardsToDisplay[i], view.Deck)

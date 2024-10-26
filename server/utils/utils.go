@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"math/rand/v2"
+	"time"
 
 	"queries"
 	conn "server/db"
@@ -16,7 +17,8 @@ func QueryForCards(ids []int32) ([]vo.GameCard, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	matchCards, err := q.GetMatchCards(ctx, ids)
 
@@ -59,7 +61,8 @@ func UpdatePlay(details vo.HandModifier) (*vo.GameMatch, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	q.UpdateCardsPlayed(ctx, queries.UpdateCardsPlayedParams{
 		Play: details.CardIds,
@@ -74,7 +77,8 @@ func PlayCard(details vo.HandModifier) (*vo.GameMatch, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	q.RemoveCardsFromHand(ctx, queries.RemoveCardsFromHandParams{
 		ID:   details.PlayerId,
@@ -117,7 +121,8 @@ func GetMatchForPlayerId(playerId int) (*vo.GameMatch, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	b, err := q.GetMatchByPlayerId(ctx, int32(playerId))
 
@@ -139,7 +144,8 @@ func GetDeckById(id int32) (queries.Deck, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	d, err := q.GetDeck(ctx, id)
 
@@ -189,7 +195,8 @@ func GetPlayerById(id int) (queries.Player, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	p, err := q.GetPlayer(ctx, int32(id))
 
@@ -205,7 +212,8 @@ func UpdatePlayerById(player *queries.Player) (queries.Player, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	p, err := q.UpdatePlayer(ctx, queries.UpdatePlayerParams{
 		Hand:    player.Hand,

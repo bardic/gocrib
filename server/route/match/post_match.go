@@ -3,6 +3,7 @@ package match
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"queries"
 	conn "server/db"
@@ -35,7 +36,8 @@ func NewMatch(c echo.Context) error {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	p, err := player.NewPlayerQuery(details.AccountId)
 

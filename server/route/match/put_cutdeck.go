@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"queries"
 	conn "server/db"
@@ -36,7 +37,8 @@ func CutDeck(c echo.Context) error {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	cleanId := strings.Trim(details.CutIndex, " ")
 

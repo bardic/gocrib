@@ -28,29 +28,20 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	cardModel := ctrl.Model.(*Model)
 	cardView := ctrl.View.(*View)
 	switch msg.String() {
+	//Highlight card to the right
 	case "right":
-		cardModel.ActiveSlotIndex++
-
-		if cardModel.ActiveSlotIndex > len(cardView.CardsToDisplay)-1 {
-			cardModel.ActiveSlotIndex = 0
-		}
-
-		cardModel.HighlighedId = cardModel.ActiveSlotIndex //Highlighed id is to be hnalded by view
-
+		ctrl.updateActiveSlotIndex(1)
+	//Highlight card to the left
 	case "left":
-		cardModel.ActiveSlotIndex--
+		ctrl.updateActiveSlotIndex(-1)
 
-		if cardModel.ActiveSlotIndex < 0 {
-			cardModel.ActiveSlotIndex = len(cardView.CardsToDisplay) - 1
-		}
-
-		cardModel.HighlighedId = cardModel.ActiveSlotIndex
+	//Select card
 	case " ":
 		idx := slices.Index(
 			cardModel.HighlightedSlotIndexes,
 			cardModel.CardsToDisplay[cardModel.HighlighedId])
 		if idx > -1 {
-			cardModel.HighlightedSlotIndexes = slices.Delete(cardModel.HighlightedSlotIndexes, 0, 1)
+			cardModel.HighlightedSlotIndexes = slices.Delete(cardModel.HighlightedSlotIndexes, idx, idx+1)
 		} else {
 			cardModel.HighlightedSlotIndexes = append(cardModel.HighlightedSlotIndexes, cardModel.CardsToDisplay[cardModel.HighlighedId])
 		}
@@ -63,4 +54,18 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 }
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	return nil
+}
+
+func (ctrl *Controller) updateActiveSlotIndex(delta int) {
+	cardModel := ctrl.Model.(*Model)
+
+	cardModel.ActiveSlotIndex += delta
+
+	if cardModel.ActiveSlotIndex < 0 {
+		cardModel.ActiveSlotIndex = len(cardModel.CardsToDisplay) - 1
+	} else if cardModel.ActiveSlotIndex > len(cardModel.CardsToDisplay)-1 {
+		cardModel.ActiveSlotIndex = 0
+	}
+
+	cardModel.HighlighedId = cardModel.ActiveSlotIndex
 }

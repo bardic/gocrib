@@ -3,6 +3,7 @@ package player
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"queries"
 	conn "server/db"
@@ -43,7 +44,8 @@ func NewPlayerQuery(accountId int32) (*queries.Player, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	p, err := q.CreatePlayer(ctx, queries.CreatePlayerParams{
 		Accountid: accountId,

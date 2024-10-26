@@ -3,11 +3,12 @@ package player
 import (
 	"context"
 	"net/http"
+	"time"
 
-	"vo"
 	"queries"
 	conn "server/db"
 	"server/utils"
+	"vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -52,7 +53,8 @@ func updateKitty(details vo.HandModifier) (*vo.GameMatch, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	err := q.UpdateKitty(ctx, queries.UpdateKittyParams{
 		ID:    details.PlayerId,
