@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"vo"
 
 	"cli/services"
 	"cli/utils"
@@ -14,20 +15,18 @@ import (
 )
 
 type View struct {
-	cutInput             textinput.Model
-	isLoading            bool //This should just be a state
-	state                queries.Gamestate
-	currentTurnsPlayerid int32
-	localPlayer          *queries.Player
-	players              []*queries.Player
-	matchId              int32
+	cutInput      textinput.Model
+	isLoading     bool //This should just be a state
+	state         queries.Gamestate
+	localPlayerId int32
+	match         *vo.GameMatch
 }
 
 var boardRowLen int = 50
 var boardEndRowLen int = 31
 
 func (view *View) Init() {
-	matchMsg := services.GetPlayerMatch(strconv.Itoa(int(view.matchId)))
+	matchMsg := services.GetPlayerMatch(strconv.Itoa(int(view.match.ID)))
 	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
@@ -48,7 +47,7 @@ func (view *View) Render() string {
 	doc := strings.Builder{}
 	viewBuilder := strings.Builder{}
 
-	if view.state == queries.GamestateCutState && view.currentTurnsPlayerid != view.localPlayer.ID {
+	if view.state == queries.GamestateCutState && view.match.Currentplayerturn != view.localPlayerId {
 		view.cutInput.Focus()
 		viewBuilder.WriteString(view.cutInput.View() + " \n")
 	} else {
@@ -56,11 +55,11 @@ func (view *View) Render() string {
 	}
 
 	//Row 1
-	viewBuilder.WriteString(utils.DrawRow(view.players, boardRowLen, 0))
+	viewBuilder.WriteString(utils.DrawRow(view.match.Players, boardRowLen, 0))
 	//Row 2
-	viewBuilder.WriteString(utils.DrawRow(view.players, boardRowLen, boardRowLen))
+	viewBuilder.WriteString(utils.DrawRow(view.match.Players, boardRowLen, boardRowLen))
 	//Row 3
-	viewBuilder.WriteString(utils.DrawRow(view.players, boardEndRowLen, boardRowLen*2))
+	viewBuilder.WriteString(utils.DrawRow(view.match.Players, boardEndRowLen, boardRowLen*2))
 
 	doc.WriteString(viewBuilder.String())
 	doc.WriteString(utils.BuildFooter())

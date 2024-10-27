@@ -56,10 +56,10 @@ func NewLogger() (*zap.Logger, error) {
 	return cfg.Build()
 }
 
-func GetPlayerById(accountId int32, players []queries.Player) (*queries.Player, error) {
+func GetPlayerByAccountId(accountId int32, players []*queries.Player) (*queries.Player, error) {
 	for _, p := range players {
 		if p.Accountid == accountId {
-			return &p, nil
+			return p, nil
 		}
 	}
 	return nil, errors.New("no player found")

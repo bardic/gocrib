@@ -12,30 +12,31 @@ import (
 )
 
 type View struct {
-	*cliVO.HandModel
-	SelectedCardId int
+	*cliVO.HandVO
+	ActiveCardId    int32
+	SelectedCardIds []int32
 }
 
 func (view *View) Init() {
-	view.SelectedCardId = 0
+	view.ActiveCardId = 0
 }
 
 func (view *View) Render() string {
 	var s string
 	var cardViews []string
 
-	for i := 0; i < len(view.CardsToDisplay); i++ {
-		c := utils.GetCardById(view.CardsToDisplay[i], view.Deck)
+	for i := 0; i < len(view.CardIds); i++ {
+		c := utils.GetCardById(view.CardIds[i], view.Deck)
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(c), c.Value)
 
 		if slices.Contains(view.SelectedCardIds, c.ID) {
-			if i == view.SelectedCardId {
+			if int32(i) == view.ActiveCardId {
 				cardViews = append(cardViews, styles.SelectedFocusedStyle.Render(cardStr))
 			} else {
 				cardViews = append(cardViews, styles.SelectedStyle.Render(cardStr))
 			}
 		} else {
-			if i == view.SelectedCardId {
+			if int32(i) == view.ActiveCardId {
 				cardViews = append(cardViews, styles.FocusedModelStyle.Render(cardStr))
 			} else {
 				cardViews = append(cardViews, styles.ModelStyle.Render(cardStr))

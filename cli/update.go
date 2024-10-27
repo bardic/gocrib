@@ -80,7 +80,9 @@ func (m *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						TabState: vo.KittyView,
 					},
 				},
-				Match: match,
+				Match:        match,
+				LocalPlayer:  match.Players[0],
+				ActiveTab:    0,
 			}
 
 			containerView := &container.View{

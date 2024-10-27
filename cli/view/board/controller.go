@@ -19,11 +19,9 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 func (ctrl *Controller) Init() {
 	boardModel := ctrl.Model.(Model)
 	ctrl.View = &View{
-		matchId:              boardModel.GameMatch.ID,
-		players:              boardModel.GameMatch.Players,
-		state:                queries.GamestateCutState,
-		localPlayer:          boardModel.GameMatch.Players[0],
-		currentTurnsPlayerid: 0,
+		state:         queries.GamestateCutState,
+		match:         boardModel.GameMatch,
+		localPlayerId: boardModel.LocalPlayerId,
 	}
 
 	ctrl.View.Init()

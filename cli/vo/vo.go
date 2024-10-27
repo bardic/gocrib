@@ -33,11 +33,10 @@ type IHandView interface {
 	BuildFooter() string
 }
 
-type HandModel struct {
-	CurrentTurnPlayerId int32
-	CardsToDisplay      []int32
-	SelectedCardIds     []int32
-	Deck                *vo.GameDeck
+type HandVO struct {
+	LocalPlayerID int32
+	CardIds       []int32
+	Deck          *vo.GameDeck
 }
 
 type IViewModel interface {
