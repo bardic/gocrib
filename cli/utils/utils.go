@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 
@@ -100,8 +101,8 @@ func GetVisibleCards(activeTab int, player queries.Player) []int32 {
 	return cards
 }
 
-func BuildFooter() string {
-	f := "\n State: meow | Active Player : 0 | Match ID: 0 "
+func BuildCommonFooter(activePlayerId, localPlayerId, matchId int32, gameState queries.Gamestate) string {
+	f := fmt.Sprintf("\nState: %v | Local/Active Player : %v/%v | Match ID: %v ", gameState, localPlayerId, activePlayerId, matchId)
 	f += "\ntab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
 	return f
 }

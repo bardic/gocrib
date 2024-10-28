@@ -11,31 +11,31 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type LoginController struct {
+type Controller struct {
 	cliVO.Controller
 }
 
-func (ctrl *LoginController) GetState() cliVO.ControllerState {
+func (ctrl *Controller) GetState() cliVO.ControllerState {
 	return cliVO.LoginControllerState
 }
 
-func (ctrl *LoginController) Init() {
+func (ctrl *Controller) Init() {
 	ctrl.Model = LoginModel{
 		cliVO.ViewModel{
 			Name: "Login",
 		},
 	}
 
-	ctrl.View = &LoginView{}
+	ctrl.View = &View{}
 	ctrl.View.Init()
 }
 
-func (ctrl *LoginController) Render() string {
+func (ctrl *Controller) Render() string {
 	return ctrl.View.Render()
 }
 
-func (ctrl *LoginController) ParseInput(msg tea.KeyMsg) tea.Msg {
-	loginView := ctrl.View.(*LoginView)
+func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
+	loginView := ctrl.View.(*View)
 
 	switch msg.String() {
 	case "enter", "view_update":
@@ -52,8 +52,8 @@ func (ctrl *LoginController) ParseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func (ctrl *LoginController) Update(msg tea.Msg) tea.Cmd {
-	loginView := ctrl.View.(*LoginView)
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+	loginView := ctrl.View.(*View)
 
 	var cmd tea.Cmd
 	var cmds []tea.Cmd

@@ -140,3 +140,11 @@ func getActiveView() (table.Model, error) {
 func getOpenMatches() tea.Msg {
 	return services.GetOpenMatches()
 }
+
+func (view *View) BuildHeader() string {
+	return ""
+}
+
+func (view *View) BuildFooter() string {
+	return ""
+}

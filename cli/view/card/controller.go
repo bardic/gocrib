@@ -58,8 +58,6 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	cardView.ActiveCardId = cardModel.ActiveSlotIndex
 	cardView.SelectedCardIds = cardModel.SelectedCardIds
 
-	cardView.BuildFooter()
-
 	return nil
 }
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {

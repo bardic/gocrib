@@ -150,7 +150,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 	}
 
 	containerModel.subview.Init()
-	
+
 }
 
 func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId, matchId int32, cardIds []int32) *cliVO.HandVO {
@@ -177,8 +177,11 @@ func (ctrl *Controller) CreateController(name string, handModel *cliVO.HandVO) c
 	}
 
 	v := &card.View{
-		ActiveCardId: m.ActiveSlotIndex,
-		HandVO:       m.HandVO,
+		ActiveCardId:   m.ActiveSlotIndex,
+		HandVO:         m.HandVO,
+		ActivePlayerId: m.HandVO.LocalPlayerID,
+		MatchId:        ctrl.Model.(*Model).Match.ID,
+		GameState:      ctrl.Model.(*Model).Match.Gamestate,
 	}
 
 	return &card.Controller{

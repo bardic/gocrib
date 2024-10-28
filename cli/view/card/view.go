@@ -2,6 +2,7 @@ package card
 
 import (
 	"fmt"
+	"queries"
 	"slices"
 
 	"cli/styles"
@@ -15,6 +16,9 @@ type View struct {
 	*cliVO.HandVO
 	ActiveCardId    int32
 	SelectedCardIds []int32
+	ActivePlayerId  int32
+	MatchId         int32
+	GameState       queries.Gamestate
 }
 
 func (view *View) Init() {
@@ -25,6 +29,7 @@ func (view *View) Render() string {
 	var s string
 	var cardViews []string
 
+	s += view.BuildHeader()
 	for i := 0; i < len(view.CardIds); i++ {
 		c := utils.GetCardById(view.CardIds[i], view.Deck)
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(c), c.Value)
@@ -45,7 +50,7 @@ func (view *View) Render() string {
 
 	s += lipgloss.JoinHorizontal(lipgloss.Top, cardViews...)
 
-	s += "\n" + utils.BuildFooter()
+	s += "\n" + view.BuildFooter()
 
 	return s
 }
@@ -55,5 +60,12 @@ func (view *View) BuildHeader() string {
 }
 
 func (view *View) BuildFooter() string {
-	return "Meow"
+	f := utils.BuildCommonFooter(
+		view.ActivePlayerId,
+		view.LocalPlayerID,
+		view.MatchId,
+		view.GameState,
+	)
+
+	return f
 }

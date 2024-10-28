@@ -62,7 +62,21 @@ func (view *View) Render() string {
 	viewBuilder.WriteString(utils.DrawRow(view.match.Players, boardEndRowLen, boardRowLen*2))
 
 	doc.WriteString(viewBuilder.String())
-	doc.WriteString(utils.BuildFooter())
+	doc.WriteString(view.BuildFooter())
 
 	return doc.String()
+}
+
+func (view *View) BuildHeader() string {
+	return ""
+}
+
+func (view *View) BuildFooter() string {
+	f := utils.BuildCommonFooter(
+		view.match.Currentplayerturn,
+		view.localPlayerId,
+		view.match.ID,
+		view.match.Gamestate,
+	)
+	return f
 }

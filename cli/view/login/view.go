@@ -9,12 +9,12 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type LoginView struct {
+type View struct {
 	loginIdField      textinput.Model
 	isLoginIdFieldSet bool
 }
 
-func (view *LoginView) Init() {
+func (view *View) Init() {
 	if view.isLoginIdFieldSet {
 		return
 	}
@@ -26,10 +26,18 @@ func (view *LoginView) Init() {
 	view.isLoginIdFieldSet = true
 }
 
-func (view *LoginView) Render() string {
+func (view *View) Render() string {
 	doc := strings.Builder{}
 	doc.WriteString("Login \n")
 	doc.WriteString(view.loginIdField.View())
 
 	return styles.WindowStyle.Align(lipgloss.Center, lipgloss.Center).Render(doc.String())
+}
+
+func (view *View) BuildHeader() string {
+	return ""
+}
+
+func (view *View) BuildFooter() string {
+	return ""
 }

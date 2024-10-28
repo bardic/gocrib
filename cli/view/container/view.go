@@ -26,3 +26,11 @@ func (view *View) Render() string {
 
 	return doc.String()
 }
+
+func (view *View) BuildHeader() string {
+	return ""
+}
+
+func (view *View) BuildFooter() string {
+	return ""
+}

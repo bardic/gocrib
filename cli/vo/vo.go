@@ -25,6 +25,8 @@ type IController interface {
 type IView interface {
 	Render() string
 	Init()
+	BuildHeader() string
+	BuildFooter() string
 }
 
 type IHandView interface {

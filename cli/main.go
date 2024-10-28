@@ -38,7 +38,7 @@ func (m *CLI) Init() tea.Cmd {
 
 func newModel() *CLI {
 	m := &CLI{
-		currentController: &login.LoginController{},
+		currentController: &login.Controller{},
 	}
 
 	m.currentController.Init()
