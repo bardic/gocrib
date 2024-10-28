@@ -3,6 +3,7 @@ package card
 import (
 	"cli/services"
 	cliVO "cli/vo"
+	"queries"
 	"slices"
 	"vo"
 
@@ -48,11 +49,20 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			cardModel.SelectedCardIds = append(cardModel.SelectedCardIds, cardModel.CardIds[cardModel.ActiveSlotIndex])
 		}
 	case "enter":
-		services.PutKitty(vo.HandModifier{
-			MatchId:  ctrl.ID,
-			PlayerId: cardModel.LocalPlayerID,
-			CardIds:  cardModel.SelectedCardIds,
-		})
+		switch cardModel.State {
+		case queries.GamestateDiscardState:
+			services.PutKitty(vo.HandModifier{
+				MatchId:  ctrl.ID,
+				PlayerId: cardModel.LocalPlayerID,
+				CardIds:  cardModel.SelectedCardIds,
+			})
+		case queries.GamestatePlayState:
+			services.PutPlay(vo.HandModifier{
+				MatchId:  ctrl.ID,
+				PlayerId: cardModel.LocalPlayerID,
+				CardIds:  cardModel.SelectedCardIds,
+			})
+		}
 	}
 
 	cardView.ActiveCardId = cardModel.ActiveSlotIndex

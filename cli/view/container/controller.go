@@ -125,6 +125,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 	case 1:
 		containerModel.Subview = ctrl.CreateController(
 			"Play",
+			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
@@ -135,6 +136,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 	case 2:
 		containerModel.Subview = ctrl.CreateController(
 			"Hand",
+			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
@@ -145,6 +147,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 	case 3:
 		containerModel.Subview = ctrl.CreateController(
 			"Kitty",
+			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
@@ -170,7 +173,7 @@ func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId, matchId in
 	return handModel
 }
 
-func (ctrl *Controller) CreateController(name string, handModel *cliVO.HandVO) cliVO.IController {
+func (ctrl *Controller) CreateController(name string, currentState queries.Gamestate, handModel *cliVO.HandVO) cliVO.IController {
 	m := &card.Model{
 		ViewModel: &cliVO.ViewModel{
 			Name: name,
@@ -179,6 +182,7 @@ func (ctrl *Controller) CreateController(name string, handModel *cliVO.HandVO) c
 		SelectedCardIds: []int32{},
 		Deck:            handModel.Deck,
 		HandVO:          handModel,
+		State:           currentState,
 	}
 
 	v := &card.View{
