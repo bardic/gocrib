@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"cli/utils"
 	"cli/view/login"
 	cliVO "cli/vo"
@@ -10,7 +8,6 @@ import (
 	"vo"
 
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -21,7 +18,7 @@ type CLI struct {
 	account           *queries.Account
 	matchId           int
 	currentController cliVO.IController
-	timer             timer.Model
+	//timer             timer.Model
 }
 
 func main() {
@@ -42,7 +39,6 @@ func (m *CLI) Init() tea.Cmd {
 func newModel() *CLI {
 	m := &CLI{
 		currentController: &login.LoginController{},
-		timer:             timer.NewWithInterval(time.Hour, time.Second*1),
 	}
 
 	m.currentController.Init()

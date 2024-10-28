@@ -101,13 +101,9 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 func (ctrl *Controller) ChangeTab(tabIndex int) {
 	containerModel := ctrl.Model.(*Model)
+	deckId := containerModel.Match.Deckid
+	matchId := containerModel.Match.ID
 
-	handModel := ctrl.getHandModelForCardIds(
-		containerModel.Match.Deckid,
-		containerModel.Match.ID,
-		containerModel.LocalPlayer.ID,
-		containerModel.Match.Players[0].Hand,
-	)
 	switch tabIndex {
 	case 0:
 		containerModel.subview = &board.Controller{
@@ -122,31 +118,42 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			},
 		}
 	case 1:
-
 		containerModel.subview = ctrl.CreateController(
 			"Play",
-			handModel,
-
-			containerModel.Match,
+			ctrl.getHandModelForCardIds(
+				containerModel.LocalPlayer.ID,
+				deckId,
+				matchId,
+				containerModel.Match.Players[0].Play,
+			),
 		)
 	case 2:
 		containerModel.subview = ctrl.CreateController(
 			"Hand",
-			handModel,
-			containerModel.Match,
+			ctrl.getHandModelForCardIds(
+				containerModel.LocalPlayer.ID,
+				deckId,
+				matchId,
+				containerModel.Match.Players[0].Hand,
+			),
 		)
 	case 3:
 		containerModel.subview = ctrl.CreateController(
 			"Kitty",
-			handModel,
-			containerModel.Match,
+			ctrl.getHandModelForCardIds(
+				containerModel.LocalPlayer.ID,
+				deckId,
+				matchId,
+				containerModel.Match.Players[0].Kitty,
+			),
 		)
 	}
 
 	containerModel.subview.Init()
+	
 }
 
-func (ctrl *Controller) getHandModelForCardIds(deckId, matchId, localPlayerId int32, cardIds []int32) *cliVO.HandVO {
+func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId, matchId int32, cardIds []int32) *cliVO.HandVO {
 	gameDeck := ctrl.getGameDeck(deckId, matchId)
 
 	handModel := &cliVO.HandVO{
@@ -158,21 +165,19 @@ func (ctrl *Controller) getHandModelForCardIds(deckId, matchId, localPlayerId in
 	return handModel
 }
 
-func (ctrl *Controller) CreateController(name string, handModel *cliVO.HandVO, gameMatch *vo.GameMatch) cliVO.IController {
+func (ctrl *Controller) CreateController(name string, handModel *cliVO.HandVO) cliVO.IController {
 	m := &card.Model{
 		ViewModel: &cliVO.ViewModel{
 			Name: name,
 		},
-		ActiveSlotIndex:        0,
-		HighlighedId:           0,
-		HighlightedSlotIndexes: []int32{},
-		Deck:                   handModel.Deck,
-		HandVO:                 handModel,
-		SelectedCardId:         0,
+		ActiveSlotIndex: 0,
+		SelectedCardIds: []int32{},
+		Deck:            handModel.Deck,
+		HandVO:          handModel,
 	}
 
 	v := &card.View{
-		ActiveCardId: m.SelectedCardId,
+		ActiveCardId: m.ActiveSlotIndex,
 		HandVO:       m.HandVO,
 	}
 

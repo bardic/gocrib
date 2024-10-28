@@ -51,11 +51,11 @@ var (
 
 	WindowStyle = lipgloss.NewStyle().
 			BorderForeground(highlightColor).
-			Padding(2, 0).
+			Padding(1, 0).
 			Border(lipgloss.NormalBorder()).
 			BorderTop(false).
-			Width(100).
-			Height(15)
+			Width(75).
+			Height(12)
 
 	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
 	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")

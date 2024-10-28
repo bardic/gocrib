@@ -7,6 +7,7 @@ import (
 	"cli/services"
 	"cli/utils"
 	"cli/view/container"
+	"cli/view/gameContainer"
 	"cli/view/lobby"
 	cliVO "cli/vo"
 	"queries"
@@ -15,13 +16,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
-	cmds = append(cmds, m.currentController.Update(msg))
+	cmds = append(cmds, cli.currentController.Update(msg))
 	switch msg := msg.(type) {
 	case queries.Account:
-		m.account = &msg
+		cli.account = &msg
 		cmds = append(cmds, func() tea.Msg {
 			return vo.StateChangeMsg{
 				NewState: vo.LobbyView,
@@ -30,16 +31,16 @@ func (m *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case vo.StateChangeMsg:
 		switch msg.NewState {
 		case vo.LobbyView:
-			m.currentController = &lobby.Controller{}
-			m.currentController.Init()
-			m.ViewStateName = vo.LobbyView
+			cli.currentController = &lobby.Controller{}
+			cli.currentController.Init()
+			cli.ViewStateName = vo.LobbyView
 
 			services.GetOpenMatches()
 		case vo.JoinGameView:
 
 			fallthrough
 		case vo.CreateGameView:
-			m.matchId = msg.MatchId
+			cli.matchId = msg.MatchId
 
 			var match *vo.GameMatch
 			idstr := strconv.Itoa(msg.MatchId)
@@ -61,7 +62,7 @@ func (m *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				utils.Logger.Sugar().Error(err)
 			}
 
-			containerModel := &container.Model{
+			gameContainerModel := &container.Model{
 				Tabs: []cliVO.Tab{
 					{
 						Title:    "Board",
@@ -80,28 +81,29 @@ func (m *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						TabState: vo.KittyView,
 					},
 				},
-				Match:        match,
-				LocalPlayer:  match.Players[0],
-				ActiveTab:    0,
+				Match:       match,
+				LocalPlayer: match.Players[0],
+				ActiveTab:   0,
 			}
 
 			containerView := &container.View{
-				ActiveTab: containerModel.ActiveTab,
-				Tabs:      containerModel.Tabs,
+				ActiveTab: gameContainerModel.ActiveTab,
+				Tabs:      gameContainerModel.Tabs,
 			}
 
-			m.currentController = &container.Controller{
-				Controller: cliVO.Controller{
-					Model: containerModel,
-					View:  containerView,
+			cli.currentController = &gameContainer.Controller{
+				Controller: &container.Controller{
+					Controller: cliVO.Controller{
+						Model: gameContainerModel,
+						View:  containerView,
+					},
 				},
 			}
 
-			ctrl := m.currentController.(*container.Controller)
+			ctrl := cli.currentController.(*gameContainer.Controller)
 			ctrl.Init()
-
 		}
 	}
 
-	return m, tea.Batch(cmds...)
+	return cli, tea.Batch(cmds...)
 }

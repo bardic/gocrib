@@ -40,22 +40,25 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	//Select card
 	case " ":
 		idx := slices.Index(
-			cardModel.HighlightedSlotIndexes,
-			cardModel.CardIds[cardModel.HighlighedId])
+			cardModel.SelectedCardIds,
+			cardModel.CardIds[cardModel.ActiveSlotIndex])
 		if idx > -1 {
-			cardModel.HighlightedSlotIndexes = slices.Delete(cardModel.HighlightedSlotIndexes, idx, idx+1)
+			cardModel.SelectedCardIds = slices.Delete(cardModel.SelectedCardIds, 0, idx+1)
 		} else {
-			cardModel.HighlightedSlotIndexes = append(cardModel.HighlightedSlotIndexes, cardModel.CardIds[cardModel.HighlighedId])
+			cardModel.SelectedCardIds = append(cardModel.SelectedCardIds, cardModel.CardIds[cardModel.ActiveSlotIndex])
 		}
 	case "enter":
 		services.PutKitty(vo.HandModifier{
 			MatchId:  ctrl.ID,
 			PlayerId: cardModel.LocalPlayerID,
+			CardIds:  cardModel.SelectedCardIds,
 		})
 	}
 
 	cardView.ActiveCardId = cardModel.ActiveSlotIndex
-	cardView.SelectedCardIds = cardModel.HighlightedSlotIndexes
+	cardView.SelectedCardIds = cardModel.SelectedCardIds
+
+	cardView.BuildFooter()
 
 	return nil
 }
@@ -65,7 +68,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 
 func (ctrl *Controller) updateActiveSlotIndex(delta int32) {
 	cardModel := ctrl.Model.(*Model)
-
 	cardModel.ActiveSlotIndex += delta
 
 	if cardModel.ActiveSlotIndex < 0 {
@@ -73,6 +75,4 @@ func (ctrl *Controller) updateActiveSlotIndex(delta int32) {
 	} else if cardModel.ActiveSlotIndex > int32(len(cardModel.CardIds))-1 {
 		cardModel.ActiveSlotIndex = 0
 	}
-
-	cardModel.HighlighedId = cardModel.ActiveSlotIndex
 }

@@ -28,23 +28,25 @@ func (view *View) Render() string {
 	for i := 0; i < len(view.CardIds); i++ {
 		c := utils.GetCardById(view.CardIds[i], view.Deck)
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(c), c.Value)
-
-		if slices.Contains(view.SelectedCardIds, c.ID) {
+		styledCard := styles.ModelStyle.Render(cardStr)
+		if slices.Index(view.SelectedCardIds, c.ID) > -1 {
 			if int32(i) == view.ActiveCardId {
-				cardViews = append(cardViews, styles.SelectedFocusedStyle.Render(cardStr))
+				styledCard = styles.SelectedFocusedStyle.Render(cardStr)
 			} else {
-				cardViews = append(cardViews, styles.SelectedStyle.Render(cardStr))
+				styledCard = styles.FocusedModelStyle.Render(cardStr)
 			}
 		} else {
 			if int32(i) == view.ActiveCardId {
-				cardViews = append(cardViews, styles.FocusedModelStyle.Render(cardStr))
-			} else {
-				cardViews = append(cardViews, styles.ModelStyle.Render(cardStr))
+				styledCard = styles.FocusedModelStyle.Render(cardStr)
 			}
 		}
+		cardViews = append(cardViews, styledCard)
 	}
 
 	s += lipgloss.JoinHorizontal(lipgloss.Top, cardViews...)
+
+	s += "\n" + utils.BuildFooter()
+
 	return s
 }
 
@@ -53,5 +55,5 @@ func (view *View) BuildHeader() string {
 }
 
 func (view *View) BuildFooter() string {
-	return ""
+	return "Meow"
 }

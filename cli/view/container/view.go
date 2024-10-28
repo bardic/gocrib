@@ -22,7 +22,7 @@ func (view *View) Render() string {
 	doc := strings.Builder{}
 	renderedTabs := utils.RenderTabs(view.Tabs, view.ActiveTab)
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))
-	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────────────────────────────────┐"))
+	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, "──────────────────────────────────────────┐"))
 
 	return doc.String()
 }

@@ -101,7 +101,9 @@ func GetVisibleCards(activeTab int, player queries.Player) []int32 {
 }
 
 func BuildFooter() string {
-	return "\n\ntab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
+	f := "\n State: meow | Active Player : 0 | Match ID: 0 "
+	f += "\ntab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
+	return f
 }
 
 func IsPlayerTurn(playerId, matchId int32) bool {

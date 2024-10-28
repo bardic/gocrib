@@ -14,7 +14,6 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type View struct {
@@ -56,7 +55,7 @@ func (view *View) Render() string {
 
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
-	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "────────────────────────────────────────────────────────────────┐")
+	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "─────────────────────────────────────────────────────────┐")
 	doc.WriteString(row)
 	doc.WriteString("\n")
 
@@ -70,7 +69,7 @@ func (view *View) Render() string {
 		view.IsLobbyTableSet = true
 	}
 
-	doc.WriteString(styles.WindowStyle.Width(100).Render(view.LobbyTable.View()))
+	doc.WriteString(styles.WindowStyle.Width(75).Height(12).Render(view.LobbyTable.View()))
 	return doc.String()
 }
 
@@ -91,7 +90,6 @@ func getActiveView() (table.Model, error) {
 		{Title: "Private", Width: 10},
 		{Title: "Creation", Width: 20},
 		{Title: "Turn", Width: 4},
-		{Title: "Last Play", Width: 20},
 		{Title: "State", Width: 5},
 	}
 
@@ -106,11 +104,6 @@ func getActiveView() (table.Model, error) {
 
 	rows := []table.Row{}
 	for _, m := range matches {
-		l := len(m.Turnpasstimestamps)
-		var lastTurnTimestamp pgtype.Timestamptz
-		if l > 0 {
-			lastTurnTimestamp = m.Turnpasstimestamps[l-1]
-		}
 
 		rows = append(rows, table.Row{
 			fmt.Sprintf("%v", m.ID),
@@ -118,7 +111,6 @@ func getActiveView() (table.Model, error) {
 			fmt.Sprintf("%v", m.Privatematch),
 			m.Creationdate.Time.String(),
 			fmt.Sprintf("%v", m.Currentplayerturn),
-			lastTurnTimestamp.Time.String(),
 			fmt.Sprintf("%v", m.Gamestate),
 		})
 	}

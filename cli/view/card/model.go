@@ -9,10 +9,8 @@ import (
 type Model struct {
 	*cliVO.ViewModel
 	*cliVO.HandVO
-	State                  queries.Gamestate
-	ActiveSlotIndex        int32
-	SelectedCardId         int32
-	HighlighedId           int32
-	HighlightedSlotIndexes []int32
-	Deck                   *vo.GameDeck
+	State           queries.Gamestate
+	ActiveSlotIndex int32
+	SelectedCardIds []int32
+	Deck            *vo.GameDeck
 }
