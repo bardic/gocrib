@@ -93,7 +93,7 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			cli.currentController = &gameContainer.Controller{
 				Controller: &container.Controller{
-					Controller: cliVO.Controller{
+					Controller: &cliVO.Controller{
 						Model: gameContainerModel,
 						View:  containerView,
 					},

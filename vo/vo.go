@@ -50,7 +50,6 @@ type MatchRequirements struct {
 }
 
 type CutDeckReq struct {
-	PlayerId int32
 	MatchId  int32
 	CutIndex string
 }

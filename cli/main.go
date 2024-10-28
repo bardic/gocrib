@@ -18,7 +18,6 @@ type CLI struct {
 	account           *queries.Account
 	matchId           int
 	currentController cliVO.IController
-	//timer             timer.Model
 }
 
 func main() {

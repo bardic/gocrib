@@ -16,7 +16,7 @@ import (
 )
 
 type Controller struct {
-	cliVO.Controller
+	*cliVO.Controller
 }
 
 func (ctrl *Controller) GetState() cliVO.ControllerState {
@@ -30,7 +30,7 @@ func (ctrl *Controller) Init() {
 func (ctrl *Controller) Render() string {
 	containerModel := ctrl.Model.(*Model)
 	containerHeader := ctrl.View.Render()
-	viewRender := containerModel.subview.Render()
+	viewRender := containerModel.Subview.Render()
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
 }
@@ -39,7 +39,7 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 	containerModel := ctrl.Model.(*Model)
-	subView := containerModel.subview
+	subView := containerModel.Subview
 
 	subView.Update(msg)
 
@@ -66,7 +66,7 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	containerModel := ctrl.Model.(*Model)
 	containerView := ctrl.View.(*View)
-	subView := containerModel.subview
+	subView := containerModel.Subview
 
 	subView.ParseInput(msg)
 
@@ -106,19 +106,24 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 
 	switch tabIndex {
 	case 0:
-		containerModel.subview = &board.Controller{
-			Controller: cliVO.Controller{
-				Model: board.Model{
+		containerModel.Subview = &board.Controller{
+			Controller: &cliVO.Controller{
+				Model: &board.Model{
 					ViewModel: cliVO.ViewModel{
 						Name: "Game",
 					},
 					GameMatch:     containerModel.Match,
 					LocalPlayerId: containerModel.LocalPlayer.ID,
 				},
+				View: &board.View{
+					Match:         containerModel.Match,
+					LocalPlayerId: containerModel.LocalPlayer.ID,
+					State:         containerModel.Match.Gamestate,
+				},
 			},
 		}
 	case 1:
-		containerModel.subview = ctrl.CreateController(
+		containerModel.Subview = ctrl.CreateController(
 			"Play",
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
@@ -128,7 +133,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			),
 		)
 	case 2:
-		containerModel.subview = ctrl.CreateController(
+		containerModel.Subview = ctrl.CreateController(
 			"Hand",
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
@@ -138,7 +143,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			),
 		)
 	case 3:
-		containerModel.subview = ctrl.CreateController(
+		containerModel.Subview = ctrl.CreateController(
 			"Kitty",
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
@@ -149,7 +154,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 		)
 	}
 
-	containerModel.subview.Init()
+	containerModel.Subview.Init()
 
 }
 

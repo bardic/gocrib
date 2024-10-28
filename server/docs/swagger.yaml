@@ -214,8 +214,6 @@ definitions:
         type: string
       matchId:
         type: integer
-      playerId:
-        type: integer
     type: object
   vo.GameDeck:
     properties:

@@ -9,7 +9,7 @@ import (
 )
 
 type Controller struct {
-	cliVO.Controller
+	*cliVO.Controller
 }
 
 func (ctrl *Controller) GetState() cliVO.ControllerState {
@@ -17,11 +17,11 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 }
 
 func (ctrl *Controller) Init() {
-	boardModel := ctrl.Model.(Model)
+	boardModel := ctrl.Model.(*Model)
 	ctrl.View = &View{
-		state:         queries.GamestateCutState,
-		match:         boardModel.GameMatch,
-		localPlayerId: boardModel.LocalPlayerId,
+		State:         queries.GamestateCutState,
+		Match:         boardModel.GameMatch,
+		LocalPlayerId: boardModel.LocalPlayerId,
 	}
 
 	ctrl.View.Init()
@@ -56,7 +56,7 @@ func (ctrl *Controller) Enter() tea.Msg {
 	switch boardModel.GameMatch.Gamestate {
 	case queries.GamestateCutState:
 		boardModel.CutIndex = boardView.cutInput.Value()
-		resp := services.CutDeck(boardModel.Account.ID, boardModel.GameMatch.ID, boardModel.CutIndex)
+			resp := services.CutDeck(boardModel.GameMatch.ID, boardModel.CutIndex)
 		return resp
 	}
 

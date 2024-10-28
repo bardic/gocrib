@@ -1231,9 +1231,6 @@ const docTemplate = `{
                 },
                 "matchId": {
                     "type": "integer"
-                },
-                "playerId": {
-                    "type": "integer"
                 }
             }
         },

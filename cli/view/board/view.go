@@ -16,17 +16,17 @@ import (
 
 type View struct {
 	cutInput      textinput.Model
-	isLoading     bool //This should just be a state
-	state         queries.Gamestate
-	localPlayerId int32
-	match         *vo.GameMatch
+	isLoading     bool
+	State         queries.Gamestate
+	LocalPlayerId int32
+	Match         *vo.GameMatch
 }
 
 var boardRowLen int = 50
 var boardEndRowLen int = 31
 
 func (view *View) Init() {
-	matchMsg := services.GetPlayerMatch(strconv.Itoa(int(view.match.ID)))
+	matchMsg := services.GetPlayerMatch(strconv.Itoa(int(view.Match.ID)))
 	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
@@ -47,7 +47,7 @@ func (view *View) Render() string {
 	doc := strings.Builder{}
 	viewBuilder := strings.Builder{}
 
-	if view.state == queries.GamestateCutState && view.match.Currentplayerturn != view.localPlayerId {
+	if view.State == queries.GamestateCutState && view.Match.Currentplayerturn != view.LocalPlayerId {
 		view.cutInput.Focus()
 		viewBuilder.WriteString(view.cutInput.View() + " \n")
 	} else {
@@ -55,11 +55,11 @@ func (view *View) Render() string {
 	}
 
 	//Row 1
-	viewBuilder.WriteString(utils.DrawRow(view.match.Players, boardRowLen, 0))
+	viewBuilder.WriteString(utils.DrawRow(view.Match.Players, boardRowLen, 0))
 	//Row 2
-	viewBuilder.WriteString(utils.DrawRow(view.match.Players, boardRowLen, boardRowLen))
+	viewBuilder.WriteString(utils.DrawRow(view.Match.Players, boardRowLen, boardRowLen))
 	//Row 3
-	viewBuilder.WriteString(utils.DrawRow(view.match.Players, boardEndRowLen, boardRowLen*2))
+	viewBuilder.WriteString(utils.DrawRow(view.Match.Players, boardEndRowLen, boardRowLen*2))
 
 	doc.WriteString(viewBuilder.String())
 	doc.WriteString(view.BuildFooter())
@@ -73,10 +73,10 @@ func (view *View) BuildHeader() string {
 
 func (view *View) BuildFooter() string {
 	f := utils.BuildCommonFooter(
-		view.match.Currentplayerturn,
-		view.localPlayerId,
-		view.match.ID,
-		view.match.Gamestate,
+		view.Match.Currentplayerturn,
+		view.LocalPlayerId,
+		view.Match.ID,
+		view.Match.Gamestate,
 	)
 	return f
 }

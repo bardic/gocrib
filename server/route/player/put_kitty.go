@@ -37,7 +37,7 @@ func UpdateKitty(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = utils.UpdateGameState(m.ID, queries.GamestatePlayState)
+	err = utils.UpdateGameState(m.ID, queries.GamestateCutState)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

@@ -55,9 +55,8 @@ func PostPlayerMatch(accountId int32) tea.Msg {
 	return sendReq(EndPointMatch, http.MethodPost, req)
 }
 
-func CutDeck(playerId, matchId int32, cutIndex string) tea.Msg {
+func CutDeck(matchId int32, cutIndex string) tea.Msg {
 	req := vo.CutDeckReq{
-		PlayerId: playerId,
 		MatchId:  matchId,
 		CutIndex: cutIndex,
 	}

@@ -12,7 +12,7 @@ type Model struct {
 	State       vo.ViewState
 	States      []vo.ViewState
 	Match       *vo.GameMatch
-	subview     cliVO.IController
+	Subview     cliVO.IController
 	LocalPlayer *queries.Player
 	ActiveTab   int
 }
