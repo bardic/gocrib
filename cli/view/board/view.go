@@ -2,7 +2,6 @@ package board
 
 import (
 	"encoding/json"
-	"strconv"
 	"strings"
 	"vo"
 
@@ -26,7 +25,7 @@ var boardRowLen int = 50
 var boardEndRowLen int = 31
 
 func (view *View) Init() {
-	matchMsg := services.GetPlayerMatch(strconv.Itoa(int(view.Match.ID)))
+	matchMsg := services.GetPlayerMatch(view.Match.ID)
 	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return

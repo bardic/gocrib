@@ -9,7 +9,6 @@ import (
 	conn "server/db"
 	"server/utils"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -54,29 +53,15 @@ func PlayerReady(c echo.Context) error {
 	// 	return c.JSON(http.StatusOK, nil)
 	// }
 
-	deck, err := utils.NewDeck()
+	deck, err := utils.NewDeckForMatchId(match.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	for _, id := range deck.Cards {
-		_, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
-			MatchID:   match.ID,
-			Cardid:    id,
-			State:     queries.CardstateDeck,
-			Origowner: pgtype.Int4{Int32: 0},
-			Currowner: pgtype.Int4{Int32: 0},
-		})
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-	}
-
 	err = q.UpdateMatchWithDeckId(ctx, queries.UpdateMatchWithDeckIdParams{
 		ID:     match.ID,
-		Deckid: int32(deck.ID),
+		Deckid: deck.ID,
 	})
 
 	if err != nil {

@@ -104,10 +104,9 @@ func getActiveView() (table.Model, error) {
 
 	rows := []table.Row{}
 	for _, m := range matches {
-
 		rows = append(rows, table.Row{
 			fmt.Sprintf("%v", m.ID),
-			fmt.Sprintf("%v", m.Playerids),
+			fmt.Sprintf("%v", utils.GetPlayerIds(m.Players)),
 			fmt.Sprintf("%v", m.Privatematch),
 			m.Creationdate.Time.String(),
 			fmt.Sprintf("%v", m.Currentplayerturn),

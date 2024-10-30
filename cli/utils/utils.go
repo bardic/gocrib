@@ -19,10 +19,15 @@ import (
 
 var Logger *zap.Logger
 
-func GetCardById(id int32, deck *vo.GameDeck) *queries.Card {
+func GetCardById(id int32, deck *vo.GameDeck) *vo.GameCard {
 	for _, card := range deck.Cards {
-		if card.Matchcard.Cardid == id {
-			return &card.Card
+		gameCard := &vo.GameCard{
+			Matchcard: card.Matchcard,
+			Card:      card.Card,
+		}
+
+		if card.Card.ID == id {
+			return gameCard
 		}
 	}
 	return nil
@@ -181,4 +186,12 @@ func RenderTabs(tabs []cliVO.Tab, activeTab int) []string {
 	}
 
 	return renderedTabs
+}
+
+func GetPlayerIds(players []*queries.Player) []int32 {
+	var playIds []int32
+	for _, p := range players {
+		playIds = append(playIds, p.Play...)
+	}
+	return playIds
 }

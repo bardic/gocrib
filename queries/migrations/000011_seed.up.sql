@@ -1,5 +1,5 @@
 INSERT INTO
-    cards ("value", "suit", "art")
+    card ("value", "suit", "art")
 VALUES
     ('Ace', 'Spades', 'meow'),
     ('Two', 'Spades', 'meow'),
@@ -55,7 +55,7 @@ VALUES
     ('King', 'Diamonds', 'meow');
 
 INSERT INTO
-    accounts("name")
+    account("name")
 VALUES
     ('test1'),
     ('test2');

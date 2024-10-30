@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"strconv"
 
 	"cli/services"
 	"cli/utils"
@@ -37,15 +36,10 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			services.GetOpenMatches()
 		case vo.JoinGameView:
+			cli.isOpponent = true
+			
+			match, err := GetMatchForId(msg)
 
-			fallthrough
-		case vo.CreateGameView:
-			cli.matchId = msg.MatchId
-
-			var match *vo.GameMatch
-			idstr := strconv.Itoa(msg.MatchId)
-			resp := services.GetPlayerMatch(idstr)
-			err := json.Unmarshal(resp.([]byte), &match)
 			if err != nil {
 				utils.Logger.Sugar().Error(err)
 			}
@@ -56,7 +50,17 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-			resp = services.GetPlayerMatch(idstr)
+			fallthrough
+		case vo.CreateGameView:
+			cli.matchId = msg.MatchId
+
+			match, err := GetMatchForId(msg)
+
+			if err != nil {
+				utils.Logger.Sugar().Error(err)
+			}
+
+			resp := services.GetPlayerMatch(match.ID)
 			err = json.Unmarshal(resp.([]byte), &match)
 			if err != nil {
 				utils.Logger.Sugar().Error(err)
@@ -106,4 +110,15 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return cli, tea.Batch(cmds...)
+}
+
+func GetMatchForId(msg vo.StateChangeMsg) (*vo.GameMatch, error) {
+	var match *vo.GameMatch
+
+	resp := services.GetPlayerMatch(match.ID)
+	err := json.Unmarshal(resp.([]byte), &match)
+	if err != nil {
+		utils.Logger.Sugar().Error(err)
+	}
+	return match, err
 }

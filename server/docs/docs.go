@@ -262,48 +262,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/player/gameplaycards/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Get cards by ids",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "csv of ids",
-                        "name": "ids",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/queries.Card"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/player/kitty": {
             "put": {
                 "consumes": [
@@ -501,7 +459,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/queries.GetGameCardsForMatchRow"
+                                "$ref": "#/definitions/queries.GetMatchCardsRow"
                             }
                         }
                     },
@@ -1071,6 +1029,28 @@ const docTemplate = `{
                 "CardvalueJoker"
             ]
         },
+        "queries.Deck": {
+            "type": "object",
+            "properties": {
+                "cutmatchcardid": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "queries.DeckMatchcard": {
+            "type": "object",
+            "properties": {
+                "deckid": {
+                    "type": "integer"
+                },
+                "matchcardid": {
+                    "type": "integer"
+                }
+            }
+        },
         "queries.Gamestate": {
             "type": "string",
             "enum": [
@@ -1104,11 +1084,17 @@ const docTemplate = `{
                 "GamestateMaxGameState"
             ]
         },
-        "queries.GetGameCardsForMatchRow": {
+        "queries.GetMatchCardsRow": {
             "type": "object",
             "properties": {
                 "card": {
                     "$ref": "#/definitions/queries.Card"
+                },
+                "deck": {
+                    "$ref": "#/definitions/queries.Deck"
+                },
+                "deckMatchcard": {
+                    "$ref": "#/definitions/queries.DeckMatchcard"
                 },
                 "matchcard": {
                     "$ref": "#/definitions/queries.Matchcard"
@@ -1145,12 +1131,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "playerids": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "privatematch": {
                     "type": "boolean"
                 },
@@ -1172,9 +1152,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/pgtype.Int4"
                 },
                 "id": {
-                    "type": "integer"
-                },
-                "matchID": {
                     "type": "integer"
                 },
                 "origowner": {
@@ -1234,14 +1211,46 @@ const docTemplate = `{
                 }
             }
         },
+        "vo.GameCard": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "cardid": {
+                    "type": "integer"
+                },
+                "currowner": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "origowner": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "state": {
+                    "$ref": "#/definitions/queries.Cardstate"
+                },
+                "suit": {
+                    "$ref": "#/definitions/queries.Cardsuit"
+                },
+                "value": {
+                    "$ref": "#/definitions/queries.Cardvalue"
+                }
+            }
+        },
         "vo.GameDeck": {
             "type": "object",
             "properties": {
                 "cards": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/queries.GetGameCardsForMatchRow"
+                        "$ref": "#/definitions/vo.GameCard"
                     }
+                },
+                "cutmatchcardid": {
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "id": {
                     "type": "integer"
@@ -1277,12 +1286,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "playerids": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "players": {
                     "type": "array",

@@ -77,7 +77,7 @@ func GetOpenMatches() ([]queries.Match, error) {
 	return matches, nil
 }
 
-func NewDeck() (queries.Deck, error) {
+func NewDeckForMatchId(matchId int32) (*vo.GameDeck, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -85,25 +85,67 @@ func NewDeck() (queries.Deck, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	//create a new deck object
+	//create match cards based on queries.Cards
+	//update deck_matchcard with new match card ids
+
+	deck, err := q.CreateDeck(ctx)
+
+	if err != nil {
+		return &vo.GameDeck{}, err
+	}
+
 	cards, err := q.GetCards(ctx)
 
 	if err != nil {
-		return queries.Deck{}, err
+		return &vo.GameDeck{}, err
 	}
 
-	//get card ids
-	var cardIds []int32
+	matchcards := []*vo.GameCard{}
 	for _, card := range cards {
-		cardIds = append(cardIds, card.ID)
+		matchCard, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
+			Cardid: card.ID,
+			State:  queries.CardstateDeck,
+		},
+		)
+
+		if err != nil {
+			return &vo.GameDeck{}, err
+		}
+
+		gameCard := &vo.GameCard{
+			Matchcard: matchCard,
+			Card:      card,
+		}
+
+		matchcards = append(matchcards, gameCard)
 	}
 
-	deck, err := q.CreateDeck(ctx, cardIds)
-
-	if err != nil {
-		return queries.Deck{}, err
+	gameDeck := &vo.GameDeck{
+		Deck:  deck,
+		Cards: matchcards,
 	}
 
-	return deck, nil
+	//cards, err := q.GetMatchCards(ctx, matchId)
+	//cards, err := q.GetCards(ctx)
+
+	// if err != nil {
+	// 	return queries.Deck{}, err
+	// }
+
+	// //get card ids
+	// var matchCardIds []int32
+	// for _, card := range cards {
+	// 	matchCardIds = append(matchCardIds, card.Matchcard.ID)
+	// }
+
+	// deck, err := q.CreateDeck(ctx, matchCardIds)
+
+	// if err != nil {
+	// 	return queries.Deck{}, err
+	// }
+
+	return gameDeck, nil
 }
 
 func UpdateMatch(match queries.Match) error {
@@ -116,7 +158,6 @@ func UpdateMatch(match queries.Match) error {
 
 	err := q.UpdateMatch(ctx, queries.UpdateMatchParams{
 		ID:                 match.ID,
-		Playerids:          match.Playerids,
 		Creationdate:       match.Creationdate,
 		Privatematch:       match.Privatematch,
 		Elorangemin:        match.Elorangemin,
@@ -127,26 +168,6 @@ func UpdateMatch(match queries.Match) error {
 		Turnpasstimestamps: match.Turnpasstimestamps,
 		Gamestate:          match.Gamestate,
 		Art:                match.Art,
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func UpdatePlayersInMatch(req vo.JoinMatchReq) error {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err := q.UpdatePlayersInMatch(ctx, queries.UpdatePlayersInMatchParams{
-		ID:          int32(req.MatchId),
-		ArrayAppend: int32(req.PlayerId),
 	})
 
 	if err != nil {

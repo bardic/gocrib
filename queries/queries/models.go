@@ -218,27 +218,18 @@ type Card struct {
 	Art   string
 }
 
-type Chat struct {
-	ID       int32
-	Members  []int32
-	Messages []int32
-}
-
-type Chatmessage struct {
-	ID        int32
-	Sender    int32
-	Message   string
-	Timestamp pgtype.Timestamptz
-}
-
 type Deck struct {
-	ID    int32
-	Cards []int32
+	ID             int32
+	Cutmatchcardid pgtype.Int4
+}
+
+type DeckMatchcard struct {
+	Deckid      int32
+	Matchcardid int32
 }
 
 type Match struct {
 	ID                 int32
-	Playerids          []int32
 	Creationdate       pgtype.Timestamptz
 	Privatematch       bool
 	Elorangemin        int32
@@ -251,21 +242,17 @@ type Match struct {
 	Art                string
 }
 
+type MatchPlayer struct {
+	Matchid  int32
+	Playerid int32
+}
+
 type Matchcard struct {
 	ID        int32
-	MatchID   int32
 	Cardid    int32
 	Origowner pgtype.Int4
 	Currowner pgtype.Int4
 	State     Cardstate
-}
-
-type Matchhistory struct {
-	ID                    int32
-	Matchid               int32
-	Matchcompletetiondate pgtype.Timestamptz
-	Winners               []int32
-	Losers                []int32
 }
 
 type Player struct {

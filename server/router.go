@@ -6,7 +6,6 @@ import (
 	"server/route/account"
 	"server/route/admin/card"
 	"server/route/deck"
-	"server/route/gameplaycard"
 	"server/route/match"
 	"server/route/player"
 
@@ -82,7 +81,6 @@ func v1Routes(g *echo.Group) {
 	// playerGroup.GET("/card", card.GetCard)
 	// playerGroup.GET("/allcards", route.GetAllCards)
 	//Player
-	playerGroup.GET("/gameplaycards", gameplaycard.GetGameplayCards)
 	playerGroup.GET("/player", player.GetPlayer)
 	playerGroup.POST("/player", player.NewPlayer)
 	playerGroup.PUT("/player", player.UpdatePlayer)

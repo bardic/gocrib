@@ -3,7 +3,6 @@ package game
 import (
 	"errors"
 	"queries"
-	"server/utils"
 	"sort"
 	"vo"
 )
@@ -431,16 +430,18 @@ func scanRightJackCut(gameplayCardsIdsInPlay []int32, match vo.GameMatch) ([]vo.
 }
 
 func getGameplayCardsForIds(ids []int32) ([]vo.GameCard, error) {
-	if len(ids) == 0 {
-		return []vo.GameCard{}, nil
-	}
+	// if len(ids) == 0 {
+	// 	return []vo.GameCard{}, nil
+	// }
 
-	// string_ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(ids)), ","), "[]")
-	cards, err := utils.QueryForCards(ids)
-	if err != nil {
-		return []vo.GameCard{}, err
-	}
-	return cards, nil
+	// // string_ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(ids)), ","), "[]")
+	// cards, err := utils.QueryForCards(ids)
+	// if err != nil {
+	// 	return []vo.GameCard{}, err
+	// }
+	// return cards, nil
+
+	return []vo.GameCard{}, nil
 }
 
 func scanForThirtyOne(gameplayCardsIdsInPlay []int32) ([]vo.Scores, error) {

@@ -102,7 +102,6 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 func (ctrl *Controller) ChangeTab(tabIndex int) {
 	containerModel := ctrl.Model.(*Model)
 	deckId := containerModel.Match.Deckid
-	matchId := containerModel.Match.ID
 
 	switch tabIndex {
 	case 0:
@@ -129,7 +128,6 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
-				matchId,
 				containerModel.Match.Players[0].Play,
 			),
 		)
@@ -140,7 +138,6 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
-				matchId,
 				containerModel.Match.Players[0].Hand,
 			),
 		)
@@ -151,7 +148,6 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
-				matchId,
 				containerModel.Match.Players[0].Kitty,
 			),
 		)
@@ -161,8 +157,8 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 
 }
 
-func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId, matchId int32, cardIds []int32) *cliVO.HandVO {
-	gameDeck := ctrl.getGameDeck(deckId, matchId)
+func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId int32, cardIds []int32) *cliVO.HandVO {
+	gameDeck := ctrl.getGameDeck(deckId)
 
 	handModel := &cliVO.HandVO{
 		LocalPlayerID: localPlayerId,
@@ -201,23 +197,13 @@ func (ctrl *Controller) CreateController(name string, currentState queries.Games
 		GameMatch: ctrl.Model.(*Model).Match,
 	}
 }
-func (ctrl *Controller) getGameDeck(deckId, matchId int32) *vo.GameDeck {
-	var deck *queries.Deck
+func (ctrl *Controller) getGameDeck(deckId int32) *vo.GameDeck {
+	var deck *vo.GameDeck
 	resp := services.GetDeckById(deckId)
 	err := json.Unmarshal(resp.([]byte), &deck)
 	if err != nil {
 		utils.Logger.Sugar().Error(err)
 	}
 
-	var gameCards []queries.GetGameCardsForMatchRow
-	resp = services.GetGampleCardsForMatch(matchId)
-	err = json.Unmarshal(resp.([]byte), &gameCards)
-	if err != nil {
-		utils.Logger.Sugar().Error(err)
-	}
-
-	return &vo.GameDeck{
-		Deck:  deck,
-		Cards: gameCards,
-	}
+	return deck
 }

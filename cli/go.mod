@@ -4,10 +4,7 @@ go 1.23.2
 
 require github.com/charmbracelet/bubbletea v1.1.1
 
-require (
-	github.com/jackc/pgx/v5 v5.7.1
-	go.uber.org/zap v1.27.0
-)
+require go.uber.org/zap v1.27.0
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect

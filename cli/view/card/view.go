@@ -32,9 +32,9 @@ func (view *View) Render() string {
 	s += view.BuildHeader()
 	for i := 0; i < len(view.CardIds); i++ {
 		c := utils.GetCardById(view.CardIds[i], view.Deck)
-		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(c), c.Value)
+		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Value)
 		styledCard := styles.ModelStyle.Render(cardStr)
-		if slices.Index(view.SelectedCardIds, c.ID) > -1 {
+		if slices.Index(view.SelectedCardIds, c.Card.ID) > -1 {
 			if int32(i) == view.ActiveCardId {
 				styledCard = styles.SelectedFocusedStyle.Render(cardStr)
 			} else {

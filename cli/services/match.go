@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"vo"
 
@@ -13,12 +14,14 @@ import (
 // 	return url(EndPointMatches+"/?id="+strconv.Itoa(state.AccountId), http.MethodGet, "")
 // }
 
-func GetPlayerMatchState(matchId string) tea.Msg {
-	return url(EndPointMatchState+"/?id="+matchId, http.MethodGet, "")
+func GetPlayerMatchState(matchId int32) tea.Msg {
+	id := strconv.Itoa(int(matchId))
+	return url(EndPointMatchState+"/?id="+id, http.MethodGet, "")
 }
 
-func GetPlayerMatch(matchId string) tea.Msg {
-	return url(EndPointMatch+"/?id="+matchId, http.MethodGet, "")
+func GetPlayerMatch(matchId int32) tea.Msg {
+	id := strconv.Itoa(int(matchId))
+	return url(EndPointMatch+"/?id="+id, http.MethodGet, "")
 }
 
 func GetOpenMatches() tea.Msg {

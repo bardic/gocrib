@@ -46,7 +46,6 @@ func NewMatch(c echo.Context) error {
 	}
 
 	m, err := q.CreateMatch(ctx, queries.CreateMatchParams{
-		Playerids:          []int32{p.ID},
 		Privatematch:       false,
 		Elorangemin:        0,
 		Elorangemax:        0,

@@ -41,7 +41,7 @@ type HandVO struct {
 	Deck          *vo.GameDeck
 }
 
-type IViewModel interface {
+type IModel interface {
 }
 
 type ViewModel struct {
@@ -50,7 +50,7 @@ type ViewModel struct {
 
 type Controller struct {
 	View  IView
-	Model IViewModel
+	Model IModel
 }
 
 type Tab struct {

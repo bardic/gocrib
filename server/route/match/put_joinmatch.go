@@ -34,13 +34,6 @@ func JoinMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	details.PlayerId = int(p.ID)
-
-	err = utils.UpdatePlayersInMatch(*details)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
 	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
 		MatchId:   int(details.MatchId),
 		PlayerId:  int(p.ID),

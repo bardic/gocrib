@@ -3,7 +3,7 @@ package utils
 import (
 	"context"
 	"encoding/json"
-	"math/rand/v2"
+	"errors"
 	"time"
 
 	"queries"
@@ -13,36 +13,37 @@ import (
 )
 
 func QueryForCards(ids []int32) ([]vo.GameCard, error) {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
+	// db := conn.Pool()
+	// defer db.Close()
+	// q := queries.New(db)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancel()
 
-	matchCards, err := q.GetMatchCards(ctx, ids)
+	// matchCards, err := q.GetMatchCards(ctx, ids)
 
-	if err != nil {
-		return []vo.GameCard{}, err
-	}
+	// if err != nil {
+	// 	return []vo.GameCard{}, err
+	// }
 
-	baseCards, err := q.GetCards(ctx)
+	// baseCards, err := q.GetCards(ctx)
 
-	if err != nil {
-		return []vo.GameCard{}, err
-	}
+	// if err != nil {
+	// 	return []vo.GameCard{}, err
+	// }
 
-	cards := []vo.GameCard{}
+	// cards := []vo.GameCard{}
 
-	for _, matchCard := range matchCards {
-		card := GetCardByIdFromCards(int(matchCard.ID), baseCards)
-		cards = append(cards, vo.GameCard{
-			Matchcard: matchCard,
-			Card:      card,
-		})
-	}
+	// for _, matchCard := range matchCards {
+	// 	card := GetCardByIdFromCards(int(matchCard.ID), baseCards)
+	// 	cards = append(cards, vo.GameCard{
+	// 		Matchcard: matchCard,
+	// 		Card:      card,
+	// 	})
+	// }
 
-	return cards, nil
+	// return cards, nil
+	return []vo.GameCard{}, nil
 }
 
 func GetCardByIdFromCards(cardId int, cards []queries.Card) queries.Card {
@@ -139,7 +140,7 @@ func GetMatchForPlayerId(playerId int) (*vo.GameMatch, error) {
 	return match, nil
 }
 
-func GetDeckById(id int32) (queries.Deck, error) {
+func GetDeckById(matchId int32) (*vo.GameDeck, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -147,19 +148,36 @@ func GetDeckById(id int32) (queries.Deck, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	d, err := q.GetDeck(ctx, id)
+	d, err := q.GetMatchCards(ctx, matchId)
 
 	if err != nil {
-		return queries.Deck{}, err
+		return &vo.GameDeck{}, err
 	}
 
-	return d, nil
+	if len(d) == 0 {
+		return &vo.GameDeck{}, errors.New("no deck found")
+	}
+
+	gameDeck := &vo.GameDeck{
+		Cards: []*vo.GameCard{},
+		Deck:  &queries.Deck{},
+	}
+
+	for _, matchCardsRow := range d {
+		gameDeck.Cards = append(gameDeck.Cards, &vo.GameCard{
+			Matchcard: matchCardsRow.Matchcard,
+			Card:      matchCardsRow.Card,
+		})
+	}
+
+	gameDeck.Deck = &d[0].Deck
+
+	return gameDeck, nil
 }
 
-func Deal(match *vo.GameMatch) (*queries.Deck, error) {
+func Deal(match *vo.GameMatch) (*vo.GameDeck, error) {
 	deck, err := GetDeckById(match.Deckid)
 
-	// deck = *deck.Shuffle()
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +189,8 @@ func Deal(match *vo.GameMatch) (*queries.Deck, error) {
 
 	for i := 0; i < len(match.Players)*cardsPerHand; i++ {
 		var cardId int32
-		cardId, deck.Cards = deck.Cards[0], deck.Cards[1:]
+		cardId = deck.Cards[0].Card.ID
+		deck.Cards = deck.Cards[1:]
 		idx := len(match.Players) - 1 - i%len(match.Players)
 
 		if len(match.Players[idx].Hand) < cardsPerHand {
@@ -187,7 +206,7 @@ func Deal(match *vo.GameMatch) (*queries.Deck, error) {
 		}
 	}
 
-	return &deck, nil
+	return deck, nil
 }
 
 func GetPlayerById(id int) (queries.Player, error) {
@@ -233,9 +252,9 @@ func UpdatePlayerById(player *queries.Player) (queries.Player, error) {
 }
 
 func Shuffle(d *queries.Deck) *queries.Deck {
-	rand.Shuffle(len(d.Cards), func(i, j int) {
-		d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
-	})
+	// rand.Shuffle(len(d.Cards), func(i, j int) {
+	// 	d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
+	// })
 
 	return d
 }

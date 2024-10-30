@@ -18,6 +18,7 @@ type CLI struct {
 	account           *queries.Account
 	matchId           int
 	currentController cliVO.IController
+	isOpponent        bool
 }
 
 func main() {

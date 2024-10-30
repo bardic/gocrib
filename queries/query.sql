@@ -2,7 +2,6 @@
 SELECT
     json_build_object(
         'id', id,
-        'playerIds', playerIds,
         'creationDate', creationDate,
         'privateMatch', privateMatch,
         'eloRangeMin', eloRangeMin,
@@ -11,8 +10,8 @@ SELECT
         'cutgamecardid', cutgamecardid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
-        'art', art,
         'gameState', gameState,
+        'art', art,
         'players',
         (
             SELECT
@@ -41,7 +40,6 @@ LIMIT 1;
 SELECT
     json_build_object(
         'id', id,
-        'playerIds', playerIds,
         'creationDate', creationDate,
         'privateMatch', privateMatch,
         'eloRangeMin', eloRangeMin,
@@ -50,8 +48,8 @@ SELECT
         'cutgamecardid', cutgamecardid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
-        'art', art,
         'gameState', gameState,
+        'art', art,
         'players',
         (
             SELECT
@@ -79,7 +77,6 @@ LIMIT 1;
 SELECT
     json_build_object(
         'id', id,
-        'playerIds', playerIds,
         'creationDate', creationDate,
         'privateMatch', privateMatch,
         'eloRangeMin', eloRangeMin,
@@ -88,8 +85,8 @@ SELECT
         'cutgamecardid', cutgamecardid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
-        'art', art,
         'gameState', gameState,
+        'art', art,
         'players',
         (
             SELECT
@@ -112,16 +109,16 @@ SELECT
 FROM match AS m;
 
 -- name: GetAccount :one
-SELECT accounts.* FROM accounts WHERE id = $1 LIMIT 1;
+SELECT account.* FROM account WHERE id = $1 LIMIT 1;
 
 -- name: UpdateAccount :exec
 UPDATE match SET cutGameCardId = @cardId where id=$1;
 
 -- name: GetCards :many
-SELECT cards.* FROM cards;
+SELECT card.* FROM card;
 
 -- name: CreateDeck :one
-INSERT INTO deck(cards) VALUES ($1) RETURNING *;
+INSERT INTO deck(cutmatchcardid) VALUES (null) RETURNING *;
 
 -- name: UpdateGameState :exec
 UPDATE match SET gameState= $1 WHERE id=$2;
@@ -131,35 +128,42 @@ UPDATE match SET cutGameCardId= $1 WHERE id=$2;
 
 -- name: UpdateMatch :exec
 UPDATE match SET
-	playerIds = $1,
-	creationDate = $2,
-	privateMatch = $3,
-	eloRangeMin = $4,
-	eloRangeMax = $5,
-	deckId = $6,
-	cutGameCardId = $7,
-	currentPlayerTurn = $8,
-	turnPassTimestamps = $9,
-	gameState= $10,
-	art = $11
-WHERE id=$12;
+	creationDate = $1,
+	privateMatch = $2,
+	eloRangeMin = $3,
+	eloRangeMax = $4,
+	deckId = $5,
+	cutGameCardId = $6,
+	currentPlayerTurn = $7,
+	turnPassTimestamps = $8,
+	gameState= $9,
+	art = $10
+WHERE id=$11;
 
 -- name: UpdateMatchState :exec
 UPDATE match SET
 	gameState= $1
 WHERE id=$2;
 
--- -- name: StartMatch :exec
--- UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1), deckid=$2 WHERE id=$3;
-
--- name: UpdatePlayersInMatch :exec
-UPDATE match SET playerIds=ARRAY_APPEND(playerIds, $1) WHERE id=$2;
-
 -- name: GetDeck :one
 SELECT deck.* FROM deck WHERE id=$1 LIMIT 1;
 
 -- name: GetMatchCards :many
-SELECT matchcards.* FROM matchcards NATURAL JOIN cards WHERE matchcards.id IN ($1::int[]);
+SELECT 
+    sqlc.embed(deck_matchcard),
+    sqlc.embed(deck),
+    sqlc.embed(matchcard),
+    sqlc.embed(card)
+FROM 
+    deck_matchcard
+LEFT JOIN
+    matchcard ON deck_matchcard.matchcardid=matchcard.id
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    card ON deck_matchcard.cardId=card.id
+WHERE
+    deck.id IN ($1);
 
 -- name: UpdateCardsPlayed :exec
 UPDATE player SET play = play + $1 where id = $2;
@@ -168,7 +172,17 @@ UPDATE player SET play = play + $1 where id = $2;
 UPDATE player SET hand = hand - $1 where id = $2;
 
 -- name: GetMatchIdForPlayerId :one 
-SELECT id from match WHERE $1 = ANY(playerids) LIMIT 1;
+SELECT 
+    match_player.*,
+    match.*,
+    player.*
+FROM 
+    match_player
+INNER JOIN
+    match ON match_player.matchid=match.id
+LEFT JOIN
+    player ON match_player.playerid=player.id
+WHERE $1 = match_player.playerId LIMIT 1;
 
 -- name: GetPlayer :one
 SELECT player.* FROM player WHERE id=$1 LIMIT 1;
@@ -187,7 +201,6 @@ UPDATE player SET
 
 -- name: CreateMatch :one
 INSERT INTO match(
-				playerIds,
 				privateMatch,
 				eloRangeMin,
 				eloRangeMax,
@@ -206,8 +219,7 @@ INSERT INTO match(
 				$6,
 				$7,
 				$8,
-				$9,
-				$10)
+				$9)
 			RETURNING *;
 
 -- name: CreatePlayer :one
@@ -243,13 +255,7 @@ UPDATE player SET kitty = kitty + $1 where id = $2;
 UPDATE match SET deckid = $1 where id = $2;
 
 -- name: CreateMatchCards :one
-INSERT INTO matchcards (match_id, cardid, origowner, currowner, state) VALUES ($1, $2, $3, $4, $5) RETURNING *;
-
--- name: GetGameCardsForMatch :many
-SELECT  sqlc.embed(m), sqlc.embed(c)
-FROM matchcards m
-JOIN cards c ON (m.cardId = c.id)
-WHERE m.match_id = $1;
+INSERT INTO matchcard (cardid, origowner, currowner, state) VALUES ($1, $2, $3, $4) RETURNING *;
 
 -- name: PassTurn :exec
 UPDATE match m

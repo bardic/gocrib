@@ -57,11 +57,25 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 				CardIds:  cardModel.SelectedCardIds,
 			})
 		case queries.GamestatePlayState:
+			//todo pass down from CLI if player is creator
 			services.PutPlay(vo.HandModifier{
 				MatchId:  ctrl.ID,
 				PlayerId: cardModel.LocalPlayerID,
 				CardIds:  cardModel.SelectedCardIds,
 			})
+		case queries.GamestateOpponentState:
+			//todo pass down from CLI if player is opponent
+
+			if cardModel.LocalPlayerID != ctrl.Players[0].ID {
+				break
+			}
+
+			services.PutPlay(vo.HandModifier{
+				MatchId:  ctrl.ID,
+				PlayerId: cardModel.LocalPlayerID,
+				CardIds:  cardModel.SelectedCardIds,
+			})
+
 		}
 	}
 

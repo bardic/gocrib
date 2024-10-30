@@ -100,6 +100,20 @@ definitions:
     - CardvalueQueen
     - CardvalueKing
     - CardvalueJoker
+  queries.Deck:
+    properties:
+      cutmatchcardid:
+        $ref: '#/definitions/pgtype.Int4'
+      id:
+        type: integer
+    type: object
+  queries.DeckMatchcard:
+    properties:
+      deckid:
+        type: integer
+      matchcardid:
+        type: integer
+    type: object
   queries.Gamestate:
     enum:
     - NewGameState
@@ -130,10 +144,14 @@ definitions:
     - GamestateGameWonState
     - GamestateGameLostState
     - GamestateMaxGameState
-  queries.GetGameCardsForMatchRow:
+  queries.GetMatchCardsRow:
     properties:
       card:
         $ref: '#/definitions/queries.Card'
+      deck:
+        $ref: '#/definitions/queries.Deck'
+      deckMatchcard:
+        $ref: '#/definitions/queries.DeckMatchcard'
       matchcard:
         $ref: '#/definitions/queries.Matchcard'
     type: object
@@ -157,10 +175,6 @@ definitions:
         $ref: '#/definitions/queries.Gamestate'
       id:
         type: integer
-      playerids:
-        items:
-          type: integer
-        type: array
       privatematch:
         type: boolean
       turnpasstimestamps:
@@ -175,8 +189,6 @@ definitions:
       currowner:
         $ref: '#/definitions/pgtype.Int4'
       id:
-        type: integer
-      matchID:
         type: integer
       origowner:
         $ref: '#/definitions/pgtype.Int4'
@@ -215,12 +227,33 @@ definitions:
       matchId:
         type: integer
     type: object
+  vo.GameCard:
+    properties:
+      art:
+        type: string
+      cardid:
+        type: integer
+      currowner:
+        $ref: '#/definitions/pgtype.Int4'
+      id:
+        type: integer
+      origowner:
+        $ref: '#/definitions/pgtype.Int4'
+      state:
+        $ref: '#/definitions/queries.Cardstate'
+      suit:
+        $ref: '#/definitions/queries.Cardsuit'
+      value:
+        $ref: '#/definitions/queries.Cardvalue'
+    type: object
   vo.GameDeck:
     properties:
       cards:
         items:
-          $ref: '#/definitions/queries.GetGameCardsForMatchRow'
+          $ref: '#/definitions/vo.GameCard'
         type: array
+      cutmatchcardid:
+        $ref: '#/definitions/pgtype.Int4'
       id:
         type: integer
     type: object
@@ -244,10 +277,6 @@ definitions:
         $ref: '#/definitions/queries.Gamestate'
       id:
         type: integer
-      playerids:
-        items:
-          type: integer
-        type: array
       players:
         items:
           $ref: '#/definitions/queries.Player'
@@ -471,34 +500,6 @@ paths:
       summary: Get all cards
       tags:
       - cards
-  /player/gameplaycards/:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: csv of ids
-        in: query
-        name: ids
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/queries.Card'
-            type: array
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get cards by ids
-      tags:
-      - cards
   /player/kitty:
     put:
       consumes:
@@ -630,7 +631,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/queries.GetGameCardsForMatchRow'
+              $ref: '#/definitions/queries.GetMatchCardsRow'
             type: array
         "404":
           description: Not Found

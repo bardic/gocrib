@@ -2,7 +2,6 @@ package gameContainer
 
 import (
 	"encoding/json"
-	"strconv"
 	"time"
 	"vo"
 
@@ -39,8 +38,7 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		var cmd tea.Cmd
 		ctrl.timer, cmd = ctrl.timer.Update(msg)
 		var gameMatch vo.GameMatch
-		idstr := strconv.Itoa(int(ctrl.Controller.Model.(*container.Model).Match.ID))
-		resp := services.GetPlayerMatch(idstr)
+		resp := services.GetPlayerMatch(ctrl.Controller.Model.(*container.Model).Match.ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
 
 		if err != nil {

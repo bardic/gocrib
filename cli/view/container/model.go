@@ -7,7 +7,7 @@ import (
 )
 
 type Model struct {
-	cliVO.IViewModel
+	cliVO.IModel
 	Tabs        []cliVO.Tab
 	State       vo.ViewState
 	States      []vo.ViewState
