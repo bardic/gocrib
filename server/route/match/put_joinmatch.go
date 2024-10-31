@@ -35,8 +35,8 @@ func JoinMatch(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
-		MatchId:   int(details.MatchId),
-		PlayerId:  int(p.ID),
+		MatchId:   details.MatchId,
+		PlayerId:  p.ID,
 		GameState: queries.GamestateJoinGameState,
 	})
 }

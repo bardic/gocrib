@@ -53,7 +53,7 @@ func PlayerReady(c echo.Context) error {
 	// 	return c.JSON(http.StatusOK, nil)
 	// }
 
-	deck, err := utils.NewDeckForMatchId(match.ID)
+	deck, err := utils.GetGameDeck(match.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

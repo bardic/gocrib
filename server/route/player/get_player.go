@@ -30,7 +30,7 @@ func GetPlayer(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	p, err := utils.GetPlayerById(p1Id)
+	p, err := utils.GetPlayerById(int32(p1Id))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

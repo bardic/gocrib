@@ -52,7 +52,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		var matchDetails vo.MatchDetailsResponse
-		msg := services.JoinMatch(int(player.ID), id)
+		msg := services.JoinMatch(player.ID, int32(id))
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
 
 		if err != nil {
@@ -67,8 +67,9 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		match := utils.CreateGame(lobbyModel.AccountId)
 
 		return vo.StateChangeMsg{
-			NewState: vo.CreateGameView,
-			MatchId:  match.MatchId,
+			NewState:  vo.CreateGameView,
+			AccountId: lobbyModel.AccountId,
+			MatchId:   match.MatchId,
 		}
 	case "tab":
 

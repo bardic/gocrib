@@ -45,13 +45,19 @@ func NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
+	deck, err := q.CreateDeck(ctx)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
 	m, err := q.CreateMatch(ctx, queries.CreateMatchParams{
 		Privatematch:       false,
 		Elorangemin:        0,
 		Elorangemax:        0,
-		Deckid:             0,
+		Deckid:             deck.ID,
 		Cutgamecardid:      0,
-		Currentplayerturn:  0,
+		Currentplayerturn:  p.ID,
 		Turnpasstimestamps: []pgtype.Timestamptz{},
 		Gamestate:          queries.GamestateNewGameState,
 		Art:                "default.png",
@@ -61,9 +67,18 @@ func NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
+	err = q.JoinMatch(ctx, queries.JoinMatchParams{
+		Matchid:  m.ID,
+		Playerid: p.ID,
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
 	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
-		MatchId:   int(m.ID),
-		PlayerId:  int(p.ID),
+		MatchId:   m.ID,
+		PlayerId:  p.ID,
 		GameState: m.Gamestate,
 	})
 }

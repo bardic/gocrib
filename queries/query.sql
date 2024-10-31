@@ -28,10 +28,14 @@ SELECT
                     )
                 )
             FROM player AS p
-            WHERE p.Id = ANY(m.playerIds)
+            LEFT JOIN
+                match_player as mp ON p.id=mp.playerid
+            WHERE p.Id = mp.playerId
         )
     )
 FROM match AS m
+LEFT JOIN
+    match_player as mp ON m.id=mp.matchid
 WHERE m.id = $1
 LIMIT 1;
 
@@ -103,10 +107,14 @@ SELECT
                     )
                 )
             FROM player AS p
-            WHERE p.Id = ANY(m.playerIds)
+            LEFT JOIN
+                match_player as mp ON p.id=mp.playerid
+            WHERE p.Id = mp.playerId
         )
     )
-FROM match AS m;
+FROM match AS m
+LEFT JOIN
+    match_player as mp ON m.id=mp.matchid;
 
 -- name: GetAccount :one
 SELECT account.* FROM account WHERE id = $1 LIMIT 1;
@@ -145,8 +153,11 @@ UPDATE match SET
 	gameState= $1
 WHERE id=$2;
 
--- name: GetDeck :one
-SELECT deck.* FROM deck WHERE id=$1 LIMIT 1;
+-- name: GetDeckForMatchId :one
+SELECT deck.* FROM deck
+LEFT JOIN
+    match ON deck.id=match.deckid
+ WHERE match.id=$1 LIMIT 1;
 
 -- name: GetMatchCards :many
 SELECT 
@@ -273,3 +284,6 @@ SET currentplayerturn =
     WHERE m.id = $1
     )            
 WHERE m.id = $1;
+
+-- name: JoinMatch :exec
+INSERT INTO match_player (matchid, playerid) VALUES ($1, $2);

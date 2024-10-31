@@ -16,7 +16,7 @@ type CLI struct {
 	ViewStateName     vo.ViewStateName
 	ActivePlayerId    int
 	account           *queries.Account
-	matchId           int
+	matchId           int32
 	currentController cliVO.IController
 	isOpponent        bool
 }

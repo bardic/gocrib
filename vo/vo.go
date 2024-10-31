@@ -42,7 +42,6 @@ type GameAction struct {
 //_Comms_
 
 type MatchRequirements struct {
-	PlayerId    int32
 	AccountId   int32
 	IsPrivate   bool
 	EloRangeMin int32
@@ -55,13 +54,13 @@ type CutDeckReq struct {
 }
 
 type JoinMatchReq struct {
-	MatchId  int
-	PlayerId int
+	MatchId  int32
+	PlayerId int32
 }
 
 type MatchDetailsResponse struct {
-	MatchId   int
-	PlayerId  int
+	MatchId   int32
+	PlayerId  int32
 	GameState queries.Gamestate
 }
 
@@ -104,8 +103,9 @@ const (
 )
 
 type StateChangeMsg struct {
-	NewState ViewStateName
-	MatchId  int
+	NewState  ViewStateName
+	AccountId int32
+	MatchId   int32
 }
 
 type GameStateChangeMsg struct {

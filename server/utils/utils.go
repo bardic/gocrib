@@ -209,7 +209,7 @@ func Deal(match *vo.GameMatch) (*vo.GameDeck, error) {
 	return deck, nil
 }
 
-func GetPlayerById(id int) (queries.Player, error) {
+func GetPlayerById(id int32) (queries.Player, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -217,7 +217,7 @@ func GetPlayerById(id int) (queries.Player, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	p, err := q.GetPlayer(ctx, int32(id))
+	p, err := q.GetPlayer(ctx, id)
 
 	if err != nil {
 		return queries.Player{}, err

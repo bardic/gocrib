@@ -325,8 +325,6 @@ definitions:
         type: integer
       isPrivate:
         type: boolean
-      playerId:
-        type: integer
     type: object
 host: localhost:1323
 info:

@@ -28,7 +28,7 @@ func GetOpenMatches() tea.Msg {
 	return url(EndPointOpenMatch, http.MethodGet, "")
 }
 
-func JoinMatch(playerId, activeMatchId int) tea.Msg {
+func JoinMatch(playerId, activeMatchId int32) tea.Msg {
 	req := vo.JoinMatchReq{
 		PlayerId: playerId,
 		MatchId:  activeMatchId,

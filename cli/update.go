@@ -24,20 +24,31 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cli.account = &msg
 		cmds = append(cmds, func() tea.Msg {
 			return vo.StateChangeMsg{
-				NewState: vo.LobbyView,
+				NewState:  vo.LobbyView,
+				AccountId: msg.ID,
 			}
 		})
 	case vo.StateChangeMsg:
 		switch msg.NewState {
 		case vo.LobbyView:
-			cli.currentController = &lobby.Controller{}
-			cli.currentController.Init()
+			cli.currentController = &lobby.Controller{
+				Controller: cliVO.Controller{
+					Model: lobby.Model{
+						ViewModel: cliVO.ViewModel{
+							Name: "Lobby",
+						},
+						ActiveMatchId: 0,
+						AccountId:     msg.AccountId,
+					},
+					View: &lobby.View{},
+				},
+			}
 			cli.ViewStateName = vo.LobbyView
 
 			services.GetOpenMatches()
 		case vo.JoinGameView:
 			cli.isOpponent = true
-			
+
 			match, err := GetMatchForId(msg)
 
 			if err != nil {
@@ -53,15 +64,11 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			fallthrough
 		case vo.CreateGameView:
 			cli.matchId = msg.MatchId
+			msg.AccountId = cli.account.ID
 
-			match, err := GetMatchForId(msg)
-
-			if err != nil {
-				utils.Logger.Sugar().Error(err)
-			}
-
-			resp := services.GetPlayerMatch(match.ID)
-			err = json.Unmarshal(resp.([]byte), &match)
+			var match *vo.GameMatch
+			resp := services.GetPlayerMatch(msg.MatchId)
+			err := json.Unmarshal(resp.([]byte), &match)
 			if err != nil {
 				utils.Logger.Sugar().Error(err)
 			}

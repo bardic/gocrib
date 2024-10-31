@@ -77,7 +77,7 @@ func GetOpenMatches() ([]queries.Match, error) {
 	return matches, nil
 }
 
-func NewDeckForMatchId(matchId int32) (*vo.GameDeck, error) {
+func GetGameDeck(matchId int32) (*vo.GameDeck, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -89,7 +89,7 @@ func NewDeckForMatchId(matchId int32) (*vo.GameDeck, error) {
 	//create match cards based on queries.Cards
 	//update deck_matchcard with new match card ids
 
-	deck, err := q.CreateDeck(ctx)
+	deck, err := q.GetDeckForMatchId(ctx, matchId)
 
 	if err != nil {
 		return &vo.GameDeck{}, err
@@ -122,28 +122,9 @@ func NewDeckForMatchId(matchId int32) (*vo.GameDeck, error) {
 	}
 
 	gameDeck := &vo.GameDeck{
-		Deck:  deck,
+		Deck:  &deck,
 		Cards: matchcards,
 	}
-
-	//cards, err := q.GetMatchCards(ctx, matchId)
-	//cards, err := q.GetCards(ctx)
-
-	// if err != nil {
-	// 	return queries.Deck{}, err
-	// }
-
-	// //get card ids
-	// var matchCardIds []int32
-	// for _, card := range cards {
-	// 	matchCardIds = append(matchCardIds, card.Matchcard.ID)
-	// }
-
-	// deck, err := q.CreateDeck(ctx, matchCardIds)
-
-	// if err != nil {
-	// 	return queries.Deck{}, err
-	// }
 
 	return gameDeck, nil
 }

@@ -1360,9 +1360,6 @@ const docTemplate = `{
                 },
                 "isPrivate": {
                     "type": "boolean"
-                },
-                "playerId": {
-                    "type": "integer"
                 }
             }
         }

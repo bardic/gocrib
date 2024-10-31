@@ -15,9 +15,9 @@ const createDeck = `-- name: CreateDeck :one
 INSERT INTO deck(cutmatchcardid) VALUES (null) RETURNING id, cutmatchcardid
 `
 
-func (q *Queries) CreateDeck(ctx context.Context) (*Deck, error) {
+func (q *Queries) CreateDeck(ctx context.Context) (Deck, error) {
 	row := q.db.QueryRow(ctx, createDeck)
-	var i *Deck
+	var i Deck
 	err := row.Scan(&i.ID, &i.Cutmatchcardid)
 	return i, err
 }
@@ -222,12 +222,15 @@ func (q *Queries) GetCurrentPlayerTurn(ctx context.Context, id int32) (int32, er
 	return currentplayerturn, err
 }
 
-const getDeck = `-- name: GetDeck :one
-SELECT deck.id, deck.cutmatchcardid FROM deck WHERE id=$1 LIMIT 1
+const getDeckForMatchId = `-- name: GetDeckForMatchId :one
+SELECT deck.id, deck.cutmatchcardid FROM deck
+LEFT JOIN
+    match ON deck.id=match.deckid
+ WHERE match.id=$1 LIMIT 1
 `
 
-func (q *Queries) GetDeck(ctx context.Context, id int32) (Deck, error) {
-	row := q.db.QueryRow(ctx, getDeck, id)
+func (q *Queries) GetDeckForMatchId(ctx context.Context, id int32) (Deck, error) {
+	row := q.db.QueryRow(ctx, getDeckForMatchId, id)
 	var i Deck
 	err := row.Scan(&i.ID, &i.Cutmatchcardid)
 	return i, err
@@ -263,10 +266,14 @@ SELECT
                     )
                 )
             FROM player AS p
-            WHERE p.Id = ANY(m.playerIds)
+            LEFT JOIN
+                match_player as mp ON p.id=mp.playerid
+            WHERE p.Id = mp.playerId
         )
     )
 FROM match AS m
+LEFT JOIN
+    match_player as mp ON m.id=mp.matchid
 WHERE m.id = $1
 LIMIT 1
 `
@@ -479,10 +486,14 @@ SELECT
                     )
                 )
             FROM player AS p
-            WHERE p.Id = ANY(m.playerIds)
+            LEFT JOIN
+                match_player as mp ON p.id=mp.playerid
+            WHERE p.Id = mp.playerId
         )
     )
 FROM match AS m
+LEFT JOIN
+    match_player as mp ON m.id=mp.matchid
 `
 
 func (q *Queries) GetOpenMatches(ctx context.Context) ([][]byte, error) {
@@ -523,6 +534,20 @@ func (q *Queries) GetPlayer(ctx context.Context, id int32) (Player, error) {
 		&i.Art,
 	)
 	return i, err
+}
+
+const joinMatch = `-- name: JoinMatch :exec
+INSERT INTO match_player (matchid, playerid) VALUES ($1, $2)
+`
+
+type JoinMatchParams struct {
+	Matchid  int32
+	Playerid int32
+}
+
+func (q *Queries) JoinMatch(ctx context.Context, arg JoinMatchParams) error {
+	_, err := q.db.Exec(ctx, joinMatch, arg.Matchid, arg.Playerid)
+	return err
 }
 
 const passTurn = `-- name: PassTurn :exec
