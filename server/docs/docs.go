@@ -1324,10 +1324,10 @@ const docTemplate = `{
         "vo.JoinMatchReq": {
             "type": "object",
             "properties": {
-                "matchId": {
+                "accountId": {
                     "type": "integer"
                 },
-                "playerId": {
+                "matchId": {
                     "type": "integer"
                 }
             }

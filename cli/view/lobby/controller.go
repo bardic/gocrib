@@ -42,17 +42,17 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			return tea.Quit
 		}
 
-		accountMsg := services.PostPlayer(int32(id))
+		playerMsg := services.PostPlayer(int32(id))
 
 		var player queries.Player
-		err = json.Unmarshal(accountMsg.([]byte), &player)
+		err = json.Unmarshal(playerMsg.([]byte), &player)
 
 		if err != nil {
 			return tea.Quit
 		}
 
 		var matchDetails vo.MatchDetailsResponse
-		msg := services.JoinMatch(player.ID, int32(id))
+		msg := services.JoinMatch(player.Accountid, int32(id))
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
 
 		if err != nil {
@@ -61,7 +61,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 		return vo.StateChangeMsg{
 			NewState: vo.JoinGameView,
-			MatchId:  matchDetails.MatchId,
+			MatchId:  int32(id),
 		}
 	case "n":
 		match := utils.CreateGame(lobbyModel.AccountId)

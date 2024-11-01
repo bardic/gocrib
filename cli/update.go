@@ -49,19 +49,14 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case vo.JoinGameView:
 			cli.isOpponent = true
 
-			match, err := GetMatchForId(msg)
+			var matchDetails vo.MatchDetailsResponse
+			msg := services.JoinMatch(cli.account.ID, msg.MatchId)
+			err := json.Unmarshal(msg.([]byte), &matchDetails)
 
 			if err != nil {
-				utils.Logger.Sugar().Error(err)
+
 			}
 
-			for _, player := range match.Players {
-				if !player.Isready {
-					services.PlayerReady(player.ID)
-				}
-			}
-
-			fallthrough
 		case vo.CreateGameView:
 			cli.matchId = msg.MatchId
 			msg.AccountId = cli.account.ID
@@ -73,56 +68,59 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				utils.Logger.Sugar().Error(err)
 			}
 
-			gameContainerModel := &container.Model{
-				Tabs: []cliVO.Tab{
-					{
-						Title:    "Board",
-						TabState: vo.BoardView,
-					},
-					{
-						Title:    "Play",
-						TabState: vo.PlayView,
-					},
-					{
-						Title:    "Hand",
-						TabState: vo.HandView,
-					},
-					{
-						Title:    "Kitty",
-						TabState: vo.KittyView,
-					},
-				},
-				Match:       match,
-				LocalPlayer: match.Players[0],
-				ActiveTab:   0,
-			}
-
-			containerView := &container.View{
-				ActiveTab: gameContainerModel.ActiveTab,
-				Tabs:      gameContainerModel.Tabs,
-			}
-
-			cli.currentController = &gameContainer.Controller{
-				Controller: &container.Controller{
-					Controller: &cliVO.Controller{
-						Model: gameContainerModel,
-						View:  containerView,
-					},
-				},
-			}
-
-			ctrl := cli.currentController.(*gameContainer.Controller)
-			ctrl.Init()
+			cli.createMatchView(match)
 		}
 	}
 
 	return cli, tea.Batch(cmds...)
 }
 
+func (cli *CLI) createMatchView(match *vo.GameMatch) {
+	gameContainerModel := &container.Model{
+		Tabs: []cliVO.Tab{
+			{
+				Title:    "Board",
+				TabState: vo.BoardView,
+			},
+			{
+				Title:    "Play",
+				TabState: vo.PlayView,
+			},
+			{
+				Title:    "Hand",
+				TabState: vo.HandView,
+			},
+			{
+				Title:    "Kitty",
+				TabState: vo.KittyView,
+			},
+		},
+		Match:       match,
+		LocalPlayer: match.Players[0],
+		ActiveTab:   0,
+	}
+
+	containerView := &container.View{
+		ActiveTab: gameContainerModel.ActiveTab,
+		Tabs:      gameContainerModel.Tabs,
+	}
+
+	cli.currentController = &gameContainer.Controller{
+		Controller: &container.Controller{
+			Controller: &cliVO.Controller{
+				Model: gameContainerModel,
+				View:  containerView,
+			},
+		},
+	}
+
+	ctrl := cli.currentController.(*gameContainer.Controller)
+	ctrl.Init()
+}
+
 func GetMatchForId(msg vo.StateChangeMsg) (*vo.GameMatch, error) {
 	var match *vo.GameMatch
-
-	resp := services.GetPlayerMatch(match.ID)
+	resp := services.GetPlayerMatch(msg.MatchId)
 	err := json.Unmarshal(resp.([]byte), &match)
 	if err != nil {
 		utils.Logger.Sugar().Error(err)

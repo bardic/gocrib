@@ -537,7 +537,10 @@ func (q *Queries) GetPlayer(ctx context.Context, id int32) (Player, error) {
 }
 
 const joinMatch = `-- name: JoinMatch :exec
-INSERT INTO match_player (matchid, playerid) VALUES ($1, $2)
+INSERT INTO 
+    match_player (matchid, playerid)     
+VALUES 
+    ($1, $2)
 `
 
 type JoinMatchParams struct {
@@ -615,8 +618,8 @@ func (q *Queries) UpdateCardsPlayed(ctx context.Context, arg UpdateCardsPlayedPa
 	return err
 }
 
-const updateGameState = `-- name: UpdateGameState :exec
-UPDATE match SET gameState= $1 WHERE id=$2
+const updateGameState = `-- name: UpdateGameState :one
+UPDATE match SET gameState= $1 WHERE id=$2 RETURNING id, creationdate, privatematch, elorangemin, elorangemax, deckid, cutgamecardid, currentplayerturn, turnpasstimestamps, gamestate, art
 `
 
 type UpdateGameStateParams struct {
@@ -624,9 +627,23 @@ type UpdateGameStateParams struct {
 	ID        int32
 }
 
-func (q *Queries) UpdateGameState(ctx context.Context, arg UpdateGameStateParams) error {
-	_, err := q.db.Exec(ctx, updateGameState, arg.Gamestate, arg.ID)
-	return err
+func (q *Queries) UpdateGameState(ctx context.Context, arg UpdateGameStateParams) (Match, error) {
+	row := q.db.QueryRow(ctx, updateGameState, arg.Gamestate, arg.ID)
+	var i Match
+	err := row.Scan(
+		&i.ID,
+		&i.Creationdate,
+		&i.Privatematch,
+		&i.Elorangemin,
+		&i.Elorangemax,
+		&i.Deckid,
+		&i.Cutgamecardid,
+		&i.Currentplayerturn,
+		&i.Turnpasstimestamps,
+		&i.Gamestate,
+		&i.Art,
+	)
+	return i, err
 }
 
 const updateKitty = `-- name: UpdateKitty :exec

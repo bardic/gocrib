@@ -54,8 +54,8 @@ type CutDeckReq struct {
 }
 
 type JoinMatchReq struct {
-	MatchId  int32
-	PlayerId int32
+	MatchId   int32
+	AccountId int32
 }
 
 type MatchDetailsResponse struct {

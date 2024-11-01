@@ -1,10 +1,13 @@
 package match
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"queries"
-	"server/utils"
+	conn "server/db"
+	"server/route/player"
 	"vo"
 
 	"github.com/labstack/echo/v4"
@@ -28,15 +31,35 @@ func JoinMatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := utils.GetPlayerById(details.PlayerId)
+	p, err := player.NewPlayerQuery(details.AccountId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
-		MatchId:   details.MatchId,
-		PlayerId:  p.ID,
-		GameState: queries.GamestateJoinGameState,
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err = q.JoinMatch(ctx, queries.JoinMatchParams{
+		Matchid:  details.MatchId,
+		Playerid: p.ID,
 	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	match, err := q.UpdateGameState(ctx, queries.UpdateGameStateParams{
+		ID:        details.MatchId,
+		Gamestate: queries.GamestateJoinGameState,
+	})	
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, match)
 }

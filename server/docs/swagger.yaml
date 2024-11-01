@@ -301,9 +301,9 @@ definitions:
     type: object
   vo.JoinMatchReq:
     properties:
-      matchId:
+      accountId:
         type: integer
-      playerId:
+      matchId:
         type: integer
     type: object
   vo.MatchDetailsResponse:

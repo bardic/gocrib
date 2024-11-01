@@ -128,8 +128,8 @@ SELECT card.* FROM card;
 -- name: CreateDeck :one
 INSERT INTO deck(cutmatchcardid) VALUES (null) RETURNING *;
 
--- name: UpdateGameState :exec
-UPDATE match SET gameState= $1 WHERE id=$2;
+-- name: UpdateGameState :one
+UPDATE match SET gameState= $1 WHERE id=$2 RETURNING *;
 
 -- name: UpdateMatchCut :exec
 UPDATE match SET cutGameCardId= $1 WHERE id=$2;
@@ -286,4 +286,7 @@ SET currentplayerturn =
 WHERE m.id = $1;
 
 -- name: JoinMatch :exec
-INSERT INTO match_player (matchid, playerid) VALUES ($1, $2);
+INSERT INTO 
+    match_player (matchid, playerid)     
+VALUES 
+    ($1, $2);

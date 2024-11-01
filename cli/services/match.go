@@ -28,10 +28,10 @@ func GetOpenMatches() tea.Msg {
 	return url(EndPointOpenMatch, http.MethodGet, "")
 }
 
-func JoinMatch(playerId, activeMatchId int32) tea.Msg {
+func JoinMatch(accountId, activeMatchId int32) tea.Msg {
 	req := vo.JoinMatchReq{
-		PlayerId: playerId,
-		MatchId:  activeMatchId,
+		AccountId: accountId,
+		MatchId:   activeMatchId,
 	}
 
 	b, err := json.Marshal(req)
