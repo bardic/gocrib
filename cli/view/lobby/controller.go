@@ -7,7 +7,6 @@ import (
 	"cli/services"
 	"cli/utils"
 	cliVO "cli/vo"
-	"queries"
 	"vo"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -34,6 +33,8 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	lobbyModel := ctrl.Model.(Model)
 
 	switch msg.String() {
+	case "ctrl+c", "q":
+		return tea.Quit()
 	case "enter", "view_update":
 		utils.Logger.Info("Enter")
 		idStr := lobbyView.LobbyTable.SelectedRow()[0]
@@ -42,17 +43,8 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			return tea.Quit
 		}
 
-		playerMsg := services.PostPlayer(int32(id))
-
-		var player queries.Player
-		err = json.Unmarshal(playerMsg.([]byte), &player)
-
-		if err != nil {
-			return tea.Quit
-		}
-
 		var matchDetails vo.MatchDetailsResponse
-		msg := services.JoinMatch(player.Accountid, int32(id))
+		msg := services.JoinMatch(lobbyModel.AccountId, int32(id))
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
 
 		if err != nil {

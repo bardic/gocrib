@@ -54,8 +54,8 @@ func JoinMatch(c echo.Context) error {
 
 	match, err := q.UpdateGameState(ctx, queries.UpdateGameStateParams{
 		ID:        details.MatchId,
-		Gamestate: queries.GamestateJoinGameState,
-	})	
+		Gamestate: queries.GamestateCutState,
+	})
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

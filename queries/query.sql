@@ -29,7 +29,7 @@ SELECT
                 )
             FROM player AS p
             LEFT JOIN
-                match_player as mp ON p.id=mp.playerid
+                match_player as mp ON p.id=mp.playerid and mp.matchid=m.id
             WHERE p.Id = mp.playerId
         )
     )

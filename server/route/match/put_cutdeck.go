@@ -57,7 +57,7 @@ func CutDeck(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = utils.UpdateGameState(details.MatchId, queries.GamestatePlayState)
+	err = utils.UpdateGameState(details.MatchId, queries.GamestateDealState)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

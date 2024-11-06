@@ -1,8 +1,14 @@
 {
     "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "server+client",
+            "configurations": ["server", "cli + debugger"]
+        }
+    ],  
     "configurations": [
         {
-            "name": "cli",
+            "name": "cli + debugger",
             "type": "go",
             "debugAdapter": "dlv-dap",
             "request": "attach",

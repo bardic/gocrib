@@ -38,6 +38,8 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	loginView := ctrl.View.(*View)
 
 	switch msg.String() {
+	case "ctrl+c", "q":
+		return tea.Quit()
 	case "enter", "view_update":
 		utils.Logger.Info("Enter")
 		idStr := loginView.loginIdField.Value()

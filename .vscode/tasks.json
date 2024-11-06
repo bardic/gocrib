@@ -19,12 +19,12 @@
                 "owner": "go",
                 "fileLocation": "relative",
                 "pattern": {
-                    "regexp": "^couldn't start listener:", // error if matched
+                    "regexp": "^couldn't start listener:",
                 },
                 "background": {
                     "activeOnStart": true,
                     "beginsPattern": "^API server listening at:",
-                    "endsPattern": "43000" // success if matched
+                    "endsPattern": "43000"
                 }
             },
         },
@@ -40,6 +40,29 @@
                 "--parseInternal"
             ],
             "type": "shell"
+        },
+        {
+            "label": "player1",
+            "type": "shell",
+            "command": "go run ${workspaceFolder}/cli",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "player2",
+            "type": "shell",
+            "command": "go run ${workspaceFolder}/cli",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "debug_2players",
+            "dependsOn": [
+                "player1",
+                "dlv",
+                "player2"
+            ],
+            "problemMatcher": []
         }
     ]
 }

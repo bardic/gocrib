@@ -48,18 +48,10 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			services.GetOpenMatches()
 		case vo.JoinGameView:
 			cli.isOpponent = true
-
-			var matchDetails vo.MatchDetailsResponse
-			msg := services.JoinMatch(cli.account.ID, msg.MatchId)
-			err := json.Unmarshal(msg.([]byte), &matchDetails)
-
-			if err != nil {
-
-			}
-
+			fallthrough
 		case vo.CreateGameView:
 			cli.matchId = msg.MatchId
-			msg.AccountId = cli.account.ID
+			msg.AccountId = cli.account.ID //TODO fix this later
 
 			var match *vo.GameMatch
 			resp := services.GetPlayerMatch(msg.MatchId)

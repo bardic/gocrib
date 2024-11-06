@@ -46,7 +46,7 @@ func (view *View) Render() string {
 	doc := strings.Builder{}
 	viewBuilder := strings.Builder{}
 
-	if view.State == queries.GamestateCutState && view.Match.Currentplayerturn != view.LocalPlayerId {
+	if view.State == queries.GamestateCutState {
 		view.cutInput.Focus()
 		viewBuilder.WriteString(view.cutInput.View() + " \n")
 	} else {
