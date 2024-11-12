@@ -57,7 +57,7 @@ func (ctrl *Controller) Enter() tea.Msg {
 	case queries.GamestateCutState:
 		boardModel.CutIndex = boardView.cutInput.Value()
 		resp := services.CutDeck(boardModel.GameMatch.ID, boardModel.CutIndex)
-		services.PlayerReady(boardModel.LocalPlayerId)
+		services.PlayerReady(boardModel.LocalPlayerId, boardModel.GameMatch.ID)
 		return resp
 	}
 

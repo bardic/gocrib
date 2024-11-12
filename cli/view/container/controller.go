@@ -103,6 +103,8 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 	containerModel := ctrl.Model.(*Model)
 	deckId := containerModel.Match.Deckid
 
+	hand := getPlayerHand(containerModel.LocalPlayer.ID, containerModel.Match.Players)
+
 	switch tabIndex {
 	case 0:
 		containerModel.Subview = &board.Controller{
@@ -128,7 +130,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
-				containerModel.Match.Players[0].Play,
+				containerModel.LocalPlayer.Play,
 			),
 		)
 	case 2:
@@ -138,7 +140,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
-				containerModel.Match.Players[0].Hand,
+				hand, //THIS IS THE WRONG PLAYER~!!!!!
 			),
 		)
 	case 3:
@@ -148,13 +150,23 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			ctrl.getHandModelForCardIds(
 				containerModel.LocalPlayer.ID,
 				deckId,
-				containerModel.Match.Players[0].Kitty,
+				containerModel.LocalPlayer.Kitty,
 			),
 		)
 	}
 
 	containerModel.Subview.Init()
 
+}
+
+func getPlayerHand(playerId int32, players []*queries.Player) []int32 {
+	for _, p := range players {
+		if p.ID == playerId {
+			return p.Hand
+		}
+	}
+
+	return []int32{}
 }
 
 func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId int32, cardIds []int32) *cliVO.HandVO {

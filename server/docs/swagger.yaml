@@ -26,6 +26,13 @@ definitions:
       valid:
         type: boolean
     type: object
+  player.PReady:
+    properties:
+      matchId:
+        type: integer
+      playerId:
+        type: integer
+    type: object
   queries.Account:
     properties:
       id:
@@ -900,10 +907,10 @@ paths:
       parameters:
       - description: player id to update
         in: body
-        name: details
+        name: pReady
         required: true
         schema:
-          type: integer
+          $ref: '#/definitions/player.PReady'
       produces:
       - application/json
       responses:

@@ -26,7 +26,7 @@ func GetCardById(id int32, deck *vo.GameDeck) *vo.GameCard {
 			Card:      card.Card,
 		}
 
-		if card.Card.ID == id {
+		if card.Matchcard.Cardid == id {
 			return gameCard
 		}
 	}

@@ -10,6 +10,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type PReady struct {
+	MatchId  int32
+	PlayerId int32
+}
+
 func GetPlayer(playerId int32) tea.Msg {
 	id := int(playerId)
 	pid := strconv.Itoa(id)
@@ -47,6 +52,17 @@ func DeletePlayer(ids []int) tea.Msg {
 	return url(EndPointPlayer, http.MethodDelete, "")
 }
 
-func PlayerReady(playerId int32) tea.Msg {
-	return url(EndPointPlayerReady, http.MethodPut, strconv.Itoa(int(playerId)))
+func PlayerReady(playerId int32, matchId int32) tea.Msg {
+	req := PReady{
+		MatchId:  matchId,
+		PlayerId: playerId,
+	}
+
+	reqStr, err := json.Marshal(req)
+
+	if err != nil {
+		return err
+	}
+
+	return url(EndPointPlayerReady, http.MethodPut, string(reqStr))
 }

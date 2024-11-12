@@ -12,21 +12,26 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type PReady struct {
+	MatchId  int32
+	PlayerId int32
+}
+
 // PlayerReady Create godoc
 // @Summary      Update player to mark as ready
 // @Description
 // @Tags         players
 // @Accept       json
 // @Produce      json
-// @Param details body int true "player id to update"
+// @Param pReady body PReady true "player id to update"
 // @Success      200  {object}  bool
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
 // @Router       /player/ready [put]
 func PlayerReady(c echo.Context) error {
-	details := new(int)
-	if err := c.Bind(details); err != nil {
+	pReady := new(PReady)
+	if err := c.Bind(pReady); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -37,13 +42,14 @@ func PlayerReady(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := ReadyPlayerById(c, *details)
+	_, err := ReadyPlayerById(c, int(pReady.PlayerId))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	match, err := utils.GetMatchForPlayerId(*details)
+	//match, err := utils.GetMatchForPlayerId(*playerId)
+	match, err := utils.GetMatch(int(pReady.MatchId))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -69,6 +75,17 @@ func PlayerReady(c echo.Context) error {
 	}
 
 	match.Deckid = deck.ID
+
+	for _, v := range deck.Cards {
+		err = q.InsertDeckMatchCard(ctx, queries.InsertDeckMatchCardParams{
+			Deckid:      deck.ID,
+			Matchcardid: v.Matchcard.Cardid,
+		})
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	}
 
 	if utils.PlayersReady(match.Players) {
 		utils.Deal(match)

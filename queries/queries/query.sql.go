@@ -315,16 +315,15 @@ SELECT
                     )
                 )
             FROM player AS p
-            WHERE p.Id = ANY(m.playerIds)
+            WHERE p.Id = $1
         )
     )
 FROM match as m 
-WHERE $1::int=ANY(m.playerIds)
 LIMIT 1
 `
 
-func (q *Queries) GetMatchByPlayerId(ctx context.Context, dollar_1 int32) ([]byte, error) {
-	row := q.db.QueryRow(ctx, getMatchByPlayerId, dollar_1)
+func (q *Queries) GetMatchByPlayerId(ctx context.Context, id int32) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getMatchByPlayerId, id)
 	var json_build_object []byte
 	err := row.Scan(&json_build_object)
 	return json_build_object, err
@@ -343,7 +342,7 @@ LEFT JOIN
 LEFT JOIN
     deck ON deck_matchcard.deckid=deck.id
 LEFT JOIN
-    card ON deck_matchcard.cardId=card.id
+    card ON deck_matchcard.matchcardId=card.id
 WHERE
     deck.id IN ($1)
 `
@@ -534,6 +533,20 @@ func (q *Queries) GetPlayer(ctx context.Context, id int32) (Player, error) {
 		&i.Art,
 	)
 	return i, err
+}
+
+const insertDeckMatchCard = `-- name: InsertDeckMatchCard :exec
+INSERT INTO deck_matchcard (deckid, matchcardid) VALUES ($1, $2)
+`
+
+type InsertDeckMatchCardParams struct {
+	Deckid      int32
+	Matchcardid int32
+}
+
+func (q *Queries) InsertDeckMatchCard(ctx context.Context, arg InsertDeckMatchCardParams) error {
+	_, err := q.db.Exec(ctx, insertDeckMatchCard, arg.Deckid, arg.Matchcardid)
+	return err
 }
 
 const joinMatch = `-- name: JoinMatch :exec

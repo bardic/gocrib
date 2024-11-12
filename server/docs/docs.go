@@ -866,11 +866,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "player id to update",
-                        "name": "details",
+                        "name": "pReady",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/player.PReady"
                         }
                     }
                 ],
@@ -933,6 +933,17 @@ const docTemplate = `{
                 },
                 "valid": {
                     "type": "boolean"
+                }
+            }
+        },
+        "player.PReady": {
+            "type": "object",
+            "properties": {
+                "matchId": {
+                    "type": "integer"
+                },
+                "playerId": {
+                    "type": "integer"
                 }
             }
         },

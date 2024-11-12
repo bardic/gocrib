@@ -70,11 +70,10 @@ SELECT
                     )
                 )
             FROM player AS p
-            WHERE p.Id = ANY(m.playerIds)
+            WHERE p.Id in 
         )
     )
 FROM match as m 
-WHERE $1::int=ANY(m.playerIds)
 LIMIT 1;
 
 -- name: GetOpenMatches :many
@@ -172,7 +171,7 @@ LEFT JOIN
 LEFT JOIN
     deck ON deck_matchcard.deckid=deck.id
 LEFT JOIN
-    card ON deck_matchcard.cardId=card.id
+    card ON deck_matchcard.matchcardId=card.id
 WHERE
     deck.id IN ($1);
 
@@ -290,3 +289,6 @@ INSERT INTO
     match_player (matchid, playerid)     
 VALUES 
     ($1, $2);
+
+-- name: InsertDeckMatchCard :exec
+INSERT INTO deck_matchcard (deckid, matchcardid) VALUES ($1, $2);
