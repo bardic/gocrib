@@ -1,11 +1,12 @@
 package card
 
 import (
-	"cli/services"
-	cliVO "cli/vo"
 	"queries"
 	"slices"
-	"vo"
+
+	"github.com/bardic/gocrib/cli/services"
+	cliVO "github.com/bardic/gocrib/cli/vo"
+	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -23,14 +24,23 @@ func (ctrl *Controller) Init() {
 
 }
 
-func (ctrl *Controller) Render() string {
+func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 	cardView := ctrl.View.(*View)
-	return cardView.Render()
+	cardView.ActiveCardId = ctrl.Model.(*Model).ActiveSlotIndex
+	cardView.SelectedCardIds = ctrl.Model.(*Model).SelectedCardIds
+	cardView.UIFooterVO = &vo.UIFooterVO{
+		ActivePlayerId: gameMatch.Players[0].ID,
+		MatchId:        gameMatch.Match.ID,
+		GameState:      gameMatch.Match.Gamestate,
+		LocalPlayerID:  0,
+	}
+
+	return cardView.Render(gameMatch.Players[0].Hand)
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	cardModel := ctrl.Model.(*Model)
-	cardView := ctrl.View.(*View)
+	// cardView := ctrl.View.(*View)
 	switch msg.String() {
 	//Highlight card to the right
 	case "right":
@@ -79,12 +89,13 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 	}
 
-	cardView.ActiveCardId = cardModel.ActiveSlotIndex
-	cardView.SelectedCardIds = cardModel.SelectedCardIds
+	// cardView.ActiveCardId = cardModel.ActiveSlotIndex
+	// cardView.SelectedCardIds = cardModel.SelectedCardIds
 
 	return nil
 }
-func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
+	ctrl.Render(gameMatch)
 	return nil
 }
 

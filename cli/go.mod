@@ -1,4 +1,4 @@
-module cli
+module github.com/bardic/gocrib/cli
 
 go 1.23.2
 

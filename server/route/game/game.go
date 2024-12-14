@@ -4,7 +4,8 @@ import (
 	"errors"
 	"queries"
 	"sort"
-	"vo"
+
+	"github.com/bardic/gocrib/vo"
 )
 
 func cardsInPlay(players []*queries.Player) []int32 {

@@ -5,14 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"vo"
+	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
-
-// func GetMatchesForPlayerId() tea.Msg {
-// 	return url(EndPointMatches+"/?id="+strconv.Itoa(state.AccountId), http.MethodGet, "")
-// }
 
 func GetPlayerMatchState(matchId int32) tea.Msg {
 	id := strconv.Itoa(int(matchId))

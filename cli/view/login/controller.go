@@ -3,10 +3,12 @@ package login
 import (
 	"encoding/json"
 
-	"cli/services"
-	"cli/utils"
-	cliVO "cli/vo"
 	"queries"
+
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/utils"
+	cliVO "github.com/bardic/gocrib/cli/vo"
+	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -30,8 +32,8 @@ func (ctrl *Controller) Init() {
 	ctrl.View.Init()
 }
 
-func (ctrl *Controller) Render() string {
-	return ctrl.View.Render()
+func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
+	return ctrl.View.Render(nil)
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
@@ -54,7 +56,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 	loginView := ctrl.View.(*View)
 
 	var cmd tea.Cmd

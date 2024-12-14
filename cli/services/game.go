@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"vo"
+
+	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

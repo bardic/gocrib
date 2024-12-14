@@ -29,8 +29,10 @@ definitions:
   player.PReady:
     properties:
       matchId:
+        description: MatchId
         type: integer
       playerId:
+        description: PlayerId
         type: integer
     type: object
   queries.Account:
@@ -367,59 +369,6 @@ paths:
       summary: Login
       tags:
       - account
-  /admin/card/:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: card Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/queries.Card'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Card'
-        "400":
-          description: Bad Request
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Create new card
-      tags:
-      - cards
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: card Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/queries.Card'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Card'
-        "400":
-          description: Bad Request
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update card by id
-      tags:
-      - cards
   /admin/match/:
     delete:
       consumes:
@@ -446,65 +395,9 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Get match by barcode
+      summary: Delete a match by id
       tags:
       - match
-  /card/:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for card by barcode
-        in: query
-        name: barcode
-        required: true
-        type: string
-      - description: Store in which the barcode was found
-        in: query
-        name: storeId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Card'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get card by barcode
-      tags:
-      - cards
-  /player/allcards/:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/queries.Card'
-            type: array
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get all cards
-      tags:
-      - cards
   /player/kitty:
     put:
       consumes:
@@ -540,7 +433,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: search for match by id
+      - description: match id
         in: query
         name: id
         required: true
@@ -558,7 +451,7 @@ paths:
         "422":
           description: Unprocessable Entity
           schema: {}
-      summary: Get match by id
+      summary: Get match state by match id
       tags:
       - match
     post:
@@ -616,7 +509,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Update match by id
+      summary: Update match details
       tags:
       - match
   /player/match/cards/:
@@ -624,7 +517,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: search for match by id
+      - description: match id
         in: query
         name: id
         required: true
@@ -644,7 +537,7 @@ paths:
         "422":
           description: Unprocessable Entity
           schema: {}
-      summary: Get match cards by id
+      summary: Get match cards by match id
       tags:
       - match
   /player/match/cut:
@@ -674,7 +567,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Cut deck by index
+      summary: Cut deck by index of card selected
       tags:
       - match
   /player/match/deck/:
@@ -682,7 +575,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: search for deck by id
+      - description: search for deck by match id
         in: query
         name: id
         required: true
@@ -700,7 +593,7 @@ paths:
         "422":
           description: Unprocessable Entity
           schema: {}
-      summary: Get deck by id
+      summary: Get deck by match id
       tags:
       - deck
   /player/match/join:
@@ -708,7 +601,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: match Object to update
+      - description: JoinMatchReq object
         in: body
         name: details
         required: true
@@ -760,7 +653,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: array of ids to add to play
+      - description: HandModifier object
         in: body
         name: details
         required: true
@@ -782,7 +675,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Update play with ids
+      summary: Update play
       tags:
       - match
   /player/player/:
@@ -871,35 +764,6 @@ paths:
       summary: Create new player
       tags:
       - players
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: player Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/queries.Player'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Player'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update player by barcode
-      tags:
-      - players
   /player/ready:
     put:
       consumes:
@@ -927,7 +791,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Update player to mark as ready
+      summary: Update player by id to be ready. Returns true if all players are ready
       tags:
       - players
 securityDefinitions:

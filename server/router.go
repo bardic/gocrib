@@ -1,13 +1,13 @@
+// Description: Main router for the server, sets up the echo server and routes
 package main
 
 import (
-	_ "server/docs"
+	_ "github.com/bardic/gocrib/server/docs"
 
-	"server/route/account"
-	"server/route/admin/card"
-	"server/route/deck"
-	"server/route/match"
-	"server/route/player"
+	"github.com/bardic/gocrib/server/route/account"
+	"github.com/bardic/gocrib/server/route/deck"
+	"github.com/bardic/gocrib/server/route/match"
+	"github.com/bardic/gocrib/server/route/player"
 
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -18,6 +18,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+// Router struct
 type Router struct {
 }
 
@@ -61,56 +62,24 @@ func v1Routes(g *echo.Group) {
 		return false, nil
 	}))
 
-	//Card
-	adminGroup.POST("/card", card.NewCard)
-	adminGroup.PUT("/card", card.UpdateCard)
-	adminGroup.DELETE("/card", card.DeleteCard)
-	//Player
-	adminGroup.DELETE("/player", player.DeletePlayer)
-	//Match
-	adminGroup.DELETE("/match", match.DeleteMatch)
+	matchGroup := g.Group("/match")
+	matchGroup.GET("/player", player.GetPlayer)
+	matchGroup.POST("/player", player.NewPlayer)
+	matchGroup.PUT("/player/kitty", player.UpdateKitty)
+	matchGroup.PUT("/player/ready", player.PlayerReady)
+	matchGroup.PUT("/player/play", match.UpdatePlay)
+	matchGroup.GET("", match.GetMatch)
+	matchGroup.GET("/state", match.GetMatchState)
+	matchGroup.GET("/open", match.GetOpenMatches)
+	matchGroup.POST("", match.NewMatch)
+	matchGroup.PUT("", match.UpdateMatch)
+	matchGroup.PUT("/join", match.JoinMatch)
+	matchGroup.PUT("/cut", match.CutDeck)
+	matchGroup.GET("/cards", match.GetMatchCardsForMatchId)
 
-	// //History
-	// adminGroup.DELETE("/history", route.DeleteHistory)
-	// //Chat
-	// adminGroup.DELETE("/chat", route.DeleteChat)
-
-	playerGroup := g.Group("/player")
-
-	//Card
-	// playerGroup.GET("/card", card.GetCard)
-	// playerGroup.GET("/allcards", route.GetAllCards)
-	//Player
-	playerGroup.GET("/player", player.GetPlayer)
-	playerGroup.POST("/player", player.NewPlayer)
-	playerGroup.PUT("/player", player.UpdatePlayer)
-	playerGroup.PUT("/kitty", player.UpdateKitty)
-	playerGroup.PUT("/ready", player.PlayerReady)
-	playerGroup.PUT("/play", match.UpdatePlay)
-	//Match
-	playerGroup.GET("/match", match.GetMatch)
-	playerGroup.GET("/match/state", match.GetMatchState)
-	playerGroup.GET("/matches/open", match.GetOpenMatches)
-	playerGroup.POST("/match", match.NewMatch)
-	playerGroup.PUT("/match", match.UpdateMatch)
-	playerGroup.PUT("/match/join", match.JoinMatch)
-	playerGroup.PUT("/match/cut", match.CutDeck)
-	playerGroup.GET("/match/cards", match.GetGameCardsForMatch)
-
-	playerGroup.GET("/match/deck", deck.GetDeck)
-	// History
-	// playerGroup.GET("/history", route.GetHistory)
-	// playerGroup.POST("/history", route.NewHistory)
-	// playerGroup.PUT("/history", route.UpdateHistory)
-	// // Chat
-	// playerGroup.GET("/chat", route.GetChat)
-	// playerGroup.POST("/chat", route.NewChat)
-	// playerGroup.PUT("/chat", route.UpdateChat)
+	g.GET("/deck", deck.GetDeckByMatchId)
 
 	//Account
 	accountGroup := g.Group("/account")
 	accountGroup.POST("/login", account.Login)
-
-	// gameGroup := g.Group("/game")
-	// gameGroup.POST("/playCard", player.PlayCard)
 }

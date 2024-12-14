@@ -2,39 +2,38 @@ package card
 
 import (
 	"fmt"
-	"queries"
 	"slices"
 
-	"cli/styles"
-	"cli/utils"
-	cliVO "cli/vo"
+	"github.com/bardic/gocrib/cli/styles"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/charmbracelet/lipgloss"
 )
 
 type View struct {
-	*cliVO.HandVO
+	// *cliVO.HandVO
 	ActiveCardId    int32
 	SelectedCardIds []int32
-	ActivePlayerId  int32
-	MatchId         int32
-	GameState       queries.Gamestate
+	Deck            *vo.GameDeck
+
+	*vo.UIFooterVO
 }
 
 func (view *View) Init() {
-	view.ActiveCardId = 0
+	// view.ActiveCardId = 0
 }
 
-func (view *View) Render() string {
+func (view *View) Render(hand []int32) string {
 	var s string
 	var cardViews []string
 
 	s += view.BuildHeader()
-	for i := 0; i < len(view.CardIds); i++ {
-		c := utils.GetCardById(view.CardIds[i], view.Deck)
+	for i := 0; i < len(hand); i++ {
+		c := utils.GetCardById(hand[i], view.Deck)
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Value)
 		styledCard := styles.ModelStyle.Render(cardStr)
-		if slices.Index(view.SelectedCardIds, c.Card.ID) > -1 {
+		if slices.Index(view.SelectedCardIds, c.Matchcard.Cardid) > -1 {
 			if int32(i) == view.ActiveCardId {
 				styledCard = styles.SelectedFocusedStyle.Render(cardStr)
 			} else {

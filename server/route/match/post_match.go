@@ -6,26 +6,27 @@ import (
 	"time"
 
 	"queries"
-	conn "server/db"
-	"server/route/player"
-	"vo"
+
+	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/route/player"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
 // Create godoc
-// @Summary      Create new match
-// @Description
-// @Tags         match
-// @Accept       json
-// @Produce      json
-// @Param details body vo.MatchRequirements true "MatchRequirements"
-// @Success      200  {object}  int
-// @Failure      400  {object}  error
-// @Failure      404  {object}  error
-// @Failure      500  {object}  error
-// @Router       /player/match/ [post]
+//	@Summary	Create new match
+//	@Description
+//	@Tags		match
+//	@Accept		json
+//	@Produce	json
+//	@Param		details	body		vo.MatchRequirements	true	"MatchRequirements"
+//	@Success	200		{object}	int
+//	@Failure	400		{object}	error
+//	@Failure	404		{object}	error
+//	@Failure	500		{object}	error
+//	@Router		/player/match/ [post]
 func NewMatch(c echo.Context) error {
 	details := new(vo.MatchRequirements)
 	if err := c.Bind(details); err != nil {
