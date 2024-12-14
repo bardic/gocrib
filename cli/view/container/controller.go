@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"queries"
 
-	"cli/services"
-	"cli/styles"
-	"cli/utils"
-	"cli/view/board"
-	"cli/view/card"
-	cliVO "cli/vo"
-	"vo"
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/styles"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/view/board"
+	"github.com/bardic/gocrib/cli/view/card"
+	cliVO "github.com/bardic/gocrib/cli/vo"
+	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -27,23 +27,25 @@ func (ctrl *Controller) Init() {
 	ctrl.ChangeTab(0)
 }
 
-func (ctrl *Controller) Render() string {
+func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
 	containerModel := ctrl.Model.(*Model)
-	containerHeader := ctrl.View.Render()
-	viewRender := containerModel.Subview.Render()
+	containerHeader := ctrl.View.Render(gamematch.Players[0].Hand)
+	viewRender := containerModel.Subview.Render(gamematch)
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
 }
 
-func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
-	var cmd tea.Cmd
+func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
+	// var cmd tea.Cmd
 	var cmds []tea.Cmd
-	containerModel := ctrl.Model.(*Model)
-	subView := containerModel.Subview
+	// containerModel := ctrl.Model.(*Model)
+	// subView := containerModel.Subview
 
-	subView.Update(msg)
+	// if gameMatch != nil {
+	// 	cmd = subView.Update(msg, gameMatch)
+	// }
 
-	cmds = append(cmds, cmd)
+	// cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg: //User input
@@ -66,9 +68,7 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	containerModel := ctrl.Model.(*Model)
 	containerView := ctrl.View.(*View)
-	subView := containerModel.Subview
-
-	subView.ParseInput(msg)
+	//subView := containerModel.Subview
 
 	switch msg.String() {
 	case "ctrl+c", "q":
@@ -96,7 +96,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 	}
 
-	return nil
+	return msg
 }
 
 func (ctrl *Controller) ChangeTab(tabIndex int) {
@@ -194,11 +194,11 @@ func (ctrl *Controller) CreateController(name string, currentState queries.Games
 	}
 
 	v := &card.View{
-		ActiveCardId:   m.ActiveSlotIndex,
-		HandVO:         m.HandVO,
-		ActivePlayerId: m.HandVO.LocalPlayerID,
-		MatchId:        ctrl.Model.(*Model).Match.ID,
-		GameState:      ctrl.Model.(*Model).Match.Gamestate,
+		// ActiveCardId:   m.ActiveSlotIndex,
+		Deck: m.HandVO.Deck,
+		// ActivePlayerId: m.HandVO.LocalPlayerID,
+		// MatchId:        ctrl.Model.(*Model).Match.ID,
+		// GameState:      ctrl.Model.(*Model).Match.Gamestate,
 	}
 
 	return &card.Controller{

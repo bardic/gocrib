@@ -1,4 +1,4 @@
-module server
+module github.com/bardic/gocrib/server
 
 go 1.23.2
 

@@ -6,23 +6,24 @@ import (
 	"time"
 
 	"queries"
-	conn "server/db"
+
+	conn "github.com/bardic/gocrib/server/db"
 
 	"github.com/labstack/echo/v4"
 )
 
 // Create godoc
-// @Summary      Create new player
-// @Description
-// @Tags         players
-// @Accept       json
-// @Produce      json
-// @Param details body int true "player Object to save"
-// @Success      200  {object}  queries.Player
-// @Failure      400  {object}  error
-// @Failure      404  {object}  error
-// @Failure      500  {object}  error
-// @Router       /player/player/ [post]
+//	@Summary	Create new player
+//	@Description
+//	@Tags		players
+//	@Accept		json
+//	@Produce	json
+//	@Param		details	body		int	true	"player Object to save"
+//	@Success	200		{object}	queries.Player
+//	@Failure	400		{object}	error
+//	@Failure	404		{object}	error
+//	@Failure	500		{object}	error
+//	@Router		/player/player/ [post]
 func NewPlayer(c echo.Context) error {
 	id := new(int32)
 	if err := c.Bind(id); err != nil {

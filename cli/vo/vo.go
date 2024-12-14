@@ -1,7 +1,7 @@
 package vo
 
 import (
-	"vo"
+	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -16,14 +16,14 @@ const (
 
 type IController interface {
 	Init()
-	Render() string
+	Render(gameMatch *vo.GameMatch) string
 	ParseInput(tea.KeyMsg) tea.Msg
-	Update(msg tea.Msg) tea.Cmd
+	Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd
 	GetState() ControllerState
 }
 
 type IView interface {
-	Render() string
+	Render(hand []int32) string
 	Init()
 	BuildHeader() string
 	BuildFooter() string

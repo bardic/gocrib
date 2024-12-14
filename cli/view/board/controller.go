@@ -1,9 +1,11 @@
 package board
 
 import (
-	"cli/services"
-	cliVO "cli/vo"
 	"queries"
+
+	"github.com/bardic/gocrib/cli/services"
+	cliVO "github.com/bardic/gocrib/cli/vo"
+	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -25,29 +27,25 @@ func (ctrl *Controller) Init() {
 	}
 
 	ctrl.View.Init()
+
 }
 
-func (ctrl *Controller) Render() string {
-	return ctrl.View.Render()
+func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
+	return ctrl.View.Render(gameMatch.Players[0].Hand)
 }
 
-func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 	gameView := ctrl.View.(*View)
 	var cmd tea.Cmd
-	gameView.cutInput.Focus()
+
 	gameView.cutInput, cmd = gameView.cutInput.Update(msg)
+	gameView.cutInput.Focus()
+
 	return cmd
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
-	switch msg.String() {
-	case "ctrl+c", "q":
-		return tea.Quit()
-	case "enter", "view_update":
-		return ctrl.Enter()
-
-	}
-	return nil
+	return msg
 }
 
 func (ctrl *Controller) Enter() tea.Msg {

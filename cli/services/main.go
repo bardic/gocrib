@@ -1,3 +1,4 @@
+// Services are the CLIs connection to the backend. If you look in server/route you'll see a coorsponding package for each service.
 package services
 
 import (
@@ -10,36 +11,24 @@ import (
 
 const (
 	BaseUrl = "http://localhost:1323/v1"
-	//Cards
-	EndPointAllCards           = BaseUrl + "/player/allcards"
-	EndPointCardById           = BaseUrl + "/player/card?id="
-	EndPointGameplayCardsByIds = BaseUrl + "/player/gameplaycards?ids="
-
 	//Game
 	EndPointGame = BaseUrl + "/game/playCard"
 	//Player
-	EndPointPlayer      = BaseUrl + "/player/player"
-	EndPointKitty       = BaseUrl + "/player/kitty"
-	EndPointPlay        = BaseUrl + "/player/play"
-	EndPointPlayerReady = BaseUrl + "/player/ready"
-	//History
-	EndPointHistory = BaseUrl + "/history"
+	EndPointPlayer      = BaseUrl + "/match/player"
+	EndPointKitty       = BaseUrl + "/match/player/kitty"
+	EndPointPlay        = BaseUrl + "/match/player/play"
+	EndPointPlayerReady = BaseUrl + "/match/player/ready"
 	//Match
-	EndPointMatch                = BaseUrl + "/player/match"
-	EndPointMatchState           = BaseUrl + "/player/match/state"
-	EndPointJoinMatch            = BaseUrl + "/player/match/join"
-	EndPointMatches              = BaseUrl + "/player/matches"
-	EndPointOpenMatch            = BaseUrl + "/player/matches/open"
-	EndPointMatchCard            = BaseUrl + "/player/match/card"
-	EndPointGameplayCardsByMatch = BaseUrl + "/player/match/cards?id="
-	EndPointMatchCutDeck         = BaseUrl + "/player/match/cut"
-	//Chat
-	EndPointChat = BaseUrl + "/chat"
-	//Lobby
-	EndPointLobby = BaseUrl + "/player/lobby"
+	EndPointMatch                = BaseUrl + "/match"
+	EndPointMatchState           = BaseUrl + "/match/state"
+	EndPointJoinMatch            = BaseUrl + "/match/join"
+	EndPointOpenMatch            = BaseUrl + "/match/open"
+	EndPointMatchCard            = BaseUrl + "/match/card"
+	EndPointGameplayCardsByMatch = BaseUrl + "/match/cards?id="
+	EndPointMatchCutDeck         = BaseUrl + "/match/cut"
+	EndPointDeckById             = BaseUrl + "/match/deck?id="
 	//Deck
-	EndPointDeck     = BaseUrl + "/deck"
-	EndPointDeckById = BaseUrl + "/player/match/deck?id="
+	EndPointDeck = BaseUrl + "/deck"
 	//Account
 	EndPointLogin = BaseUrl + "/account/login"
 )

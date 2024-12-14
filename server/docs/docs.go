@@ -56,86 +56,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/card/": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Update card by id",
-                "parameters": [
-                    {
-                        "description": "card Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/queries.Card"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Card"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Create new card",
-                "parameters": [
-                    {
-                        "description": "card Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/queries.Card"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Card"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/admin/match/": {
             "delete": {
                 "consumes": [
@@ -147,7 +67,7 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Get match by barcode",
+                "summary": "Delete a match by id",
                 "parameters": [
                     {
                         "type": "string",
@@ -167,89 +87,6 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/card/": {
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Get card by barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for card by barcode",
-                        "name": "barcode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Store in which the barcode was found",
-                        "name": "storeId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Card"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/player/allcards/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Get all cards",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/queries.Card"
-                            }
-                        }
                     },
                     "404": {
                         "description": "Not Found",
@@ -318,11 +155,11 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Get match by id",
+                "summary": "Get match state by match id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for match by id",
+                        "description": "match id",
                         "name": "id",
                         "in": "query",
                         "required": true
@@ -355,7 +192,7 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Update match by id",
+                "summary": "Update match details",
                 "parameters": [
                     {
                         "description": "match Object to update",
@@ -443,11 +280,11 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Get match cards by id",
+                "summary": "Get match cards by match id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for match by id",
+                        "description": "match id",
                         "name": "id",
                         "in": "query",
                         "required": true
@@ -485,7 +322,7 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Cut deck by index",
+                "summary": "Cut deck by index of card selected",
                 "parameters": [
                     {
                         "description": "Deck index that is to become the cut",
@@ -530,11 +367,11 @@ const docTemplate = `{
                 "tags": [
                     "deck"
                 ],
-                "summary": "Get deck by id",
+                "summary": "Get deck by match id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "search for deck by id",
+                        "description": "search for deck by match id",
                         "name": "id",
                         "in": "query",
                         "required": true
@@ -572,7 +409,7 @@ const docTemplate = `{
                 "summary": "Join match by id",
                 "parameters": [
                     {
-                        "description": "match Object to update",
+                        "description": "JoinMatchReq object",
                         "name": "details",
                         "in": "body",
                         "required": true,
@@ -647,10 +484,10 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Update play with ids",
+                "summary": "Update play",
                 "parameters": [
                     {
-                        "description": "array of ids to add to play",
+                        "description": "HandModifier object",
                         "name": "details",
                         "in": "body",
                         "required": true,
@@ -700,49 +537,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "query",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Player"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "players"
-                ],
-                "summary": "Update player by barcode",
-                "parameters": [
-                    {
-                        "description": "player Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/queries.Player"
-                        }
                     }
                 ],
                 "responses": {
@@ -862,7 +656,7 @@ const docTemplate = `{
                 "tags": [
                     "players"
                 ],
-                "summary": "Update player to mark as ready",
+                "summary": "Update player by id to be ready. Returns true if all players are ready",
                 "parameters": [
                     {
                         "description": "player id to update",
@@ -940,9 +734,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "matchId": {
+                    "description": "MatchId",
                     "type": "integer"
                 },
                 "playerId": {
+                    "description": "PlayerId",
                     "type": "integer"
                 }
             }

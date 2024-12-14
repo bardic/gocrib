@@ -6,25 +6,27 @@ import (
 	"time"
 
 	"queries"
-	conn "server/db"
-	"server/utils"
-	"vo"
+
+	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/route/helpers"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )
 
 // Create godoc
-// @Summary      Update kitty with ids
-// @Description
-// @Tags         match
-// @Accept       json
-// @Produce      json
-// @Param details body vo.HandModifier true "array of ids to add to kitty"
-// @Success      200  {object}  queries.Match
-// @Failure      400  {object}  error
-// @Failure      404  {object}  error
-// @Failure      500  {object}  error
-// @Router       /player/kitty [put]
+//
+//	@Summary	Update kitty with ids
+//	@Description
+//	@Tags		match
+//	@Accept		json
+//	@Produce	json
+//	@Param		details	body		vo.HandModifier	true	"array of ids to add to kitty"
+//	@Success	200		{object}	queries.Match
+//	@Failure	400		{object}	error
+//	@Failure	404		{object}	error
+//	@Failure	500		{object}	error
+//	@Router		/player/kitty [put]
 func UpdateKitty(c echo.Context) error {
 	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {
@@ -37,7 +39,7 @@ func UpdateKitty(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = utils.UpdateGameState(m.ID, queries.GamestateCutState)
+	err = helpers.UpdateGameState(m.ID, queries.GamestateCutState)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -71,7 +73,7 @@ func updateKitty(details vo.HandModifier) (*vo.GameMatch, error) {
 		return nil, err
 	}
 
-	m, err := utils.GetMatch(int(details.MatchId))
+	m, err := helpers.GetMatch(int(details.MatchId))
 
 	if err != nil {
 		return nil, err

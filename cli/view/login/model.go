@@ -1,7 +1,7 @@
 package login
 
 import (
-	cliVO "cli/vo"
+	cliVO "github.com/bardic/gocrib/cli/vo"
 )
 
 type LoginModel struct {

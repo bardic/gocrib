@@ -1,11 +1,12 @@
 package main
 
 import (
-	"cli/utils"
-	"cli/view/login"
-	cliVO "cli/vo"
 	"queries"
-	"vo"
+
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/view/login"
+	cliVO "github.com/bardic/gocrib/cli/vo"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,6 +20,7 @@ type CLI struct {
 	matchId           int32
 	currentController cliVO.IController
 	isOpponent        bool
+	GameMatch         *vo.GameMatch
 }
 
 func main() {

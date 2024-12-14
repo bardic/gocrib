@@ -6,39 +6,42 @@ import (
 	"time"
 
 	"queries"
-	conn "server/db"
-	"server/utils"
 
-	"vo"
+	"github.com/bardic/gocrib/server/controller"
+	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/route/helpers"
+
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )
 
-// Create godoc
-// @Summary      Update play with ids
-// @Description
-// @Tags         match
-// @Accept       json
-// @Produce      json
-// @Param details body vo.HandModifier true "array of ids to add to play"
-// @Success      200  {object}  queries.Match
-// @Failure      400  {object}  error
-// @Failure      404  {object}  error
-// @Failure      500  {object}  error
-// @Router       /player/play [put]
+// Updates a matches cards state
+//
+//	@Summary	Update play
+//	@Description
+//	@Tags		match
+//	@Accept		json
+//	@Produce	json
+//	@Param		details	body		vo.HandModifier	true	"HandModifier object"
+//	@Success	200		{object}	queries.Match
+//	@Failure	400		{object}	error
+//	@Failure	404		{object}	error
+//	@Failure	500		{object}	error
+//	@Router		/player/play [put]
 func UpdatePlay(c echo.Context) error {
 	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	m, err := utils.UpdatePlay(*details)
+	m, err := controller.UpdatePlay(*details)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = utils.UpdateGameState(m.ID, queries.GamestateOpponentState)
+	err = helpers.UpdateGameState(m.ID, queries.GamestateOpponentState)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

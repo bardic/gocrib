@@ -3,10 +3,11 @@ package board
 import (
 	"encoding/json"
 	"strings"
-	"vo"
 
-	"cli/services"
-	"cli/utils"
+	"github.com/bardic/gocrib/vo"
+
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/utils"
 
 	"queries"
 
@@ -34,11 +35,12 @@ func (view *View) Init() {
 	view.cutInput = textinput.New()
 	view.cutInput.Placeholder = "0"
 	view.cutInput.CharLimit = 5
+	view.cutInput.Focus()
 	view.cutInput.Width = 5
 	view.isLoading = false
 }
 
-func (view *View) Render() string {
+func (view *View) Render(hand []int32) string {
 	if view.isLoading {
 		return "Loading..."
 	}
@@ -47,7 +49,6 @@ func (view *View) Render() string {
 	viewBuilder := strings.Builder{}
 
 	if view.State == queries.GamestateCutState {
-		view.cutInput.Focus()
 		viewBuilder.WriteString(view.cutInput.View() + " \n")
 	} else {
 		viewBuilder.WriteString("\n")

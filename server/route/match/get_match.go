@@ -4,22 +4,22 @@ import (
 	"net/http"
 	"strconv"
 
-	"server/utils"
-
+	"github.com/bardic/gocrib/server/route/helpers"
 	"github.com/labstack/echo/v4"
 )
 
-// Create godoc
-// @Summary      Get match by id
-// @Description
-// @Tags         match
-// @Accept       json
-// @Produce      json
-// @Param        id    query     string  true  "search for match by id"'
-// @Success      200  {object}  queries.Match
-// @Failure      404  {object}  error
-// @Failure      422  {object}  error
-// @Router       /player/match/ [get]
+// Returns a match by id
+//
+//	@Summary	Get match by id
+//	@Description
+//	@Tags		match
+//	@Accept		json
+//	@Produce		json
+//	@Param		id	query		string	true	"Match ID"'
+//	@Success	200	{object}	queries.Match
+//	@Failure	404	{object}	error
+//	@Failure	422	{object}	error
+//	@Router		/player/match/ [get]
 func GetMatch(c echo.Context) error {
 	p := c.Request().URL.Query().Get("id")
 	id, err := strconv.Atoi(p)
@@ -28,7 +28,7 @@ func GetMatch(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	m, err := utils.GetMatch(id)
+	m, err := helpers.GetMatch(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

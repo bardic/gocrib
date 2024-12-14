@@ -3,11 +3,12 @@ package gameContainer
 import (
 	"encoding/json"
 	"time"
-	"vo"
 
-	"cli/services"
-	"cli/utils"
-	"cli/view/container"
+	"github.com/bardic/gocrib/vo"
+
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/view/container"
 
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,12 +20,8 @@ type Controller struct {
 	timerStarted bool
 }
 
-func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
-	var cmd tea.Cmd
+func (ctrl *Controller) Update(msg tea.Msg, oldGameMatch *vo.GameMatch) tea.Cmd {
 	var cmds []tea.Cmd
-
-	cmd = ctrl.Controller.Update(msg)
-	cmds = append(cmds, cmd)
 
 	if !ctrl.timerStarted {
 		ctrl.timer = timer.NewWithInterval(time.Hour, time.Second*1)
@@ -33,11 +30,12 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		ctrl.timerStarted = true
 	}
 
+	var gameMatch *vo.GameMatch
 	switch msg := msg.(type) {
 	case timer.TickMsg: // Polling update
 		var cmd tea.Cmd
 		ctrl.timer, cmd = ctrl.timer.Update(msg)
-		var gameMatch vo.GameMatch
+
 		resp := services.GetPlayerMatch(ctrl.Controller.Model.(*container.Model).Match.ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
 
@@ -45,10 +43,13 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 			utils.Logger.Sugar().Error(err)
 		}
 
-		ctrl.Controller.Model.(*container.Model).Match = &gameMatch
+		ctrl.Controller.Model.(*container.Model).Match = gameMatch
 
 		cmds = append(cmds, cmd)
+
 	}
 
+	cmd := ctrl.Controller.Update(msg, gameMatch)
+	cmds = append(cmds, cmd)
 	return tea.Batch(cmds...)
 }

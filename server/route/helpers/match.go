@@ -1,12 +1,13 @@
-package utils
+package helpers
 
 import (
 	"context"
 	"encoding/json"
 	"queries"
-	conn "server/db"
 	"time"
-	"vo"
+
+	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/vo"
 )
 
 func UpdateGameState(matchId int32, state queries.Gamestate) error {
