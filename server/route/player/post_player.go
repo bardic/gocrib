@@ -13,6 +13,7 @@ import (
 )
 
 // Create godoc
+//
 //	@Summary	Create new player
 //	@Description
 //	@Tags		players
@@ -23,7 +24,7 @@ import (
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/player/player/ [post]
+//	@Router		/match/player/ [post]
 func NewPlayer(c echo.Context) error {
 	id := new(int32)
 	if err := c.Bind(id); err != nil {

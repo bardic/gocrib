@@ -9,6 +9,7 @@ import (
 )
 
 // Create godoc
+//
 //	@Summary	Get player by barcode
 //	@Description
 //	@Tags		players
@@ -19,7 +20,7 @@ import (
 //	@Failure	400	{object}	error
 //	@Failure	404	{object}	error
 //	@Failure	500	{object}	error
-//	@Router		/player/player/ [get]
+//	@Router		/match/player/ [get]
 func GetPlayer(c echo.Context) error {
 	id := c.Request().URL.Query().Get("id")
 

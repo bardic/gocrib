@@ -7,6 +7,7 @@ import (
 )
 
 // Create godoc
+//
 //	@Summary	Get player by barcode
 //	@Description
 //	@Tags		players
@@ -17,7 +18,7 @@ import (
 //	@Failure	400	{object}	error
 //	@Failure	404	{object}	error
 //	@Failure	500	{object}	error
-//	@Router		/player/player/ [delete]
+//	@Router		/match/player/ [delete]
 func DeletePlayer(c echo.Context) error {
 	return c.JSON(http.StatusOK, nil)
 }

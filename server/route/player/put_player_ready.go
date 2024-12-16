@@ -31,7 +31,7 @@ type PReady struct {
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/player/ready [put]
+//	@Router		/match/player/ready [put]
 func PlayerReady(c echo.Context) error {
 	pReady := new(PReady)
 	if err := c.Bind(pReady); err != nil {

@@ -1,5 +1,5 @@
 // Description: Main router for the server, sets up the echo server and routes
-package main
+package router
 
 import (
 	_ "github.com/bardic/gocrib/server/docs"

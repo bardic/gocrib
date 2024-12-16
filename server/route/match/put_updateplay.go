@@ -28,7 +28,7 @@ import (
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/player/play [put]
+//	@Router		/play [put]
 func UpdatePlay(c echo.Context) error {
 	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {

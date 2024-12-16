@@ -26,7 +26,7 @@ import (
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/player/kitty [put]
+//	@Router		/match/player//kitty [put]
 func UpdateKitty(c echo.Context) error {
 	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {

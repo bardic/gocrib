@@ -1,5 +1,7 @@
 package main
 
+import "github.com/bardic/gocrib/server/router"
+
 // Cribbage API
 //
 //	@title						cribbage server
@@ -11,6 +13,6 @@ package main
 //	@host						localhost:1323
 //	@BasePath					/v1
 func main() {
-	r := &Router{}
+	r := &router.Router{}
 	r.New()
 }

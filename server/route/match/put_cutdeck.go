@@ -28,7 +28,7 @@ import (
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/player/match/cut [put]
+//	@Router		/match/cut [put]
 func CutDeck(c echo.Context) error {
 	details := new(vo.CutDeckReq)
 	if err := c.Bind(details); err != nil {

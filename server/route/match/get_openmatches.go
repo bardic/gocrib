@@ -17,7 +17,7 @@ import (
 //	@Success	200	{object}	[]vo.GameMatch
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
-//	@Router		/player/matches/open [get]
+//	@Router		/matches/open [get]
 func GetOpenMatches(c echo.Context) error {
 	v, err := helpers.GetOpenMatches()
 	if err != nil {

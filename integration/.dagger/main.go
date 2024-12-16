@@ -15,37 +15,64 @@
 package main
 
 import (
+	"context"
 	"dagger/integration/internal/dagger"
 )
 
 type Integration struct{}
 
-func (i *Integration) Test(migrations, server, test *dagger.Directory) *dagger.Container {
+// dbService := dag.Container().
+// 	From("postgres:latest").
+// 	WithEnvVariable("POSTGRES_USER", "postgres").
+// 	WithEnvVariable("POSTGRES_PASSWORD", "example").
+// 	WithEnvVariable("POSTGRES_DB", "cribbage").
+// 	AsService()
+
+func (i *Integration) Test(server, test *dagger.Directory) (string, error) {
+
 	dbService := dag.Container().
 		From("postgres:latest").
 		WithEnvVariable("POSTGRES_USER", "postgres").
 		WithEnvVariable("POSTGRES_PASSWORD", "example").
 		WithEnvVariable("POSTGRES_DB", "cribbage").
-		WithExposedPort(5432).
 		AsService()
 
 	dag.Container().
-		From("migrate/migrate").
-		WithDirectory("/migrations", server).
+		From("golang:latest").
 		WithServiceBinding("db", dbService).
-		WithExec([]string{"migrate", "-database", "postgres://postgres:example@db:5432/cribbage?sslmode=disable", "-path", "migrations", "up"})
+		WithDirectory("/src", server).
+		WithExec([]string{"go", "-tags", "'postgres'", "github.com/golang-migrate/migrate/v4/cmd/migrate@latest"}).
+		WithExec([]string{"migrate", "-path", "/src/migrations", "-database", "postgres://postgres:example@localhost:5432/cribbage?sslmode=disable", "up"}).
+		AsService().Up(context.Background())
 
 	serverService := dag.Container().
 		From("golang:latest").
-		WithDirectory("/src", server).
+		WithDirectory("/src", server, dagger.ContainerWithDirectoryOpts{
+			Exclude: []string{
+				"./integration/.dagger/internal",
+				"./.git",
+				"./.vscode",
+				".gitignore",
+				"README.md",
+				"UNLICENSE",
+				"crib.log",
+				"./integration/.dagger/dagger.gen.go",
+			},
+		}).
+		WithExposedPort(1323).
 		WithWorkdir("/src").
-		WithExec([]string{"go", "run", "main.go"}).
+		WithExec([]string{"go", "run", "/src/server/main.go"}).
 		AsService()
 
 	return dag.Container().
-		From("jetbrains/intellij-http-client").
-		WithDirectory("/workdir", test).
-		WithServiceBinding("db", dbService).
+		From("alpine:latest").
 		WithServiceBinding("server", serverService).
-		WithExec([]string{"run.http"})
+		WithDirectory("/workdir", test).
+		WithExec([]string{"apk", "add", "openjdk17-jdk", "curl", "unzip"}).
+		WithExec([]string{"/bin/sh", "-c", "mkdir /ijhttp"}).
+		WithExec([]string{"curl", "-f", "-L", "-o", "/ijhttp/ijhttp.zip", "https://jb.gg/ijhttp/latest"}).
+		WithExec([]string{"unzip", "/ijhttp/ijhttp.zip"}).
+		WithExec([]string{"/bin/sh", "-c", "chmod +x /ijhttp/ijhttp"}).
+		WithExec([]string{"sh", "/ijhttp/ijhttp", "/workdir/test.http"}).
+		Stdout(context.Background())
 }

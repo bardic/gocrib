@@ -24,7 +24,7 @@ import (
 //	@Success	200	{object}	[]queries.GetMatchCardsRow
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
-//	@Router		/player/match/cards/ [get]
+//	@Router		/match/cards/ [get]
 func GetMatchCardsForMatchId(c echo.Context) error {
 	p := c.Request().URL.Query().Get("id")
 	id, err := strconv.Atoi(p)

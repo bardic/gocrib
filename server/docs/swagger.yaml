@@ -369,12 +369,12 @@ paths:
       summary: Login
       tags:
       - account
-  /admin/match/:
-    delete:
+  /deck/:
+    get:
       consumes:
       - application/json
       parameters:
-      - description: search for match by barcode
+      - description: search for deck by match id
         in: query
         name: id
         required: true
@@ -385,50 +385,17 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/queries.Match'
-        "400":
-          description: Bad Request
-          schema: {}
+            $ref: '#/definitions/vo.GameDeck'
         "404":
           description: Not Found
           schema: {}
-        "500":
-          description: Internal Server Error
+        "422":
+          description: Unprocessable Entity
           schema: {}
-      summary: Delete a match by id
+      summary: Get deck by match id
       tags:
-      - match
-  /player/kitty:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: array of ids to add to kitty
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/vo.HandModifier'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Match'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update kitty with ids
-      tags:
-      - match
-  /player/match/:
+      - deck
+  /match/:
     get:
       consumes:
       - application/json
@@ -512,7 +479,7 @@ paths:
       summary: Update match details
       tags:
       - match
-  /player/match/cards/:
+  /match/cards/:
     get:
       consumes:
       - application/json
@@ -540,7 +507,7 @@ paths:
       summary: Get match cards by match id
       tags:
       - match
-  /player/match/cut:
+  /match/cut:
     put:
       consumes:
       - application/json
@@ -570,33 +537,7 @@ paths:
       summary: Cut deck by index of card selected
       tags:
       - match
-  /player/match/deck/:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for deck by match id
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.GameDeck'
-        "404":
-          description: Not Found
-          schema: {}
-        "422":
-          description: Unprocessable Entity
-          schema: {}
-      summary: Get deck by match id
-      tags:
-      - deck
-  /player/match/join:
+  /match/join:
     put:
       consumes:
       - application/json
@@ -626,59 +567,7 @@ paths:
       summary: Join match by id
       tags:
       - match
-  /player/matches/open:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/vo.GameMatch'
-            type: array
-        "404":
-          description: Not Found
-          schema: {}
-        "422":
-          description: Unprocessable Entity
-          schema: {}
-      summary: Get match by id
-      tags:
-      - match
-  /player/play:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: HandModifier object
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/vo.HandModifier'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Match'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update play
-      tags:
-      - match
-  /player/player/:
+  /match/player/:
     delete:
       consumes:
       - application/json
@@ -764,7 +653,37 @@ paths:
       summary: Create new player
       tags:
       - players
-  /player/ready:
+  /match/player//kitty:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: array of ids to add to kitty
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/vo.HandModifier'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update kitty with ids
+      tags:
+      - match
+  /match/player/ready:
     put:
       consumes:
       - application/json
@@ -794,6 +713,58 @@ paths:
       summary: Update player by id to be ready. Returns true if all players are ready
       tags:
       - players
+  /matches/open:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/vo.GameMatch'
+            type: array
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get match by id
+      tags:
+      - match
+  /play:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: HandModifier object
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/vo.HandModifier'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update play
+      tags:
+      - match
 securityDefinitions:
   BasicAuth:
     type: basic
