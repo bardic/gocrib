@@ -72,7 +72,6 @@ func v1Routes(g *echo.Group) {
 	matchGroup.GET("/state", match.GetMatchState)
 	matchGroup.GET("/open", match.GetOpenMatches)
 	matchGroup.POST("", match.NewMatch)
-	matchGroup.PUT("", match.UpdateMatch)
 	matchGroup.PUT("/join", match.JoinMatch)
 	matchGroup.PUT("/cut", match.CutDeck)
 	matchGroup.GET("/cards", match.GetMatchCardsForMatchId)

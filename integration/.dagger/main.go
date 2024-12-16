@@ -35,15 +35,16 @@ func (i *Integration) Test(server, test *dagger.Directory) (string, error) {
 		WithEnvVariable("POSTGRES_USER", "postgres").
 		WithEnvVariable("POSTGRES_PASSWORD", "example").
 		WithEnvVariable("POSTGRES_DB", "cribbage").
+		WithExposedPort(5432).
 		AsService()
 
-	dag.Container().
+	migrateService := dag.Container().
 		From("golang:latest").
 		WithServiceBinding("db", dbService).
 		WithDirectory("/src", server).
-		WithExec([]string{"go", "-tags", "'postgres'", "github.com/golang-migrate/migrate/v4/cmd/migrate@latest"}).
-		WithExec([]string{"migrate", "-path", "/src/migrations", "-database", "postgres://postgres:example@localhost:5432/cribbage?sslmode=disable", "up"}).
-		AsService().Up(context.Background())
+		WithExec([]string{"go", "install", "-tags", "'postgres'", "github.com/golang-migrate/migrate/v4/cmd/migrate@latest"}).
+		WithExec([]string{"migrate", "-path", "/src/migrations", "-database", "postgres://postgres:example@db:5432/cribbage?sslmode=disable", "up"}).
+		AsService()
 
 	serverService := dag.Container().
 		From("golang:latest").
@@ -66,6 +67,7 @@ func (i *Integration) Test(server, test *dagger.Directory) (string, error) {
 
 	return dag.Container().
 		From("alpine:latest").
+		WithServiceBinding("migrate", migrateService).
 		WithServiceBinding("server", serverService).
 		WithDirectory("/workdir", test).
 		WithExec([]string{"apk", "add", "openjdk17-jdk", "curl", "unzip"}).

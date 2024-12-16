@@ -39,10 +39,6 @@ func JoinMatch(accountId, activeMatchId int32) tea.Msg {
 	return url(EndPointJoinMatch, http.MethodPut, string(b))
 }
 
-func PutPlayerMatch(id int) tea.Msg {
-	return url(EndPointMatch, http.MethodPut, "")
-}
-
 func PostPlayerMatch(accountId int32) tea.Msg {
 	req := vo.MatchRequirements{
 		AccountId:   accountId,
