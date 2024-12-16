@@ -1,0 +1,11 @@
+@host = http://server:1323/v1
+
+< {%
+    request.variables.set("id", "1")
+%}
+
+GET {{host}}/match?id={{id}}
+
+> js/isOk.js
+> js/isJson.js
+
