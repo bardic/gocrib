@@ -5,7 +5,7 @@ import "github.com/bardic/gocrib/server/router"
 // Cribbage API
 //
 //	@title						cribbage server
-//	@version					0.0.2
+//	@version					0.0.4
 //	@description				cribbage rest server
 //
 //	@host						localhost
@@ -13,6 +13,7 @@ import "github.com/bardic/gocrib/server/router"
 //	@host						localhost:1323
 //	@BasePath					/v1
 func main() {
+
 	r := &router.Router{}
 	r.New()
 }

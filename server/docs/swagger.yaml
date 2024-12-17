@@ -340,7 +340,7 @@ info:
   contact: {}
   description: cribbage rest server
   title: cribbage server
-  version: 0.0.2
+  version: 0.0.4
 paths:
   /account/login/:
     post:
@@ -448,35 +448,6 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: Create new match
-      tags:
-      - match
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match Object to update
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/queries.Match'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Match'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update match details
       tags:
       - match
   /match/cards/:
