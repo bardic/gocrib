@@ -5,7 +5,10 @@ import (
 	"dagger/integration/internal/dagger"
 )
 
-type Integration struct{}
+type Integration struct {
+	Db     *dagger.Service
+	Server *dagger.Service
+}
 
 func (i *Integration) postgresDB() *dagger.Service {
 	return dag.Container().
@@ -13,15 +16,14 @@ func (i *Integration) postgresDB() *dagger.Service {
 		WithEnvVariable("POSTGRES_USER", "postgres").
 		WithEnvVariable("POSTGRES_PASSWORD", "example").
 		WithEnvVariable("POSTGRES_DB", "cribbage").
-		WithExposedPort(5432).
-		AsService().
+		AsService(dagger.ContainerAsServiceOpts{UseEntrypoint: true}).
 		WithHostname("db")
 }
 
-func (i *Integration) migrationService(src *dagger.Directory, db *dagger.Service) *dagger.Service {
+func (i *Integration) migrationService(src *dagger.Directory) *dagger.Service {
 	migration := dag.Container().
 		From("golang:latest").
-		WithServiceBinding("db", db)
+		WithServiceBinding("db", i.Db)
 
 	migration = gomod(migration, src)
 
@@ -36,7 +38,7 @@ func (i *Integration) migrationService(src *dagger.Directory, db *dagger.Service
 	migration = exclude(migration, src)
 
 	return migration.
-		WithExec([]string{
+		WithDefaultArgs([]string{
 			"migrate",
 			"-path",
 			"/src/queries/migrations",
@@ -47,7 +49,7 @@ func (i *Integration) migrationService(src *dagger.Directory, db *dagger.Service
 		AsService()
 }
 
-func (i *Integration) swagger(db *dagger.Service, src *dagger.Directory) *dagger.Service {
+func (i *Integration) swagger(src *dagger.Directory) *dagger.Service {
 
 	server := dag.Container().
 		From("golang:latest")
@@ -69,11 +71,25 @@ func (i *Integration) swagger(db *dagger.Service, src *dagger.Directory) *dagger
 		})
 
 	return server.
-		WithServiceBinding("db", db).
-		WithExec([]string{"go", "run", "main.go"}).
+		WithServiceBinding("db", i.Db).
 		WithExposedPort(1323).
+		WithDefaultArgs([]string{"go", "run", "main.go"}).
 		AsService().
 		WithHostname("server")
+}
+
+func (i *Integration) ijhttp(src *dagger.Directory) *dagger.Container {
+	return dag.Container().
+		From("alpine:latest").
+		WithDirectory("/workdir", src).
+		WithExec([]string{"apk", "add", "openjdk17-jdk", "curl", "unzip"}).
+		WithExec([]string{"/bin/sh", "-c", "mkdir /ijhttp"}).
+		WithExec([]string{"curl", "-f", "-L", "-o", "/ijhttp/ijhttp.zip", "https://jb.gg/ijhttp/latest"}).
+		WithExec([]string{"unzip", "/ijhttp/ijhttp.zip"}).
+		WithExec([]string{"/bin/sh", "-c", "chmod +x /ijhttp/ijhttp"}).
+		WithServiceBinding("server", i.Server).
+		WithExec([]string{"sh", "/ijhttp/ijhttp", "/workdir/match.http"})
+
 }
 
 func (i *Integration) TestSwagger(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
@@ -84,16 +100,16 @@ func (i *Integration) TestSwagger(ctx context.Context, src *dagger.Directory) (*
 		return nil, err
 	}
 
-	defer db.Stop(ctx)
+	i.Db = db
 
-	server, err := i.swagger(db, src).
+	server, err := i.swagger(src).
 		Start(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	migration, err := i.migrationService(src, db).
+	migration, err := i.migrationService(src).
 		Start(ctx)
 
 	if err != nil {
@@ -105,10 +121,51 @@ func (i *Integration) TestSwagger(ctx context.Context, src *dagger.Directory) (*
 	return server, nil
 }
 
+func (i *Integration) Test(ctx context.Context, src *dagger.Directory) (string, error) {
+	db, err := i.postgresDB().
+		Start(ctx)
+
+	if err != nil {
+		return "", err
+	}
+
+	i.Db = db
+
+	server, err := i.swagger(src).
+		Start(ctx)
+
+	if err != nil {
+		return "", err
+	}
+
+	i.Server = server
+
+	migration, err := i.migrationService(src).
+		Start(ctx)
+
+	if err != nil {
+		return "", err
+	}
+
+	defer migration.Stop(ctx)
+
+	ij := i.ijhttp(src.Directory("integration/http"))
+
+	s, err := ij.Stdout(ctx)
+
+	if err != nil {
+		return "", err
+	}
+
+	return s, nil
+}
+
 func (i *Integration) TestPostgres(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
 	db := i.postgresDB()
 
-	migration, err := i.migrationService(src, db).
+	i.Db = db
+
+	migration, err := i.migrationService(src).
 		Start(ctx)
 
 	if err != nil {
