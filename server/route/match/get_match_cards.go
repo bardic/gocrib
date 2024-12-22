@@ -15,18 +15,18 @@ import (
 
 // Takes a match id and returns the cards for that match
 //
-//	@Summary	Get match cards by match id
+//	@Summary	Get match card by match id
 //	@Description
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
-//	@Param		id	query		string	true	"match id"'
+//	@Param		id	path		int	true	"match id"'
 //	@Success	200	{object}	[]queries.GetMatchCardsRow
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
-//	@Router		/match/cards/ [get]
+//	@Router		/match/{id}/cards [get]
 func GetMatchCardsForMatchId(c echo.Context) error {
-	p := c.Request().URL.Query().Get("id")
+	p := c.Param("id")
 	id, err := strconv.Atoi(p)
 
 	if err != nil {

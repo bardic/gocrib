@@ -45,7 +45,7 @@ func (i *Integration) RestServer(src *dagger.Directory) *dagger.Service {
 	return server.
 		WithWorkdir("/src").
 		WithExec([]string{"go", "run", "/src/server/main.go"}).
-		AsService()
+		AsService().WithHostname("server")
 }
 
 func (i *Integration) Swagger(src *dagger.Directory) *dagger.Service {
@@ -68,10 +68,9 @@ func (i *Integration) Swagger(src *dagger.Directory) *dagger.Service {
 
 	server = exclude(server, src)
 
-	server, err = server.
+	server = server.
 		WithoutEntrypoint().
 		WithWorkdir("/src/server").
-		WithExposedPort(1323).
 		WithExec([]string{"go", "install", "github.com/swaggo/swag/cmd/swag@latest"}).
 		WithExec([]string{
 			"/go/bin/swag",
@@ -80,12 +79,13 @@ func (i *Integration) Swagger(src *dagger.Directory) *dagger.Service {
 			"/src/server",
 			"--parseDependency",
 			"--parseInternal",
-		}).
-		Sync(context.Background())
+		})
+		// .
+		// Sync(context.Background())
 
-	if err != nil {
-		return nil
-	}
+	// if err != nil {
+	// 	return nil
+	// }
 
 	return server.WithExec([]string{"go", "run", "main.go"}).WithExposedPort(1323).AsService()
 }

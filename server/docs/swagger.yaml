@@ -26,15 +26,6 @@ definitions:
       valid:
         type: boolean
     type: object
-  player.PReady:
-    properties:
-      matchId:
-        description: MatchId
-        type: integer
-      playerId:
-        description: PlayerId
-        type: integer
-    type: object
   queries.Account:
     properties:
       id:
@@ -335,6 +326,15 @@ definitions:
       isPrivate:
         type: boolean
     type: object
+  vo.PlayerReady:
+    properties:
+      matchId:
+        description: MatchId
+        type: integer
+      playerId:
+        description: PlayerId
+        type: integer
+    type: object
 host: localhost:1323
 info:
   contact: {}
@@ -396,31 +396,6 @@ paths:
       tags:
       - deck
   /match/:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.MatchDetailsResponse'
-        "404":
-          description: Not Found
-          schema: {}
-        "422":
-          description: Unprocessable Entity
-          schema: {}
-      summary: Get match state by match id
-      tags:
-      - match
     post:
       consumes:
       - application/json
@@ -450,16 +425,42 @@ paths:
       summary: Create new match
       tags:
       - match
-  /match/cards/:
+  /match/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Match ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get match by id
+      tags:
+      - match
+  /match/{id}/cards:
     get:
       consumes:
       - application/json
       parameters:
       - description: match id
-        in: query
+        in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -475,9 +476,78 @@ paths:
         "422":
           description: Unprocessable Entity
           schema: {}
-      summary: Get match cards by match id
+      summary: Get match card by match id
       tags:
       - match
+  /match/{matchId}/player/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: player Object to save
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/vo.JoinMatchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Player'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new player
+      tags:
+      - players
+  /match/{matchId}/player/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for match by id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: search for match by id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Player'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get player by barcode
+      tags:
+      - players
   /match/cut:
     put:
       consumes:
@@ -567,63 +637,6 @@ paths:
       summary: Get player by barcode
       tags:
       - players
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for match by id
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Player'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get player by barcode
-      tags:
-      - players
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: player Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Player'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Create new player
-      tags:
-      - players
   /match/player//kitty:
     put:
       consumes:
@@ -664,7 +677,7 @@ paths:
         name: pReady
         required: true
         schema:
-          $ref: '#/definitions/player.PReady'
+          $ref: '#/definitions/vo.PlayerReady'
       produces:
       - application/json
       responses:
@@ -684,7 +697,7 @@ paths:
       summary: Update player by id to be ready. Returns true if all players are ready
       tags:
       - players
-  /matches/open:
+  /open:
     get:
       consumes:
       - application/json

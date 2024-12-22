@@ -96,43 +96,6 @@ const docTemplate = `{
             }
         },
         "/match/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Get match state by match id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "match id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/vo.MatchDetailsResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {}
-                    }
-                }
-            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -172,48 +135,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/match/cards/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Get match cards by match id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "match id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/queries.GetMatchCardsRow"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
                         "schema": {}
                     }
                 }
@@ -310,90 +231,6 @@ const docTemplate = `{
             }
         },
         "/match/player/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "players"
-                ],
-                "summary": "Get player by barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for match by id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Player"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "players"
-                ],
-                "summary": "Create new player",
-                "parameters": [
-                    {
-                        "description": "player Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Player"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            },
             "delete": {
                 "consumes": [
                     "application/json"
@@ -500,7 +337,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/player.PReady"
+                            "$ref": "#/definitions/vo.PlayerReady"
                         }
                     }
                 ],
@@ -526,7 +363,190 @@ const docTemplate = `{
                 }
             }
         },
-        "/matches/open": {
+        "/match/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Get match by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Match ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/queries.Match"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{id}/cards": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Get match card by match id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/queries.GetMatchCardsRow"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{matchId}/player/": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Create new player",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "player Object to save",
+                        "name": "details",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/vo.JoinMatchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/queries.Player"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{matchId}/player/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Get player by barcode",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "search for match by id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "search for match by id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/queries.Player"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/open": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -641,19 +661,6 @@ const docTemplate = `{
                 },
                 "valid": {
                     "type": "boolean"
-                }
-            }
-        },
-        "player.PReady": {
-            "type": "object",
-            "properties": {
-                "matchId": {
-                    "description": "MatchId",
-                    "type": "integer"
-                },
-                "playerId": {
-                    "description": "PlayerId",
-                    "type": "integer"
                 }
             }
         },
@@ -1081,6 +1088,19 @@ const docTemplate = `{
                 },
                 "isPrivate": {
                     "type": "boolean"
+                }
+            }
+        },
+        "vo.PlayerReady": {
+            "type": "object",
+            "properties": {
+                "matchId": {
+                    "description": "MatchId",
+                    "type": "integer"
+                },
+                "playerId": {
+                    "description": "PlayerId",
+                    "type": "integer"
                 }
             }
         }

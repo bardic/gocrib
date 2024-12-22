@@ -15,14 +15,16 @@ import (
 //	@Tags		players
 //	@Accept		json
 //	@Produce	json
-//	@Param		id	query		string	true	"search for match by id"'
+//	@Param		id	path		int	true	"search for match by id"'
+//	@Param		matchId	path		int	true	"search for match by id"'
 //	@Success	200	{object}	queries.Player
 //	@Failure	400	{object}	error
 //	@Failure	404	{object}	error
 //	@Failure	500	{object}	error
-//	@Router		/match/player/ [get]
+//	@Router		/match/{matchId}/player/{id} [get]
 func GetPlayer(c echo.Context) error {
-	id := c.Request().URL.Query().Get("id")
+	id := c.Param("id")
+	//match := c.Param("matchId")
 
 	p1Id, err := strconv.Atoi(id)
 

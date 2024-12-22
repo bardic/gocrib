@@ -8,6 +8,7 @@ import (
 	"queries"
 
 	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,19 +20,20 @@ import (
 //	@Tags		players
 //	@Accept		json
 //	@Produce	json
-//	@Param		details	body		int	true	"player Object to save"
+//	@Param		matchId	path		int	true	"match id"'
+//	@Param		details	body		vo.JoinMatchReq	true	"player Object to save"
 //	@Success	200		{object}	queries.Player
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/match/player/ [post]
+//	@Router		/match/{matchId}/player/ [post]
 func NewPlayer(c echo.Context) error {
-	id := new(int32)
-	if err := c.Bind(id); err != nil {
+	joinMatchReq := new(vo.JoinMatchReq)
+	if err := c.Bind(joinMatchReq); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := NewPlayerQuery(*id)
+	p, err := NewPlayerQuery(joinMatchReq.AccountId)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

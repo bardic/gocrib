@@ -1,4 +1,4 @@
-@host = http://server:1323/v1
+@host = http://localhost:1323/v1
 @gameId = 1
 @secondPlayerId = 2
 @cutIndex = "30"
@@ -36,7 +36,29 @@ Content-Type: application/json
 
 ###
 
-GET {{host}}/match?id={{gameId}}
+GET {{host}}/open
+
+> {%
+    var minNumOfMatches = 1;    
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+     client.test(`At least ${minNumOfMatches} match(es) exists`, function () {
+        client.assert(jsonPath(response.body, "@",) >= `${minNumOfMatches}`, "Not enough matches");
+    });
+%}
+
+###
+
+GET {{host}}/match/{{gameId}}
 
 > {%
     var gameIdToMatch = 1;    
@@ -52,13 +74,13 @@ GET {{host}}/match?id={{gameId}}
     });
 
     client.test(`Is Id ${gameIdToMatch}`, function () {
-        client.assert(jsonPath(response.body, "$.ID",) == `${gameIdToMatch}`, "Id is wrong");
+        client.assert(jsonPath(response.body, "$.MatchId",) == `${gameIdToMatch}`, "Id is wrong");
     });
 %}
 
 ###
 
-PUT {{host}}/match/join
+PUT {{host}}/match/{{gameId}}/join
 Content-Type: application/json
 
 {
@@ -91,7 +113,7 @@ Content-Type: application/json
 
 ###
 
-PUT {{host}}/match/cut
+PUT {{host}}/match/{{gameId}}/cut
 Content-Type: application/json
 
 {
@@ -120,7 +142,7 @@ Content-Type: application/json
 
 ###
 
-GET {{host}}/match/cards?id=1
+GET {{host}}/match/{{gameId}}/cards
 	
 > {%
     var gameIdToMatch = 1;    

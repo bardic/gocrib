@@ -124,3 +124,8 @@ type UIFooterVO struct {
 	GameState      queries.Gamestate
 	LocalPlayerID  int32
 }
+
+type PlayerReady struct {
+	MatchId  int32 // MatchId
+	PlayerId int32 // PlayerId
+}

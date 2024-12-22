@@ -1,1 +1,2 @@
+DROP TYPE gamestate;
 DROP TABLE IF EXISTS match;
