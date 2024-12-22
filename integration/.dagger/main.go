@@ -76,7 +76,7 @@ func (i *Integration) swagger(db *dagger.Service, src *dagger.Directory) *dagger
 		WithHostname("server")
 }
 
-func (i *Integration) Test(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
+func (i *Integration) TestSwagger(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
 	db, err := i.postgresDB().
 		Start(ctx)
 
@@ -103,6 +103,21 @@ func (i *Integration) Test(ctx context.Context, src *dagger.Directory) (*dagger.
 	defer migration.Stop(ctx)
 
 	return server, nil
+}
+
+func (i *Integration) TestPostgres(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
+	db := i.postgresDB()
+
+	migration, err := i.migrationService(src, db).
+		Start(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer migration.Stop(ctx)
+
+	return db, nil
 }
 
 func exclude(c *dagger.Container, dir *dagger.Directory) *dagger.Container {
