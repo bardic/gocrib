@@ -63,7 +63,7 @@ func v1Routes(g *echo.Group) {
 	}))
 
 	g.GET("/open", match.GetOpenMatches)
-	g.GET("/match", match.GetMatch)
+	g.GET("/match/:id", match.GetMatch)
 
 	g.POST("/match", match.NewMatch)
 	matchGroup := g.Group("/match/:id")
