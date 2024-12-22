@@ -1,7 +1,7 @@
 package active
 
 import (
-	"cli/styles"
+	"github.com/bardic/gocrib/cli/styles"
 
 	"github.com/charmbracelet/lipgloss"
 )

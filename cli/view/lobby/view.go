@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"cli/services"
-	"cli/styles"
-	"cli/utils"
-	cliVO "cli/vo"
-	"vo"
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/styles"
+	"github.com/bardic/gocrib/cli/utils"
+	cliVO "github.com/bardic/gocrib/cli/vo"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
@@ -39,7 +39,7 @@ func (view *View) Init() {
 	view.LobbyTabNames = []string{"Open Matches", "Available Matches"}
 }
 
-func (view *View) Render() string {
+func (view *View) Render(hand []int32) string {
 	doc := strings.Builder{}
 
 	renderedTabs := utils.RenderTabs([]cliVO.Tab{

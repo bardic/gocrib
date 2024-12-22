@@ -1,0 +1,159 @@
+@host = http://server:1323/v1
+@gameId = 1
+@secondPlayerId = 2
+@cutIndex = "30"
+
+< {%
+    request.variables.set("id", "1")
+%}
+
+POST {{host}}/match
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "eloRangeMax": 0,
+  "eloRangeMin": 0,
+  "isPrivate": true
+}
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("Is GameState NewGameState", function () {
+        client.log(jsonPath(response.body, "$.GameState",))
+        client.assert(jsonPath(response.body, "$.GameState",) == "NewGameState", "GameState is not NewGameState");
+    });
+%}
+
+###
+
+GET {{host}}/open
+
+> {%
+    var minNumOfMatches = 1;    
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+     client.test(`At least ${minNumOfMatches} match(es) exists`, function () {
+        client.assert(jsonPath(response.body, "@",) >= `${minNumOfMatches}`, "Not enough matches");
+    });
+%}
+
+###
+
+GET {{host}}/match/{{gameId}}
+
+> {%
+    var gameIdToMatch = 1;    
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Is Id ${gameIdToMatch}`, function () {
+        client.assert(jsonPath(response.body, "$.MatchId",) == `${gameIdToMatch}`, "Id is wrong");
+    });
+%}
+
+###
+
+PUT {{host}}/match/{{gameId}}/join
+Content-Type: application/json
+
+{
+  "AccountId": {{secondPlayerId}},
+  "MatchId": {{gameId}}
+}
+
+> {%
+    var gameIdToMatch = 1;    
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Is Id ${gameIdToMatch}`, function () {
+        client.assert(jsonPath(response.body, "$.ID",) == `${gameIdToMatch}`, "Id is wrong");
+    });
+
+    client.test("Is GameState CutState", function () {
+        client.log(jsonPath(response.body, "$.Gamestate",))
+        client.assert(jsonPath(response.body, "$.Gamestate",) == "CutState", "GameState is not CutState");
+    });
+%}
+
+###
+
+PUT {{host}}/match/{{gameId}}/cut
+Content-Type: application/json
+
+{
+  "MatchId": {{gameId}},
+  "CutIndex": {{cutIndex}}
+}
+	
+> {%
+    var gameIdToMatch = 1;    
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Is Id ${gameIdToMatch}`, function () {
+        client.assert(response.body == 1, "Id is wrong");
+    });
+
+%}
+
+###
+
+GET {{host}}/match/{{gameId}}/cards
+	
+> {%
+    var gameIdToMatch = 1;    
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}

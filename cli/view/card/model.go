@@ -1,9 +1,10 @@
 package card
 
 import (
-	cliVO "cli/vo"
 	"queries"
-	"vo"
+
+	cliVO "github.com/bardic/gocrib/cli/vo"
+	"github.com/bardic/gocrib/vo"
 )
 
 type Model struct {

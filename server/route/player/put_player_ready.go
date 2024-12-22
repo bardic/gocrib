@@ -3,34 +3,34 @@ package player
 import (
 	"context"
 	"net/http"
+	"queries"
 	"time"
 
-	"queries"
-	conn "server/db"
-	"server/utils"
+	"github.com/bardic/gocrib/server/controller"
+	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/route/helpers"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )
 
-type PReady struct {
-	MatchId  int32
-	PlayerId int32
-}
+// PReady struct
 
-// PlayerReady Create godoc
-// @Summary      Update player to mark as ready
-// @Description
-// @Tags         players
-// @Accept       json
-// @Produce      json
-// @Param pReady body PReady true "player id to update"
-// @Success      200  {object}  bool
-// @Failure      400  {object}  error
-// @Failure      404  {object}  error
-// @Failure      500  {object}  error
-// @Router       /player/ready [put]
+// Update player by id to be ready. Returns true if all players are ready
+//
+//	@Summary	Update player by id to be ready. Returns true if all players are ready
+//	@Description
+//	@Tags		players
+//	@Accept		json
+//	@Produce	json
+//	@Param		pReady	body		vo.PlayerReady	true	"player id to update"
+//	@Success	200		{object}	bool
+//	@Failure	400		{object}	error
+//	@Failure	404		{object}	error
+//	@Failure	500		{object}	error
+//	@Router		/match/player/ready [put]
 func PlayerReady(c echo.Context) error {
-	pReady := new(PReady)
+	pReady := new(vo.PlayerReady)
 	if err := c.Bind(pReady); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -42,14 +42,13 @@ func PlayerReady(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := ReadyPlayerById(c, int(pReady.PlayerId))
+	_, err := readyPlayerById(int(pReady.PlayerId))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	//match, err := utils.GetMatchForPlayerId(*playerId)
-	match, err := utils.GetMatch(int(pReady.MatchId))
+	match, err := helpers.GetMatch(int(pReady.MatchId))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -59,7 +58,7 @@ func PlayerReady(c echo.Context) error {
 	// 	return c.JSON(http.StatusOK, nil)
 	// }
 
-	deck, err := utils.GetGameDeck(match.ID)
+	deck, err := helpers.GetGameDeck(match.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -87,15 +86,31 @@ func PlayerReady(c echo.Context) error {
 		}
 	}
 
-	if utils.PlayersReady(match.Players) {
-		utils.Deal(match)
-		utils.UpdateGameState(match.ID, queries.GamestateDiscardState)
+	if arePlayersReady(match.Players) {
+		controller.Deal(match)
+		helpers.UpdateGameState(match.ID, queries.GamestateDiscardState)
 	}
 
 	return c.JSON(http.StatusOK, nil)
 }
 
-func ReadyPlayerById(c echo.Context, playerId int) (bool, error) {
+func arePlayersReady(players []*queries.Player) bool {
+	ready := true
+
+	// if len(players) < 2 {
+	// 	return false
+	// }
+
+	// for _, p := range players {
+	// 	if !p.Isready {
+	// 		ready = false
+	// 	}
+	// }
+
+	return ready
+}
+
+func readyPlayerById(playerId int) (bool, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)

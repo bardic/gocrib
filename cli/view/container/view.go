@@ -3,8 +3,8 @@ package container
 import (
 	"strings"
 
-	"cli/utils"
-	cliVO "cli/vo"
+	"github.com/bardic/gocrib/cli/utils"
+	cliVO "github.com/bardic/gocrib/cli/vo"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -18,7 +18,7 @@ func (view *View) Init() {
 
 }
 
-func (view *View) Render() string {
+func (view *View) Render(hand []int32) string {
 	doc := strings.Builder{}
 	renderedTabs := utils.RenderTabs(view.Tabs, view.ActiveTab)
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))

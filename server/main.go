@@ -1,14 +1,19 @@
 package main
 
-// @title cribbage server
-// @version 0.0.2
-// @description cribbage rest server
+import "github.com/bardic/gocrib/server/router"
 
-// @host localhost
-// @securityDefinitions.basic BasicAuth
-// @host localhost:1323
-// @BasePath /v1
+// Cribbage API
+//
+//	@title						cribbage server
+//	@version					0.0.4
+//	@description				cribbage rest server
+//
+//	@host						localhost
+//	@securityDefinitions.basic	BasicAuth
+//	@host						localhost:1323
+//	@BasePath					/v1
 func main() {
-	r := &Router{}
+
+	r := &router.Router{}
 	r.New()
 }

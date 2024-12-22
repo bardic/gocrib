@@ -117,3 +117,15 @@ type GameStateChangeMsg struct {
 type ChangeTabMsg struct {
 	TabIndex int
 }
+
+type UIFooterVO struct {
+	ActivePlayerId int32
+	MatchId        int32
+	GameState      queries.Gamestate
+	LocalPlayerID  int32
+}
+
+type PlayerReady struct {
+	MatchId  int32 // MatchId
+	PlayerId int32 // PlayerId
+}

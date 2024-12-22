@@ -6,25 +6,27 @@ import (
 	"time"
 
 	"queries"
-	conn "server/db"
-	"server/route/player"
-	"vo"
+
+	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/route/player"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )
 
-// Create godoc
-// @Summary      Join match by id
-// @Description
-// @Tags         match
-// @Accept       json
-// @Produce      json
-// @Param details body vo.JoinMatchReq true "match Object to update"
-// @Success      200  {object}  vo.MatchDetailsResponse
-// @Failure      400  {object}  error
-// @Failure      404  {object}  error
-// @Failure      500  {object}  error
-// @Router       /player/match/join [put]
+// Return match details if the player is able to join the match
+//
+//	@Summary	Join match by id
+//	@Description
+//	@Tags		match
+//	@Accept		json
+//	@Produce	json
+//	@Param		details	body		vo.JoinMatchReq	true	"JoinMatchReq object"
+//	@Success	200		{object}	vo.MatchDetailsResponse
+//	@Failure	400		{object}	error
+//	@Failure	404		{object}	error
+//	@Failure	500		{object}	error
+//	@Router		/match/join [put]
 func JoinMatch(c echo.Context) error {
 	details := new(vo.JoinMatchReq)
 	if err := c.Bind(details); err != nil {

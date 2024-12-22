@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"vo"
-
+	"github.com/bardic/gocrib/vo"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -20,10 +19,6 @@ func GetPlayer(playerId int32) tea.Msg {
 	pid := strconv.Itoa(id)
 
 	return url(EndPointPlayer+"/?id="+pid, http.MethodGet, "")
-}
-
-func PutPlayer(id int) tea.Msg {
-	return url(EndPointPlayer, http.MethodPut, "")
 }
 
 func PutKitty(req vo.HandModifier) tea.Msg {

@@ -7,24 +7,26 @@ import (
 	"time"
 
 	"queries"
-	conn "server/db"
+
+	conn "github.com/bardic/gocrib/server/db"
 
 	"github.com/labstack/echo/v4"
 )
 
-// Create godoc
-// @Summary      Get match cards by id
-// @Description
-// @Tags         match
-// @Accept       json
-// @Produce      json
-// @Param        id    query     string  true  "search for match by id"'
-// @Success      200  {object}  []queries.GetMatchCardsRow
-// @Failure      404  {object}  error
-// @Failure      422  {object}  error
-// @Router       /player/match/cards/ [get]
-func GetGameCardsForMatch(c echo.Context) error {
-	p := c.Request().URL.Query().Get("id")
+// Takes a match id and returns the cards for that match
+//
+//	@Summary	Get match card by match id
+//	@Description
+//	@Tags		match
+//	@Accept		json
+//	@Produce	json
+//	@Param		id	path		int	true	"match id"'
+//	@Success	200	{object}	[]queries.GetMatchCardsRow
+//	@Failure	404	{object}	error
+//	@Failure	422	{object}	error
+//	@Router		/match/{id}/cards [get]
+func GetMatchCardsForMatchId(c echo.Context) error {
+	p := c.Param("id")
 	id, err := strconv.Atoi(p)
 
 	if err != nil {
@@ -38,7 +40,6 @@ func GetGameCardsForMatch(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	//cards, err := q.GetGameCardsForMatch(ctx, int32(id))
 	cards, err := q.GetMatchCards(ctx, int32(id))
 
 	if err != nil {

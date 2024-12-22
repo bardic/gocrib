@@ -2,23 +2,25 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"cli/services"
-	"cli/utils"
-	"cli/view/container"
-	"cli/view/gameContainer"
-	"cli/view/lobby"
-	cliVO "cli/vo"
 	"queries"
-	"vo"
+
+	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/view/container"
+	"github.com/bardic/gocrib/cli/view/gameContainer"
+	"github.com/bardic/gocrib/cli/view/lobby"
+	cliVO "github.com/bardic/gocrib/cli/vo"
+	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
+	var match *vo.GameMatch
 
-	cmds = append(cmds, cli.currentController.Update(msg))
 	switch msg := msg.(type) {
 	case queries.Account:
 		cli.account = &msg
@@ -29,6 +31,7 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		})
 	case vo.StateChangeMsg:
+		fmt.Println(msg.NewState)
 		switch msg.NewState {
 		case vo.LobbyView:
 			cli.currentController = &lobby.Controller{
@@ -53,17 +56,18 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cli.matchId = msg.MatchId
 			msg.AccountId = cli.account.ID //TODO fix this later
 
-			var match *vo.GameMatch
 			resp := services.GetPlayerMatch(msg.MatchId)
 			err := json.Unmarshal(resp.([]byte), &match)
 			if err != nil {
 				utils.Logger.Sugar().Error(err)
 			}
 
+			cli.GameMatch = match
 			cli.createMatchView(match)
 		}
 	}
 
+	cmds = append(cmds, cli.currentController.Update(msg, match))
 	return cli, tea.Batch(cmds...)
 }
 

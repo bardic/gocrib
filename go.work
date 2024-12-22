@@ -2,7 +2,8 @@ go 1.23.2
 
 use (
 	./cli
-	./server
+	./integration/.dagger
 	./queries/queries
+	./server
 	./vo
 )

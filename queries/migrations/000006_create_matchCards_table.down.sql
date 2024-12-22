@@ -1,1 +1,2 @@
+DROP TYPE IF EXISTS cardstate;
 DROP TABLE IF EXISTS matchCard;

@@ -1,0 +1,86 @@
+@host = http://localhost:1323/v1
+@matchId = 1
+@playerId = 1
+@accountId = 1
+@cutIndex = "30"
+
+POST {{host}}/match/{{matchId}}/player/
+Content-Type: application/json
+
+{
+  "accountId": {{accountId}},
+  "matchId": {{matchId}}
+}
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+###
+
+GET {{host}}/match/{{matchId}}/player/{{playerId}}
+Content-Type: application/json
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+###
+
+PUT {{host}}/match/{{matchId}}/player/{{playerId}}/ready
+Content-Type: application/json
+
+{
+    "MatchId": 1,
+	"PlayerId": 1
+}
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+###
+
+PUT {{host}}/match/{{matchId}}/player/{{playerId}}/play
+Content-Type: application/json
+
+{
+    "MatchId": 1,
+	"PlayerId": 1
+}
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}

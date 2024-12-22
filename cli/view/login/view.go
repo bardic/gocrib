@@ -3,7 +3,7 @@ package login
 import (
 	"strings"
 
-	"cli/styles"
+	"github.com/bardic/gocrib/cli/styles"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
@@ -26,7 +26,7 @@ func (view *View) Init() {
 	view.isLoginIdFieldSet = true
 }
 
-func (view *View) Render() string {
+func (view *View) Render(hand []int32) string {
 	doc := strings.Builder{}
 	doc.WriteString("Login \n")
 	doc.WriteString(view.loginIdField.View())
