@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"dagger/integration/internal/dagger"
+	"strings"
 )
 
 type Integration struct {
@@ -25,7 +26,8 @@ func (i *Integration) migrationService(src *dagger.Directory) *dagger.Service {
 		From("golang:latest").
 		WithServiceBinding("db", i.Db)
 
-	migration = gomod(migration, src)
+	mSrc := src.Directory("queries")
+	migration = gomod(migration, mSrc)
 
 	migration = migration.WithExec([]string{
 		"go",
@@ -54,7 +56,8 @@ func (i *Integration) swagger(src *dagger.Directory) *dagger.Service {
 	server := dag.Container().
 		From("golang:latest")
 
-	server = gomod(server, src)
+	sSrc := src.Directory("server")
+	server = gomod(server, sSrc)
 	server = server.WithExec([]string{"go", "install", "github.com/swaggo/swag/cmd/swag@latest"})
 	server = exclude(server, src)
 
@@ -79,7 +82,7 @@ func (i *Integration) swagger(src *dagger.Directory) *dagger.Service {
 }
 
 func (i *Integration) ijhttp(src *dagger.Directory) *dagger.Container {
-	return dag.Container().
+	ij := dag.Container().
 		From("alpine:latest").
 		WithDirectory("/workdir", src).
 		WithExec([]string{"apk", "add", "openjdk17-jdk", "curl", "unzip"}).
@@ -87,8 +90,26 @@ func (i *Integration) ijhttp(src *dagger.Directory) *dagger.Container {
 		WithExec([]string{"curl", "-f", "-L", "-o", "/ijhttp/ijhttp.zip", "https://jb.gg/ijhttp/latest"}).
 		WithExec([]string{"unzip", "/ijhttp/ijhttp.zip"}).
 		WithExec([]string{"/bin/sh", "-c", "chmod +x /ijhttp/ijhttp"}).
-		WithServiceBinding("server", i.Server).
-		WithExec([]string{"sh", "/ijhttp/ijhttp", "/workdir/match.http"})
+		WithServiceBinding("server", i.Server)
+
+	entries, err := src.Entries(context.Background())
+
+	if err != nil {
+		return nil
+	}
+
+	f := make([]string, 0)
+	for _, file := range entries {
+		if strings.HasSuffix(file, ".http") {
+			//f += "/workdir/" + file + " "
+			f = append(f, "/workdir/"+file)
+			//ij = ij.WithExec([]string{"sh", "/ijhttp/ijhttp", "/workdir/" + file, " >> /workdir/output.txt"})
+		}
+	}
+
+	ij = ij.WithExec(append([]string{"sh", "/ijhttp/ijhttp"}, f...))
+
+	return ij
 
 }
 
@@ -151,13 +172,7 @@ func (i *Integration) Test(ctx context.Context, src *dagger.Directory) (string, 
 
 	ij := i.ijhttp(src.Directory("integration/http"))
 
-	s, err := ij.Stdout(ctx)
-
-	if err != nil {
-		return "", err
-	}
-
-	return s, nil
+	return ij.Stdout(ctx)
 }
 
 func (i *Integration) TestPostgres(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
@@ -188,10 +203,18 @@ func exclude(c *dagger.Container, dir *dagger.Directory) *dagger.Container {
 }
 
 func gomod(c *dagger.Container, dir *dagger.Directory) *dagger.Container {
-	return c.WithDirectory("/src", dir, dagger.ContainerWithDirectoryOpts{
-		Include: []string{
-			"go.mod",
-			"go.sum",
-		},
-	})
+	return c.
+		WithDirectory("/src", dir,
+			dagger.ContainerWithDirectoryOpts{
+				Include: []string{
+					"go.mod",
+					"go.sum",
+				},
+			}).
+		WithWorkdir("/src").
+		WithExec([]string{
+			"go",
+			"mod",
+			"download",
+		})
 }
