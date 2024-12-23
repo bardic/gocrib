@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"dagger/integration/internal/dagger"
 	"strings"
+
+	"dagger/integration/internal/dagger"
 )
 
 type Integration struct {
@@ -101,95 +102,94 @@ func (i *Integration) ijhttp(src *dagger.Directory) *dagger.Container {
 	f := make([]string, 0)
 	for _, file := range entries {
 		if strings.HasSuffix(file, ".http") {
-			//f += "/workdir/" + file + " "
 			f = append(f, "/workdir/"+file)
-			//ij = ij.WithExec([]string{"sh", "/ijhttp/ijhttp", "/workdir/" + file, " >> /workdir/output.txt"})
 		}
 	}
 
 	ij = ij.WithExec(append([]string{"sh", "/ijhttp/ijhttp"}, f...))
 
 	return ij
-
 }
 
 func (i *Integration) TestSwagger(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
-	db, err := i.postgresDB().
-		Start(ctx)
-
+	db, err := i.startPostgresDB(ctx)
 	if err != nil {
 		return nil, err
 	}
-
 	i.Db = db
 
-	server, err := i.swagger(src).
-		Start(ctx)
-
+	server, err := i.startSwagger(ctx, src)
 	if err != nil {
 		return nil, err
 	}
 
-	migration, err := i.migrationService(src).
-		Start(ctx)
-
+	migration, err := i.startMigrationService(ctx, src)
 	if err != nil {
 		return nil, err
 	}
-
 	defer migration.Stop(ctx)
 
 	return server, nil
 }
 
 func (i *Integration) Test(ctx context.Context, src *dagger.Directory) (string, error) {
-	db, err := i.postgresDB().
-		Start(ctx)
-
+	db, err := i.startPostgresDB(ctx)
 	if err != nil {
 		return "", err
 	}
-
 	i.Db = db
 
-	server, err := i.swagger(src).
-		Start(ctx)
-
+	server, err := i.startSwagger(ctx, src)
 	if err != nil {
 		return "", err
 	}
-
 	i.Server = server
 
-	migration, err := i.migrationService(src).
-		Start(ctx)
-
+	migration, err := i.startMigrationService(ctx, src)
 	if err != nil {
 		return "", err
 	}
-
 	defer migration.Stop(ctx)
 
 	ij := i.ijhttp(src.Directory("integration/http"))
-
 	return ij.Stdout(ctx)
 }
 
 func (i *Integration) TestPostgres(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
 	db := i.postgresDB()
-
 	i.Db = db
 
-	migration, err := i.migrationService(src).
-		Start(ctx)
-
+	migration, err := i.startMigrationService(ctx, src)
 	if err != nil {
 		return nil, err
 	}
-
 	defer migration.Stop(ctx)
 
 	return db, nil
+}
+
+func (i *Integration) startPostgresDB(ctx context.Context) (*dagger.Service, error) {
+	db, err := i.postgresDB().Start(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func (i *Integration) startSwagger(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
+	server, err := i.swagger(src).Start(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return server, nil
+}
+
+func (i *Integration) startMigrationService(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
+	migration, err := i.migrationService(src).Start(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return migration, nil
 }
 
 func exclude(c *dagger.Container, dir *dagger.Directory) *dagger.Container {
