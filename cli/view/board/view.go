@@ -9,7 +9,7 @@ import (
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
 
-	"queries"
+	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/charmbracelet/bubbles/textinput"
 )

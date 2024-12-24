@@ -3,8 +3,9 @@ package player
 import (
 	"context"
 	"net/http"
-	"queries"
 	"time"
+
+	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/server/controller"
 	conn "github.com/bardic/gocrib/server/db"

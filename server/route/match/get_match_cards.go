@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"queries"
+	"github.com/bardic/gocrib/queries/queries"
 
 	conn "github.com/bardic/gocrib/server/db"
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"queries"
+	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/view/login"

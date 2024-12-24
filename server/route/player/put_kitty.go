@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"queries"
+	"github.com/bardic/gocrib/queries/queries"
 
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/route/helpers"

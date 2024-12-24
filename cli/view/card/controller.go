@@ -1,8 +1,9 @@
 package card
 
 import (
-	"queries"
 	"slices"
+
+	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/cli/services"
 	cliVO "github.com/bardic/gocrib/cli/vo"

@@ -2,8 +2,9 @@ package game
 
 import (
 	"errors"
-	"queries"
 	"sort"
+
+	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/vo"
 )

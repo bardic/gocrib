@@ -2,7 +2,8 @@ package container
 
 import (
 	"encoding/json"
-	"queries"
+
+	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"

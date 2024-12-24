@@ -23,7 +23,8 @@
 !docker-compose.yml
 !.vscode/launch.json
 !.vscode/tasks.json
-!integration/http/**/*
+!/http/**/*
+!dagger.json
 # !Makefile
 
 # ...even if they are in subdirectories

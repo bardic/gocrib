@@ -1,4 +1,4 @@
-module dagger/integration
+module dagger/CribService
 
 go 1.23.2
 

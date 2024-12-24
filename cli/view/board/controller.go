@@ -1,7 +1,7 @@
 package board
 
 import (
-	"queries"
+	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/cli/services"
 	cliVO "github.com/bardic/gocrib/cli/vo"

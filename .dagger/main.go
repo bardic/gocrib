@@ -2,17 +2,97 @@ package main
 
 import (
 	"context"
+	"dagger/CribService/internal/dagger"
 	"strings"
-
-	"dagger/integration/internal/dagger"
 )
 
-type Integration struct {
+type CribService struct {
 	Db     *dagger.Service
 	Server *dagger.Service
 }
 
-func (i *Integration) postgresDB() *dagger.Service {
+func (i *CribService) TestSqlc(ctx context.Context, src *dagger.Directory) *dagger.Container {
+	return dag.Container().
+		From("golang:latest").
+		WithDirectory("/src", src.Directory("sql")).
+		WithWorkdir("/src").
+		WithExec([]string{"go", "install", "github.com/sqlc-dev/sqlc/cmd/sqlc@latest"}).
+		WithEntrypoint([]string{"sqlc", "generate"})
+}
+
+func (i *CribService) Sqlc(ctx context.Context, src *dagger.Directory) *dagger.Directory {
+	s := dag.Container().
+		From("golang:latest").
+		WithDirectory("/src", src.Directory("sql")).
+		WithWorkdir("/src")
+
+	s = gomod(s, src)
+
+	return s.
+		WithExec([]string{"go", "install", "github.com/sqlc-dev/sqlc/cmd/sqlc@latest"}).
+		WithExec([]string{"sqlc", "generate"}).
+		WithEntrypoint([]string{"sqlc", "generate"}).
+		Directory("/src/queries")
+}
+
+func (i *CribService) GameServer(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
+	db, err := i.startPostgresDB(ctx)
+	if err != nil {
+		return nil, err
+	}
+	i.Db = db
+
+	server, err := i.startSwagger(ctx, src)
+	if err != nil {
+		return nil, err
+	}
+
+	migration, err := i.startMigrationService(ctx, src)
+	if err != nil {
+		return nil, err
+	}
+	defer migration.Stop(ctx)
+
+	return server, nil
+}
+
+func (i *CribService) Http(ctx context.Context, src *dagger.Directory) (string, error) {
+	db, err := i.startPostgresDB(ctx)
+	if err != nil {
+		return "", err
+	}
+	i.Db = db
+
+	server, err := i.startSwagger(ctx, src)
+	if err != nil {
+		return "", err
+	}
+	i.Server = server
+
+	migration, err := i.startMigrationService(ctx, src)
+	if err != nil {
+		return "", err
+	}
+	defer migration.Stop(ctx)
+
+	ij := i.ijhttp(src.Directory("http"))
+	return ij.Stdout(ctx)
+}
+
+func (i *CribService) Postgres(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
+	db := i.postgresDB()
+	i.Db = db
+
+	migration, err := i.startMigrationService(ctx, src)
+	if err != nil {
+		return nil, err
+	}
+	defer migration.Stop(ctx)
+
+	return db, nil
+}
+
+func (i *CribService) postgresDB() *dagger.Service {
 	return dag.Container().
 		From("postgres:latest").
 		WithEnvVariable("POSTGRES_USER", "postgres").
@@ -22,12 +102,12 @@ func (i *Integration) postgresDB() *dagger.Service {
 		WithHostname("db")
 }
 
-func (i *Integration) migrationService(src *dagger.Directory) *dagger.Service {
+func (i *CribService) migrationService(src *dagger.Directory) *dagger.Service {
 	migration := dag.Container().
 		From("golang:latest").
 		WithServiceBinding("db", i.Db)
 
-	mSrc := src.Directory("queries")
+	mSrc := src.Directory("sql")
 	migration = gomod(migration, mSrc)
 
 	migration = migration.WithExec([]string{
@@ -44,7 +124,7 @@ func (i *Integration) migrationService(src *dagger.Directory) *dagger.Service {
 		WithDefaultArgs([]string{
 			"migrate",
 			"-path",
-			"/src/queries/migrations",
+			"/src/sql/migrations",
 			"-database",
 			"postgres://postgres:example@db:5432/cribbage?sslmode=disable",
 			"up",
@@ -52,7 +132,7 @@ func (i *Integration) migrationService(src *dagger.Directory) *dagger.Service {
 		AsService()
 }
 
-func (i *Integration) swagger(src *dagger.Directory) *dagger.Service {
+func (i *CribService) swagger(src *dagger.Directory) *dagger.Service {
 
 	server := dag.Container().
 		From("golang:latest")
@@ -82,7 +162,7 @@ func (i *Integration) swagger(src *dagger.Directory) *dagger.Service {
 		WithHostname("server")
 }
 
-func (i *Integration) ijhttp(src *dagger.Directory) *dagger.Container {
+func (i *CribService) ijhttp(src *dagger.Directory) *dagger.Container {
 	ij := dag.Container().
 		From("alpine:latest").
 		WithDirectory("/workdir", src).
@@ -111,64 +191,7 @@ func (i *Integration) ijhttp(src *dagger.Directory) *dagger.Container {
 	return ij
 }
 
-func (i *Integration) TestSwagger(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
-	db, err := i.startPostgresDB(ctx)
-	if err != nil {
-		return nil, err
-	}
-	i.Db = db
-
-	server, err := i.startSwagger(ctx, src)
-	if err != nil {
-		return nil, err
-	}
-
-	migration, err := i.startMigrationService(ctx, src)
-	if err != nil {
-		return nil, err
-	}
-	defer migration.Stop(ctx)
-
-	return server, nil
-}
-
-func (i *Integration) Test(ctx context.Context, src *dagger.Directory) (string, error) {
-	db, err := i.startPostgresDB(ctx)
-	if err != nil {
-		return "", err
-	}
-	i.Db = db
-
-	server, err := i.startSwagger(ctx, src)
-	if err != nil {
-		return "", err
-	}
-	i.Server = server
-
-	migration, err := i.startMigrationService(ctx, src)
-	if err != nil {
-		return "", err
-	}
-	defer migration.Stop(ctx)
-
-	ij := i.ijhttp(src.Directory("integration/http"))
-	return ij.Stdout(ctx)
-}
-
-func (i *Integration) TestPostgres(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
-	db := i.postgresDB()
-	i.Db = db
-
-	migration, err := i.startMigrationService(ctx, src)
-	if err != nil {
-		return nil, err
-	}
-	defer migration.Stop(ctx)
-
-	return db, nil
-}
-
-func (i *Integration) startPostgresDB(ctx context.Context) (*dagger.Service, error) {
+func (i *CribService) startPostgresDB(ctx context.Context) (*dagger.Service, error) {
 	db, err := i.postgresDB().Start(ctx)
 	if err != nil {
 		return nil, err
@@ -176,7 +199,7 @@ func (i *Integration) startPostgresDB(ctx context.Context) (*dagger.Service, err
 	return db, nil
 }
 
-func (i *Integration) startSwagger(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
+func (i *CribService) startSwagger(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
 	server, err := i.swagger(src).Start(ctx)
 	if err != nil {
 		return nil, err
@@ -184,7 +207,7 @@ func (i *Integration) startSwagger(ctx context.Context, src *dagger.Directory) (
 	return server, nil
 }
 
-func (i *Integration) startMigrationService(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
+func (i *CribService) startMigrationService(ctx context.Context, src *dagger.Directory) (*dagger.Service, error) {
 	migration, err := i.migrationService(src).Start(ctx)
 	if err != nil {
 		return nil, err
@@ -195,9 +218,9 @@ func (i *Integration) startMigrationService(ctx context.Context, src *dagger.Dir
 func exclude(c *dagger.Container, dir *dagger.Directory) *dagger.Container {
 	return c.WithDirectory("/src", dir, dagger.ContainerWithDirectoryOpts{
 		Exclude: []string{
-			"./integration/.dagger/internal",
+			"./.dagger/internal",
 			"./.git",
-			"./integration/.dagger/dagger.gen.go",
+			"./.dagger/dagger.gen.go",
 		},
 	})
 }

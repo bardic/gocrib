@@ -5,8 +5,8 @@ sql:
     schema: "migrations/"
     gen:
       go:
-        package: "queries"
-        out: "queries"
+        package: "github.com/bardic/gocrib/queries/queries"
+        out: "github.com/bardic/gocrib/queries/queries"
         sql_package: "pgx/v5"
         overrides:
           - db_type: "integer"

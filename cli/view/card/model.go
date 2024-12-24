@@ -1,7 +1,7 @@
 package card
 
 import (
-	"queries"
+	"github.com/bardic/gocrib/queries/queries"
 
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"

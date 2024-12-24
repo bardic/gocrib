@@ -2,9 +2,10 @@ package controller
 
 import (
 	"context"
-	"queries"
 	"slices"
 	"time"
+
+	"github.com/bardic/gocrib/queries/queries"
 
 	conn "github.com/bardic/gocrib/server/db"
 )

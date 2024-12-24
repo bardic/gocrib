@@ -70,7 +70,7 @@ SELECT
                     )
                 )
             FROM player AS p
-            WHERE p.Id in 
+            WHERE p.Id = ANY(m.playerIds)
         )
     )
 FROM match as m 

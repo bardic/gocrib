@@ -1,9 +1,9 @@
 go 1.23.2
 
 use (
+	./.dagger
 	./cli
-	./integration/.dagger
-	./queries/queries
 	./server
+	./sql
 	./vo
 )

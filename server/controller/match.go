@@ -3,8 +3,9 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"queries"
 	"time"
+
+	"github.com/bardic/gocrib/queries/queries"
 
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/vo"

@@ -315,15 +315,15 @@ SELECT
                     )
                 )
             FROM player AS p
-            WHERE p.Id = $1
+            WHERE p.Id = ANY(m.playerIds)
         )
     )
 FROM match as m 
 LIMIT 1
 `
 
-func (q *Queries) GetMatchByPlayerId(ctx context.Context, id int32) ([]byte, error) {
-	row := q.db.QueryRow(ctx, getMatchByPlayerId, id)
+func (q *Queries) GetMatchByPlayerId(ctx context.Context) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getMatchByPlayerId)
 	var json_build_object []byte
 	err := row.Scan(&json_build_object)
 	return json_build_object, err

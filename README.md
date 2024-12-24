@@ -2,32 +2,27 @@
 
 Async TUI multiplayer cribbage game written in Go
 
+## Generate / Update queries 
+
+```
+dagger call sqlc --src=. export --path=sql/queries
+```
+
 ## Server
 
-### Run DB
-
 ```
-docker compose --profile db up -d
+dagger call game-server --src=. up
 ```
 
-### DB Migration: 
+## Integration Test
 
 ```
-migrate -database "postgres://postgres:example@localhost:5432/cribbage?sslmode=disable" -path migrations up
-```
-
-### Build
-
-```
-cd server
-go build .
+dagger call http --src=.
 ```
 
 ## Client
 
-###
-
 ```
 cd cli
-go build .
+go run .
 ```

@@ -1,7 +1,7 @@
 package vo
 
 import (
-	"queries"
+	"github.com/bardic/gocrib/queries/queries"
 )
 
 type GameMatch struct {
