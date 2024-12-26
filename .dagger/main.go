@@ -56,24 +56,31 @@ func (i *CribService) GameServer(ctx context.Context, src *dagger.Directory) (*d
 	return server, nil
 }
 
-func (i *CribService) Http(ctx context.Context, src *dagger.Directory) (string, error) {
-	db, err := i.startPostgresDB(ctx)
-	if err != nil {
-		return "", err
-	}
-	i.Db = db
+func (i *CribService) Http(ctx context.Context, src *dagger.Directory,
+	// +optional
+	localService *dagger.Service,
+) (string, error) {
+	i.Server = localService
 
-	server, err := i.startSwagger(ctx, src)
-	if err != nil {
-		return "", err
-	}
-	i.Server = server
+	if localService == nil {
+		db, err := i.startPostgresDB(ctx)
+		if err != nil {
+			return "", err
+		}
+		i.Db = db
 
-	migration, err := i.startMigrationService(ctx, src)
-	if err != nil {
-		return "", err
+		server, err := i.startSwagger(ctx, src)
+		if err != nil {
+			return "", err
+		}
+		i.Server = server
+
+		migration, err := i.startMigrationService(ctx, src)
+		if err != nil {
+			return "", err
+		}
+		defer migration.Stop(ctx)
 	}
-	defer migration.Stop(ctx)
 
 	ij := i.ijhttp(src.Directory("http"))
 	return ij.Stdout(ctx)
@@ -170,8 +177,9 @@ func (i *CribService) ijhttp(src *dagger.Directory) *dagger.Container {
 		WithExec([]string{"/bin/sh", "-c", "mkdir /ijhttp"}).
 		WithExec([]string{"curl", "-f", "-L", "-o", "/ijhttp/ijhttp.zip", "https://jb.gg/ijhttp/latest"}).
 		WithExec([]string{"unzip", "/ijhttp/ijhttp.zip"}).
-		WithExec([]string{"/bin/sh", "-c", "chmod +x /ijhttp/ijhttp"}).
-		WithServiceBinding("server", i.Server)
+		WithExec([]string{"/bin/sh", "-c", "chmod +x /ijhttp/ijhttp"})
+
+	ij.WithServiceBinding("server", i.Server)
 
 	entries, err := src.Entries(context.Background())
 

@@ -41,13 +41,15 @@ func Queries() error {
 func Test() error {
 	fmt.Println("Testing...")
 	cmd := exec.Command("dagger", "call", "http", "--src=.")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
 func LocalTest() error {
 	fmt.Println("Local Testing...")
 
-	entries, err := os.ReadDir("../http")
+	entries, err := os.ReadDir("./http")
 	if err != nil {
 		return err
 	}
