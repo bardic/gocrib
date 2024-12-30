@@ -1,12 +1,12 @@
 package main
 
 import (
-	"context"
 	"dagger/CribService/internal/dagger"
+	"dagger/CribService/utils"
 	"fmt"
 )
 
-func (i *CribService) BuildServer(ctx context.Context, src *dagger.Directory) *dagger.Directory {
+func (i *CribService) buildServer(src *dagger.Directory) *dagger.Directory {
 	gooses := []string{"linux", "darwin"}
 	goarches := []string{"amd64", "arm64"}
 
@@ -16,7 +16,7 @@ func (i *CribService) BuildServer(ctx context.Context, src *dagger.Directory) *d
 		From("golang:latest").
 		WithDirectory("/src", src).
 		WithWorkdir("/src")
-	s = gomod(s, src)
+	s = utils.GoMod(s, src.Directory("server"))
 	// return s.
 	// 	WithExec([]string{"go", "build", "-o", "/out/server", "./server/main.go"}).File("/out/server")
 
@@ -40,7 +40,7 @@ func (i *CribService) BuildServer(ctx context.Context, src *dagger.Directory) *d
 	return outputs
 }
 
-func (i *CribService) BuildGame(ctx context.Context, src *dagger.Directory) *dagger.Directory {
+func (i *CribService) buildGame(src *dagger.Directory) *dagger.Directory {
 	gooses := []string{"linux", "darwin"}
 	goarches := []string{"amd64", "arm64"}
 
@@ -49,7 +49,7 @@ func (i *CribService) BuildGame(ctx context.Context, src *dagger.Directory) *dag
 	s := dag.Container().
 		From("golang:latest")
 
-	s = gomod(s, src.Directory("cli"))
+	s = utils.GoMod(s, src.Directory("cli"))
 	s = s.WithDirectory("/src", src)
 
 	// return s.
@@ -76,14 +76,11 @@ func (i *CribService) BuildGame(ctx context.Context, src *dagger.Directory) *dag
 	return outputs
 }
 
-func (i *CribService) BuildGameTest(ctx context.Context, src *dagger.Directory) *dagger.Container {
-
+func (i *CribService) buildGameTest(src *dagger.Directory) *dagger.Container {
 	s := dag.Container().
 		From("golang:latest").
 		WithDirectory("/src", src).
 		WithWorkdir("/src")
-	s = gomod(s, src)
 
-	// return build directory
 	return s
 }

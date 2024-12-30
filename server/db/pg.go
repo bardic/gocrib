@@ -9,7 +9,13 @@ import (
 )
 
 func Pool() *pgxpool.Pool {
-	dsn := "postgres://postgres:example@db:5432/cribbage?sslmode=disable"
+	host := os.Getenv("GOCRIB_HOST")
+
+	if host == "" {
+		host = "db"
+	}
+
+	dsn := "postgres://postgres:example@" + host + ":5432/cribbage?sslmode=disable"
 	dbpool, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)

@@ -9,22 +9,22 @@ import (
 	"strings"
 )
 
-// A build step that requires additional params, or platform specific steps for example
-func GameBuild() error {
-	fmt.Println("Building Game...")
-	cmd := exec.Command("dagger", "call", "build-game", "--src=.", "export", "--path=/builds")
-	return cmd.Run()
-}
+// // A build step that requires additional params, or platform specific steps for example
+// func GameBuild() error {
+// 	fmt.Println("Building Game...")
+// 	cmd := exec.Command("dagger", "call", "build-game", "--src=.", "export", "--path=/builds")
+// 	return cmd.Run()
+// }
 
-func ServerBuild() error {
-	fmt.Println("Building Server...")
-	cmd := exec.Command("dagger", "call", "build-server", "--src=.", "export", "--path=/builds")
-	return cmd.Run()
-}
+// func ServerBuild() error {
+// 	fmt.Println("Building Server...")
+// 	cmd := exec.Command("dagger", "call", "build-server", "--src=.", "export", "--path=/builds")
+// 	return cmd.Run()
+// }
 
 func ServerUp() error {
 	fmt.Println("Starting Server...")
-	cmd := exec.Command("dagger", "call", "game-server", "--src=.", "up")
+	cmd := exec.Command("dagger", "call", "server", "--src=.", "up")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -32,9 +32,22 @@ func ServerUp() error {
 	return err
 }
 
-func Queries() error {
+func DbUp() error {
+	fmt.Println("Starting Server...")
+	os.Setenv("GOCRIB_HOST", "localhost")
+	cmd := exec.Command("dagger", "call", "postgres", "--src=.", "--with-port", "up")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	return err
+}
+
+func GenQueries() error {
 	fmt.Println("Building Queries...")
-	cmd := exec.Command("dagger", "call", "sqlc", "--src=.", "export", "--path=sql/queries")
+	cmd := exec.Command("dagger", "call", "gen", "--src=.", "export", "--path=sql/queries")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
@@ -66,4 +79,12 @@ func LocalTest() error {
 	fmt.Println(string(o))
 
 	return err
+}
+
+func MigrateLocal() error {
+	fmt.Println("Migrating...")
+	cmd := exec.Command("migrate", "-database", "postgres://postgres:example@localhost:5432/cribbage?sslmode=disable", "-path", "sql/migrations", "up")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }

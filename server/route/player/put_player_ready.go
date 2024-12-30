@@ -43,6 +43,8 @@ func PlayerReady(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	//check if player is alreay ready
+
 	_, err := readyPlayerById(int(pReady.PlayerId))
 
 	if err != nil {
@@ -127,6 +129,25 @@ func readyPlayerById(playerId int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
+	return true, nil
+}
+
+func isPlayerReady(playerId int) (bool, error) {
+	// db := conn.Pool()
+	// defer db.Close()
+	// q := queries.New(db)
+
+	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancel()
+
+	// p, err := q.GetPlayerById(ctx, int32(playerId))
+
+	// if err != nil {
+	// 	return false, err
+	// }
+
+	// return p.Isready, nil
 
 	return true, nil
 }
