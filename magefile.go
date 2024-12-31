@@ -9,22 +9,9 @@ import (
 	"strings"
 )
 
-// // A build step that requires additional params, or platform specific steps for example
-// func GameBuild() error {
-// 	fmt.Println("Building Game...")
-// 	cmd := exec.Command("dagger", "call", "build-game", "--src=.", "export", "--path=/builds")
-// 	return cmd.Run()
-// }
-
-// func ServerBuild() error {
-// 	fmt.Println("Building Server...")
-// 	cmd := exec.Command("dagger", "call", "build-server", "--src=.", "export", "--path=/builds")
-// 	return cmd.Run()
-// }
-
 func ServerUp() error {
 	fmt.Println("Starting Server...")
-	cmd := exec.Command("dagger", "call", "server", "--src=.", "up")
+	cmd := exec.Command("dagger", "call", "server", "--src=.", "--migrate", "up")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -53,7 +40,7 @@ func GenQueries() error {
 
 func Test() error {
 	fmt.Println("Testing...")
-	cmd := exec.Command("dagger", "call", "http", "--src=.")
+	cmd := exec.Command("dagger", "call", "test-http", "--src=.")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()

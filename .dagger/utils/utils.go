@@ -2,7 +2,7 @@ package utils
 
 import "dagger/CribService/internal/dagger"
 
-func GoMod(container *dagger.Container, dir *dagger.Directory) *dagger.Container {
+func GoMod(container *dagger.Container) *dagger.Container {
 	return container.
 		WithWorkdir("/src").
 		WithExec([]string{"go", "mod", "download"})

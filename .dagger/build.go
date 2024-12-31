@@ -16,7 +16,7 @@ func (i *CribService) buildServer(src *dagger.Directory) *dagger.Directory {
 		From("golang:latest").
 		WithDirectory("/src", src).
 		WithWorkdir("/src")
-	s = utils.GoMod(s, src.Directory("server"))
+	s = utils.GoMod(s)
 	// return s.
 	// 	WithExec([]string{"go", "build", "-o", "/out/server", "./server/main.go"}).File("/out/server")
 
@@ -49,7 +49,7 @@ func (i *CribService) buildGame(src *dagger.Directory) *dagger.Directory {
 	s := dag.Container().
 		From("golang:latest")
 
-	s = utils.GoMod(s, src.Directory("cli"))
+	s = utils.GoMod(s)
 	s = s.WithDirectory("/src", src)
 
 	// return s.
