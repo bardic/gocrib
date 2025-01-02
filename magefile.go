@@ -21,8 +21,7 @@ func ServerUp() error {
 
 func DbUp() error {
 	fmt.Println("Starting Server...")
-	os.Setenv("GOCRIB_HOST", "localhost")
-	cmd := exec.Command("dagger", "call", "postgres", "--src=.", "--with-port", "up")
+	cmd := exec.Command("dagger", "call", "db-up", "--src=.", "--with-port", "up")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -49,6 +48,8 @@ func Test() error {
 func LocalTest() error {
 	fmt.Println("Local Testing...")
 
+	os.Setenv("GOCRIB_HOST", "localhost")
+
 	entries, err := os.ReadDir("./http")
 	if err != nil {
 		return err
@@ -60,6 +61,8 @@ func LocalTest() error {
 			f = append(f, "./http/"+file.Name())
 		}
 	}
+
+	f = append(f, "-e", "development", "-v", "./http/http-client.env.json")
 
 	cmd := exec.Command("ijhttp", f...)
 	o, err := cmd.CombinedOutput()

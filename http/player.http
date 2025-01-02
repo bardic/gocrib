@@ -1,4 +1,4 @@
-@host = http://server:1323/v1
+@host = http://{{host}}:1323/v1
 @matchId = 1
 @playerId = 1
 @accountId = 1

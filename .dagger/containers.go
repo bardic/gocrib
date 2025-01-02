@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"dagger/CribService/internal/dagger"
 	"dagger/CribService/utils"
 )
@@ -37,8 +36,8 @@ func (c *CribService) postgres(withPort bool) *dagger.Container {
 func (c *CribService) gameServer(src *dagger.Directory) *dagger.Container {
 	server := c.golang()
 	server = server.WithExec([]string{"go", "install", "github.com/swaggo/swag/cmd/swag@latest"})
+	server = utils.GoMod(src.Directory("server"), server)
 	server = server.WithDirectory("/src", src)
-	server = utils.GoMod(server)
 	return server.
 		WithoutEntrypoint().
 		WithWorkdir("/src/server").
@@ -52,15 +51,15 @@ func (c *CribService) gameServer(src *dagger.Directory) *dagger.Container {
 		})
 }
 
-func (i *CribService) http(ctx context.Context, src *dagger.Directory) *dagger.Container {
+func (i *CribService) http(src *dagger.Directory) *dagger.Container {
 	ij := dag.Container().
 		From("alpine:latest").
-		WithDirectory("/workdir", src.Directory("http")).
 		WithExec([]string{"apk", "add", "openjdk17-jdk", "curl", "unzip"}).
 		WithExec([]string{"/bin/sh", "-c", "mkdir /ijhttp"}).
 		WithExec([]string{"curl", "-f", "-L", "-o", "/ijhttp/ijhttp.zip", "https://jb.gg/ijhttp/latest"}).
 		WithExec([]string{"unzip", "/ijhttp/ijhttp.zip"}).
-		WithExec([]string{"/bin/sh", "-c", "chmod +x /ijhttp/ijhttp"})
+		WithExec([]string{"/bin/sh", "-c", "chmod +x /ijhttp/ijhttp"}).
+		WithDirectory("/workdir", src.Directory("http"))
 
 	return ij
 }

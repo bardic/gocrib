@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"dagger/CribService/internal/dagger"
-	"os"
 	"strings"
 )
 
@@ -11,28 +10,33 @@ type CribService struct {
 	ServerContainer *dagger.Container
 	Db              *dagger.Service
 	ServerService   *dagger.Service
-	// Migrator         *dagger.Container
-	// MigrationService *dagger.Service
 }
 
 func (c *CribService) Gen(ctx context.Context, src *dagger.Directory) *dagger.Directory {
 	g := c.sqlc(src)
 	return g.Directory("/src/queries")
 }
-func (c *CribService) Postgres(ctx context.Context, src *dagger.Directory, withPort bool) *dagger.Service {
-	os.Setenv("GOCRIB_HOST", "localhost")
-	return c.postgresService(withPort)
+func (c *CribService) DbUp(ctx context.Context, src *dagger.Directory, withPort bool) (*dagger.Service, error) {
+	p := c.postgresService(withPort)
+	_, err := c.migrationService(src, p).Start(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 
-func (i *CribService) Server(ctx context.Context, src *dagger.Directory, migrate bool) *dagger.Service {
-	os.Setenv("GOCRIB_HOST", "")
-	return i.startGameServer(src, migrate)
+func (i *CribService) Server(ctx context.Context, src *dagger.Directory, migrate bool) (*dagger.Service, error) {
+	return i.gameServerService(ctx, src, migrate)
 }
 
 func (i *CribService) TestHttp(ctx context.Context, src *dagger.Directory) (string, error) {
-	s := i.startGameServer(src, true)
+	s, err := i.gameServerService(ctx, src, true)
 
-	ij := i.http(ctx, src)
+	if err != nil {
+		return "", err
+	}
+
+	ij := i.http(src)
 
 	ij = ij.WithServiceBinding("server", s)
 
@@ -51,7 +55,7 @@ func (i *CribService) TestHttp(ctx context.Context, src *dagger.Directory) (stri
 		}
 	}
 
-	ij = ij.WithExec(append([]string{"sh", "/ijhttp/ijhttp"}, f...))
+	ij = ij.WithExec(append([]string{"sh", "/ijhttp/ijhttp", "-e", "production"}, f...))
 
 	return ij.Stdout(ctx)
 }

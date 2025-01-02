@@ -1,4 +1,4 @@
-@host = http://server:1323/v1
+@host = http://{{host}}:1323/v1
 @gameId = 1
 @secondPlayerId = 2
 @cutIndex = "30"

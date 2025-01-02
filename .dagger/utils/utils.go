@@ -2,8 +2,9 @@ package utils
 
 import "dagger/CribService/internal/dagger"
 
-func GoMod(container *dagger.Container) *dagger.Container {
+func GoMod(src *dagger.Directory, container *dagger.Container) *dagger.Container {
 	return container.
+		WithFiles("/src", []*dagger.File{src.File("go.mod"), src.File("go.sum")}).
 		WithWorkdir("/src").
 		WithExec([]string{"go", "mod", "download"})
 }

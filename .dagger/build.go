@@ -11,14 +11,12 @@ func (i *CribService) buildServer(src *dagger.Directory) *dagger.Directory {
 	goarches := []string{"amd64", "arm64"}
 
 	outputs := dag.Directory()
-
 	s := dag.Container().
-		From("golang:latest").
-		WithDirectory("/src", src).
-		WithWorkdir("/src")
-	s = utils.GoMod(s)
-	// return s.
-	// 	WithExec([]string{"go", "build", "-o", "/out/server", "./server/main.go"}).File("/out/server")
+		From("golang:latest")
+
+	s = utils.GoMod(src.Directory("server"), s)
+
+	s = s.WithDirectory("/src", src)
 
 	for _, goos := range gooses {
 		for _, goarch := range goarches {
@@ -29,6 +27,7 @@ func (i *CribService) buildServer(src *dagger.Directory) *dagger.Directory {
 			build := s.
 				WithEnvVariable("GOOS", goos).
 				WithEnvVariable("GOARCH", goarch).
+				WithWorkdir("/src/server").
 				WithExec([]string{"go", "build", "-o", path, "./server/server.go"})
 
 			// add build to outputs
@@ -49,11 +48,8 @@ func (i *CribService) buildGame(src *dagger.Directory) *dagger.Directory {
 	s := dag.Container().
 		From("golang:latest")
 
-	s = utils.GoMod(s)
+	s = utils.GoMod(src.Directory("cli"), s)
 	s = s.WithDirectory("/src", src)
-
-	// return s.
-	// 	WithExec([]string{"go", "build", "-o", "/out/client", "./cli/main.go"}).File("/out/client")
 
 	for _, goos := range gooses {
 		for _, goarch := range goarches {
