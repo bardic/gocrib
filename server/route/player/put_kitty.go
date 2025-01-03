@@ -3,6 +3,7 @@ package player
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
@@ -21,19 +22,57 @@ import (
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
+//	@Param		matchId		path		int	true	"match id"'
+//	@Param		playerId	path		int	true	"player id"'
 //	@Param		details	body		vo.HandModifier	true	"array of ids to add to kitty"
 //	@Success	200		{object}	queries.Match
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/match/player//kitty [put]
+//	@Router		/match/{matchId}/player/{playerId}/kitty [put]
 func UpdateKitty(c echo.Context) error {
+	matchId, err := strconv.Atoi(c.Param("matchId"))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	playerId, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
 	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	m, err := updateKitty(*details)
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err = q.UpdateKitty(ctx, queries.UpdateKittyParams{
+		ID:    int32(playerId),
+		Kitty: details.CardIds,
+	})
+
+	if err != nil {
+		return err
+	}
+	err = q.RemoveCardsFromHand(ctx, queries.RemoveCardsFromHandParams{
+		ID:   int32(playerId),
+		Hand: details.CardIds,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	m, err := helpers.GetMatch(matchId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -46,38 +85,4 @@ func UpdateKitty(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, nil)
-}
-
-func updateKitty(details vo.HandModifier) (*vo.GameMatch, error) {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err := q.UpdateKitty(ctx, queries.UpdateKittyParams{
-		ID:    details.PlayerId,
-		Kitty: details.CardIds,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	err = q.RemoveCardsFromHand(ctx, queries.RemoveCardsFromHandParams{
-		ID:   details.PlayerId,
-		Hand: details.CardIds,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	m, err := helpers.GetMatch(int(details.MatchId))
-
-	if err != nil {
-		return nil, err
-	}
-
-	return m, nil
 }

@@ -3,6 +3,7 @@ package match
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
@@ -23,19 +24,32 @@ import (
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
+//	@Param		matchId		path		int	true	"match id"'
+//	@Param		playerId	path		int	true	"player id"'
 //	@Param		details	body		vo.HandModifier	true	"HandModifier object"
 //	@Success	200		{object}	queries.Match
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/play [put]
+//	@Router		/match/{matchId}/player/{playerId}/play [put]
 func UpdatePlay(c echo.Context) error {
+	matchId, err := strconv.Atoi(c.Param("matchId"))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	playerId, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
 	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	m, err := controller.UpdatePlay(*details)
+	m, err := controller.UpdatePlay(matchId, playerId, *details)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

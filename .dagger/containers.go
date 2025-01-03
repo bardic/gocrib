@@ -59,7 +59,7 @@ func (i *CribService) http(src *dagger.Directory) *dagger.Container {
 		WithExec([]string{"curl", "-f", "-L", "-o", "/ijhttp/ijhttp.zip", "https://jb.gg/ijhttp/latest"}).
 		WithExec([]string{"unzip", "/ijhttp/ijhttp.zip"}).
 		WithExec([]string{"/bin/sh", "-c", "chmod +x /ijhttp/ijhttp"}).
-		WithDirectory("/workdir", src.Directory("http"))
+		WithDirectory("/workdir", src)
 
 	return ij
 }

@@ -294,10 +294,6 @@ definitions:
         items:
           type: integer
         type: array
-      matchId:
-        type: integer
-      playerId:
-        type: integer
     type: object
   vo.JoinMatchReq:
     properties:
@@ -548,6 +544,86 @@ paths:
       summary: Get player by barcode
       tags:
       - players
+  /match/{matchId}/player/{playerId}/kitty:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: player id
+        in: path
+        name: playerId
+        required: true
+        type: integer
+      - description: array of ids to add to kitty
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/vo.HandModifier'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update kitty with ids
+      tags:
+      - match
+  /match/{matchId}/player/{playerId}/play:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: player id
+        in: path
+        name: playerId
+        required: true
+        type: integer
+      - description: HandModifier object
+        in: body
+        name: details
+        required: true
+        schema:
+          $ref: '#/definitions/vo.HandModifier'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update play
+      tags:
+      - match
   /match/cut:
     put:
       consumes:
@@ -637,36 +713,6 @@ paths:
       summary: Get player by barcode
       tags:
       - players
-  /match/player//kitty:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: array of ids to add to kitty
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/vo.HandModifier'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Match'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update kitty with ids
-      tags:
-      - match
   /match/player/ready:
     put:
       consumes:
@@ -717,36 +763,6 @@ paths:
           description: Unprocessable Entity
           schema: {}
       summary: Get match by id
-      tags:
-      - match
-  /play:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: HandModifier object
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/vo.HandModifier'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Match'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update play
       tags:
       - match
 securityDefinitions:

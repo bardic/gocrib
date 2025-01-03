@@ -6,29 +6,26 @@ import (
 	"fmt"
 )
 
-func (i *CribService) buildServer(src *dagger.Directory) *dagger.Directory {
-	gooses := []string{"linux", "darwin"}
-	goarches := []string{"amd64", "arm64"}
+func (c *CribService) buildServer(src *dagger.Directory) *dagger.Directory {
+	gooses := []string{"linux"}
+	goarches := []string{"amd64"}
 
 	outputs := dag.Directory()
-	s := dag.Container().
-		From("golang:latest")
-
-	s = utils.GoMod(src.Directory("server"), s)
-
-	s = s.WithDirectory("/src", src)
 
 	for _, goos := range gooses {
 		for _, goarch := range goarches {
 			// create directory for each OS and architecture
 			path := fmt.Sprintf("server/%s/%s/", goos, goarch)
 
+			s := c.golang()
+			s = utils.GoMod(src.Directory("server"), s)
+			s = s.WithDirectory("/src", src)
 			// build artifact
 			build := s.
 				WithEnvVariable("GOOS", goos).
 				WithEnvVariable("GOARCH", goarch).
 				WithWorkdir("/src/server").
-				WithExec([]string{"go", "build", "-o", path, "./server/server.go"})
+				WithExec([]string{"go", "build", "-o", path, "main.go"})
 
 			// add build to outputs
 			outputs = outputs.WithDirectory(path, build.Directory(path))
@@ -39,15 +36,13 @@ func (i *CribService) buildServer(src *dagger.Directory) *dagger.Directory {
 	return outputs
 }
 
-func (i *CribService) buildGame(src *dagger.Directory) *dagger.Directory {
+func (c *CribService) buildGame(src *dagger.Directory) *dagger.Directory {
 	gooses := []string{"linux", "darwin"}
 	goarches := []string{"amd64", "arm64"}
 
 	outputs := dag.Directory()
 
-	s := dag.Container().
-		From("golang:latest")
-
+	s := c.golang()
 	s = utils.GoMod(src.Directory("cli"), s)
 	s = s.WithDirectory("/src", src)
 
@@ -72,11 +67,7 @@ func (i *CribService) buildGame(src *dagger.Directory) *dagger.Directory {
 	return outputs
 }
 
-func (i *CribService) buildGameTest(src *dagger.Directory) *dagger.Container {
-	s := dag.Container().
-		From("golang:latest").
-		WithDirectory("/src", src).
-		WithWorkdir("/src")
-
-	return s
+func (c *CribService) buildQueries(src *dagger.Directory) *dagger.Directory {
+	g := c.sqlc(src)
+	return g.Directory("/src/queries")
 }

@@ -48,7 +48,7 @@ func Deal(match *vo.GameMatch) (*vo.GameDeck, error) {
 }
 
 // RemoveCardsFromHand takes a hand modifier object and updates the state of the game with that information
-func RemoveCardsFromHand(details vo.HandModifier) (*vo.GameMatch, error) {
+func RemoveCardsFromHand(matchId, playerId int, details vo.HandModifier) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -57,11 +57,11 @@ func RemoveCardsFromHand(details vo.HandModifier) (*vo.GameMatch, error) {
 	defer cancel()
 
 	q.RemoveCardsFromHand(ctx, queries.RemoveCardsFromHandParams{
-		ID:   details.PlayerId,
+		ID:   int32(playerId),
 		Hand: details.CardIds,
 	})
 
-	b, err := q.GetMatchById(ctx, details.MatchId)
+	b, err := q.GetMatchById(ctx, int32(matchId))
 
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func RemoveCardsFromHand(details vo.HandModifier) (*vo.GameMatch, error) {
 }
 
 // UpdatePlay updates the state of the game with the play information
-func UpdatePlay(details vo.HandModifier) (*vo.GameMatch, error) {
+func UpdatePlay(matchId, playerId int, details vo.HandModifier) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -87,8 +87,8 @@ func UpdatePlay(details vo.HandModifier) (*vo.GameMatch, error) {
 
 	q.UpdateCardsPlayed(ctx, queries.UpdateCardsPlayedParams{
 		Play: details.CardIds,
-		ID:   details.PlayerId,
+		ID:   int32(playerId),
 	})
 
-	return RemoveCardsFromHand(details)
+	return RemoveCardsFromHand(matchId, playerId, details)
 }

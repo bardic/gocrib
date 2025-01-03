@@ -12,10 +12,18 @@ type CribService struct {
 	ServerService   *dagger.Service
 }
 
-func (c *CribService) Gen(ctx context.Context, src *dagger.Directory) *dagger.Directory {
-	g := c.sqlc(src)
-	return g.Directory("/src/queries")
+func (c *CribService) BuildQueries(ctx context.Context, src *dagger.Directory) *dagger.Directory {
+	return c.buildQueries(src)
 }
+
+func (c *CribService) BuildServer(src *dagger.Directory) *dagger.Directory {
+	return c.buildServer(src)
+}
+
+func (c *CribService) BuildGame(src *dagger.Directory) *dagger.Directory {
+	return c.buildGame(src)
+}
+
 func (c *CribService) DbUp(ctx context.Context, src *dagger.Directory, withPort bool) (*dagger.Service, error) {
 	p := c.postgresService(withPort)
 	_, err := c.migrationService(src, p).Start(ctx)
@@ -26,23 +34,32 @@ func (c *CribService) DbUp(ctx context.Context, src *dagger.Directory, withPort 
 }
 
 func (i *CribService) Server(ctx context.Context, src *dagger.Directory, migrate bool) (*dagger.Service, error) {
-	return i.gameServerService(ctx, src, migrate)
+	return i.serverService(ctx, src, migrate)
 }
 
-func (i *CribService) TestHttp(ctx context.Context, src *dagger.Directory) (string, error) {
-	s, err := i.gameServerService(ctx, src, true)
+func (i *CribService) TestHttp(ctx context.Context, src *dagger.Directory,
+	// +optional
+	isCI bool,
+) (string, error) {
+	httpDir := src.Directory("http")
+	ij := i.http(httpDir)
 
-	if err != nil {
-		return "", err
+	e := "local"
+
+	if isCI {
+		e = "ci"
+
+		s, err := i.serverService(ctx, src, true)
+
+		if err != nil {
+			return "", err
+		}
+
+		i.ServerService = s
+		ij = ij.WithServiceBinding("server", s)
 	}
 
-	ij := i.http(src)
-
-	ij = ij.WithServiceBinding("server", s)
-
-	i.ServerService = s
-
-	entries, err := src.Directory("http").Entries(context.Background())
+	entries, err := httpDir.Entries(context.Background())
 
 	if err != nil {
 		return "", nil
@@ -55,7 +72,7 @@ func (i *CribService) TestHttp(ctx context.Context, src *dagger.Directory) (stri
 		}
 	}
 
-	ij = ij.WithExec(append([]string{"sh", "/ijhttp/ijhttp", "-e", "production"}, f...))
+	ij = ij.WithExec(append([]string{"sh", "/ijhttp/ijhttp", "-v", "/workdir/http-client.env.json", "-e", e}, f...))
 
 	return ij.Stdout(ctx)
 }

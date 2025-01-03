@@ -63,9 +63,7 @@ type MatchDetailsResponse struct {
 }
 
 type HandModifier struct {
-	MatchId  int32
-	PlayerId int32
-	CardIds  []int32
+	CardIds []int32
 }
 
 type ScoreResults struct {

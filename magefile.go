@@ -47,9 +47,7 @@ func Test() error {
 
 func LocalTest() error {
 	fmt.Println("Local Testing...")
-
 	os.Setenv("GOCRIB_HOST", "localhost")
-
 	entries, err := os.ReadDir("./http")
 	if err != nil {
 		return err
@@ -62,7 +60,7 @@ func LocalTest() error {
 		}
 	}
 
-	f = append(f, "-e", "development", "-v", "./http/http-client.env.json")
+	f = append(f, "-e", "local", "-v", "./http/http-client.env.json")
 
 	cmd := exec.Command("ijhttp", f...)
 	o, err := cmd.CombinedOutput()
@@ -74,6 +72,30 @@ func LocalTest() error {
 func MigrateLocal() error {
 	fmt.Println("Migrating...")
 	cmd := exec.Command("migrate", "-database", "postgres://postgres:example@localhost:5432/cribbage?sslmode=disable", "-path", "sql/migrations", "up")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func BuildCLI() error {
+	fmt.Println("Building CLI...")
+	cmd := exec.Command("dagger", "call", "test-http", "--src=.")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func BuildServer() error {
+	fmt.Println("Building Server...")
+	cmd := exec.Command("dagger", "call", "build-server", "--src=.", "export", "--path=builds/")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func BuildGame() error {
+	fmt.Println("Building Game...")
+	cmd := exec.Command("dagger", "call", "build-game", "--src=.", "export", "--path=builds/")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()

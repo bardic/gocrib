@@ -5,6 +5,9 @@ import (
 	"dagger/CribService/internal/dagger"
 )
 
+var dbHostName = "db"
+var serverHostName = "server"
+
 func (c *CribService) migrationService(src *dagger.Directory, p *dagger.Service) *dagger.Service {
 	return c.golang().
 		WithExec([]string{
@@ -14,7 +17,7 @@ func (c *CribService) migrationService(src *dagger.Directory, p *dagger.Service)
 			"'postgres'",
 			"github.com/golang-migrate/migrate/v4/cmd/migrate@latest"}).
 		WithDirectory("/src", src).
-		WithServiceBinding("db", p).
+		WithServiceBinding(dbHostName, p).
 		WithExec([]string{
 			"migrate",
 			"-path",
@@ -26,19 +29,16 @@ func (c *CribService) migrationService(src *dagger.Directory, p *dagger.Service)
 		AsService()
 }
 
-func (c *CribService) postgresService(
-	// +optional
-	withPort bool,
-) *dagger.Service {
+func (c *CribService) postgresService(withPort bool) *dagger.Service {
 	p := c.
 		postgres(withPort).
 		AsService(dagger.ContainerAsServiceOpts{UseEntrypoint: true}).
-		WithHostname("db")
+		WithHostname(dbHostName)
 
 	return p
 }
 
-func (c *CribService) gameServerService(ctx context.Context, src *dagger.Directory, migrate bool) (*dagger.Service, error) {
+func (c *CribService) serverService(ctx context.Context, src *dagger.Directory, migrate bool) (*dagger.Service, error) {
 	c.Db = c.postgresService(true)
 	if migrate {
 		m := c.migrationService(src, c.Db)
@@ -50,9 +50,9 @@ func (c *CribService) gameServerService(ctx context.Context, src *dagger.Directo
 	}
 	return c.
 		gameServer(src).
-		WithServiceBinding("db", c.Db).
+		WithServiceBinding(dbHostName, c.Db).
 		WithExposedPort(1323).
 		WithDefaultArgs([]string{"go", "run", "main.go"}).AsService().
-		WithHostname("server"), nil
+		WithHostname(serverHostName), nil
 
 }

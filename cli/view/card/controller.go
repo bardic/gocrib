@@ -29,6 +29,7 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 	cardView := ctrl.View.(*View)
 	cardView.ActiveCardId = ctrl.Model.(*Model).ActiveSlotIndex
 	cardView.SelectedCardIds = ctrl.Model.(*Model).SelectedCardIds
+
 	cardView.UIFooterVO = &vo.UIFooterVO{
 		ActivePlayerId: gameMatch.Players[0].ID,
 		MatchId:        gameMatch.Match.ID,
@@ -63,16 +64,16 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		switch cardModel.State {
 		case queries.GamestateDiscardState:
 			services.PutKitty(vo.HandModifier{
-				MatchId:  ctrl.ID,
-				PlayerId: cardModel.LocalPlayerID,
-				CardIds:  cardModel.SelectedCardIds,
+				// MatchId:  ctrl.ID,
+				// PlayerId: cardModel.LocalPlayerID,
+				CardIds: cardModel.SelectedCardIds,
 			})
 		case queries.GamestatePlayState:
 			//todo pass down from CLI if player is creator
 			services.PutPlay(vo.HandModifier{
-				MatchId:  ctrl.ID,
-				PlayerId: cardModel.LocalPlayerID,
-				CardIds:  cardModel.SelectedCardIds,
+				// MatchId:  ctrl.ID,
+				// PlayerId: cardModel.LocalPlayerID,
+				CardIds: cardModel.SelectedCardIds,
 			})
 		case queries.GamestateOpponentState:
 			//todo pass down from CLI if player is opponent
@@ -82,9 +83,9 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			}
 
 			services.PutPlay(vo.HandModifier{
-				MatchId:  ctrl.ID,
-				PlayerId: cardModel.LocalPlayerID,
-				CardIds:  cardModel.SelectedCardIds,
+				// MatchId:  ctrl.ID,
+				// PlayerId: cardModel.LocalPlayerID,
+				CardIds: cardModel.SelectedCardIds,
 			})
 
 		}
