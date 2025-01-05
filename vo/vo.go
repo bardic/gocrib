@@ -51,11 +51,6 @@ type CutDeckReq struct {
 	CutIndex string
 }
 
-type JoinMatchReq struct {
-	MatchId   int32
-	AccountId int32
-}
-
 type MatchDetailsResponse struct {
 	MatchId   int32
 	PlayerId  int32
@@ -124,4 +119,8 @@ type UIFooterVO struct {
 type PlayerReady struct {
 	MatchId  int32 // MatchId
 	PlayerId int32 // PlayerId
+}
+
+type Kitty struct {
+	Cards []int32
 }

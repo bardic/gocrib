@@ -95,51 +95,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/match/": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Create new match",
-                "parameters": [
-                    {
-                        "description": "MatchRequirements",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/vo.MatchRequirements"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/match/cut": {
             "put": {
                 "consumes": [
@@ -199,13 +154,18 @@ const docTemplate = `{
                 "summary": "Join match by id",
                 "parameters": [
                     {
-                        "description": "JoinMatchReq object",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/vo.JoinMatchReq"
-                        }
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "account id",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -318,6 +278,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/match/{accountId}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Create new match",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "account id",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/match/{id}": {
             "get": {
                 "consumes": [
@@ -357,7 +360,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/match/{id}/cards": {
+        "/match/{matchId}/cards": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -373,7 +376,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "match id",
-                        "name": "id",
+                        "name": "matchId",
                         "in": "path",
                         "required": true
                     }
@@ -394,58 +397,6 @@ const docTemplate = `{
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/match/{matchId}/player/": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "players"
-                ],
-                "summary": "Create new player",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "match id",
-                        "name": "matchId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "player Object to save",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/vo.JoinMatchReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Player"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -867,7 +818,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/pgtype.Timestamptz"
                 },
                 "currentplayerturn": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "cutgamecardid": {
                     "type": "integer"
@@ -1023,7 +974,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/pgtype.Timestamptz"
                 },
                 "currentplayerturn": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "cutgamecardid": {
                     "type": "integer"
@@ -1071,17 +1022,6 @@ const docTemplate = `{
                 }
             }
         },
-        "vo.JoinMatchReq": {
-            "type": "object",
-            "properties": {
-                "accountId": {
-                    "type": "integer"
-                },
-                "matchId": {
-                    "type": "integer"
-                }
-            }
-        },
         "vo.MatchDetailsResponse": {
             "type": "object",
             "properties": {
@@ -1093,23 +1033,6 @@ const docTemplate = `{
                 },
                 "playerId": {
                     "type": "integer"
-                }
-            }
-        },
-        "vo.MatchRequirements": {
-            "type": "object",
-            "properties": {
-                "accountId": {
-                    "type": "integer"
-                },
-                "eloRangeMax": {
-                    "type": "integer"
-                },
-                "eloRangeMin": {
-                    "type": "integer"
-                },
-                "isPrivate": {
-                    "type": "boolean"
                 }
             }
         },

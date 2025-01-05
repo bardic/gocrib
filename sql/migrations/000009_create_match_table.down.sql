@@ -1,2 +1,2 @@
-DROP TYPE gamestate;
+DROP TYPE gamestate CASCADE;
 DROP TABLE IF EXISTS match;

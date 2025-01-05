@@ -79,7 +79,7 @@ func GetOpenMatches() ([]queries.Match, error) {
 	return matches, nil
 }
 
-func GetGameDeck(matchId int32) (*vo.GameDeck, error) {
+func CreateGameDeck(matchId int32) (*vo.GameDeck, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)

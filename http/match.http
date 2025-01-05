@@ -1,21 +1,12 @@
 @host = http://{{host}}:1323/v1
-@gameId = 1
-@secondPlayerId = 2
+@p1accountId = 1
+@p2accountId = 2
+@matchId = 1
 @cutIndex = "30"
 
-< {%
-    request.variables.set("id", "1")
-%}
-
-POST {{host}}/match
+### Create new match and player
+POST {{host}}/match/{{p1accountId}}
 Content-Type: application/json
-
-{
-  "accountId": 1,
-  "eloRangeMax": 0,
-  "eloRangeMin": 0,
-  "isPrivate": true
-}
 
 > {%
     client.test("Test status code", function() {
@@ -34,8 +25,7 @@ Content-Type: application/json
     });
 %}
 
-###
-
+### Get list of open matches
 GET {{host}}/open
 
 > {%
@@ -56,12 +46,11 @@ GET {{host}}/open
     });
 %}
 
-###
-
-GET {{host}}/match/{{gameId}}
+### Get match details by id
+GET {{host}}/match/{{matchId}}
 
 > {%
-    var gameIdToMatch = 1;    
+    var matchIdToMatch = 1;    
 
     client.test("Test status code", function() {
         console.log("Response status: " + response.status);
@@ -73,23 +62,17 @@ GET {{host}}/match/{{gameId}}
         client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
     });
 
-    client.test(`Is Id ${gameIdToMatch}`, function () {
-        client.assert(jsonPath(response.body, "$.MatchId",) == `${gameIdToMatch}`, "Id is wrong");
+    client.test(`Is Id ${matchIdToMatch}`, function () {
+        client.assert(jsonPath(response.body, "$.MatchId",) == `${matchIdToMatch}`, "Id is wrong");
     });
 %}
 
-###
-
-PUT {{host}}/match/{{gameId}}/join
+### p2 join match
+PUT {{host}}/match/{{matchId}}/join/{{p2accountId}}
 Content-Type: application/json
 
-{
-  "AccountId": {{secondPlayerId}},
-  "MatchId": {{gameId}}
-}
-
 > {%
-    var gameIdToMatch = 1;    
+    var matchIdToMatch = 1;    
 
     client.test("Test status code", function() {
         console.log("Response status: " + response.status);
@@ -101,8 +84,8 @@ Content-Type: application/json
         client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
     });
 
-    client.test(`Is Id ${gameIdToMatch}`, function () {
-        client.assert(jsonPath(response.body, "$.ID",) == `${gameIdToMatch}`, "Id is wrong");
+    client.test(`Is Id ${matchIdToMatch}`, function () {
+        client.assert(jsonPath(response.body, "$.ID",) == `${matchIdToMatch}`, "Id is wrong");
     });
 
     client.test("Is GameState CutState", function () {
@@ -111,18 +94,39 @@ Content-Type: application/json
     });
 %}
 
-###
+### Get match deck
+GET {{host}}/match/{{matchId}}/cards
+	
+> {%
+    var matchIdToMatch = 1;   
+    var minNumOfMatches = 52; 
 
-PUT {{host}}/match/{{gameId}}/cut
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+     client.test(`At least ${minNumOfMatches} match(es) exists`, function () {
+        client.assert(jsonPath(response.body, "@",) >= `${minNumOfMatches}`, "Not enough matches");
+    });
+%}
+
+### Cut match deck
+PUT {{host}}/match/{{matchId}}/cut
 Content-Type: application/json
 
 {
-  "MatchId": {{gameId}},
+  "MatchId": {{matchId}},
   "CutIndex": {{cutIndex}}
 }
 	
 > {%
-    var gameIdToMatch = 1;    
+    var matchIdToMatch = 1;    
 
     client.test("Test status code", function() {
         console.log("Response status: " + response.status);
@@ -134,26 +138,8 @@ Content-Type: application/json
         client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
     });
 
-    client.test(`Is Id ${gameIdToMatch}`, function () {
+    client.test(`Is Id ${matchIdToMatch}`, function () {
         client.assert(response.body == 1, "Id is wrong");
     });
 
-%}
-
-###
-
-GET {{host}}/match/{{gameId}}/cards
-	
-> {%
-    var gameIdToMatch = 1;    
-
-    client.test("Test status code", function() {
-        console.log("Response status: " + response.status);
-        client.assert(response.status === 200, "Response status is not 200");
-    });
-
-    client.test("Response content-type is json", function () {
-        var type = response.contentType.mimeType;
-        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
-    });
 %}

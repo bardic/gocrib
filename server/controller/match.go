@@ -85,10 +85,34 @@ func UpdatePlay(matchId, playerId int, details vo.HandModifier) (*vo.GameMatch, 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	q.UpdateCardsPlayed(ctx, queries.UpdateCardsPlayedParams{
+	err := q.UpdateCardsPlayed(ctx, queries.UpdateCardsPlayedParams{
 		Play: details.CardIds,
 		ID:   int32(playerId),
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return RemoveCardsFromHand(matchId, playerId, details)
+}
+
+func UpdateKitty(matchId, playerId int, details vo.HandModifier) (*vo.GameMatch, error) {
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := q.UpdateKitty(ctx, queries.UpdateKittyParams{
+		Kitty: details.CardIds,
+		ID:    int32(playerId),
+	})
+
+	if err != nil {
+		return nil, err
+	}
 
 	return RemoveCardsFromHand(matchId, playerId, details)
 }

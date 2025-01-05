@@ -48,11 +48,14 @@ func (c *CribService) serverService(ctx context.Context, src *dagger.Directory, 
 			return nil, err
 		}
 	}
+
 	return c.
 		gameServer(src).
 		WithServiceBinding(dbHostName, c.Db).
 		WithExposedPort(1323).
-		WithDefaultArgs([]string{"go", "run", "main.go"}).AsService().
+		WithExec([]string{"go", "build", "main.go"}).
+		WithDefaultArgs([]string{"./main"}).
+		AsService().
 		WithHostname(serverHostName), nil
 
 }

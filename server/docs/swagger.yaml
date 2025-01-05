@@ -162,7 +162,7 @@ definitions:
       creationdate:
         $ref: '#/definitions/pgtype.Timestamptz'
       currentplayerturn:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       cutgamecardid:
         type: integer
       deckid:
@@ -264,7 +264,7 @@ definitions:
       creationdate:
         $ref: '#/definitions/pgtype.Timestamptz'
       currentplayerturn:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       cutgamecardid:
         type: integer
       deckid:
@@ -295,13 +295,6 @@ definitions:
           type: integer
         type: array
     type: object
-  vo.JoinMatchReq:
-    properties:
-      accountId:
-        type: integer
-      matchId:
-        type: integer
-    type: object
   vo.MatchDetailsResponse:
     properties:
       gameState:
@@ -310,17 +303,6 @@ definitions:
         type: integer
       playerId:
         type: integer
-    type: object
-  vo.MatchRequirements:
-    properties:
-      accountId:
-        type: integer
-      eloRangeMax:
-        type: integer
-      eloRangeMin:
-        type: integer
-      isPrivate:
-        type: boolean
     type: object
   vo.PlayerReady:
     properties:
@@ -391,17 +373,16 @@ paths:
       summary: Get deck by match id
       tags:
       - deck
-  /match/:
+  /match/{accountId}:
     post:
       consumes:
       - application/json
       parameters:
-      - description: MatchRequirements
-        in: body
-        name: details
+      - description: account id
+        in: path
+        name: accountId
         required: true
-        schema:
-          $ref: '#/definitions/vo.MatchRequirements'
+        type: integer
       produces:
       - application/json
       responses:
@@ -447,14 +428,14 @@ paths:
       summary: Get match by id
       tags:
       - match
-  /match/{id}/cards:
+  /match/{matchId}/cards:
     get:
       consumes:
       - application/json
       parameters:
       - description: match id
         in: path
-        name: id
+        name: matchId
         required: true
         type: integer
       produces:
@@ -475,41 +456,6 @@ paths:
       summary: Get match card by match id
       tags:
       - match
-  /match/{matchId}/player/:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      - description: player Object to save
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/vo.JoinMatchReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Player'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Create new player
-      tags:
-      - players
   /match/{matchId}/player/{id}:
     get:
       consumes:
@@ -659,12 +605,16 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: JoinMatchReq object
-        in: body
-        name: details
+      - description: match id
+        in: path
+        name: matchId
         required: true
-        schema:
-          $ref: '#/definitions/vo.JoinMatchReq'
+        type: integer
+      - description: account id
+        in: path
+        name: accountId
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

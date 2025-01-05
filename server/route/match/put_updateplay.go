@@ -39,7 +39,7 @@ func UpdatePlay(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	playerId, err := strconv.Atoi(c.Param("id"))
+	playerId, err := strconv.Atoi(c.Param("playerId"))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -68,7 +68,10 @@ func UpdatePlay(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = q.PassTurn(ctx, m.ID)
+	err = q.PassTurn(ctx, queries.PassTurnParams{
+		Matchid:  int32(matchId),
+		Playerid: int32(playerId),
+	})
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

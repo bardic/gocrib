@@ -36,15 +36,6 @@ func PlayerReady(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	//check if player is alreay ready
-
 	_, err := readyPlayerById(int(pReady.PlayerId))
 
 	if err != nil {
@@ -55,38 +46,6 @@ func PlayerReady(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	// if len(match.Players) != 2 {
-	// 	return c.JSON(http.StatusOK, nil)
-	// }
-
-	deck, err := helpers.GetGameDeck(match.ID)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	err = q.UpdateMatchWithDeckId(ctx, queries.UpdateMatchWithDeckIdParams{
-		ID:     match.ID,
-		Deckid: deck.ID,
-	})
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	match.Deckid = deck.ID
-
-	for _, v := range deck.Cards {
-		err = q.InsertDeckMatchCard(ctx, queries.InsertDeckMatchCardParams{
-			Deckid:      deck.ID,
-			Matchcardid: v.Matchcard.Cardid,
-		})
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
 	}
 
 	if arePlayersReady(match.Players) {

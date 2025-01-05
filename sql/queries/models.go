@@ -236,7 +236,7 @@ type Match struct {
 	Elorangemax        int32
 	Deckid             int32
 	Cutgamecardid      int32
-	Currentplayerturn  int32
+	Currentplayerturn  pgtype.Int4
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
 	Art                string

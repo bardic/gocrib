@@ -37,6 +37,10 @@ func (i *CribService) Server(ctx context.Context, src *dagger.Directory, migrate
 	return i.serverService(ctx, src, migrate)
 }
 
+func (i *CribService) ServerTest(ctx context.Context, src *dagger.Directory) (*dagger.Container, error) {
+	return i.gameServer(src), nil
+}
+
 func (i *CribService) TestHttp(ctx context.Context, src *dagger.Directory,
 	// +optional
 	isCI bool,

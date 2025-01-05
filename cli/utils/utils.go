@@ -107,7 +107,7 @@ func GetVisibleCards(activeTab int, player queries.Player) []int32 {
 	return cards
 }
 
-func BuildCommonFooter(activePlayerId, localPlayerId, matchId int32, gameState queries.Gamestate) string {
+func BuildCommonFooter(activePlayerId, localPlayerId, matchId int, gameState queries.Gamestate) string {
 	f := fmt.Sprintf("\nState: %v | Local/Active Player : %v/%v | Match ID: %v ", gameState, localPlayerId, activePlayerId, matchId)
 	f += "\ntab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
 	return f

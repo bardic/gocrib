@@ -3,6 +3,7 @@ package match
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
@@ -22,15 +23,16 @@ import (
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
-//	@Param		details	body		vo.MatchRequirements	true	"MatchRequirements"
+//	@Param		accountId	path		int	true	"account id"'
 //	@Success	200		{object}	int
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/match/ [post]
+//	@Router		/match/{accountId} [post]
 func NewMatch(c echo.Context) error {
-	details := new(vo.MatchRequirements)
-	if err := c.Bind(details); err != nil {
+	accountId, err := strconv.Atoi(c.Param("accountId"))
+
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -41,11 +43,9 @@ func NewMatch(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	p, err := player.NewPlayerQuery(details.AccountId)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	// create deck
+	// create match cards
+	// link with deck_matchcard
 
 	deck, err := q.CreateDeck(ctx)
 
@@ -59,11 +59,42 @@ func NewMatch(c echo.Context) error {
 		Elorangemax:        0,
 		Deckid:             deck.ID,
 		Cutgamecardid:      0,
-		Currentplayerturn:  p.ID,
 		Turnpasstimestamps: []pgtype.Timestamptz{},
 		Gamestate:          queries.GamestateNewGameState,
 		Art:                "default.png",
 	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	cards, err := q.GetCards(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	for _, card := range cards {
+		matchCard, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
+			Cardid: card.ID,
+			State:  queries.CardstateDeck,
+		})
+
+		if err != nil {
+			return err
+		}
+
+		err = q.InsertDeckMatchCard(ctx, queries.InsertDeckMatchCardParams{
+			Deckid:      deck.ID,
+			Matchcardid: matchCard.ID,
+		})
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	}
+
+	p, err := player.NewPlayerQuery(m.ID, int32(accountId))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

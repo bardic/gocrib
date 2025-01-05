@@ -60,9 +60,9 @@ func (view *View) BuildHeader() string {
 
 func (view *View) BuildFooter() string {
 	f := utils.BuildCommonFooter(
-		view.ActivePlayerId,
-		view.LocalPlayerID,
-		view.MatchId,
+		int(view.ActivePlayerId),
+		int(view.LocalPlayerID),
+		int(view.MatchId),
 		view.GameState,
 	)
 

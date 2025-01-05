@@ -216,7 +216,6 @@ INSERT INTO match(
 				eloRangeMax,
 				deckId,
 				cutGameCardId,
-				currentplayerturn,
 				turnPassTimestamps,
 				gameState,
 				art)
@@ -228,8 +227,7 @@ INSERT INTO match(
 				$5,
 				$6,
 				$7,
-				$8,
-				$9)
+				$8)
 			RETURNING *;
 
 -- name: CreatePlayer :one
@@ -270,18 +268,10 @@ INSERT INTO matchcard (cardid, origowner, currowner, state) VALUES ($1, $2, $3, 
 -- name: PassTurn :exec
 UPDATE match m
 SET currentplayerturn = 
-    (SELECT 
-    CASE WHEN 
-            array_position(playerids, currentplayerturn)=
-            array_length(playerids,1)
-        THEN 
-            playerids[1]
-        ELSE 
-            playerids[array_position(playerids, currentplayerturn)+1]
-        END
-    FROM match m
-    WHERE m.id = $1
-    )            
+    (
+    SELECT playerId FROM match_player p
+ where p.playerId !=$2 and p.matchId =$1
+    )    
 WHERE m.id = $1;
 
 -- name: JoinMatch :exec

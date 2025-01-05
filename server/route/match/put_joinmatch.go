@@ -3,13 +3,13 @@ package match
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
 
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/route/player"
-	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,19 +21,27 @@ import (
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
-//	@Param		details	body		vo.JoinMatchReq	true	"JoinMatchReq object"
+//	@Param		matchId	path		int	true	"match id"'
+//	@Param		accountId	path		int	true	"account id"'
 //	@Success	200		{object}	vo.MatchDetailsResponse
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/join [put]
 func JoinMatch(c echo.Context) error {
-	details := new(vo.JoinMatchReq)
-	if err := c.Bind(details); err != nil {
+	matchId, err := strconv.Atoi(c.Param("matchId"))
+
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := player.NewPlayerQuery(details.AccountId)
+	accountId, err := strconv.Atoi(c.Param("accountId"))
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	p, err := player.NewPlayerQuery(int32(matchId), int32(accountId))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -46,7 +54,7 @@ func JoinMatch(c echo.Context) error {
 	defer cancel()
 
 	err = q.JoinMatch(ctx, queries.JoinMatchParams{
-		Matchid:  details.MatchId,
+		Matchid:  int32(matchId),
 		Playerid: p.ID,
 	})
 
@@ -55,7 +63,7 @@ func JoinMatch(c echo.Context) error {
 	}
 
 	match, err := q.UpdateGameState(ctx, queries.UpdateGameStateParams{
-		ID:        details.MatchId,
+		ID:        int32(matchId),
 		Gamestate: queries.GamestateCutState,
 	})
 

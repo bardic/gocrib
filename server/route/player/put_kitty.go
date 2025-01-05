@@ -37,7 +37,7 @@ func UpdateKitty(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	playerId, err := strconv.Atoi(c.Param("id"))
+	playerId, err := strconv.Atoi(c.Param("playerId"))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

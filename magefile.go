@@ -31,7 +31,7 @@ func DbUp() error {
 
 func GenQueries() error {
 	fmt.Println("Building Queries...")
-	cmd := exec.Command("dagger", "call", "gen", "--src=.", "export", "--path=sql/queries")
+	cmd := exec.Command("dagger", "call", "build-queries", "--src=.", "export", "--path=sql/queries")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -39,7 +39,7 @@ func GenQueries() error {
 
 func Test() error {
 	fmt.Println("Testing...")
-	cmd := exec.Command("dagger", "call", "test-http", "--src=.")
+	cmd := exec.Command("dagger", "call", "test-http", "--src=.", "--is-ci")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -48,6 +48,15 @@ func Test() error {
 func LocalTest() error {
 	fmt.Println("Local Testing...")
 	os.Setenv("GOCRIB_HOST", "localhost")
+
+	cmd := exec.Command("migrate", "-database", "postgres://postgres:example@localhost:5432/cribbage?sslmode=disable", "-path", "sql/migrations", "down", "-all")
+	o, err := cmd.CombinedOutput()
+	fmt.Println(string(o))
+
+	cmd = exec.Command("migrate", "-database", "postgres://postgres:example@localhost:5432/cribbage?sslmode=disable", "-path", "sql/migrations", "up")
+	o, err = cmd.CombinedOutput()
+	fmt.Println(string(o))
+
 	entries, err := os.ReadDir("./http")
 	if err != nil {
 		return err
@@ -62,8 +71,8 @@ func LocalTest() error {
 
 	f = append(f, "-e", "local", "-v", "./http/http-client.env.json")
 
-	cmd := exec.Command("ijhttp", f...)
-	o, err := cmd.CombinedOutput()
+	cmd = exec.Command("ijhttp", f...)
+	o, err = cmd.CombinedOutput()
 	fmt.Println(string(o))
 
 	return err

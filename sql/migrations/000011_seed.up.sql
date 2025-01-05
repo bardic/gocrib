@@ -59,33 +59,3 @@ INSERT INTO
 VALUES
     ('test1'),
     ('test2');
-
-INSERT INTO
-    player(
-        "accountid",
-        "play",
-        "hand",
-        "kitty",
-        "score",
-        "isready",
-        "art"
-    )
-VALUES
-    (
-        1,
-        ARRAY [] :: integer [],
-        ARRAY [] :: integer [],
-        ARRAY [] :: integer [],
-        0,
-        false,
-        'default.png'
-    ),
-    (
-        2,
-        ARRAY [] :: integer [],
-        ARRAY [] :: integer [],
-        ARRAY [] :: integer [],
-        0,
-        false,
-        'default.png'
-    )

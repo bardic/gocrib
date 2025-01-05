@@ -20,13 +20,13 @@ import (
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
-//	@Param		id	path		int	true	"match id"'
+//	@Param		matchId	path		int	true	"match id"'
 //	@Success	200	{object}	[]queries.GetMatchCardsRow
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
-//	@Router		/match/{id}/cards [get]
+//	@Router		/match/{matchId}/cards [get]
 func GetMatchCardsForMatchId(c echo.Context) error {
-	p := c.Param("id")
+	p := c.Param("matchId")
 	id, err := strconv.Atoi(p)
 
 	if err != nil {

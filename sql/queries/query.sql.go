@@ -29,7 +29,6 @@ INSERT INTO match(
 				eloRangeMax,
 				deckId,
 				cutGameCardId,
-				currentplayerturn,
 				turnPassTimestamps,
 				gameState,
 				art)
@@ -41,8 +40,7 @@ INSERT INTO match(
 				$5,
 				$6,
 				$7,
-				$8,
-				$9)
+				$8)
 			RETURNING id, creationdate, privatematch, elorangemin, elorangemax, deckid, cutgamecardid, currentplayerturn, turnpasstimestamps, gamestate, art
 `
 
@@ -52,7 +50,6 @@ type CreateMatchParams struct {
 	Elorangemax        int32
 	Deckid             int32
 	Cutgamecardid      int32
-	Currentplayerturn  int32
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
 	Art                string
@@ -65,7 +62,6 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) (Match
 		arg.Elorangemax,
 		arg.Deckid,
 		arg.Cutgamecardid,
-		arg.Currentplayerturn,
 		arg.Turnpasstimestamps,
 		arg.Gamestate,
 		arg.Art,
@@ -215,9 +211,9 @@ const getCurrentPlayerTurn = `-- name: GetCurrentPlayerTurn :one
 SELECT currentplayerturn FROM match WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetCurrentPlayerTurn(ctx context.Context, id int32) (int32, error) {
+func (q *Queries) GetCurrentPlayerTurn(ctx context.Context, id int32) (pgtype.Int4, error) {
 	row := q.db.QueryRow(ctx, getCurrentPlayerTurn, id)
-	var currentplayerturn int32
+	var currentplayerturn pgtype.Int4
 	err := row.Scan(&currentplayerturn)
 	return currentplayerturn, err
 }
@@ -412,7 +408,7 @@ type GetMatchIdForPlayerIdRow struct {
 	Elorangemax        int32
 	Deckid             int32
 	Cutgamecardid      int32
-	Currentplayerturn  int32
+	Currentplayerturn  pgtype.Int4
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
 	Art                string
@@ -569,23 +565,20 @@ func (q *Queries) JoinMatch(ctx context.Context, arg JoinMatchParams) error {
 const passTurn = `-- name: PassTurn :exec
 UPDATE match m
 SET currentplayerturn = 
-    (SELECT 
-    CASE WHEN 
-            array_position(playerids, currentplayerturn)=
-            array_length(playerids,1)
-        THEN 
-            playerids[1]
-        ELSE 
-            playerids[array_position(playerids, currentplayerturn)+1]
-        END
-    FROM match m
-    WHERE m.id = $1
-    )            
+    (
+    SELECT playerId FROM match_player p
+ where p.playerId !=$2 and p.matchId =$1
+    )    
 WHERE m.id = $1
 `
 
-func (q *Queries) PassTurn(ctx context.Context, id int32) error {
-	_, err := q.db.Exec(ctx, passTurn, id)
+type PassTurnParams struct {
+	Matchid  int32
+	Playerid int32
+}
+
+func (q *Queries) PassTurn(ctx context.Context, arg PassTurnParams) error {
+	_, err := q.db.Exec(ctx, passTurn, arg.Matchid, arg.Playerid)
 	return err
 }
 
@@ -695,7 +688,7 @@ type UpdateMatchParams struct {
 	Elorangemax        int32
 	Deckid             int32
 	Cutgamecardid      int32
-	Currentplayerturn  int32
+	Currentplayerturn  pgtype.Int4
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
 	Art                string
