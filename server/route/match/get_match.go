@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/bardic/gocrib/server/route/helpers"
-	"github.com/bardic/gocrib/vo"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,13 +15,13 @@ import (
 //	@Tags		match
 //	@Accept		json
 //	@Produce		json
-//	@Param		id	path		int	true	"Match ID"'
+//	@Param		matchId	path		int	true	"Match ID"'
 //	@Success	200	{object}	queries.Match
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
-//	@Router		/match/{id} [get]
+//	@Router		/match/{matchId} [get]
 func GetMatch(c echo.Context) error {
-	p := c.Param("id")
+	p := c.Param("matchId")
 	id, err := strconv.Atoi(p)
 
 	if err != nil {
@@ -34,8 +33,5 @@ func GetMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
-		MatchId:   m.ID,
-		GameState: m.Gamestate,
-	})
+	return c.JSON(http.StatusOK, m)
 }

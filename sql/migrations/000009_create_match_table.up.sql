@@ -1,17 +1,18 @@
 CREATE TYPE GameState AS ENUM (
-  'NewGameState',
-  'JoinGameState',
-  'WaitingState',
-  'MatchReady',
-  'DealState',
-  'DiscardState',
-  'CutState',
-  'PlayState',
-  'OpponentState',
-  'KittyState',
-  'GameWonState',
-  'GameLostState',
-  'MaxGameState'
+  'New',
+  'Waiting',
+  'Ready',
+  'Determine',
+  'Deal',
+  'Discard',
+  'Cut',
+  'PlayOwn',
+  'PlayOpponent',
+  'PassTurn',
+  'Count',
+  'Kitty',
+  'Won',
+  'Lost'
 );
 
 

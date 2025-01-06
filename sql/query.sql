@@ -282,3 +282,6 @@ VALUES
 
 -- name: InsertDeckMatchCard :exec
 INSERT INTO deck_matchcard (deckid, matchcardid) VALUES ($1, $2);
+
+-- name: UpdateCurrentPlayerTurn :exec
+UPDATE match SET currentplayerturn = $1 WHERE id = $2;

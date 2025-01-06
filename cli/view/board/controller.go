@@ -21,7 +21,7 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 func (ctrl *Controller) Init() {
 	boardModel := ctrl.Model.(*Model)
 	ctrl.View = &View{
-		State:         queries.GamestateCutState,
+		State:         queries.GamestateCut,
 		Match:         boardModel.GameMatch,
 		LocalPlayerId: boardModel.LocalPlayerId,
 	}
@@ -52,7 +52,7 @@ func (ctrl *Controller) Enter() tea.Msg {
 	boardView := ctrl.View.(*View)
 	boardModel := ctrl.Model.(*Model)
 	switch boardModel.GameMatch.Gamestate {
-	case queries.GamestateCutState:
+	case queries.GamestateCut:
 		boardModel.CutIndex = boardView.cutInput.Value()
 		resp := services.CutDeck(boardModel.GameMatch.ID, boardModel.CutIndex)
 		services.PlayerReady(boardModel.LocalPlayerId, boardModel.GameMatch.ID)

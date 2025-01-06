@@ -1,4 +1,4 @@
-package match
+package player
 
 import (
 	"context"
@@ -55,7 +55,7 @@ func UpdatePlay(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = helpers.UpdateGameState(m.ID, queries.GamestateOpponentState)
+	err = helpers.UpdateGameState(m.ID, queries.GamestatePassTurn)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

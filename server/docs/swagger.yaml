@@ -116,34 +116,36 @@ definitions:
     type: object
   queries.Gamestate:
     enum:
-    - NewGameState
-    - JoinGameState
-    - WaitingState
-    - MatchReady
-    - DealState
-    - DiscardState
-    - CutState
-    - PlayState
-    - OpponentState
-    - KittyState
-    - GameWonState
-    - GameLostState
-    - MaxGameState
+    - New
+    - Waiting
+    - Ready
+    - Determine
+    - Deal
+    - Discard
+    - Cut
+    - PlayOwn
+    - PlayOpponent
+    - PassTurn
+    - Count
+    - Kitty
+    - Won
+    - Lost
     type: string
     x-enum-varnames:
-    - GamestateNewGameState
-    - GamestateJoinGameState
-    - GamestateWaitingState
-    - GamestateMatchReady
-    - GamestateDealState
-    - GamestateDiscardState
-    - GamestateCutState
-    - GamestatePlayState
-    - GamestateOpponentState
-    - GamestateKittyState
-    - GamestateGameWonState
-    - GamestateGameLostState
-    - GamestateMaxGameState
+    - GamestateNew
+    - GamestateWaiting
+    - GamestateReady
+    - GamestateDetermine
+    - GamestateDeal
+    - GamestateDiscard
+    - GamestateCut
+    - GamestatePlayOwn
+    - GamestatePlayOpponent
+    - GamestatePassTurn
+    - GamestateCount
+    - GamestateKitty
+    - GamestateWon
+    - GamestateLost
   queries.GetMatchCardsRow:
     properties:
       card:
@@ -218,13 +220,6 @@ definitions:
           type: integer
         type: array
       score:
-        type: integer
-    type: object
-  vo.CutDeckReq:
-    properties:
-      cutIndex:
-        type: string
-      matchId:
         type: integer
     type: object
   vo.GameCard:
@@ -402,14 +397,14 @@ paths:
       summary: Create new match
       tags:
       - match
-  /match/{id}:
+  /match/{matchId}:
     get:
       consumes:
       - application/json
       parameters:
       - description: Match ID
         in: path
-        name: id
+        name: matchId
         required: true
         type: integer
       produces:
@@ -454,6 +449,74 @@ paths:
           description: Unprocessable Entity
           schema: {}
       summary: Get match card by match id
+      tags:
+      - match
+  /match/{matchId}/cut/{cutId}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: cut id
+        in: path
+        name: cutIndex
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Cut deck by index of card selected
+      tags:
+      - match
+  /match/{matchId}/join/{accountId}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: account id
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/vo.MatchDetailsResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Join match by id
       tags:
       - match
   /match/{matchId}/player/{id}:
@@ -570,99 +633,6 @@ paths:
       summary: Update play
       tags:
       - match
-  /match/cut:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Deck index that is to become the cut
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/vo.CutDeckReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: integer
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Cut deck by index of card selected
-      tags:
-      - match
-  /match/join:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      - description: account id
-        in: path
-        name: accountId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.MatchDetailsResponse'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Join match by id
-      tags:
-      - match
-  /match/player/:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for match by barcode
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Player'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get player by barcode
-      tags:
-      - players
   /match/player/ready:
     put:
       consumes:

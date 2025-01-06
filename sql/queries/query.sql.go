@@ -624,6 +624,20 @@ func (q *Queries) UpdateCardsPlayed(ctx context.Context, arg UpdateCardsPlayedPa
 	return err
 }
 
+const updateCurrentPlayerTurn = `-- name: UpdateCurrentPlayerTurn :exec
+UPDATE match SET currentplayerturn = $1 WHERE id = $2
+`
+
+type UpdateCurrentPlayerTurnParams struct {
+	Currentplayerturn pgtype.Int4
+	ID                int32
+}
+
+func (q *Queries) UpdateCurrentPlayerTurn(ctx context.Context, arg UpdateCurrentPlayerTurnParams) error {
+	_, err := q.db.Exec(ctx, updateCurrentPlayerTurn, arg.Currentplayerturn, arg.ID)
+	return err
+}
+
 const updateGameState = `-- name: UpdateGameState :one
 UPDATE match SET gameState= $1 WHERE id=$2 RETURNING id, creationdate, privatematch, elorangemin, elorangemax, deckid, cutgamecardid, currentplayerturn, turnpasstimestamps, gamestate, art
 `

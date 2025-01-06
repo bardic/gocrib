@@ -95,144 +95,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/match/cut": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Cut deck by index of card selected",
-                "parameters": [
-                    {
-                        "description": "Deck index that is to become the cut",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/vo.CutDeckReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/match/join": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Join match by id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "match id",
-                        "name": "matchId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "account id",
-                        "name": "accountId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/vo.MatchDetailsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/match/player/": {
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "players"
-                ],
-                "summary": "Get player by barcode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for match by barcode",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Player"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/match/player/ready": {
             "put": {
                 "consumes": [
@@ -321,7 +183,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/match/{id}": {
+        "/match/{matchId}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -337,7 +199,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Match ID",
-                        "name": "id",
+                        "name": "matchId",
                         "in": "path",
                         "required": true
                     }
@@ -397,6 +259,106 @@ const docTemplate = `{
                     },
                     "422": {
                         "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{matchId}/cut/{cutId}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Cut deck by index of card selected",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "cut id",
+                        "name": "cutIndex",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{matchId}/join/{accountId}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Join match by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "account id",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.MatchDetailsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -761,34 +723,36 @@ const docTemplate = `{
         "queries.Gamestate": {
             "type": "string",
             "enum": [
-                "NewGameState",
-                "JoinGameState",
-                "WaitingState",
-                "MatchReady",
-                "DealState",
-                "DiscardState",
-                "CutState",
-                "PlayState",
-                "OpponentState",
-                "KittyState",
-                "GameWonState",
-                "GameLostState",
-                "MaxGameState"
+                "New",
+                "Waiting",
+                "Ready",
+                "Determine",
+                "Deal",
+                "Discard",
+                "Cut",
+                "PlayOwn",
+                "PlayOpponent",
+                "PassTurn",
+                "Count",
+                "Kitty",
+                "Won",
+                "Lost"
             ],
             "x-enum-varnames": [
-                "GamestateNewGameState",
-                "GamestateJoinGameState",
-                "GamestateWaitingState",
-                "GamestateMatchReady",
-                "GamestateDealState",
-                "GamestateDiscardState",
-                "GamestateCutState",
-                "GamestatePlayState",
-                "GamestateOpponentState",
-                "GamestateKittyState",
-                "GamestateGameWonState",
-                "GamestateGameLostState",
-                "GamestateMaxGameState"
+                "GamestateNew",
+                "GamestateWaiting",
+                "GamestateReady",
+                "GamestateDetermine",
+                "GamestateDeal",
+                "GamestateDiscard",
+                "GamestateCut",
+                "GamestatePlayOwn",
+                "GamestatePlayOpponent",
+                "GamestatePassTurn",
+                "GamestateCount",
+                "GamestateKitty",
+                "GamestateWon",
+                "GamestateLost"
             ]
         },
         "queries.GetMatchCardsRow": {
@@ -903,17 +867,6 @@ const docTemplate = `{
                     }
                 },
                 "score": {
-                    "type": "integer"
-                }
-            }
-        },
-        "vo.CutDeckReq": {
-            "type": "object",
-            "properties": {
-                "cutIndex": {
-                    "type": "string"
-                },
-                "matchId": {
                     "type": "integer"
                 }
             }

@@ -4,7 +4,7 @@ Steps to create and ready match :
 
 - P1 creates new match with their account : 
   - [x] {{host}}/match/{{p1accountId}}
-  - Set state: Create
+  - Set state: New
     - [x] Creates a match player
     - [x] Creates deck
     - [x] Creates 52 match cards
@@ -17,11 +17,14 @@ Steps to create and ready match :
     - Determine first player
     - Set state: Deal
 - Server: Deal hand to each player
-  - Set state: Discard {{host}}/match/{{matchId}}/player/{{playerId}}/discard
+  - [x] {{host}}/match/{{matchId}}/player/{{playerId}}/kitty
+  - [x] Set state: Discard
 - Await: Players to submit cards for kitty
-  - Set state: P1 Player {{host}}/match/{{matchId}}/player/{{playerId}}/play
+  - [x]  {{host}}/match/{{matchId}}/player/{{playerId}}/play
+  - [x] Set state: PlayOwn
 - Await: P1 submit match card id 
-  - Set state: P2 Play {{host}}/match/{{matchId}}/player/{{playerId}}/play
+  - [x] {{host}}/match/{{matchId}}/player/{{playerId}}/play
+  - [x] Set state: PlayOpponent
 - Await: P2 submit match card id
   - Set state: Count 
 - Server: Update players score

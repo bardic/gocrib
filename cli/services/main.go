@@ -21,7 +21,7 @@ const (
 	//Match
 	EndPointMatch                = BaseUrl + "/match"
 	EndPointMatchState           = BaseUrl + "/match/%s/state"
-	EndPointJoinMatch            = BaseUrl + "/match/%s/join"
+	EndPointJoinMatch            = BaseUrl + "/match/%v/join/%v"
 	EndPointOpenMatch            = BaseUrl + "/match/%s/open"
 	EndPointMatchCard            = BaseUrl + "/match/%s/card"
 	EndPointGameplayCardsByMatch = BaseUrl + "/match/%s/cards?id=%s"

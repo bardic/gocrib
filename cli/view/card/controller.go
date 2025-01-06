@@ -62,20 +62,20 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 	case "enter":
 		switch cardModel.State {
-		case queries.GamestateDiscardState:
+		case queries.GamestateDiscard:
 			services.PutKitty(vo.HandModifier{
 				// MatchId:  ctrl.ID,
 				// PlayerId: cardModel.LocalPlayerID,
 				CardIds: cardModel.SelectedCardIds,
 			})
-		case queries.GamestatePlayState:
+		case queries.GamestatePlayOwn:
 			//todo pass down from CLI if player is creator
 			services.PutPlay(vo.HandModifier{
 				// MatchId:  ctrl.ID,
 				// PlayerId: cardModel.LocalPlayerID,
 				CardIds: cardModel.SelectedCardIds,
 			})
-		case queries.GamestateOpponentState:
+		case queries.GamestatePlayOpponent:
 			//todo pass down from CLI if player is opponent
 
 			if cardModel.LocalPlayerID != ctrl.Players[0].ID {

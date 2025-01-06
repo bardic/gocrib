@@ -63,7 +63,7 @@ func v1Routes(g *echo.Group) {
 	}))
 
 	g.GET("/open", match.GetOpenMatches)
-	g.GET("/match/:id", match.GetMatch)
+	g.GET("/match/:matchId", match.GetMatch)
 	g.GET("/deck", deck.GetDeckByMatchId)
 
 	g.POST("/match/:accountId", match.NewMatch)
@@ -71,15 +71,14 @@ func v1Routes(g *echo.Group) {
 	//Match
 	matchGroup := g.Group("/match/:matchId")
 	matchGroup.GET("/cards", match.GetMatchCardsForMatchId)
-	matchGroup.GET("/player/:playerId", player.GetPlayer)
-
-	matchGroup.PUT("/cut", match.CutDeck)
+	matchGroup.PUT("/cut/:cutIndex", match.CutDeck)
 	matchGroup.PUT("/join/:accountId", match.JoinMatch)
 
 	//Player
+	matchGroup.GET("/player/:playerId", player.GetPlayer)
 	playerGroup := matchGroup.Group("/player/:playerId")
 	playerGroup.PUT("/kitty", player.UpdateKitty)
-	playerGroup.PUT("/play", match.UpdatePlay)
+	playerGroup.PUT("/play", player.UpdatePlay)
 	playerGroup.PUT("/ready", player.PlayerReady)
 
 	//Account

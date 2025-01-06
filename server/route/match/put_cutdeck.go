@@ -4,14 +4,12 @@ import (
 	"context"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
 
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/route/helpers"
-	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -23,16 +21,24 @@ import (
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
-//	@Param		details	body		vo.CutDeckReq	true	"Deck index that is to become the cut"
+//	@Param		matchId	path		int	true	"match id"
+//	@Param		cutIndex	path		int	true	"cut id"
 //	@Success	200		{object}	int
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/match/cut [put]
+//	@Router		/match/{matchId}/cut/{cutId} [put]
 func CutDeck(c echo.Context) error {
-	details := new(vo.CutDeckReq)
-	if err := c.Bind(details); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	matchId, err := strconv.Atoi(c.Param("matchId"))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	cutIndex, err := strconv.Atoi(c.Param("matchId"))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	db := conn.Pool()
@@ -42,16 +48,8 @@ func CutDeck(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cleanId := strings.Trim(details.CutIndex, " ")
-
-	cutIndex, err := strconv.Atoi(cleanId)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
 	err = q.UpdateMatchCut(ctx, queries.UpdateMatchCutParams{
-		ID:            int32(details.MatchId),
+		ID:            int32(matchId),
 		Cutgamecardid: int32(cutIndex),
 	})
 
@@ -59,11 +57,11 @@ func CutDeck(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = helpers.UpdateGameState(details.MatchId, queries.GamestateDealState)
+	err = helpers.UpdateGameState(int32(matchId), queries.GamestateDeal)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, details.MatchId)
+	return c.JSON(http.StatusOK, matchId)
 }

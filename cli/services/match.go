@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,18 +26,9 @@ func GetOpenMatches() tea.Msg {
 }
 
 func JoinMatch(accountId, activeMatchId int32) tea.Msg {
-	req := vo.JoinMatchReq{
-		AccountId: accountId,
-		MatchId:   activeMatchId,
-	}
+	u := fmt.Sprintf(EndPointJoinMatch, activeMatchId, accountId)
 
-	b, err := json.Marshal(req)
-
-	if err != nil {
-		return err
-	}
-
-	return url(EndPointJoinMatch, http.MethodPut, string(b))
+	return url(u, http.MethodPut, "")
 }
 
 func PostPlayerMatch(accountId int32) tea.Msg {

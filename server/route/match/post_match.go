@@ -60,7 +60,7 @@ func NewMatch(c echo.Context) error {
 		Deckid:             deck.ID,
 		Cutgamecardid:      0,
 		Turnpasstimestamps: []pgtype.Timestamptz{},
-		Gamestate:          queries.GamestateNewGameState,
+		Gamestate:          queries.GamestateNew,
 		Art:                "default.png",
 	})
 

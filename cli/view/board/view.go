@@ -48,7 +48,7 @@ func (view *View) Render(hand []int32) string {
 	doc := strings.Builder{}
 	viewBuilder := strings.Builder{}
 
-	if view.State == queries.GamestateCutState {
+	if view.State == queries.GamestateCut {
 		viewBuilder.WriteString(view.cutInput.View() + " \n")
 	} else {
 		viewBuilder.WriteString("\n")

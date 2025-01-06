@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/route/player"
@@ -27,7 +28,7 @@ import (
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/match/join [put]
+//	@Router		/match/{matchId}/join/{accountId} [put]
 func JoinMatch(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 
@@ -41,7 +42,7 @@ func JoinMatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	p, err := player.NewPlayerQuery(int32(matchId), int32(accountId))
+	player, err := player.NewPlayerQuery(int32(matchId), int32(accountId))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -55,7 +56,30 @@ func JoinMatch(c echo.Context) error {
 
 	err = q.JoinMatch(ctx, queries.JoinMatchParams{
 		Matchid:  int32(matchId),
-		Playerid: p.ID,
+		Playerid: player.ID,
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	_, err = q.UpdateGameState(ctx, queries.UpdateGameStateParams{
+		ID:        int32(matchId),
+		Gamestate: queries.GamestateDetermine,
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	pid := pgtype.Int4{
+		Int32: int32(player.ID),
+		Valid: true,
+	}
+
+	err = q.UpdateCurrentPlayerTurn(ctx, queries.UpdateCurrentPlayerTurnParams{
+		ID:                int32(matchId),
+		Currentplayerturn: pid,
 	})
 
 	if err != nil {
@@ -64,12 +88,16 @@ func JoinMatch(c echo.Context) error {
 
 	match, err := q.UpdateGameState(ctx, queries.UpdateGameStateParams{
 		ID:        int32(matchId),
-		Gamestate: queries.GamestateCutState,
+		Gamestate: queries.GamestateDeal,
 	})
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
+
+	// Deal cards
+
+	// _, err = q.
 
 	return c.JSON(http.StatusOK, match)
 }

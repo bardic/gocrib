@@ -2,27 +2,36 @@
 
 Async TUI multiplayer cribbage game written in Go
 
-## Generate / Update queries 
+## Building 
+
+### Generate / Update queries 
 
 ```
-dagger call sqlc --src=. export --path=sql/queries
+mage genQueries
 ```
 
-## Server
+### DB
 
 ```
-dagger call game-server --src=. up
+mage dbUp
 ```
 
-## Integration Test
+## Server + DB
 
 ```
-dagger call http --src=.
+mage serverUp
 ```
 
-## Client
+### Integration Test
+
+```
+mage test
+```
+
+### Client
 
 ```
 cd cli
 go run .
 ```
+

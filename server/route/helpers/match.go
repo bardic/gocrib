@@ -159,3 +159,8 @@ func UpdateMatch(match queries.Match) error {
 
 	return nil
 }
+
+func Deal() error {
+
+	return nil
+}
