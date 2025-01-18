@@ -13,8 +13,8 @@ import (
 
 type View struct {
 	// *cliVO.HandVO
-	ActiveCardId    int32
-	SelectedCardIds []int32
+	ActiveCardId    int
+	SelectedCardIds []int
 	Deck            *vo.GameDeck
 
 	*vo.UIFooterVO
@@ -24,7 +24,7 @@ func (view *View) Init() {
 	// view.ActiveCardId = 0
 }
 
-func (view *View) Render(hand []int32) string {
+func (view *View) Render(hand []int) string {
 	var s string
 	var cardViews []string
 
@@ -34,13 +34,13 @@ func (view *View) Render(hand []int32) string {
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Value)
 		styledCard := styles.ModelStyle.Render(cardStr)
 		if slices.Index(view.SelectedCardIds, c.Matchcard.Cardid) > -1 {
-			if int32(i) == view.ActiveCardId {
+			if int(i) == view.ActiveCardId {
 				styledCard = styles.SelectedFocusedStyle.Render(cardStr)
 			} else {
 				styledCard = styles.FocusedModelStyle.Render(cardStr)
 			}
 		} else {
-			if int32(i) == view.ActiveCardId {
+			if int(i) == view.ActiveCardId {
 				styledCard = styles.FocusedModelStyle.Render(cardStr)
 			}
 		}

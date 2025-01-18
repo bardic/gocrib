@@ -23,9 +23,9 @@ import (
 type CLI struct {
 	GameInitd         bool
 	ViewStateName     vo.ViewStateName
-	ActivePlayerId    int
+	ActivePlayerId    *int
 	account           *queries.Account
-	matchId           int32
+	matchId           *int
 	currentController cliVO.IController
 	isOpponent        bool
 	GameMatch         *vo.GameMatch
@@ -73,13 +73,14 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		fmt.Println(msg.NewState)
 		switch msg.NewState {
 		case vo.LobbyView:
+			activeMatchId := 0 //TODO what the fuck is this doing
 			cli.currentController = &lobby.Controller{
 				Controller: cliVO.Controller{
 					Model: lobby.Model{
 						ViewModel: cliVO.ViewModel{
 							Name: "Lobby",
 						},
-						ActiveMatchId: 0,
+						ActiveMatchId: &activeMatchId,
 						AccountId:     msg.AccountId,
 					},
 					View: &lobby.View{},

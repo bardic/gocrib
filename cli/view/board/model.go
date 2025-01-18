@@ -12,5 +12,5 @@ type Model struct {
 	Account       *queries.Account
 	CutIndex      string
 	GameMatch     *vo.GameMatch
-	LocalPlayerId int32
+	LocalPlayerId int
 }

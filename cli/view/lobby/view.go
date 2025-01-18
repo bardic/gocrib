@@ -17,14 +17,14 @@ import (
 )
 
 type View struct {
-	AccountId        int32
+	AccountId        int
 	ActiveLandingTab int
 	LobbyViewState   vo.ViewState
 	LobbyTabNames    []string
 	LobbyTable       table.Model
 	IsLobbyTableSet  bool
 	lobbyViewInitd   bool
-	ActiveMatchId    int32
+	ActiveMatchId    int
 }
 
 func (view *View) Init() {
@@ -39,7 +39,7 @@ func (view *View) Init() {
 	view.LobbyTabNames = []string{"Open Matches", "Available Matches"}
 }
 
-func (view *View) Render(hand []int32) string {
+func (view *View) Render(hand []int) string {
 	doc := strings.Builder{}
 
 	renderedTabs := utils.RenderTabs([]cliVO.Tab{

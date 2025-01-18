@@ -28,7 +28,7 @@ func GetMatch(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	m, err := helpers.GetMatch(id)
+	m, err := helpers.GetMatch(&id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

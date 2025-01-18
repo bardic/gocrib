@@ -264,6 +264,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/match/{matchId}/currentPlayer/{playerId}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Update the matches current palyer",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "playerId id",
+                        "name": "playerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/match/{matchId}/cut/{cutId}": {
             "put": {
                 "consumes": [
@@ -297,6 +347,92 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{matchId}/deal": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Join match by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.MatchDetailsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{matchId}/determinefirst/": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Join match by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.MatchDetailsResponse"
                         }
                     },
                     "400": {
@@ -580,17 +716,6 @@ const docTemplate = `{
                 "NegativeInfinity"
             ]
         },
-        "pgtype.Int4": {
-            "type": "object",
-            "properties": {
-                "int32": {
-                    "type": "integer"
-                },
-                "valid": {
-                    "type": "boolean"
-                }
-            }
-        },
         "pgtype.Timestamptz": {
             "type": "object",
             "properties": {
@@ -702,7 +827,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cutmatchcardid": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -782,7 +907,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/pgtype.Timestamptz"
                 },
                 "currentplayerturn": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "cutgamecardid": {
                     "type": "integer"
@@ -820,13 +945,13 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "currowner": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "origowner": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "state": {
                     "$ref": "#/definitions/queries.Cardstate"
@@ -842,29 +967,11 @@ const docTemplate = `{
                 "art": {
                     "type": "string"
                 },
-                "hand": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "id": {
                     "type": "integer"
                 },
                 "isready": {
                     "type": "boolean"
-                },
-                "kitty": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "play": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "score": {
                     "type": "integer"
@@ -881,13 +988,13 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "currowner": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "origowner": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "state": {
                     "$ref": "#/definitions/queries.Cardstate"
@@ -910,7 +1017,7 @@ const docTemplate = `{
                     }
                 },
                 "cutmatchcardid": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -927,7 +1034,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/pgtype.Timestamptz"
                 },
                 "currentplayerturn": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "cutgamecardid": {
                     "type": "integer"
@@ -972,6 +1079,9 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                },
+                "senderId": {
+                    "type": "integer"
                 }
             }
         },

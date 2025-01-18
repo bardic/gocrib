@@ -11,13 +11,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func GetPlayerMatchState(matchId int32) tea.Msg {
-	id := strconv.Itoa(int(matchId))
+func GetPlayerMatchState(matchId *int) tea.Msg {
+	id := strconv.Itoa(*matchId)
 	return url(EndPointMatchState+"/?id="+id, http.MethodGet, "")
 }
 
-func GetPlayerMatch(matchId int32) tea.Msg {
-	id := strconv.Itoa(int(matchId))
+func GetPlayerMatch(matchId *int) tea.Msg {
+	id := strconv.Itoa(*matchId)
 	return url(EndPointMatch+"/?id="+id, http.MethodGet, "")
 }
 
@@ -25,26 +25,28 @@ func GetOpenMatches() tea.Msg {
 	return url(EndPointOpenMatch, http.MethodGet, "")
 }
 
-func JoinMatch(accountId, activeMatchId int32) tea.Msg {
+func JoinMatch(accountId, activeMatchId int) tea.Msg {
 	u := fmt.Sprintf(EndPointJoinMatch, activeMatchId, accountId)
 
 	return url(u, http.MethodPut, "")
 }
 
-func PostPlayerMatch(accountId int32) tea.Msg {
+func PostPlayerMatch(accountId *int) tea.Msg {
+	eloRangeMin := 1
+	eloRangeMax := 3000
 	req := vo.MatchRequirements{
 		AccountId:   accountId,
 		IsPrivate:   false,
-		EloRangeMin: 1,
-		EloRangeMax: 3000,
+		EloRangeMin: &eloRangeMin,
+		EloRangeMax: &eloRangeMax,
 	}
 
 	return sendReq(EndPointMatch, http.MethodPost, req)
 }
 
-func CutDeck(matchId int32, cutIndex string) tea.Msg {
+func CutDeck(matchId int, cutIndex string) tea.Msg {
 	req := vo.CutDeckReq{
-		MatchId:  matchId,
+		MatchId:  &matchId,
 		CutIndex: cutIndex,
 	}
 

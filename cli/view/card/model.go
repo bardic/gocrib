@@ -11,7 +11,7 @@ type Model struct {
 	*cliVO.ViewModel
 	*cliVO.HandVO
 	State           queries.Gamestate
-	ActiveSlotIndex int32
-	SelectedCardIds []int32
+	ActiveSlotIndex int
+	SelectedCardIds []int
 	Deck            *vo.GameDeck
 }

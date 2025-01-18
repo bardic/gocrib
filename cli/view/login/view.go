@@ -26,7 +26,7 @@ func (view *View) Init() {
 	view.isLoginIdFieldSet = true
 }
 
-func (view *View) Render(hand []int32) string {
+func (view *View) Render(hand []int) string {
 	doc := strings.Builder{}
 	doc.WriteString("Login \n")
 	doc.WriteString(view.loginIdField.View())

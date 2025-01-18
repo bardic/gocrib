@@ -208,61 +208,58 @@ func (ns NullGamestate) Value() (driver.Value, error) {
 }
 
 type Account struct {
-	ID   int32
+	ID   *int
 	Name string
 }
 
 type Card struct {
-	ID    int32
+	ID    *int
 	Value Cardvalue
 	Suit  Cardsuit
 	Art   string
 }
 
 type Deck struct {
-	ID             int32
-	Cutmatchcardid pgtype.Int4
+	ID             *int
+	Cutmatchcardid *int
 }
 
 type DeckMatchcard struct {
-	Deckid      int32
-	Matchcardid int32
+	Deckid      *int
+	Matchcardid *int
 }
 
 type Match struct {
-	ID                 int32
+	ID                 *int
 	Creationdate       pgtype.Timestamptz
 	Privatematch       bool
-	Elorangemin        int32
-	Elorangemax        int32
-	Deckid             int32
-	Cutgamecardid      int32
-	Currentplayerturn  pgtype.Int4
+	Elorangemin        *int
+	Elorangemax        *int
+	Deckid             *int
+	Cutgamecardid      *int
+	Currentplayerturn  *int
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
 	Art                string
 }
 
 type MatchPlayer struct {
-	Matchid  int32
-	Playerid int32
+	Matchid  *int
+	Playerid *int
 }
 
 type Matchcard struct {
-	ID        int32
-	Cardid    int32
-	Origowner pgtype.Int4
-	Currowner pgtype.Int4
+	ID        *int
+	Cardid    *int
+	Origowner *int
+	Currowner *int
 	State     Cardstate
 }
 
 type Player struct {
-	ID        int32
-	Accountid int32
-	Play      []int32
-	Hand      []int32
-	Kitty     []int32
-	Score     int32
+	ID        *int
+	Accountid *int
+	Score     *int
 	Isready   bool
 	Art       string
 }

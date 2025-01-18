@@ -10,11 +10,11 @@ import (
 )
 
 type PReady struct {
-	MatchId  int32
-	PlayerId int32
+	MatchId  int
+	PlayerId int
 }
 
-func GetPlayer(playerId int32) tea.Msg {
+func GetPlayer(playerId int) tea.Msg {
 	id := int(playerId)
 	pid := strconv.Itoa(id)
 
@@ -39,7 +39,7 @@ func PutPlay(req vo.HandModifier) tea.Msg {
 	return url(EndPointPlay, http.MethodPut, string(b))
 }
 
-func PostPlayer(accountId int32) tea.Msg {
+func PostPlayer(accountId int) tea.Msg {
 	return url(EndPointPlayer, http.MethodPost, strconv.Itoa(int(accountId)))
 }
 
@@ -47,7 +47,7 @@ func DeletePlayer(ids []int) tea.Msg {
 	return url(EndPointPlayer, http.MethodDelete, "")
 }
 
-func PlayerReady(playerId int32, matchId int32) tea.Msg {
+func PlayerReady(playerId int, matchId int) tea.Msg {
 	req := PReady{
 		MatchId:  matchId,
 		PlayerId: playerId,

@@ -40,7 +40,7 @@ func GetMatchCardsForMatchId(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cards, err := q.GetMatchCards(ctx, int32(id))
+	cards, err := q.GetMatchCards(ctx, &id)
 
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)

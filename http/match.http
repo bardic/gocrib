@@ -41,6 +41,28 @@ Content-Type: application/json
     });
 %}
 
+### Get match deck
+GET {{host}}/match/{{matchId}}/cards
+	
+> {%
+    var matchIdToMatch = 1;   
+    var minNumOfMatches = 52; 
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+     client.test(`At least ${minNumOfMatches} match(es) exists`, function () {
+        client.assert(jsonPath(response.body, "@") >= `${minNumOfMatches}`, "Not enough matches");
+    });
+%}
+
 
 ### Get list of open matches
 GET {{host}}/open
@@ -82,16 +104,16 @@ Content-Type: application/json
 
     client.test("Is GameState Determine", function () {
         client.log(jsonPath(response.body, "$.Gamestate",))
-        client.assert(jsonPath(response.body, "$.Gamestate",) == "Deal", "GameState is not CutState");
+        client.assert(jsonPath(response.body, "$.Gamestate",) == "Determine", "GameState is not CutState");
     });
 %}
 
-### Get match deck
-GET {{host}}/match/{{matchId}}/cards
+
+### Determine first player
+PUT {{host}}/match/{{matchId}}/determinefirst
+Content-Type: application/json
 	
 > {%
-    var matchIdToMatch = 1;   
-    var minNumOfMatches = 52; 
 
     client.test("Test status code", function() {
         console.log("Response status: " + response.status);
@@ -103,10 +125,63 @@ GET {{host}}/match/{{matchId}}/cards
         client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
     });
 
-     client.test(`At least ${minNumOfMatches} match(es) exists`, function () {
-        client.assert(jsonPath(response.body, "@",) >= `${minNumOfMatches}`, "Not enough matches");
+    client.test(`Current Player is player ID 1`, function () {
+        client.assert(jsonPath(response.body, "$.Currentplayerturn") == `1`, "CurrentPlayerTurn is null");
     });
 %}
+
+### Deal cards to player
+PUT {{host}}/match/{{matchId}}/deal
+Content-Type: application/json
+	
+> {%
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Current Player is player ID 1`, function () {
+        client.assert(jsonPath(response.body, "$.Currentplayerturn") == `1`, "CurrentPlayerTurn is null");
+    });
+%}
+
+
+### Discard to kitty
+PUT {{host}}/match/{{matchId}}/player/{{p1accountId}}/kitty
+Content-Type: application/json
+	
+
+{
+  "cardIds": [
+    1
+  ],
+  "senderId": 1
+}
+
+
+> {%
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Current Player is player ID 1`, function () {
+        client.assert(jsonPath(response.body, "$.Currentplayerturn") == `1`, "CurrentPlayerTurn is null");
+    });
+%}
+
 
 ### Cut match deck
 PUT {{host}}/match/{{matchId}}/cut/{{cutIndex}}
@@ -122,6 +197,10 @@ Content-Type: application/json
     client.test("Response content-type is json", function () {
         var type = response.contentType.mimeType;
         client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Cutgamecardid is 30`, function () {
+        client.assert(jsonPath(response.body, "$.Cutgamecardid") == `30`,"CurrentPlayerTurn is " + jsonPath(response.body, "$.Cutgamecardid"));
     });
 %}
 

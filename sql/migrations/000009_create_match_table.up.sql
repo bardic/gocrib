@@ -27,9 +27,6 @@ CREATE TABLE IF NOT EXISTS match (
     FOREIGN KEY(deckId) 
       REFERENCES deck(id),
   cutGameCardId integer NOT NULL,
-  -- CONSTRAINT fk_matchCards
-  --   FOREIGN KEY(cutGameCardId) 
-  --     REFERENCES matchCards(id),
   currentPlayerTurn integer,
   CONSTRAINT fk_player
     FOREIGN KEY(currentPlayerTurn) 

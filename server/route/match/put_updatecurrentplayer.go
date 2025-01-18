@@ -16,26 +16,26 @@ import (
 
 // Updates the match with the index of the user selected 'cut' card
 //
-//	@Summary	Cut deck by index of card selected
+//	@Summary	Update the matches current palyer
 //	@Description
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
 //	@Param		matchId	path		int	true	"match id"
-//	@Param		cutIndex	path		int	true	"cut id"
+//	@Param		playerId	path		int	true	"playerId id"
 //	@Success	200		{object}	int
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/match/{matchId}/cut/{cutId} [put]
-func CutDeck(c echo.Context) error {
+//	@Router		/match/{matchId}/currentPlayer/{playerId} [put]
+func UpdateCurrentPLayer(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	cutIndex, err := strconv.Atoi(c.Param("cutIndex"))
+	playerId, err := strconv.Atoi(c.Param("playerId"))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -48,16 +48,10 @@ func CutDeck(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = q.UpdateMatchCut(ctx, queries.UpdateMatchCutParams{
-		ID:            &matchId,
-		Cutgamecardid: &cutIndex,
+	err = q.UpdateCurrentPlayerTurn(ctx, queries.UpdateCurrentPlayerTurnParams{
+		ID:                &matchId,
+		Currentplayerturn: &playerId,
 	})
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	err = helpers.UpdateGameState(&matchId, queries.GamestateDeal)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

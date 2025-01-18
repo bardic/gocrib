@@ -44,7 +44,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		var matchDetails vo.MatchDetailsResponse
-		msg := services.JoinMatch(lobbyModel.AccountId, int32(id))
+		msg := services.JoinMatch(lobbyModel.AccountId, int(id))
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
 
 		if err != nil {
@@ -53,7 +53,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 		return vo.StateChangeMsg{
 			NewState: vo.JoinGameView,
-			MatchId:  int32(id),
+			MatchId:  int(id),
 		}
 	case "n":
 		match := utils.CreateGame(lobbyModel.AccountId)

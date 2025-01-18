@@ -160,17 +160,17 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 
 }
 
-func getPlayerHand(playerId int32, players []*queries.Player) []int32 {
+func getPlayerHand(playerId int, players []*queries.Player) []int {
 	for _, p := range players {
 		if p.ID == playerId {
 			return p.Hand
 		}
 	}
 
-	return []int32{}
+	return []int{}
 }
 
-func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId int32, cardIds []int32) *cliVO.HandVO {
+func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId int, cardIds []int) *cliVO.HandVO {
 	gameDeck := ctrl.getGameDeck(deckId)
 
 	handModel := &cliVO.HandVO{
@@ -188,7 +188,7 @@ func (ctrl *Controller) CreateController(name string, currentState queries.Games
 			Name: name,
 		},
 		ActiveSlotIndex: 0,
-		SelectedCardIds: []int32{},
+		SelectedCardIds: []int{},
 		Deck:            handModel.Deck,
 		HandVO:          handModel,
 		State:           currentState,
@@ -210,7 +210,7 @@ func (ctrl *Controller) CreateController(name string, currentState queries.Games
 		GameMatch: ctrl.Model.(*Model).Match,
 	}
 }
-func (ctrl *Controller) getGameDeck(deckId int32) *vo.GameDeck {
+func (ctrl *Controller) getGameDeck(deckId int) *vo.GameDeck {
 	var deck *vo.GameDeck
 	resp := services.GetDeckById(deckId)
 	err := json.Unmarshal(resp.([]byte), &deck)

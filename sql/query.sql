@@ -19,9 +19,6 @@ SELECT
                     json_build_object(
                         'id', p.id,
                         'accountid', p.accountid,
-                        'play', p.play,
-                        'hand', p.hand,
-                        'kitty', p.kitty,
                         'score', p.score,
                         'isready', p.isready,
                         'art', p.art
@@ -61,9 +58,6 @@ SELECT
                     json_build_object(
                         'id', p.id,
                         'accountid', p.accountid,
-                        'play', p.play,
-                        'hand', p.hand,
-                        'kitty', p.kitty,
                         'score', p.score,
                         'isready', p.isready,
                         'art', p.art
@@ -97,9 +91,6 @@ SELECT
                     json_build_object(
                         'id', p.id,
                         'accountid', p.accountid,
-                        'play', p.play,
-                        'hand', p.hand,
-                        'kitty', p.kitty,
                         'score', p.score,
                         'isready', p.isready,
                         'art', p.art
@@ -175,12 +166,6 @@ LEFT JOIN
 WHERE
     deck.id IN ($1);
 
--- name: UpdateCardsPlayed :exec
-UPDATE player SET play = play + $1 where id = $2;
-
--- name: RemoveCardsFromHand :exec
-UPDATE player SET hand = hand - $1 where id = $2;
-
 -- name: GetMatchIdForPlayerId :one 
 SELECT 
     match_player.*,
@@ -199,14 +184,11 @@ SELECT player.* FROM player WHERE id=$1 LIMIT 1;
 
 -- name: UpdatePlayer :one
 UPDATE player SET 
-		hand = $1, 
-		play = $2, 
-		kitty = $3, 
-		score = $4, 
-		isReady = $5,
-		art = $6 
+		score = $1, 
+		isReady = $2,
+		art = $3 
 	WHERE 
-		id = $7
+		id = $4
     RETURNING *;
 
 -- name: CreateMatch :one
@@ -233,9 +215,6 @@ INSERT INTO match(
 -- name: CreatePlayer :one
 INSERT INTO player (
 			accountid,
-			hand,
-			play,
-			kitty,
 			score,
 			isready,
 			art
@@ -243,10 +222,7 @@ INSERT INTO player (
 			$1,
 			$2,
 			$3,
-			$4,
-			$5,
-			$6,
-			$7
+			$4
 		)
 		RETURNING *;
 
@@ -255,9 +231,6 @@ SELECT currentplayerturn FROM match WHERE id = $1 LIMIT 1;
 
 -- name: UpdatePlayerReady :exec
 UPDATE player SET isReady = $1 WHERE id = $2;
-
--- name: UpdateKitty :exec
-UPDATE player SET kitty = kitty + $1 where id = $2;
 
 -- name: UpdateMatchWithDeckId :exec
 UPDATE match SET deckid = $1 where id = $2;
@@ -285,3 +258,19 @@ INSERT INTO deck_matchcard (deckid, matchcardid) VALUES ($1, $2);
 
 -- name: UpdateCurrentPlayerTurn :exec
 UPDATE match SET currentplayerturn = $1 WHERE id = $2;
+
+-- -- name: RemoveCardFromDeck :exec
+-- DELETE FROM deck_matchcard WHERE deckid = $1 AND matchcardid = $2;
+
+-- name: GetPlayersInMatch :many
+SELECT 
+    player.*
+FROM
+    player
+LEFT JOIN
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1;  
+
+-- name: UpdateMatchCardState :exec
+UPDATE matchcard SET state = $1, origowner = $2, currowner = $3 WHERE id = $4;

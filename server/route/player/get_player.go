@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/server/controller"
+	"github.com/bardic/gocrib/queries/queries"
+	conn "github.com/bardic/gocrib/server/db"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,8 +32,12 @@ func GetPlayer(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
+	ctx := c.Request().Context()
 
-	p, err := controller.GetPlayerById(int32(p1Id))
+	p, err := q.GetPlayer(ctx, &p1Id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

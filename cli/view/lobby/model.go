@@ -6,6 +6,6 @@ import (
 
 type Model struct {
 	cliVO.ViewModel
-	ActiveMatchId int32
-	AccountId     int32
+	ActiveMatchId *int
+	AccountId     *int
 }

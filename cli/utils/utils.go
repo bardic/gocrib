@@ -20,7 +20,7 @@ import (
 
 var Logger *zap.Logger
 
-func GetCardById(id int32, deck *vo.GameDeck) *vo.GameCard {
+func GetCardById(id *int, deck *vo.GameDeck) *vo.GameCard {
 	for _, card := range deck.Cards {
 		gameCard := &vo.GameCard{
 			Matchcard: card.Matchcard,
@@ -34,8 +34,8 @@ func GetCardById(id int32, deck *vo.GameDeck) *vo.GameCard {
 	return nil
 }
 
-func GetIdsFromCards(c []queries.Card) []int32 {
-	ids := []int32{}
+func GetIdsFromCards(c []queries.Card) []*int {
+	ids := []*int{}
 	for _, card := range c {
 		ids = append(ids, card.ID)
 	}
@@ -43,7 +43,7 @@ func GetIdsFromCards(c []queries.Card) []int32 {
 	return ids
 }
 
-func GetCardInHandById(id int32, hand []queries.Card) queries.Card {
+func GetCardInHandById(id *int, hand []queries.Card) queries.Card {
 	idx := slices.IndexFunc(hand, func(c queries.Card) bool {
 		return c.ID == id
 	})
@@ -63,7 +63,7 @@ func NewLogger() (*zap.Logger, error) {
 	return cfg.Build()
 }
 
-func GetPlayerByAccountId(accountId int32, players []*queries.Player) (*queries.Player, error) {
+func GetPlayerByAccountId(accountId *int, players []*queries.Player) (*queries.Player, error) {
 	for _, p := range players {
 		if p.Accountid == accountId {
 			return p, nil
@@ -72,7 +72,7 @@ func GetPlayerByAccountId(accountId int32, players []*queries.Player) (*queries.
 	return nil, errors.New("no player found")
 }
 
-func CreateGame(accountId int32) vo.MatchDetailsResponse {
+func CreateGame(accountId *int) vo.MatchDetailsResponse {
 	newMatch := services.PostPlayerMatch(accountId).([]byte)
 
 	var matchDetails vo.MatchDetailsResponse
@@ -81,7 +81,7 @@ func CreateGame(accountId int32) vo.MatchDetailsResponse {
 	return matchDetails
 }
 
-func GetPlayerForAccountId(id int32, match *vo.GameMatch) *queries.Player {
+func GetPlayerForAccountId(id *int, match *vo.GameMatch) *queries.Player {
 	for _, player := range match.Players {
 		if player.Accountid == id {
 			return player
@@ -91,8 +91,8 @@ func GetPlayerForAccountId(id int32, match *vo.GameMatch) *queries.Player {
 	return nil
 }
 
-func GetVisibleCards(activeTab int, player queries.Player) []int32 {
-	var cards []int32
+func GetVisibleCards(activeTab int, player queries.Player) []*int {
+	var cards []*int
 	switch activeTab {
 	case 0:
 		cards = nil
@@ -113,7 +113,7 @@ func BuildCommonFooter(activePlayerId, localPlayerId, matchId int, gameState que
 	return f
 }
 
-func IsPlayerTurn(playerId, matchId int32) bool {
+func IsPlayerTurn(playerId, matchId int) bool {
 	return playerId == matchId
 }
 
@@ -139,12 +139,13 @@ const (
 	Empty  PegState = "○"
 )
 
-func DrawRow(players []*queries.Player, pegsToDraw, scoreOffet int) string {
+func DrawRow(players []*queries.Player, pegsToDraw, scoreOffet *int) string {
 	viewBuilder := strings.Builder{}
 	for _, player := range players {
 		viewBuilder.WriteString("\n")
-		for i := range pegsToDraw {
-			if i+scoreOffet == int(player.Score) {
+
+		for i := range *pegsToDraw {
+			if i+*scoreOffet == *player.Score {
 				viewBuilder.WriteString(string(Filled))
 			} else {
 				viewBuilder.WriteString(string(Empty))
@@ -153,7 +154,7 @@ func DrawRow(players []*queries.Player, pegsToDraw, scoreOffet int) string {
 	}
 
 	viewBuilder.WriteString("\n")
-	for range pegsToDraw {
+	for range *pegsToDraw {
 		viewBuilder.WriteString("-")
 	}
 
@@ -189,8 +190,8 @@ func RenderTabs(tabs []cliVO.Tab, activeTab int) []string {
 	return renderedTabs
 }
 
-func GetPlayerIds(players []*queries.Player) []int32 {
-	var playIds []int32
+func GetPlayerIds(players []*queries.Player) []*int {
+	var playIds []*int
 	for _, p := range players {
 		playIds = append(playIds, p.Play...)
 	}

@@ -8,3 +8,12 @@ sql:
         package: "queries"
         out: "queries"
         sql_package: "pgx/v5"
+        overrides:
+          - db_type: "pg_catalog.int4"
+            nullable: true
+            go_type:
+              type:  "*int"
+          - db_type: "pg_catalog.int4"
+            nullable: false
+            go_type:
+              type:  "*int"

@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/server/controller"
+	"github.com/bardic/gocrib/queries/queries"
 	"github.com/labstack/echo/v4"
+
+	conn "github.com/bardic/gocrib/server/db"
 )
 
 // Returns the deck for a match id
@@ -28,7 +30,13 @@ func GetDeckByMatchId(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	deck, err := controller.GetDeckByMatchId(int32(id))
+	db := conn.Pool()
+	defer db.Close()
+	q := queries.New(db)
+	ctx := c.Request().Context()
+
+	deck, err := q.GetDeckForMatchId(ctx, &id)
+	//deck, err := controller.GetDeckByMatchId(&id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

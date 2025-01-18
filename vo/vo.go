@@ -18,8 +18,8 @@ type GameCard struct {
 }
 
 type GameCardDetails struct {
-	Value int
-	Order int
+	Value *int
+	Order *int
 }
 
 type GameActionType int
@@ -32,33 +32,34 @@ const (
 )
 
 type GameAction struct {
-	MatchId  int
+	MatchId  *int
 	Type     GameActionType
-	CardsIds []int
+	CardsIds []*int
 }
 
 //_Comms_
 
 type MatchRequirements struct {
-	AccountId   int32
+	AccountId   *int
 	IsPrivate   bool
-	EloRangeMin int32
-	EloRangeMax int32
+	EloRangeMin *int
+	EloRangeMax *int
 }
 
 type CutDeckReq struct {
-	MatchId  int32
+	MatchId  *int
 	CutIndex string
 }
 
 type MatchDetailsResponse struct {
-	MatchId   int32
-	PlayerId  int32
+	MatchId   *int
+	PlayerId  *int
 	GameState queries.Gamestate
 }
 
 type HandModifier struct {
-	CardIds []int32
+	SenderId *int
+	CardIds  []*int
 }
 
 type ScoreResults struct {
@@ -67,7 +68,7 @@ type ScoreResults struct {
 
 type Scores struct {
 	Cards []GameCard
-	Point int
+	Point *int
 }
 
 type ViewStateName uint
@@ -95,32 +96,32 @@ const (
 
 type StateChangeMsg struct {
 	NewState  ViewStateName
-	AccountId int32
-	MatchId   int32
+	AccountId *int
+	MatchId   *int
 }
 
 type GameStateChangeMsg struct {
 	NewState queries.Gamestate
-	PlayerId int32
-	MatchId  int32
+	PlayerId *int
+	MatchId  *int
 }
 
 type ChangeTabMsg struct {
-	TabIndex int
+	TabIndex *int
 }
 
 type UIFooterVO struct {
-	ActivePlayerId int32
-	MatchId        int32
+	ActivePlayerId *int
+	MatchId        *int
 	GameState      queries.Gamestate
-	LocalPlayerID  int32
+	LocalPlayerID  *int
 }
 
 type PlayerReady struct {
-	MatchId  int32 // MatchId
-	PlayerId int32 // PlayerId
+	MatchId  *int // MatchId
+	PlayerId *int // PlayerId
 }
 
 type Kitty struct {
-	Cards []int32
+	Cards []*int
 }

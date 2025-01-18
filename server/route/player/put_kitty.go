@@ -55,34 +55,24 @@ func UpdateKitty(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = q.UpdateKitty(ctx, queries.UpdateKittyParams{
-		ID:    int32(playerId),
-		Kitty: details.CardIds,
+	q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
+		ID:        &matchId,
+		State:     queries.CardstateKitty,
+		Origowner: &playerId,
+		Currowner: &playerId,
 	})
 
-	if err != nil {
-		return err
-	}
-	err = q.RemoveCardsFromHand(ctx, queries.RemoveCardsFromHandParams{
-		ID:   int32(playerId),
-		Hand: details.CardIds,
-	})
-
-	if err != nil {
-		return err
-	}
-
-	m, err := helpers.GetMatch(matchId)
+	err = helpers.UpdateGameState(&matchId, queries.GamestateCut)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = helpers.UpdateGameState(m.ID, queries.GamestateCut)
+	m, err := helpers.GetMatch(&matchId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, nil)
+	return c.JSON(http.StatusOK, m)
 }

@@ -23,7 +23,7 @@ type IController interface {
 }
 
 type IView interface {
-	Render(hand []int32) string
+	Render(hand []int) string
 	Init()
 	BuildHeader() string
 	BuildFooter() string
@@ -36,8 +36,8 @@ type IHandView interface {
 }
 
 type HandVO struct {
-	LocalPlayerID int32
-	CardIds       []int32
+	LocalPlayerID int
+	CardIds       []int
 	Deck          *vo.GameDeck
 }
 

@@ -18,7 +18,7 @@ type View struct {
 	cutInput      textinput.Model
 	isLoading     bool
 	State         queries.Gamestate
-	LocalPlayerId int32
+	LocalPlayerId int
 	Match         *vo.GameMatch
 }
 
@@ -40,7 +40,7 @@ func (view *View) Init() {
 	view.isLoading = false
 }
 
-func (view *View) Render(hand []int32) string {
+func (view *View) Render(hand []int) string {
 	if view.isLoading {
 		return "Loading..."
 	}
@@ -73,7 +73,7 @@ func (view *View) BuildHeader() string {
 
 func (view *View) BuildFooter() string {
 	f := utils.BuildCommonFooter(
-		int(view.Match.Currentplayerturn.Int32),
+		int(view.Match.Currentplayerturn.int),
 		int(view.LocalPlayerId),
 		int(view.Match.ID),
 		view.Match.Gamestate,

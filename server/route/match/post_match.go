@@ -16,6 +16,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var (
+	Zero = 0
+)
+
 // Create godoc
 //
 //	@Summary	Create new match
@@ -55,10 +59,10 @@ func NewMatch(c echo.Context) error {
 
 	m, err := q.CreateMatch(ctx, queries.CreateMatchParams{
 		Privatematch:       false,
-		Elorangemin:        0,
-		Elorangemax:        0,
+		Elorangemin:        &Zero,
+		Elorangemax:        &Zero,
 		Deckid:             deck.ID,
-		Cutgamecardid:      0,
+		Cutgamecardid:      &Zero,
 		Turnpasstimestamps: []pgtype.Timestamptz{},
 		Gamestate:          queries.GamestateNew,
 		Art:                "default.png",
@@ -94,7 +98,7 @@ func NewMatch(c echo.Context) error {
 		}
 	}
 
-	p, err := player.NewPlayerQuery(m.ID, int32(accountId))
+	p, err := player.NewPlayerQuery(m.ID, &accountId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

@@ -18,7 +18,7 @@ func (view *View) Init() {
 
 }
 
-func (view *View) Render(hand []int32) string {
+func (view *View) Render(hand []int) string {
 	doc := strings.Builder{}
 	renderedTabs := utils.RenderTabs(view.Tabs, view.ActiveTab)
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))

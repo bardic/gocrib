@@ -10,13 +10,6 @@ definitions:
     - Infinity
     - Finite
     - NegativeInfinity
-  pgtype.Int4:
-    properties:
-      int32:
-        type: integer
-      valid:
-        type: boolean
-    type: object
   pgtype.Timestamptz:
     properties:
       infinityModifier:
@@ -103,7 +96,7 @@ definitions:
   queries.Deck:
     properties:
       cutmatchcardid:
-        $ref: '#/definitions/pgtype.Int4'
+        type: integer
       id:
         type: integer
     type: object
@@ -164,7 +157,7 @@ definitions:
       creationdate:
         $ref: '#/definitions/pgtype.Timestamptz'
       currentplayerturn:
-        $ref: '#/definitions/pgtype.Int4'
+        type: integer
       cutgamecardid:
         type: integer
       deckid:
@@ -189,11 +182,11 @@ definitions:
       cardid:
         type: integer
       currowner:
-        $ref: '#/definitions/pgtype.Int4'
+        type: integer
       id:
         type: integer
       origowner:
-        $ref: '#/definitions/pgtype.Int4'
+        type: integer
       state:
         $ref: '#/definitions/queries.Cardstate'
     type: object
@@ -203,22 +196,10 @@ definitions:
         type: integer
       art:
         type: string
-      hand:
-        items:
-          type: integer
-        type: array
       id:
         type: integer
       isready:
         type: boolean
-      kitty:
-        items:
-          type: integer
-        type: array
-      play:
-        items:
-          type: integer
-        type: array
       score:
         type: integer
     type: object
@@ -229,11 +210,11 @@ definitions:
       cardid:
         type: integer
       currowner:
-        $ref: '#/definitions/pgtype.Int4'
+        type: integer
       id:
         type: integer
       origowner:
-        $ref: '#/definitions/pgtype.Int4'
+        type: integer
       state:
         $ref: '#/definitions/queries.Cardstate'
       suit:
@@ -248,7 +229,7 @@ definitions:
           $ref: '#/definitions/vo.GameCard'
         type: array
       cutmatchcardid:
-        $ref: '#/definitions/pgtype.Int4'
+        type: integer
       id:
         type: integer
     type: object
@@ -259,7 +240,7 @@ definitions:
       creationdate:
         $ref: '#/definitions/pgtype.Timestamptz'
       currentplayerturn:
-        $ref: '#/definitions/pgtype.Int4'
+        type: integer
       cutgamecardid:
         type: integer
       deckid:
@@ -289,6 +270,8 @@ definitions:
         items:
           type: integer
         type: array
+      senderId:
+        type: integer
     type: object
   vo.MatchDetailsResponse:
     properties:
@@ -451,6 +434,40 @@ paths:
       summary: Get match card by match id
       tags:
       - match
+  /match/{matchId}/currentPlayer/{playerId}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: playerId id
+        in: path
+        name: playerId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update the matches current palyer
+      tags:
+      - match
   /match/{matchId}/cut/{cutId}:
     put:
       consumes:
@@ -483,6 +500,64 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: Cut deck by index of card selected
+      tags:
+      - match
+  /match/{matchId}/deal:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/vo.MatchDetailsResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Join match by id
+      tags:
+      - match
+  /match/{matchId}/determinefirst/:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/vo.MatchDetailsResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Join match by id
       tags:
       - match
   /match/{matchId}/join/{accountId}:

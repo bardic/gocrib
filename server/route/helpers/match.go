@@ -11,7 +11,7 @@ import (
 	"github.com/bardic/gocrib/vo"
 )
 
-func UpdateGameState(matchId int32, state queries.Gamestate) error {
+func UpdateGameState(matchId *int, state queries.Gamestate) error {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -28,7 +28,7 @@ func UpdateGameState(matchId int32, state queries.Gamestate) error {
 	return nil
 }
 
-func GetMatch(id int) (*vo.GameMatch, error) {
+func GetMatch(id *int) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -36,7 +36,7 @@ func GetMatch(id int) (*vo.GameMatch, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	m, err := q.GetMatchById(ctx, int32(id))
+	m, err := q.GetMatchById(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func GetOpenMatches() ([]queries.Match, error) {
 	return matches, nil
 }
 
-func CreateGameDeck(matchId int32) (*vo.GameDeck, error) {
+func CreateGameDeck(matchId *int) (*vo.GameDeck, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -124,7 +124,9 @@ func CreateGameDeck(matchId int32) (*vo.GameDeck, error) {
 	}
 
 	gameDeck := &vo.GameDeck{
-		Deck:  &deck,
+		Deck: &queries.Deck{
+			ID: deck.ID,
+		},
 		Cards: matchcards,
 	}
 

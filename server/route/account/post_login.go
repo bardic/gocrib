@@ -25,7 +25,7 @@ import (
 //	@Failure	500		{object}	error
 //	@Router		/account/login/ [post]
 func Login(c echo.Context) error {
-	id := new(int32)
+	id := new(int)
 	if err := c.Bind(id); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
@@ -37,7 +37,7 @@ func Login(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	a, err := q.GetAccount(ctx, *id)
+	a, err := q.GetAccount(ctx, id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

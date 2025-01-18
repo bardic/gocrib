@@ -12,7 +12,7 @@ func (c *CribService) golang() *dagger.Container {
 
 func (c *CribService) sqlc(src *dagger.Directory) *dagger.Container {
 	g := c.golang()
-	g = g.WithExec([]string{"go", "install", "github.com/sqlc-dev/sqlc/cmd/sqlc@latest"})
+	g = g.WithExec([]string{"go", "install", "github.com/sqlc-dev/sqlc/cmd/sqlc@v1.27.0"})
 	g = g.WithDirectory("/src", src.Directory("sql"))
 	return g.
 		WithWorkdir("/src").

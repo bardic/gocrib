@@ -101,13 +101,13 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 	return nil
 }
 
-func (ctrl *Controller) updateActiveSlotIndex(delta int32) {
+func (ctrl *Controller) updateActiveSlotIndex(delta int) {
 	cardModel := ctrl.Model.(*Model)
 	cardModel.ActiveSlotIndex += delta
 
 	if cardModel.ActiveSlotIndex < 0 {
-		cardModel.ActiveSlotIndex = int32(len(cardModel.CardIds)) - 1
-	} else if cardModel.ActiveSlotIndex > int32(len(cardModel.CardIds))-1 {
+		cardModel.ActiveSlotIndex = int(len(cardModel.CardIds)) - 1
+	} else if cardModel.ActiveSlotIndex > int(len(cardModel.CardIds))-1 {
 		cardModel.ActiveSlotIndex = 0
 	}
 }
