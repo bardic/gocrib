@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS match_player (
   matchId integer NOT NULL,
   playerId integer NOT NULL,
+  turnOrder integer,
   PRIMARY KEY (matchId, playerId),
   CONSTRAINT fk_match
     FOREIGN KEY(matchId) 

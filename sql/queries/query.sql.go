@@ -41,7 +41,7 @@ INSERT INTO match(
 				$6,
 				$7,
 				$8)
-			RETURNING id, creationdate, privatematch, elorangemin, elorangemax, deckid, cutgamecardid, currentplayerturn, turnpasstimestamps, gamestate, art
+			RETURNING id, creationdate, privatematch, elorangemin, elorangemax, deckid, cutgamecardid, dealerid, currentplayerturn, turnpasstimestamps, gamestate, art
 `
 
 type CreateMatchParams struct {
@@ -75,6 +75,7 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) (Match
 		&i.Elorangemax,
 		&i.Deckid,
 		&i.Cutgamecardid,
+		&i.Dealerid,
 		&i.Currentplayerturn,
 		&i.Turnpasstimestamps,
 		&i.Gamestate,
@@ -192,6 +193,59 @@ func (q *Queries) GetCards(ctx context.Context) ([]Card, error) {
 	return items, nil
 }
 
+const getCardsForPlayerAndDeck = `-- name: GetCardsForPlayerAndDeck :many
+SELECT
+    card.id, card.value, card.suit, card.art,
+    matchcard.state 
+FROM
+    card
+LEFT JOIN
+    matchcard ON card.id=matchcard.cardid
+LEFT JOIN
+    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
+WHERE
+    deck_matchcard.deckid = $1 AND matchcard.origowner = $2
+`
+
+type GetCardsForPlayerAndDeckParams struct {
+	Deckid    *int
+	Origowner *int
+}
+
+type GetCardsForPlayerAndDeckRow struct {
+	ID    *int
+	Value Cardvalue
+	Suit  Cardsuit
+	Art   string
+	State NullCardstate
+}
+
+func (q *Queries) GetCardsForPlayerAndDeck(ctx context.Context, arg GetCardsForPlayerAndDeckParams) ([]GetCardsForPlayerAndDeckRow, error) {
+	rows, err := q.db.Query(ctx, getCardsForPlayerAndDeck, arg.Deckid, arg.Origowner)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCardsForPlayerAndDeckRow
+	for rows.Next() {
+		var i GetCardsForPlayerAndDeckRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Value,
+			&i.Suit,
+			&i.Art,
+			&i.State,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCurrentPlayerTurn = `-- name: GetCurrentPlayerTurn :one
 SELECT currentplayerturn FROM match WHERE id = $1 LIMIT 1
 `
@@ -201,6 +255,30 @@ func (q *Queries) GetCurrentPlayerTurn(ctx context.Context, id *int) (*int, erro
 	var currentplayerturn *int
 	err := row.Scan(&currentplayerturn)
 	return currentplayerturn, err
+}
+
+const getDealerForMatchId = `-- name: GetDealerForMatchId :one
+SELECT 
+    player.id, player.accountid, player.score, player.isready, player.art
+FROM
+    player
+LEFT JOIN
+    match ON player.id=match.dealerid
+WHERE
+    match.id = $1
+`
+
+func (q *Queries) GetDealerForMatchId(ctx context.Context, id *int) (Player, error) {
+	row := q.db.QueryRow(ctx, getDealerForMatchId, id)
+	var i Player
+	err := row.Scan(
+		&i.ID,
+		&i.Accountid,
+		&i.Score,
+		&i.Isready,
+		&i.Art,
+	)
+	return i, err
 }
 
 const getDeckForMatchId = `-- name: GetDeckForMatchId :one
@@ -217,6 +295,53 @@ func (q *Queries) GetDeckForMatchId(ctx context.Context, id *int) (Deck, error) 
 	return i, err
 }
 
+const getMarchCardsByType = `-- name: GetMarchCardsByType :many
+
+SELECT 
+    matchcard.id, matchcard.cardid, matchcard.origowner, matchcard.currowner, matchcard.state
+FROM
+    matchcard
+LEFT JOIN
+    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    match ON deck.id=match.deckid
+WHERE
+    match.id = $1 AND matchcard.state = $2
+`
+
+type GetMarchCardsByTypeParams struct {
+	ID    *int
+	State Cardstate
+}
+
+func (q *Queries) GetMarchCardsByType(ctx context.Context, arg GetMarchCardsByTypeParams) ([]Matchcard, error) {
+	rows, err := q.db.Query(ctx, getMarchCardsByType, arg.ID, arg.State)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Matchcard
+	for rows.Next() {
+		var i Matchcard
+		if err := rows.Scan(
+			&i.ID,
+			&i.Cardid,
+			&i.Origowner,
+			&i.Currowner,
+			&i.State,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getMatchById = `-- name: GetMatchById :one
 SELECT
     json_build_object(
@@ -227,6 +352,7 @@ SELECT
         'eloRangeMax', eloRangeMax,
         'deckid', deckid,
         'cutgamecardid', cutgamecardid,
+        'dealerid', dealerid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
         'gameState', gameState,
@@ -273,6 +399,7 @@ SELECT
         'eloRangeMax', eloRangeMax,
         'deckid', deckid,
         'cutgamecardid', cutgamecardid,
+        'dealerid', dealerid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
         'gameState', gameState,
@@ -365,8 +492,8 @@ func (q *Queries) GetMatchCards(ctx context.Context, id *int) ([]GetMatchCardsRo
 
 const getMatchIdForPlayerId = `-- name: GetMatchIdForPlayerId :one
 SELECT 
-    match_player.matchid, match_player.playerid,
-    match.id, match.creationdate, match.privatematch, match.elorangemin, match.elorangemax, match.deckid, match.cutgamecardid, match.currentplayerturn, match.turnpasstimestamps, match.gamestate, match.art,
+    match_player.matchid, match_player.playerid, match_player.turnorder,
+    match.id, match.creationdate, match.privatematch, match.elorangemin, match.elorangemax, match.deckid, match.cutgamecardid, match.dealerid, match.currentplayerturn, match.turnpasstimestamps, match.gamestate, match.art,
     player.id, player.accountid, player.score, player.isready, player.art
 FROM 
     match_player
@@ -380,6 +507,7 @@ WHERE $1 = match_player.playerId LIMIT 1
 type GetMatchIdForPlayerIdRow struct {
 	Matchid            *int
 	Playerid           *int
+	Turnorder          *int
 	ID                 *int
 	Creationdate       pgtype.Timestamptz
 	Privatematch       bool
@@ -387,6 +515,7 @@ type GetMatchIdForPlayerIdRow struct {
 	Elorangemax        *int
 	Deckid             *int
 	Cutgamecardid      *int
+	Dealerid           *int
 	Currentplayerturn  *int
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
@@ -404,6 +533,7 @@ func (q *Queries) GetMatchIdForPlayerId(ctx context.Context, playerid *int) (Get
 	err := row.Scan(
 		&i.Matchid,
 		&i.Playerid,
+		&i.Turnorder,
 		&i.ID,
 		&i.Creationdate,
 		&i.Privatematch,
@@ -411,6 +541,7 @@ func (q *Queries) GetMatchIdForPlayerId(ctx context.Context, playerid *int) (Get
 		&i.Elorangemax,
 		&i.Deckid,
 		&i.Cutgamecardid,
+		&i.Dealerid,
 		&i.Currentplayerturn,
 		&i.Turnpasstimestamps,
 		&i.Gamestate,
@@ -424,6 +555,145 @@ func (q *Queries) GetMatchIdForPlayerId(ctx context.Context, playerid *int) (Get
 	return i, err
 }
 
+const getMatchPlayerOrdered = `-- name: GetMatchPlayerOrdered :many
+SELECT 
+    player.id, player.accountid, player.score, player.isready, player.art,
+    match_player.turnOrder
+FROM
+    player
+LEFT JOIN
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1
+ORDER BY
+    match_player.turnOrder ASC
+`
+
+type GetMatchPlayerOrderedRow struct {
+	ID        *int
+	Accountid *int
+	Score     *int
+	Isready   bool
+	Art       string
+	Turnorder *int
+}
+
+func (q *Queries) GetMatchPlayerOrdered(ctx context.Context, matchid *int) ([]GetMatchPlayerOrderedRow, error) {
+	rows, err := q.db.Query(ctx, getMatchPlayerOrdered, matchid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMatchPlayerOrderedRow
+	for rows.Next() {
+		var i GetMatchPlayerOrderedRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Accountid,
+			&i.Score,
+			&i.Isready,
+			&i.Art,
+			&i.Turnorder,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getMatchPlayersByMatchId = `-- name: GetMatchPlayersByMatchId :many
+SELECT 
+    player.id, player.accountid, player.score, player.isready, player.art,
+    match_player.turnorder 
+FROM
+    player
+LEFT JOIN   
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1
+`
+
+type GetMatchPlayersByMatchIdRow struct {
+	ID        *int
+	Accountid *int
+	Score     *int
+	Isready   bool
+	Art       string
+	Turnorder *int
+}
+
+func (q *Queries) GetMatchPlayersByMatchId(ctx context.Context, matchid *int) ([]GetMatchPlayersByMatchIdRow, error) {
+	rows, err := q.db.Query(ctx, getMatchPlayersByMatchId, matchid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMatchPlayersByMatchIdRow
+	for rows.Next() {
+		var i GetMatchPlayersByMatchIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Accountid,
+			&i.Score,
+			&i.Isready,
+			&i.Art,
+			&i.Turnorder,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getNextPlayerInTurnOrder = `-- name: GetNextPlayerInTurnOrder :one
+
+SELECT 
+    player.id, player.accountid, player.score, player.isready, player.art,
+    match_player.turnorder
+FROM
+    player
+LEFT JOIN
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1 AND match_player.turnorder = $2 + 1
+`
+
+type GetNextPlayerInTurnOrderParams struct {
+	Matchid *int
+	Column2 interface{}
+}
+
+type GetNextPlayerInTurnOrderRow struct {
+	ID        *int
+	Accountid *int
+	Score     *int
+	Isready   bool
+	Art       string
+	Turnorder *int
+}
+
+func (q *Queries) GetNextPlayerInTurnOrder(ctx context.Context, arg GetNextPlayerInTurnOrderParams) (GetNextPlayerInTurnOrderRow, error) {
+	row := q.db.QueryRow(ctx, getNextPlayerInTurnOrder, arg.Matchid, arg.Column2)
+	var i GetNextPlayerInTurnOrderRow
+	err := row.Scan(
+		&i.ID,
+		&i.Accountid,
+		&i.Score,
+		&i.Isready,
+		&i.Art,
+		&i.Turnorder,
+	)
+	return i, err
+}
+
 const getOpenMatches = `-- name: GetOpenMatches :many
 SELECT
     json_build_object(
@@ -433,7 +703,9 @@ SELECT
         'eloRangeMin', eloRangeMin,
         'eloRangeMax', eloRangeMax,
         'deckid', deckid,
+        'dealerid', dealerid,
         'cutgamecardid', cutgamecardid,
+        'dealerid', dealerid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
         'gameState', gameState,
@@ -498,8 +770,56 @@ func (q *Queries) GetPlayer(ctx context.Context, id *int) (Player, error) {
 	return i, err
 }
 
-const getPlayersInMatch = `-- name: GetPlayersInMatch :many
+const getPlayerById = `-- name: GetPlayerById :one
+SELECT 	
+	p.id, p.accountid, p.score, p.isready, p.art,
+	array(	
+		(select m.cardid from 
+		matchcard m where
+		m.currowner=1 and m.state='Hand'
+		)) as hand,
+	array(	
+		(select m.cardid from 
+		matchcard m where
+		m.currowner=1 and m.state='Play'
+		)) as board,
+	array(	
+		(select m.cardid from 
+		matchcard m where
+		m.currowner=$1 and m.state='Kitty'
+		)) as kitty
+FROM player as p
+WHERE p.id=$1
+`
 
+type GetPlayerByIdRow struct {
+	ID        *int
+	Accountid *int
+	Score     *int
+	Isready   bool
+	Art       string
+	Hand      interface{}
+	Board     interface{}
+	Kitty     interface{}
+}
+
+func (q *Queries) GetPlayerById(ctx context.Context, currowner *int) (GetPlayerByIdRow, error) {
+	row := q.db.QueryRow(ctx, getPlayerById, currowner)
+	var i GetPlayerByIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.Accountid,
+		&i.Score,
+		&i.Isready,
+		&i.Art,
+		&i.Hand,
+		&i.Board,
+		&i.Kitty,
+	)
+	return i, err
+}
+
+const getPlayersInMatch = `-- name: GetPlayersInMatch :many
 SELECT 
     player.id, player.accountid, player.score, player.isready, player.art
 FROM
@@ -510,8 +830,6 @@ WHERE
     match_player.matchid = $1
 `
 
-// -- name: RemoveCardFromDeck :exec
-// DELETE FROM deck_matchcard WHERE deckid = $1 AND matchcardid = $2;
 func (q *Queries) GetPlayersInMatch(ctx context.Context, matchid *int) ([]Player, error) {
 	rows, err := q.db.Query(ctx, getPlayersInMatch, matchid)
 	if err != nil {
@@ -589,6 +907,23 @@ func (q *Queries) PassTurn(ctx context.Context, arg PassTurnParams) error {
 	return err
 }
 
+const resetDeckState = `-- name: ResetDeckState :exec
+UPDATE matchcard m SET state = 'Deck', origowner = null, currowner = null FROM matchcard
+LEFT JOIN 
+    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    match ON deck.id=match.deckid
+WHERE
+    match.id = $1
+`
+
+func (q *Queries) ResetDeckState(ctx context.Context, id *int) error {
+	_, err := q.db.Exec(ctx, resetDeckState, id)
+	return err
+}
+
 const updateAccount = `-- name: UpdateAccount :exec
 UPDATE match SET cutGameCardId = $2 where id=$1
 `
@@ -617,8 +952,22 @@ func (q *Queries) UpdateCurrentPlayerTurn(ctx context.Context, arg UpdateCurrent
 	return err
 }
 
+const updateDealerForMatch = `-- name: UpdateDealerForMatch :exec
+UPDATE match SET dealerid = $1 WHERE id = $2
+`
+
+type UpdateDealerForMatchParams struct {
+	Dealerid *int
+	ID       *int
+}
+
+func (q *Queries) UpdateDealerForMatch(ctx context.Context, arg UpdateDealerForMatchParams) error {
+	_, err := q.db.Exec(ctx, updateDealerForMatch, arg.Dealerid, arg.ID)
+	return err
+}
+
 const updateGameState = `-- name: UpdateGameState :one
-UPDATE match SET gameState= $1 WHERE id=$2 RETURNING id, creationdate, privatematch, elorangemin, elorangemax, deckid, cutgamecardid, currentplayerturn, turnpasstimestamps, gamestate, art
+UPDATE match SET gameState= $1 WHERE id=$2 RETURNING id, creationdate, privatematch, elorangemin, elorangemax, deckid, cutgamecardid, dealerid, currentplayerturn, turnpasstimestamps, gamestate, art
 `
 
 type UpdateGameStateParams struct {
@@ -637,6 +986,7 @@ func (q *Queries) UpdateGameState(ctx context.Context, arg UpdateGameStateParams
 		&i.Elorangemax,
 		&i.Deckid,
 		&i.Cutgamecardid,
+		&i.Dealerid,
 		&i.Currentplayerturn,
 		&i.Turnpasstimestamps,
 		&i.Gamestate,
@@ -653,11 +1003,12 @@ UPDATE match SET
 	eloRangeMax = $4,
 	deckId = $5,
 	cutGameCardId = $6,
-	currentPlayerTurn = $7,
-	turnPassTimestamps = $8,
-	gameState= $9,
-	art = $10
-WHERE id=$11
+    dealerId = $7,
+	currentPlayerTurn = $8,
+	turnPassTimestamps = $9,
+	gameState= $10,
+	art = $11
+WHERE id=$12
 `
 
 type UpdateMatchParams struct {
@@ -667,6 +1018,7 @@ type UpdateMatchParams struct {
 	Elorangemax        *int
 	Deckid             *int
 	Cutgamecardid      *int
+	Dealerid           *int
 	Currentplayerturn  *int
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
@@ -682,6 +1034,7 @@ func (q *Queries) UpdateMatch(ctx context.Context, arg UpdateMatchParams) error 
 		arg.Elorangemax,
 		arg.Deckid,
 		arg.Cutgamecardid,
+		arg.Dealerid,
 		arg.Currentplayerturn,
 		arg.Turnpasstimestamps,
 		arg.Gamestate,
@@ -802,5 +1155,21 @@ type UpdatePlayerReadyParams struct {
 
 func (q *Queries) UpdatePlayerReady(ctx context.Context, arg UpdatePlayerReadyParams) error {
 	_, err := q.db.Exec(ctx, updatePlayerReady, arg.Isready, arg.ID)
+	return err
+}
+
+const updatePlayerTurnOrder = `-- name: UpdatePlayerTurnOrder :exec
+
+UPDATE match_player SET turnorder = $1 WHERE matchid = $2 AND playerid = $3
+`
+
+type UpdatePlayerTurnOrderParams struct {
+	Turnorder *int
+	Matchid   *int
+	Playerid  *int
+}
+
+func (q *Queries) UpdatePlayerTurnOrder(ctx context.Context, arg UpdatePlayerTurnOrderParams) error {
+	_, err := q.db.Exec(ctx, updatePlayerTurnOrder, arg.Turnorder, arg.Matchid, arg.Playerid)
 	return err
 }

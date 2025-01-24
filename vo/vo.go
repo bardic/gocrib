@@ -122,6 +122,6 @@ type PlayerReady struct {
 	PlayerId *int // PlayerId
 }
 
-type Kitty struct {
-	Cards []*int
+type Hand struct {
+	Cards []queries.Matchcard
 }

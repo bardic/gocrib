@@ -2,14 +2,13 @@ package player
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
 
 	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/route/helpers"
 
 	"github.com/bardic/gocrib/vo"
 
@@ -52,32 +51,38 @@ func UpdatePlay(c echo.Context) error {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
+	ctx := context.Background()
 
-	//TODO
-	//m, err := controller.UpdatePlay(matchId, playerId, *details)
+	// Udpate cards to play state
 
 	for _, cardId := range details.CardIds {
-		q.UpdateMatchCardState(context.Background(), queries.UpdateMatchCardStateParams{
+		q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
 			State:     queries.CardstatePlay,
 			Origowner: &playerId,
-			Currowner: &playerId,
+			Currowner: nil,
 			ID:        cardId,
 		})
 	}
 
-	err = helpers.UpdateGameState(&matchId, queries.GamestatePassTurn)
+	//Pass player turn
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+	orderedPlayers, err := q.GetMatchPlayerOrdered(ctx, &matchId)
+
+	for i, player := range orderedPlayers {
+		if *player.ID == playerId {
+			playerIndex := i
+			nextPlayer := orderedPlayers[(playerIndex+1)%len(orderedPlayers)]
+			err := q.UpdateCurrentPlayerTurn(ctx, queries.UpdateCurrentPlayerTurnParams{
+				ID:                &matchId,
+				Currentplayerturn: nextPlayer.ID,
+			})
+
+			if err != nil {
+				fmt.Println(err)
+			}
+			break
+		}
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err = q.PassTurn(ctx, queries.PassTurnParams{
-		Matchid:  &matchId,
-		Playerid: &playerId,
-	})
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -85,7 +90,7 @@ func UpdatePlay(c echo.Context) error {
 
 	match, err := q.UpdateGameState(ctx, queries.UpdateGameStateParams{
 		ID:        &matchId,
-		Gamestate: queries.GamestateDeal,
+		Gamestate: queries.GamestatePassTurn,
 	})
 
 	if err != nil {

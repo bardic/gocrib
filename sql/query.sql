@@ -8,6 +8,7 @@ SELECT
         'eloRangeMax', eloRangeMax,
         'deckid', deckid,
         'cutgamecardid', cutgamecardid,
+        'dealerid', dealerid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
         'gameState', gameState,
@@ -47,6 +48,7 @@ SELECT
         'eloRangeMax', eloRangeMax,
         'deckid', deckid,
         'cutgamecardid', cutgamecardid,
+        'dealerid', dealerid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
         'gameState', gameState,
@@ -79,7 +81,9 @@ SELECT
         'eloRangeMin', eloRangeMin,
         'eloRangeMax', eloRangeMax,
         'deckid', deckid,
+        'dealerid', dealerid,
         'cutgamecardid', cutgamecardid,
+        'dealerid', dealerid,
         'currentplayerturn', currentplayerturn,
         'turnpasstimestamps', turnpasstimestamps,
         'gameState', gameState,
@@ -132,11 +136,12 @@ UPDATE match SET
 	eloRangeMax = $4,
 	deckId = $5,
 	cutGameCardId = $6,
-	currentPlayerTurn = $7,
-	turnPassTimestamps = $8,
-	gameState= $9,
-	art = $10
-WHERE id=$11;
+    dealerId = $7,
+	currentPlayerTurn = $8,
+	turnPassTimestamps = $9,
+	gameState= $10,
+	art = $11
+WHERE id=$12;
 
 -- name: UpdateMatchState :exec
 UPDATE match SET
@@ -259,9 +264,6 @@ INSERT INTO deck_matchcard (deckid, matchcardid) VALUES ($1, $2);
 -- name: UpdateCurrentPlayerTurn :exec
 UPDATE match SET currentplayerturn = $1 WHERE id = $2;
 
--- -- name: RemoveCardFromDeck :exec
--- DELETE FROM deck_matchcard WHERE deckid = $1 AND matchcardid = $2;
-
 -- name: GetPlayersInMatch :many
 SELECT 
     player.*
@@ -274,3 +276,117 @@ WHERE
 
 -- name: UpdateMatchCardState :exec
 UPDATE matchcard SET state = $1, origowner = $2, currowner = $3 WHERE id = $4;
+
+-- name: GetMatchPlayerOrdered :many
+SELECT 
+    player.*,
+    match_player.turnOrder
+FROM
+    player
+LEFT JOIN
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1
+ORDER BY
+    match_player.turnOrder ASC;
+
+-- name: GetCardsForPlayerAndDeck :many
+SELECT
+    card.*,
+    matchcard.state 
+FROM
+    card
+LEFT JOIN
+    matchcard ON card.id=matchcard.cardid
+LEFT JOIN
+    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
+WHERE
+    deck_matchcard.deckid = $1 AND matchcard.origowner = $2;
+
+-- name: GetDealerForMatchId :one  
+SELECT 
+    player.*
+FROM
+    player
+LEFT JOIN
+    match ON player.id=match.dealerid
+WHERE
+    match.id = $1;
+
+-- name: UpdateDealerForMatch :exec
+UPDATE match SET dealerid = $1 WHERE id = $2;
+
+-- name: GetPlayerById :one
+SELECT 	
+	p.*,
+	array(	
+		(select m.cardid from 
+		matchcard m where
+		m.currowner=1 and m.state='Hand'
+		)) as hand,
+	array(	
+		(select m.cardid from 
+		matchcard m where
+		m.currowner=1 and m.state='Play'
+		)) as board,
+	array(	
+		(select m.cardid from 
+		matchcard m where
+		m.currowner=$1 and m.state='Kitty'
+		)) as kitty
+FROM player as p
+WHERE p.id=$1;
+
+-- name: GetMarchCardsByType :many
+
+SELECT 
+    matchcard.*
+FROM
+    matchcard
+LEFT JOIN
+    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    match ON deck.id=match.deckid
+WHERE
+    match.id = $1 AND matchcard.state = $2;
+
+-- name: ResetDeckState :exec
+UPDATE matchcard m SET state = 'Deck', origowner = null, currowner = null FROM matchcard
+LEFT JOIN 
+    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    match ON deck.id=match.deckid
+WHERE
+    match.id = $1;
+
+
+-- name: GetMatchPlayersByMatchId :many
+SELECT 
+    player.*,
+    match_player.turnorder 
+FROM
+    player
+LEFT JOIN   
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1;
+    
+-- name: UpdatePlayerTurnOrder :exec
+
+UPDATE match_player SET turnorder = $1 WHERE matchid = $2 AND playerid = $3;
+
+-- name: GetNextPlayerInTurnOrder :one
+
+SELECT 
+    player.*,
+    match_player.turnorder
+FROM
+    player
+LEFT JOIN
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1 AND match_player.turnorder = $2 + 1;

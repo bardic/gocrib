@@ -63,7 +63,6 @@ GET {{host}}/match/{{matchId}}/cards
     });
 %}
 
-
 ### Get list of open matches
 GET {{host}}/open
 
@@ -108,7 +107,6 @@ Content-Type: application/json
     });
 %}
 
-
 ### Determine first player
 PUT {{host}}/match/{{matchId}}/determinefirst
 Content-Type: application/json
@@ -151,19 +149,16 @@ Content-Type: application/json
     });
 %}
 
-
-### Discard to kitty
+### P1 discard to kitty
 PUT {{host}}/match/{{matchId}}/player/{{p1accountId}}/kitty
 Content-Type: application/json
-	
 
 {
   "cardIds": [
-    1
+    1,2
   ],
   "senderId": 1
 }
-
 
 > {%
 
@@ -176,9 +171,50 @@ Content-Type: application/json
         var type = response.contentType.mimeType;
         client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
     });
+%}
 
-    client.test(`Current Player is player ID 1`, function () {
-        client.assert(jsonPath(response.body, "$.Currentplayerturn") == `1`, "CurrentPlayerTurn is null");
+### P2 discard to kitty
+PUT {{host}}/match/{{matchId}}/player/{{p1accountId}}/kitty
+Content-Type: application/json
+
+{
+  "cardIds": [
+    7,8
+  ],
+  "senderId": 2
+}
+
+> {%
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+### Count playre P1 Kitty
+GET {{host}}/match/{{matchId}}/deck/kitty
+Content-Type: application/json
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("P1 score is 0", function () {
+        
+        client.assert(jsonPath(response.body, "$.Cards.size()",) == "4", "There are too mant cards! " + jsonPath(response.body, "$.Cards.size()",));
     });
 %}
 
@@ -202,5 +238,241 @@ Content-Type: application/json
     client.test(`Cutgamecardid is 30`, function () {
         client.assert(jsonPath(response.body, "$.Cutgamecardid") == `30`,"CurrentPlayerTurn is " + jsonPath(response.body, "$.Cutgamecardid"));
     });
+%}  
+
+### P1 play card and passes turn
+PUT {{host}}/match/{{matchId}}/player/{{p1accountId}}/play 
+Content-Type: application/json
+	
+> {%
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Current Player Turn is player ID 2`, function () {
+        client.assert(jsonPath(response.body, "$.Currentplayerturn") == `2`, "CurrentPlayerTurn is null");
+    });
+
+    client.test("Is GameState PassTurn", function () {
+        client.log(jsonPath(response.body, "$.Gamestate",))
+        client.assert(jsonPath(response.body, "$.Gamestate",) == "PassTurn", "GameState is not CutState");
+    });
+    
 %}
 
+### Player 1 should have score of 0
+GET {{host}}/match/{{matchId}}
+Content-Type: application/json
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("P1 score is 0", function () {
+        
+        client.assert(jsonPath(response.body, "$.Players[0].Score",) == "0", "GameState is not New");
+    });
+%}
+
+
+### P2 play card and passes turn
+PUT {{host}}/match/{{matchId}}/player/{{p2accountId}}/play 
+Content-Type: application/json
+	
+> {%
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Current Player Turn is player ID 1`, function () {
+        client.assert(jsonPath(response.body, "$.Currentplayerturn") == `1`, "CurrentPlayerTurn is null");
+    });
+
+    client.test("Is GameState PassTurn", function () {
+        client.log(jsonPath(response.body, "$.Gamestate",))
+        client.assert(jsonPath(response.body, "$.Gamestate",) == "PassTurn", "GameState is not CutState");
+    });
+    
+%}
+
+## Count points in  play
+
+### Player 2 should have score of 0
+GET {{host}}/match/{{matchId}}
+Content-Type: application/json
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("P1 score is 0", function () {
+        
+        client.assert(jsonPath(response.body, "$.Players[1].Score",) == "0", "GameState is not New");
+    });
+%}
+
+##Count Kitty
+
+
+### Count playre P1 Kitty
+GET {{host}}/match/{{matchId}}/deck/kitty
+Content-Type: application/json
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("P1 score is 0", function () {
+        
+        client.assert(jsonPath(response.body, "$.Cards.size()",) == "4", "There are too mant cards! " + jsonPath(response.body, "$.Cards.size()",));
+    });
+%}
+
+
+### Return all cards to deck
+
+PUT {{host}}/match/{{matchId}}/deck/shuffle
+Content-Type: application/json
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("P1 score is 0", function () {
+        client.assert(jsonPath(response.body, "$.Cards.size()",) == "52", "There are too mant cards! " + jsonPath(response.body, "$.Cards.size()",));
+    });
+%}
+
+
+### Pass turn
+
+PUT {{host}}/match/{{matchId}}/pass
+Content-Type: application/json
+
+> {%
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+ 
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test("P1 score is 0", function () {
+       client.assert(jsonPath(response.body, "$.Gamestate",) == "Deal", "GameState is " + jsonPath(response.body, "$.Gamestate",));
+    });
+%}
+
+
+### Deal cards to player
+PUT {{host}}/match/{{matchId}}/deal
+Content-Type: application/json
+	
+> {%
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+
+    client.test(`Current Player is player ID 2`, function () {
+        client.assert(jsonPath(response.body, "$.Currentplayerturn") == `2`, "CurrentPlayerTurn is " + jsonPath(response.body, "$.Currentplayerturn"));
+    });
+%}
+
+### P1 discard to kitty
+PUT {{host}}/match/{{matchId}}/player/{{p1accountId}}/kitty
+Content-Type: application/json
+
+{
+  "cardIds": [
+    1,2
+  ],
+  "senderId": 1
+}
+
+> {%
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}
+
+### P1 discard to kitty
+PUT {{host}}/match/{{matchId}}/player/{{p1accountId}}/kitty
+Content-Type: application/json
+
+{
+  "cardIds": [
+    7,8
+  ],
+  "senderId": 2
+}
+
+> {%
+
+    client.test("Test status code", function() {
+        console.log("Response status: " + response.status);
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Response content-type is json", function () {
+        var type = response.contentType.mimeType;
+        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+    });
+%}

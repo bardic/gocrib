@@ -63,7 +63,7 @@ func Deal(c echo.Context) error {
 
 	for i := 0; i < numOfPlayers; i++ {
 		for j := 0; j < cardsToDealPerPlayer; j++ {
-			card := cards[i*j]
+			card := cards[(i*cardsToDealPerPlayer)+j]
 			q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
 				State:     queries.CardstateHand,
 				Origowner: players[i].ID,

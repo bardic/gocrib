@@ -156,20 +156,19 @@ func (ns NullCardvalue) Value() (driver.Value, error) {
 type Gamestate string
 
 const (
-	GamestateNew          Gamestate = "New"
-	GamestateWaiting      Gamestate = "Waiting"
-	GamestateReady        Gamestate = "Ready"
-	GamestateDetermine    Gamestate = "Determine"
-	GamestateDeal         Gamestate = "Deal"
-	GamestateDiscard      Gamestate = "Discard"
-	GamestateCut          Gamestate = "Cut"
-	GamestatePlayOwn      Gamestate = "PlayOwn"
-	GamestatePlayOpponent Gamestate = "PlayOpponent"
-	GamestatePassTurn     Gamestate = "PassTurn"
-	GamestateCount        Gamestate = "Count"
-	GamestateKitty        Gamestate = "Kitty"
-	GamestateWon          Gamestate = "Won"
-	GamestateLost         Gamestate = "Lost"
+	GamestateNew       Gamestate = "New"
+	GamestateWaiting   Gamestate = "Waiting"
+	GamestateReady     Gamestate = "Ready"
+	GamestateDetermine Gamestate = "Determine"
+	GamestateDeal      Gamestate = "Deal"
+	GamestateDiscard   Gamestate = "Discard"
+	GamestateCut       Gamestate = "Cut"
+	GamestatePlay      Gamestate = "Play"
+	GamestatePassTurn  Gamestate = "PassTurn"
+	GamestateCount     Gamestate = "Count"
+	GamestateKitty     Gamestate = "Kitty"
+	GamestateWon       Gamestate = "Won"
+	GamestateLost      Gamestate = "Lost"
 )
 
 func (e *Gamestate) Scan(src interface{}) error {
@@ -237,6 +236,7 @@ type Match struct {
 	Elorangemax        *int
 	Deckid             *int
 	Cutgamecardid      *int
+	Dealerid           *int
 	Currentplayerturn  *int
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          Gamestate
@@ -244,8 +244,9 @@ type Match struct {
 }
 
 type MatchPlayer struct {
-	Matchid  *int
-	Playerid *int
+	Matchid   *int
+	Playerid  *int
+	Turnorder *int
 }
 
 type Matchcard struct {

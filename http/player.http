@@ -4,57 +4,23 @@
 @matchId = 1
 @cutIndex = "30"
 
-### Get player by id
-
-GET {{host}}/match/{{matchId}}/player/{{playerId}}
-Content-Type: application/json
+### Get list of open matches
+GET {{host}}/open
 
 > {%
+    var minNumOfMatches = 1;    
+
     client.test("Test status code", function() {
         console.log("Response status: " + response.status);
         client.assert(response.status === 200, "Response status is not 200");
     });
- 
+
     client.test("Response content-type is json", function () {
         var type = response.contentType.mimeType;
         client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
     });
-%}
 
-### Ready player to start match
-
-PUT {{host}}/match/{{matchId}}/player/{{playerId}}/ready
-Content-Type: application/json
-
-> {%
-    client.test("Test status code", function() {
-        console.log("Response status: " + response.status);
-        client.assert(response.status === 200, "Response status is not 200");
-    });
- 
-    client.test("Response content-type is json", function () {
-        var type = response.contentType.mimeType;
-        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
-    });
-%}
-
-### Play a card
-
-PUT {{host}}/match/{{matchId}}/player/{{playerId}}/play
-Content-Type: application/json
-
-{
-    "cardIds": [1]
-}
-
-> {%
-    client.test("Test status code", function() {
-        console.log("Response status: " + response.status);
-        client.assert(response.status === 200, "Response status is not 200");
-    });
- 
-    client.test("Response content-type is json", function () {
-        var type = response.contentType.mimeType;
-        client.assert(type === "application/json", "Expected 'application/json' but received '" + type + "'");
+     client.test(`At least ${minNumOfMatches} match(es) exists`, function () {
+        client.assert(jsonPath(response.body, "@",) >= `${minNumOfMatches}`, "Not enough matches");
     });
 %}

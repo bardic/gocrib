@@ -407,6 +407,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/match/{matchId}/deck/kitty": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "GetKitty",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Hand"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{matchId}/deck/shuffle": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deck"
+                ],
+                "summary": "PutSHuffle",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.Hand"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/match/{matchId}/determinefirst/": {
             "put": {
                 "consumes": [
@@ -474,6 +560,49 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "account id",
                         "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.MatchDetailsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/match/{matchId}/pass": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Join match by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
                         "in": "path",
                         "required": true
                     }
@@ -855,8 +984,7 @@ const docTemplate = `{
                 "Deal",
                 "Discard",
                 "Cut",
-                "PlayOwn",
-                "PlayOpponent",
+                "Play",
                 "PassTurn",
                 "Count",
                 "Kitty",
@@ -871,8 +999,7 @@ const docTemplate = `{
                 "GamestateDeal",
                 "GamestateDiscard",
                 "GamestateCut",
-                "GamestatePlayOwn",
-                "GamestatePlayOpponent",
+                "GamestatePlay",
                 "GamestatePassTurn",
                 "GamestateCount",
                 "GamestateKitty",
@@ -910,6 +1037,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "cutgamecardid": {
+                    "type": "integer"
+                },
+                "dealerid": {
                     "type": "integer"
                 },
                 "deckid": {
@@ -1039,6 +1169,9 @@ const docTemplate = `{
                 "cutgamecardid": {
                     "type": "integer"
                 },
+                "dealerid": {
+                    "type": "integer"
+                },
                 "deckid": {
                     "type": "integer"
                 },
@@ -1067,6 +1200,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/pgtype.Timestamptz"
+                    }
+                }
+            }
+        },
+        "vo.Hand": {
+            "type": "object",
+            "properties": {
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/queries.Matchcard"
                     }
                 }
             }
