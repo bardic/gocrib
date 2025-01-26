@@ -190,19 +190,6 @@ definitions:
       state:
         $ref: '#/definitions/queries.Cardstate'
     type: object
-  queries.Player:
-    properties:
-      accountid:
-        type: integer
-      art:
-        type: string
-      id:
-        type: integer
-      isready:
-        type: boolean
-      score:
-        type: integer
-    type: object
   vo.GameCard:
     properties:
       art:
@@ -257,7 +244,7 @@ definitions:
         type: integer
       players:
         items:
-          $ref: '#/definitions/queries.Player'
+          $ref: '#/definitions/vo.GamePlayer'
         type: array
       privatematch:
         type: boolean
@@ -265,6 +252,31 @@ definitions:
         items:
           $ref: '#/definitions/pgtype.Timestamptz'
         type: array
+    type: object
+  vo.GamePlayer:
+    properties:
+      accountid:
+        type: integer
+      art:
+        type: string
+      hand:
+        items:
+          $ref: '#/definitions/queries.Matchcard'
+        type: array
+      id:
+        type: integer
+      isready:
+        type: boolean
+      kitty:
+        items:
+          $ref: '#/definitions/queries.Matchcard'
+        type: array
+      play:
+        items:
+          $ref: '#/definitions/queries.Matchcard'
+        type: array
+      score:
+        type: integer
     type: object
   vo.Hand:
     properties:
@@ -334,32 +346,6 @@ paths:
       summary: Login
       tags:
       - account
-  /deck/:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for deck by match id
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.GameDeck'
-        "404":
-          description: Not Found
-          schema: {}
-        "422":
-          description: Unprocessable Entity
-          schema: {}
-      summary: Get deck by match id
-      tags:
-      - deck
   /match/{accountId}:
     post:
       consumes:
@@ -540,6 +526,32 @@ paths:
       summary: Join match by id
       tags:
       - match
+  /match/{matchId}/deck/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for deck by match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/vo.GameDeck'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get deck by match id
+      tags:
+      - deck
   /match/{matchId}/deck/kitty:
     get:
       consumes:
@@ -711,7 +723,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/queries.Player'
+            $ref: '#/definitions/vo.GamePlayer'
         "400":
           description: Bad Request
           schema: {}

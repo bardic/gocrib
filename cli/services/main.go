@@ -22,11 +22,11 @@ const (
 	EndPointMatch                = BaseUrl + "/match"
 	EndPointMatchState           = BaseUrl + "/match/%s/state"
 	EndPointJoinMatch            = BaseUrl + "/match/%v/join/%v"
-	EndPointOpenMatch            = BaseUrl + "/match/%s/open"
+	EndPointOpenMatch            = BaseUrl + "/open"
 	EndPointMatchCard            = BaseUrl + "/match/%s/card"
 	EndPointGameplayCardsByMatch = BaseUrl + "/match/%s/cards?id=%s"
 	EndPointMatchCutDeck         = BaseUrl + "/match/%s/cut"
-	EndPointDeckById             = BaseUrl + "/match/%s/deck?id=%s"
+	EndPointDeckById             = BaseUrl + "/match/%s/deck"
 	//Deck
 	EndPointDeck = BaseUrl + "/deck"
 	//Account

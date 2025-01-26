@@ -96,7 +96,7 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cli.matchId = msg.MatchId
 			msg.AccountId = cli.account.ID //TODO fix this later
 
-			resp := services.GetPlayerMatch(msg.MatchId)
+			resp := services.GetPlayerMatch(msg.AccountId)
 			err := json.Unmarshal(resp.([]byte), &match)
 			if err != nil {
 				utils.Logger.Sugar().Error(err)

@@ -33,7 +33,7 @@ func (view *View) Render(hand []int) string {
 		c := utils.GetCardById(hand[i], view.Deck)
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Value)
 		styledCard := styles.ModelStyle.Render(cardStr)
-		if slices.Index(view.SelectedCardIds, c.Matchcard.Cardid) > -1 {
+		if slices.Index(view.SelectedCardIds, *c.Matchcard.Cardid) > -1 {
 			if int(i) == view.ActiveCardId {
 				styledCard = styles.SelectedFocusedStyle.Render(cardStr)
 			} else {
@@ -60,9 +60,9 @@ func (view *View) BuildHeader() string {
 
 func (view *View) BuildFooter() string {
 	f := utils.BuildCommonFooter(
-		int(view.ActivePlayerId),
-		int(view.LocalPlayerID),
-		int(view.MatchId),
+		view.ActivePlayerId,
+		view.LocalPlayerID,
+		view.MatchId,
 		view.GameState,
 	)
 

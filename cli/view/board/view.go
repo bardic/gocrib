@@ -18,7 +18,7 @@ type View struct {
 	cutInput      textinput.Model
 	isLoading     bool
 	State         queries.Gamestate
-	LocalPlayerId int
+	LocalPlayerId *int
 	Match         *vo.GameMatch
 }
 
@@ -73,9 +73,9 @@ func (view *View) BuildHeader() string {
 
 func (view *View) BuildFooter() string {
 	f := utils.BuildCommonFooter(
-		int(view.Match.Currentplayerturn.int),
-		int(view.LocalPlayerId),
-		int(view.Match.ID),
+		view.Match.Currentplayerturn,
+		view.LocalPlayerId,
+		view.Match.ID,
 		view.Match.Gamestate,
 	)
 	return f

@@ -6,6 +6,7 @@ import (
 	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/utils"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -30,14 +31,16 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 	cardView.ActiveCardId = ctrl.Model.(*Model).ActiveSlotIndex
 	cardView.SelectedCardIds = ctrl.Model.(*Model).SelectedCardIds
 
+	localPlayerId := 0
+
 	cardView.UIFooterVO = &vo.UIFooterVO{
 		ActivePlayerId: gameMatch.Players[0].ID,
 		MatchId:        gameMatch.Match.ID,
 		GameState:      gameMatch.Match.Gamestate,
-		LocalPlayerID:  0,
+		LocalPlayerID:  &localPlayerId,
 	}
 
-	return cardView.Render(gameMatch.Players[0].Hand)
+	return cardView.Render(utils.IdFromCards(gameMatch.Players[0].Hand))
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
@@ -68,26 +71,8 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 				// PlayerId: cardModel.LocalPlayerID,
 				CardIds: cardModel.SelectedCardIds,
 			})
-		case queries.GamestatePlayOwn:
-			//todo pass down from CLI if player is creator
-			services.PutPlay(vo.HandModifier{
-				// MatchId:  ctrl.ID,
-				// PlayerId: cardModel.LocalPlayerID,
-				CardIds: cardModel.SelectedCardIds,
-			})
-		case queries.GamestatePlayOpponent:
-			//todo pass down from CLI if player is opponent
-
-			if cardModel.LocalPlayerID != ctrl.Players[0].ID {
-				break
-			}
-
-			services.PutPlay(vo.HandModifier{
-				// MatchId:  ctrl.ID,
-				// PlayerId: cardModel.LocalPlayerID,
-				CardIds: cardModel.SelectedCardIds,
-			})
-
+		case queries.GamestatePlay:
+			services.PutPlay(vo.HandModifier{})
 		}
 	}
 

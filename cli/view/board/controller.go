@@ -31,7 +31,13 @@ func (ctrl *Controller) Init() {
 }
 
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
-	return ctrl.View.Render(gameMatch.Players[0].Hand)
+	ids := []int{}
+
+	for _, card := range gameMatch.Players[0].Hand {
+		ids = append(ids, *card.Cardid)
+	}
+
+	return ctrl.View.Render(ids)
 }
 
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
@@ -54,7 +60,7 @@ func (ctrl *Controller) Enter() tea.Msg {
 	switch boardModel.GameMatch.Gamestate {
 	case queries.GamestateCut:
 		boardModel.CutIndex = boardView.cutInput.Value()
-		resp := services.CutDeck(boardModel.GameMatch.ID, boardModel.CutIndex)
+		resp := services.CutDeck(*boardModel.GameMatch.ID, boardModel.CutIndex)
 		services.PlayerReady(boardModel.LocalPlayerId, boardModel.GameMatch.ID)
 		return resp
 	}

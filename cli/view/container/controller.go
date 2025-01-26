@@ -30,7 +30,13 @@ func (ctrl *Controller) Init() {
 
 func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
 	containerModel := ctrl.Model.(*Model)
-	containerHeader := ctrl.View.Render(gamematch.Players[0].Hand)
+
+	cardIds := []int{}
+	for _, card := range gamematch.Players[0].Hand {
+		cardIds = append(cardIds, *card.Cardid)
+	}
+
+	containerHeader := ctrl.View.Render(cardIds)
 	viewRender := containerModel.Subview.Render(gamematch)
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
@@ -102,7 +108,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 func (ctrl *Controller) ChangeTab(tabIndex int) {
 	containerModel := ctrl.Model.(*Model)
-	deckId := containerModel.Match.Deckid
+	// deckId := containerModel.Match.Deckid
 
 	hand := getPlayerHand(containerModel.LocalPlayer.ID, containerModel.Match.Players)
 
@@ -129,9 +135,9 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			"Play",
 			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
-				containerModel.LocalPlayer.ID,
-				deckId,
-				containerModel.LocalPlayer.Play,
+				*containerModel.LocalPlayer.ID,
+				*containerModel.Match.ID,
+				utils.IdFromCards(containerModel.LocalPlayer.Play),
 			),
 		)
 	case 2:
@@ -139,8 +145,8 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			"Hand",
 			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
-				containerModel.LocalPlayer.ID,
-				deckId,
+				*containerModel.LocalPlayer.ID,
+				*containerModel.Match.ID,
 				hand, //THIS IS THE WRONG PLAYER~!!!!!
 			),
 		)
@@ -149,9 +155,9 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			"Kitty",
 			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
-				containerModel.LocalPlayer.ID,
-				deckId,
-				containerModel.LocalPlayer.Kitty,
+				*containerModel.LocalPlayer.ID,
+				*containerModel.Match.ID,
+				utils.IdFromCards(containerModel.LocalPlayer.Kitty),
 			),
 		)
 	}
@@ -160,18 +166,18 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 
 }
 
-func getPlayerHand(playerId int, players []*queries.Player) []int {
+func getPlayerHand(playerId *int, players []vo.GamePlayer) []int {
 	for _, p := range players {
 		if p.ID == playerId {
-			return p.Hand
+			return utils.IdFromCards(p.Hand)
 		}
 	}
 
 	return []int{}
 }
 
-func (ctrl *Controller) getHandModelForCardIds(localPlayerId, deckId int, cardIds []int) *cliVO.HandVO {
-	gameDeck := ctrl.getGameDeck(deckId)
+func (ctrl *Controller) getHandModelForCardIds(localPlayerId, matchId int, cardIds []int) *cliVO.HandVO {
+	gameDeck := ctrl.getGameDeckForMatchId(matchId)
 
 	handModel := &cliVO.HandVO{
 		LocalPlayerID: localPlayerId,
@@ -210,9 +216,9 @@ func (ctrl *Controller) CreateController(name string, currentState queries.Games
 		GameMatch: ctrl.Model.(*Model).Match,
 	}
 }
-func (ctrl *Controller) getGameDeck(deckId int) *vo.GameDeck {
+func (ctrl *Controller) getGameDeckForMatchId(matchId int) *vo.GameDeck {
 	var deck *vo.GameDeck
-	resp := services.GetDeckById(deckId)
+	resp := services.GetDeckByMatchId(matchId)
 	err := json.Unmarshal(resp.([]byte), &deck)
 	if err != nil {
 		utils.Logger.Sugar().Error(err)

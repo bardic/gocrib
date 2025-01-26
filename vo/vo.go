@@ -2,9 +2,16 @@ package vo
 
 import "github.com/bardic/gocrib/queries/queries"
 
+type GamePlayer struct {
+	queries.Player
+	Hand  []queries.Matchcard
+	Play  []queries.Matchcard
+	Kitty []queries.Matchcard
+}
+
 type GameMatch struct {
 	queries.Match
-	Players []*queries.Player
+	Players []GamePlayer
 }
 
 type GameDeck struct {
@@ -59,7 +66,7 @@ type MatchDetailsResponse struct {
 
 type HandModifier struct {
 	SenderId *int
-	CardIds  []*int
+	CardIds  []int
 }
 
 type ScoreResults struct {
@@ -107,7 +114,7 @@ type GameStateChangeMsg struct {
 }
 
 type ChangeTabMsg struct {
-	TabIndex *int
+	TabIndex int
 }
 
 type UIFooterVO struct {

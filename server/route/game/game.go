@@ -27,7 +27,7 @@ var (
 	Fourteen int = 14
 )
 
-func cardsInPlay(players []*queries.Player) []*int {
+func cardsInPlay(players []vo.GamePlayer) []*int {
 	cardIds := []*int{}
 	// for _, p := range players {
 	// 	cardIds = append(cardIds, p.Hand...)

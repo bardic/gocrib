@@ -57,7 +57,7 @@ func UpdateKitty(c echo.Context) error {
 
 	for _, cardId := range details.CardIds {
 		q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
-			ID:        cardId,
+			ID:        &cardId,
 			State:     queries.CardstateKitty,
 			Origowner: &playerId,
 			Currowner: &playerId,

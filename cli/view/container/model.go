@@ -1,8 +1,6 @@
 package container
 
 import (
-	"github.com/bardic/gocrib/queries/queries"
-
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 )
@@ -14,6 +12,6 @@ type Model struct {
 	States      []vo.ViewState
 	Match       *vo.GameMatch
 	Subview     cliVO.IController
-	LocalPlayer *queries.Player
+	LocalPlayer vo.GamePlayer
 	ActiveTab   int
 }

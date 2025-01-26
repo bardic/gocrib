@@ -18,7 +18,7 @@ func GetPlayerMatchState(matchId *int) tea.Msg {
 
 func GetPlayerMatch(matchId *int) tea.Msg {
 	id := strconv.Itoa(*matchId)
-	return url(EndPointMatch+"/?id="+id, http.MethodGet, "")
+	return url(EndPointMatch+"/"+id, http.MethodGet, "")
 }
 
 func GetOpenMatches() tea.Msg {
@@ -32,16 +32,16 @@ func JoinMatch(accountId, activeMatchId int) tea.Msg {
 }
 
 func PostPlayerMatch(accountId *int) tea.Msg {
-	eloRangeMin := 1
-	eloRangeMax := 3000
-	req := vo.MatchRequirements{
-		AccountId:   accountId,
-		IsPrivate:   false,
-		EloRangeMin: &eloRangeMin,
-		EloRangeMax: &eloRangeMax,
-	}
+	// eloRangeMin := 1
+	// eloRangeMax := 3000
+	// // req := vo.MatchRequirements{
+	// // 	AccountId:   accountId,
+	// // 	IsPrivate:   false,
+	// // 	EloRangeMin: &eloRangeMin,
+	// // 	EloRangeMax: &eloRangeMax,
+	// // }
 
-	return sendReq(EndPointMatch, http.MethodPost, req)
+	return sendReq(EndPointMatch+"/"+strconv.Itoa(*accountId), http.MethodPost, nil)
 }
 
 func CutDeck(matchId int, cutIndex string) tea.Msg {

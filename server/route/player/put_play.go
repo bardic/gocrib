@@ -60,7 +60,7 @@ func UpdatePlay(c echo.Context) error {
 			State:     queries.CardstatePlay,
 			Origowner: &playerId,
 			Currowner: nil,
-			ID:        cardId,
+			ID:        &cardId,
 		})
 	}
 

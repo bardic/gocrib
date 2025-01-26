@@ -10,8 +10,8 @@ import (
 )
 
 type PReady struct {
-	MatchId  int
-	PlayerId int
+	MatchId  *int
+	PlayerId *int
 }
 
 func GetPlayer(playerId int) tea.Msg {
@@ -47,7 +47,7 @@ func DeletePlayer(ids []int) tea.Msg {
 	return url(EndPointPlayer, http.MethodDelete, "")
 }
 
-func PlayerReady(playerId int, matchId int) tea.Msg {
+func PlayerReady(playerId, matchId *int) tea.Msg {
 	req := PReady{
 		MatchId:  matchId,
 		PlayerId: playerId,

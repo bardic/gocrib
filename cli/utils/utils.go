@@ -20,14 +20,14 @@ import (
 
 var Logger *zap.Logger
 
-func GetCardById(id *int, deck *vo.GameDeck) *vo.GameCard {
+func GetCardById(id int, deck *vo.GameDeck) *vo.GameCard {
 	for _, card := range deck.Cards {
 		gameCard := &vo.GameCard{
 			Matchcard: card.Matchcard,
 			Card:      card.Card,
 		}
 
-		if card.Matchcard.Cardid == id {
+		if *card.Matchcard.Cardid == id {
 			return gameCard
 		}
 	}
@@ -81,33 +81,33 @@ func CreateGame(accountId *int) vo.MatchDetailsResponse {
 	return matchDetails
 }
 
-func GetPlayerForAccountId(id *int, match *vo.GameMatch) *queries.Player {
+func GetPlayerForAccountId(id *int, match *vo.GameMatch) *vo.GamePlayer {
 	for _, player := range match.Players {
 		if player.Accountid == id {
-			return player
+			return &player
 		}
 	}
 
 	return nil
 }
 
-func GetVisibleCards(activeTab int, player queries.Player) []*int {
-	var cards []*int
-	switch activeTab {
-	case 0:
-		cards = nil
-	case 1:
-		cards = player.Play
-	case 2:
-		cards = player.Hand
-	case 3:
-		cards = player.Kitty
-	}
+// func GetVisibleCards(activeTab int, player queries.Player) []*int {
+// 	var cards []*int
+// 	switch activeTab {
+// 	case 0:
+// 		cards = nil
+// 	case 1:
+// 		cards = player.Play
+// 	case 2:
+// 		cards = player.Hand
+// 	case 3:
+// 		cards = player.Kitty
+// 	}
 
-	return cards
-}
+// 	return cards
+// }
 
-func BuildCommonFooter(activePlayerId, localPlayerId, matchId int, gameState queries.Gamestate) string {
+func BuildCommonFooter(activePlayerId, localPlayerId, matchId *int, gameState queries.Gamestate) string {
 	f := fmt.Sprintf("\nState: %v | Local/Active Player : %v/%v | Match ID: %v ", gameState, localPlayerId, activePlayerId, matchId)
 	f += "\ntab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
 	return f
@@ -139,13 +139,13 @@ const (
 	Empty  PegState = "○"
 )
 
-func DrawRow(players []*queries.Player, pegsToDraw, scoreOffet *int) string {
+func DrawRow(players []vo.GamePlayer, pegsToDraw, scoreOffet int) string {
 	viewBuilder := strings.Builder{}
 	for _, player := range players {
 		viewBuilder.WriteString("\n")
 
-		for i := range *pegsToDraw {
-			if i+*scoreOffet == *player.Score {
+		for i := range pegsToDraw {
+			if i+scoreOffet == *player.Score {
 				viewBuilder.WriteString(string(Filled))
 			} else {
 				viewBuilder.WriteString(string(Empty))
@@ -154,7 +154,7 @@ func DrawRow(players []*queries.Player, pegsToDraw, scoreOffet *int) string {
 	}
 
 	viewBuilder.WriteString("\n")
-	for range *pegsToDraw {
+	for range pegsToDraw {
 		viewBuilder.WriteString("-")
 	}
 
@@ -190,10 +190,19 @@ func RenderTabs(tabs []cliVO.Tab, activeTab int) []string {
 	return renderedTabs
 }
 
-func GetPlayerIds(players []*queries.Player) []*int {
+func GetPlayerIds(players []vo.GamePlayer) []*int {
 	var playIds []*int
 	for _, p := range players {
-		playIds = append(playIds, p.Play...)
+		playIds = append(playIds, p.ID)
 	}
 	return playIds
+}
+
+func IdFromCards(cards []queries.Matchcard) []int {
+	var ids []int
+	for _, c := range cards {
+		ids = append(ids, *c.Cardid)
+	}
+
+	return ids
 }

@@ -56,45 +56,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/deck/": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "deck"
-                ],
-                "summary": "Get deck by match id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "search for deck by match id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/vo.GameDeck"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/match/player/ready": {
             "put": {
                 "consumes": [
@@ -407,6 +368,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/match/{matchId}/deck/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deck"
+                ],
+                "summary": "Get deck by match id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "search for deck by match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.GameDeck"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/match/{matchId}/deck/kitty": {
             "get": {
                 "consumes": [
@@ -661,7 +661,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/queries.Player"
+                            "$ref": "#/definitions/vo.GamePlayer"
                         }
                     },
                     "400": {
@@ -1088,26 +1088,6 @@ const docTemplate = `{
                 }
             }
         },
-        "queries.Player": {
-            "type": "object",
-            "properties": {
-                "accountid": {
-                    "type": "integer"
-                },
-                "art": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "isready": {
-                    "type": "boolean"
-                },
-                "score": {
-                    "type": "integer"
-                }
-            }
-        },
         "vo.GameCard": {
             "type": "object",
             "properties": {
@@ -1190,7 +1170,7 @@ const docTemplate = `{
                 "players": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/queries.Player"
+                        "$ref": "#/definitions/vo.GamePlayer"
                     }
                 },
                 "privatematch": {
@@ -1201,6 +1181,44 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/pgtype.Timestamptz"
                     }
+                }
+            }
+        },
+        "vo.GamePlayer": {
+            "type": "object",
+            "properties": {
+                "accountid": {
+                    "type": "integer"
+                },
+                "art": {
+                    "type": "string"
+                },
+                "hand": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/queries.Matchcard"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isready": {
+                    "type": "boolean"
+                },
+                "kitty": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/queries.Matchcard"
+                    }
+                },
+                "play": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/queries.Matchcard"
+                    }
+                },
+                "score": {
+                    "type": "integer"
                 }
             }
         },

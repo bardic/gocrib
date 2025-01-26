@@ -17,13 +17,13 @@ import (
 //	@Tags		deck
 //	@Accept		json
 //	@Produce	json
-//	@Param		id	query		string	true	"search for deck by match id"'
+//	@Param		matchId	path		int	true	"search for deck by match id"'
 //	@Success	200	{object}	vo.GameDeck
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
-//	@Router		/deck/ [get]
+//	@Router		/match/{matchId}/deck/ [get]
 func GetDeckByMatchId(c echo.Context) error {
-	p := c.Request().URL.Query().Get("id")
+	p := c.Param("matchId")
 	id, err := strconv.Atoi(p)
 
 	if err != nil {
