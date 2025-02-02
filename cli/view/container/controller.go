@@ -177,7 +177,8 @@ func getPlayerHand(playerId *int, players []vo.GamePlayer) []int {
 }
 
 func (ctrl *Controller) getHandModelForCardIds(localPlayerId, matchId int, cardIds []int) *cliVO.HandVO {
-	gameDeck := ctrl.getGameDeckForMatchId(matchId)
+	//gameDeck := ctrl.getGameDeckForMatchId(matchId)
+	gameDeck := ctrl.getDeckByPlayerIdAndMatchId(localPlayerId, matchId)
 
 	handModel := &cliVO.HandVO{
 		LocalPlayerID: localPlayerId,
@@ -216,9 +217,21 @@ func (ctrl *Controller) CreateController(name string, currentState queries.Games
 		GameMatch: ctrl.Model.(*Model).Match,
 	}
 }
+
 func (ctrl *Controller) getGameDeckForMatchId(matchId int) *vo.GameDeck {
 	var deck *vo.GameDeck
 	resp := services.GetDeckByMatchId(matchId)
+	err := json.Unmarshal(resp.([]byte), &deck)
+	if err != nil {
+		utils.Logger.Sugar().Error(err)
+	}
+
+	return deck
+}
+
+func (ctrl *Controller) getDeckByPlayerIdAndMatchId(playerId, matchId int) *vo.GameDeck {
+	var deck *vo.GameDeck
+	resp := services.GetDeckByPlayIdAndMatchId(playerId, matchId)
 	err := json.Unmarshal(resp.([]byte), &deck)
 	if err != nil {
 		utils.Logger.Sugar().Error(err)

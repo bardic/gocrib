@@ -26,7 +26,7 @@ var boardRowLen int = 50
 var boardEndRowLen int = 31
 
 func (view *View) Init() {
-	matchMsg := services.GetPlayerMatch(view.Match.ID)
+	matchMsg := services.GetMatchById(view.Match.ID)
 	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return

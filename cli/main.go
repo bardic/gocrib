@@ -28,7 +28,7 @@ type CLI struct {
 	matchId           *int
 	currentController cliVO.IController
 	isOpponent        bool
-	GameMatch         *vo.GameMatch
+	// GameMatch         *vo.GameMatch
 }
 
 func main() {
@@ -94,15 +94,15 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			fallthrough
 		case vo.CreateGameView:
 			cli.matchId = msg.MatchId
-			msg.AccountId = cli.account.ID //TODO fix this later
 
-			resp := services.GetPlayerMatch(msg.AccountId)
+			resp := services.GetMatchById(msg.MatchId)
 			err := json.Unmarshal(resp.([]byte), &match)
 			if err != nil {
 				utils.Logger.Sugar().Error(err)
 			}
 
-			cli.GameMatch = match
+			//cli.GameMatch = match
+
 			cli.createMatchView(match)
 		}
 	}
@@ -156,7 +156,7 @@ func (cli *CLI) createMatchView(match *vo.GameMatch) {
 
 func GetMatchForId(msg vo.StateChangeMsg) (*vo.GameMatch, error) {
 	var match *vo.GameMatch
-	resp := services.GetPlayerMatch(msg.MatchId)
+	resp := services.GetMatchById(msg.MatchId)
 	err := json.Unmarshal(resp.([]byte), &match)
 	if err != nil {
 		utils.Logger.Sugar().Error(err)
@@ -165,5 +165,15 @@ func GetMatchForId(msg vo.StateChangeMsg) (*vo.GameMatch, error) {
 }
 
 func (m *CLI) View() string {
-	return styles.ViewStyle.Render(m.currentController.Render(m.GameMatch))
+	switch m.currentController.(type) {
+	case *login.Controller:
+		return styles.ViewStyle.Render(m.currentController.Render(nil))
+	case *lobby.Controller:
+		return styles.ViewStyle.Render(m.currentController.Render(nil))
+	case *gameContainer.Controller:
+		match := m.currentController.(*gameContainer.Controller).Model.(*container.Model).Match
+		return styles.ViewStyle.Render(m.currentController.Render(match))
+	default:
+		return "No view"
+	}
 }

@@ -72,7 +72,19 @@ func JoinMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	match, err := helpers.GetMatch(&matchId)
+	_, err = helpers.GetMatch(&matchId)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	_, err = OnDetermineFirst(matchId)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	match, err := OnDeal(matchId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

@@ -31,6 +31,11 @@ func (view *View) Render(hand []int) string {
 	s += view.BuildHeader()
 	for i := 0; i < len(hand); i++ {
 		c := utils.GetCardById(hand[i], view.Deck)
+
+		if c == nil {
+			continue
+		}
+
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Value)
 		styledCard := styles.ModelStyle.Render(cardStr)
 		if slices.Index(view.SelectedCardIds, *c.Matchcard.Cardid) > -1 {

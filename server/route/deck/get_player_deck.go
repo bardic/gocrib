@@ -19,13 +19,21 @@ import (
 //	@Accept		json
 //	@Produce	json
 //	@Param		matchId	path		int	true	"search for deck by match id"'
+//	@Param		playerId	path		int	true	"search for deck by player id"'
 //	@Success	200	{object}	vo.GameDeck
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
-//	@Router		/match/{matchId}/deck/ [get]
-func GetDeckByMatchId(c echo.Context) error {
+//	@Router		/match/{matchId}/player/{playerId}/deck/ [get]
+func GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 	p := c.Param("matchId")
 	id, err := strconv.Atoi(p)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	pid := c.Param("matchId")
+	playerId, err := strconv.Atoi(pid)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
@@ -43,9 +51,9 @@ func GetDeckByMatchId(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	cards, err := q.GetMatchCardsByTypeAndDeckId(ctx, queries.GetMatchCardsByTypeAndDeckIdParams{
-		ID:    &id,
-		State: "Deck",
+	cards, err := q.GetMatchCardsByPlayerIdAndDeckId(ctx, queries.GetMatchCardsByPlayerIdAndDeckIdParams{
+		ID:        &id,
+		Currowner: &playerId,
 	})
 
 	if err != nil {

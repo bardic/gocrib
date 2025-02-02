@@ -433,7 +433,7 @@ func (q *Queries) GetMatchByPlayerId(ctx context.Context) ([]byte, error) {
 
 const getMatchCards = `-- name: GetMatchCards :many
 SELECT 
-    deck_matchcard.deckid, deck_matchcard.matchcardid,
+    deck_matchcard.deckid, deck_matchcard.matchcardid, 
     deck.id, deck.cutmatchcardid,
     matchcard.id, matchcard.cardid, matchcard.origowner, matchcard.currowner, matchcard.state,
     card.id, card.value, card.suit, card.art
@@ -446,14 +446,23 @@ LEFT JOIN
 LEFT JOIN
     card ON deck_matchcard.matchcardId=card.id
 WHERE
-    deck.id IN ($1)
+    deck.id = $1
 `
 
 type GetMatchCardsRow struct {
-	DeckMatchcard DeckMatchcard
-	Deck          Deck
-	Matchcard     Matchcard
-	Card          Card
+	Deckid         *int
+	Matchcardid    *int
+	ID             *int
+	Cutmatchcardid *int
+	ID_2           *int
+	Cardid         *int
+	Origowner      *int
+	Currowner      *int
+	State          NullCardstate
+	ID_3           *int
+	Value          NullCardvalue
+	Suit           NullCardsuit
+	Art            pgtype.Text
 }
 
 func (q *Queries) GetMatchCards(ctx context.Context, id *int) ([]GetMatchCardsRow, error) {
@@ -466,19 +475,165 @@ func (q *Queries) GetMatchCards(ctx context.Context, id *int) ([]GetMatchCardsRo
 	for rows.Next() {
 		var i GetMatchCardsRow
 		if err := rows.Scan(
-			&i.DeckMatchcard.Deckid,
-			&i.DeckMatchcard.Matchcardid,
-			&i.Deck.ID,
-			&i.Deck.Cutmatchcardid,
-			&i.Matchcard.ID,
-			&i.Matchcard.Cardid,
-			&i.Matchcard.Origowner,
-			&i.Matchcard.Currowner,
-			&i.Matchcard.State,
-			&i.Card.ID,
-			&i.Card.Value,
-			&i.Card.Suit,
-			&i.Card.Art,
+			&i.Deckid,
+			&i.Matchcardid,
+			&i.ID,
+			&i.Cutmatchcardid,
+			&i.ID_2,
+			&i.Cardid,
+			&i.Origowner,
+			&i.Currowner,
+			&i.State,
+			&i.ID_3,
+			&i.Value,
+			&i.Suit,
+			&i.Art,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getMatchCardsByPlayerIdAndDeckId = `-- name: GetMatchCardsByPlayerIdAndDeckId :many
+SELECT 
+    deck_matchcard.deckid, deck_matchcard.matchcardid, 
+    deck.id, deck.cutmatchcardid,
+    matchcard.id, matchcard.cardid, matchcard.origowner, matchcard.currowner, matchcard.state,
+    card.id, card.value, card.suit, card.art
+FROM 
+    deck_matchcard
+LEFT JOIN
+    matchcard ON deck_matchcard.matchcardid=matchcard.id
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    card ON deck_matchcard.matchcardId=card.id
+WHERE
+     deck.id = $1 AND (matchcard.currowner = $2 OR matchcard.currowner IS NULL)
+`
+
+type GetMatchCardsByPlayerIdAndDeckIdParams struct {
+	ID        *int
+	Currowner *int
+}
+
+type GetMatchCardsByPlayerIdAndDeckIdRow struct {
+	Deckid         *int
+	Matchcardid    *int
+	ID             *int
+	Cutmatchcardid *int
+	ID_2           *int
+	Cardid         *int
+	Origowner      *int
+	Currowner      *int
+	State          NullCardstate
+	ID_3           *int
+	Value          NullCardvalue
+	Suit           NullCardsuit
+	Art            pgtype.Text
+}
+
+func (q *Queries) GetMatchCardsByPlayerIdAndDeckId(ctx context.Context, arg GetMatchCardsByPlayerIdAndDeckIdParams) ([]GetMatchCardsByPlayerIdAndDeckIdRow, error) {
+	rows, err := q.db.Query(ctx, getMatchCardsByPlayerIdAndDeckId, arg.ID, arg.Currowner)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMatchCardsByPlayerIdAndDeckIdRow
+	for rows.Next() {
+		var i GetMatchCardsByPlayerIdAndDeckIdRow
+		if err := rows.Scan(
+			&i.Deckid,
+			&i.Matchcardid,
+			&i.ID,
+			&i.Cutmatchcardid,
+			&i.ID_2,
+			&i.Cardid,
+			&i.Origowner,
+			&i.Currowner,
+			&i.State,
+			&i.ID_3,
+			&i.Value,
+			&i.Suit,
+			&i.Art,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getMatchCardsByTypeAndDeckId = `-- name: GetMatchCardsByTypeAndDeckId :many
+SELECT 
+    deck_matchcard.deckid, deck_matchcard.matchcardid, 
+    deck.id, deck.cutmatchcardid,
+    matchcard.id, matchcard.cardid, matchcard.origowner, matchcard.currowner, matchcard.state,
+    card.id, card.value, card.suit, card.art
+FROM 
+    deck_matchcard
+LEFT JOIN
+    matchcard ON deck_matchcard.matchcardid=matchcard.id
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    card ON deck_matchcard.matchcardId=card.id
+WHERE
+    deck.id = $1 AND matchcard.state = $2
+`
+
+type GetMatchCardsByTypeAndDeckIdParams struct {
+	ID    *int
+	State Cardstate
+}
+
+type GetMatchCardsByTypeAndDeckIdRow struct {
+	Deckid         *int
+	Matchcardid    *int
+	ID             *int
+	Cutmatchcardid *int
+	ID_2           *int
+	Cardid         *int
+	Origowner      *int
+	Currowner      *int
+	State          NullCardstate
+	ID_3           *int
+	Value          NullCardvalue
+	Suit           NullCardsuit
+	Art            pgtype.Text
+}
+
+func (q *Queries) GetMatchCardsByTypeAndDeckId(ctx context.Context, arg GetMatchCardsByTypeAndDeckIdParams) ([]GetMatchCardsByTypeAndDeckIdRow, error) {
+	rows, err := q.db.Query(ctx, getMatchCardsByTypeAndDeckId, arg.ID, arg.State)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMatchCardsByTypeAndDeckIdRow
+	for rows.Next() {
+		var i GetMatchCardsByTypeAndDeckIdRow
+		if err := rows.Scan(
+			&i.Deckid,
+			&i.Matchcardid,
+			&i.ID,
+			&i.Cutmatchcardid,
+			&i.ID_2,
+			&i.Cardid,
+			&i.Origowner,
+			&i.Currowner,
+			&i.State,
+			&i.ID_3,
+			&i.Value,
+			&i.Suit,
+			&i.Art,
 		); err != nil {
 			return nil, err
 		}
@@ -774,17 +929,17 @@ const getPlayerById = `-- name: GetPlayerById :one
 SELECT 	
 	p.id, p.accountid, p.score, p.isready, p.art,
 	array(	
-		(select m.cardid from 
+		(select m.id, m.cardid, m.origowner, m.currowner, m.state from 
 		matchcard m where
 		m.currowner=1 and m.state='Hand'
 		)) as hand,
 	array(	
-		(select m.cardid from 
+		(select m.id, m.cardid, m.origowner, m.currowner, m.state from 
 		matchcard m where
 		m.currowner=1 and m.state='Play'
 		)) as board,
 	array(	
-		(select m.cardid from 
+		(select m.id, m.cardid, m.origowner, m.currowner, m.state from 
 		matchcard m where
 		m.currowner=$1 and m.state='Kitty'
 		)) as kitty
@@ -817,6 +972,152 @@ func (q *Queries) GetPlayerById(ctx context.Context, currowner *int) (GetPlayerB
 		&i.Kitty,
 	)
 	return i, err
+}
+
+const getPlayerJSON = `-- name: GetPlayerJSON :many
+SELECT
+    json_build_object(
+        'id', p.id,
+        'accountid', p.accountid,
+        'score', p.score,
+        'isready', p.isready,
+        'art', p.art,
+        'hand',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Hand'
+        ),
+        'kitty',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Kitty'
+        ),
+        'play',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Play'
+        )
+    )
+FROM player as p
+LEFT JOIN
+    match_player ON p.id=match_player.playerid
+WHERE
+    match_player.matchid = $1
+`
+
+func (q *Queries) GetPlayerJSON(ctx context.Context, matchid *int) ([][]byte, error) {
+	rows, err := q.db.Query(ctx, getPlayerJSON, matchid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items [][]byte
+	for rows.Next() {
+		var json_build_object []byte
+		if err := rows.Scan(&json_build_object); err != nil {
+			return nil, err
+		}
+		items = append(items, json_build_object)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayersByMatchId = `-- name: GetPlayersByMatchId :many
+SELECT 	
+	p.id, p.accountid, p.score, p.isready, p.art,
+	array(	
+		(select m.id, m.cardid, m.origowner, m.currowner, m.state from 
+		matchcard m where
+		m.currowner=p.id and m.state='Hand'
+		)) as hand,
+	array(	
+		(select m.id, m.cardid, m.origowner, m.currowner, m.state from 
+		matchcard m where
+		m.currowner=p.id and m.state='Play'
+		)) as board,
+	array(	
+		(select m.id, m.cardid, m.origowner, m.currowner, m.state from 
+		matchcard m where
+		m.currowner=p.id and m.state='Kitty'
+		)) as kitty
+FROM player as p
+LEFT JOIN
+    match_player ON p.id=match_player.playerid
+WHERE
+    match_player.matchid = $1
+`
+
+type GetPlayersByMatchIdRow struct {
+	ID        *int
+	Accountid *int
+	Score     *int
+	Isready   bool
+	Art       string
+	Hand      interface{}
+	Board     interface{}
+	Kitty     interface{}
+}
+
+func (q *Queries) GetPlayersByMatchId(ctx context.Context, matchid *int) ([]GetPlayersByMatchIdRow, error) {
+	rows, err := q.db.Query(ctx, getPlayersByMatchId, matchid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPlayersByMatchIdRow
+	for rows.Next() {
+		var i GetPlayersByMatchIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Accountid,
+			&i.Score,
+			&i.Isready,
+			&i.Art,
+			&i.Hand,
+			&i.Board,
+			&i.Kitty,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getPlayersInMatch = `-- name: GetPlayersInMatch :many

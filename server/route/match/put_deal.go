@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
+	"github.com/bardic/gocrib/vo"
 
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/route/helpers"
@@ -34,6 +35,17 @@ func Deal(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	match, err := OnDeal(matchId)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, match)
+}
+
+func OnDeal(matchId int) (*vo.GameMatch, error) {
+
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -43,7 +55,7 @@ func Deal(c echo.Context) error {
 	players, err := q.GetPlayersInMatch(ctx, &matchId)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return nil, err
 	}
 
 	numOfPlayers := len(players)
@@ -58,7 +70,7 @@ func Deal(c echo.Context) error {
 	cards, err := q.GetMatchCards(ctx, &matchId)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return nil, err
 	}
 
 	for i := 0; i < numOfPlayers; i++ {
@@ -68,7 +80,7 @@ func Deal(c echo.Context) error {
 				State:     queries.CardstateHand,
 				Origowner: players[i].ID,
 				Currowner: players[i].ID,
-				ID:        card.Card.ID,
+				ID:        card.Cardid,
 			})
 		}
 	}
@@ -76,8 +88,17 @@ func Deal(c echo.Context) error {
 	match, err := helpers.GetMatch(&matchId)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return nil, err
 	}
 
-	return c.JSON(http.StatusOK, match)
+	_, err = q.UpdateGameState(ctx, queries.UpdateGameStateParams{
+		ID:        &matchId,
+		Gamestate: queries.GamestateDiscard,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return match, nil
 }

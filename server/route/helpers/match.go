@@ -47,6 +47,53 @@ func GetMatch(id *int) (*vo.GameMatch, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//TODO Add player info here to the gamematch object
+
+	// players, err := q.GetPlayersByMatchId(ctx, id)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	b, err := q.GetPlayerJSON(ctx, id)
+
+	if err != nil {
+		return nil, err
+
+	}
+
+	var gamePlayers []vo.GamePlayer
+	for _, gp := range b {
+		var gameplayer vo.GamePlayer
+		err = json.Unmarshal(gp, &gameplayer)
+		if err != nil {
+			return nil, err
+		}
+		gamePlayers = append(gamePlayers, gameplayer)
+	}
+
+	gameplayers := []vo.GamePlayer{}
+	for _, p := range gamePlayers {
+
+		player := vo.GamePlayer{
+			Player: queries.Player{
+				ID:        p.ID,
+				Accountid: p.Accountid,
+				Score:     p.Score,
+				Isready:   p.Isready,
+				Art:       p.Art,
+			},
+			Hand:  p.Hand,
+			Play:  p.Play,
+			Kitty: p.Kitty,
+		}
+
+		gameplayers = append(gameplayers, player)
+	}
+
+	match.Players = gameplayers
+
 	return match, nil
 }
 

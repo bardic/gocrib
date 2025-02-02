@@ -16,7 +16,7 @@ func GetPlayerMatchState(matchId *int) tea.Msg {
 	return url(EndPointMatchState+"/?id="+id, http.MethodGet, "")
 }
 
-func GetPlayerMatch(matchId *int) tea.Msg {
+func GetMatchById(matchId *int) tea.Msg {
 	id := strconv.Itoa(*matchId)
 	return url(EndPointMatch+"/"+id, http.MethodGet, "")
 }

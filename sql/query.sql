@@ -156,10 +156,10 @@ LEFT JOIN
 
 -- name: GetMatchCards :many
 SELECT 
-    sqlc.embed(deck_matchcard),
-    sqlc.embed(deck),
-    sqlc.embed(matchcard),
-    sqlc.embed(card)
+    deck_matchcard.*, 
+    deck.*,
+    matchcard.*,
+    card.*
 FROM 
     deck_matchcard
 LEFT JOIN
@@ -169,7 +169,7 @@ LEFT JOIN
 LEFT JOIN
     card ON deck_matchcard.matchcardId=card.id
 WHERE
-    deck.id IN ($1);
+    deck.id = $1;
 
 -- name: GetMatchIdForPlayerId :one 
 SELECT 
@@ -320,17 +320,17 @@ UPDATE match SET dealerid = $1 WHERE id = $2;
 SELECT 	
 	p.*,
 	array(	
-		(select m.cardid from 
+		(select m.* from 
 		matchcard m where
 		m.currowner=1 and m.state='Hand'
 		)) as hand,
 	array(	
-		(select m.cardid from 
+		(select m.* from 
 		matchcard m where
 		m.currowner=1 and m.state='Play'
 		)) as board,
 	array(	
-		(select m.cardid from 
+		(select m.* from 
 		matchcard m where
 		m.currowner=$1 and m.state='Kitty'
 		)) as kitty
@@ -351,6 +351,40 @@ LEFT JOIN
     match ON deck.id=match.deckid
 WHERE
     match.id = $1 AND matchcard.state = $2;
+
+-- name: GetMatchCardsByTypeAndDeckId :many
+SELECT 
+    deck_matchcard.*, 
+    deck.*,
+    matchcard.*,
+    card.*
+FROM 
+    deck_matchcard
+LEFT JOIN
+    matchcard ON deck_matchcard.matchcardid=matchcard.id
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    card ON deck_matchcard.matchcardId=card.id
+WHERE
+    deck.id = $1 AND matchcard.state = $2;
+
+-- name: GetMatchCardsByPlayerIdAndDeckId :many
+SELECT 
+    deck_matchcard.*, 
+    deck.*,
+    matchcard.*,
+    card.*
+FROM 
+    deck_matchcard
+LEFT JOIN
+    matchcard ON deck_matchcard.matchcardid=matchcard.id
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    card ON deck_matchcard.matchcardId=card.id
+WHERE
+     deck.id = $1 AND (matchcard.currowner = $2 OR matchcard.currowner IS NULL);
 
 -- name: ResetDeckState :exec
 UPDATE matchcard m SET state = 'Deck', origowner = null, currowner = null FROM matchcard
@@ -390,3 +424,91 @@ LEFT JOIN
     match_player ON player.id=match_player.playerid
 WHERE
     match_player.matchid = $1 AND match_player.turnorder = $2 + 1;
+
+
+-- name: GetPlayersByMatchId :many
+SELECT 	
+	p.id, p.accountid, p.score, p.isready, p.art,
+	array(	
+		(select m.* from 
+		matchcard m where
+		m.currowner=p.id and m.state='Hand'
+		)) as hand,
+	array(	
+		(select m.* from 
+		matchcard m where
+		m.currowner=p.id and m.state='Play'
+		)) as board,
+	array(	
+		(select m.* from 
+		matchcard m where
+		m.currowner=p.id and m.state='Kitty'
+		)) as kitty
+FROM player as p
+LEFT JOIN
+    match_player ON p.id=match_player.playerid
+WHERE
+    match_player.matchid = $1;
+
+
+
+-- name: GetPlayerJSON :many
+SELECT
+    json_build_object(
+        'id', p.id,
+        'accountid', p.accountid,
+        'score', p.score,
+        'isready', p.isready,
+        'art', p.art,
+        'hand',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Hand'
+        ),
+        'kitty',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Kitty'
+        ),
+        'play',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Play'
+        )
+    )
+FROM player as p
+LEFT JOIN
+    match_player ON p.id=match_player.playerid
+WHERE
+    match_player.matchid = $1;
+

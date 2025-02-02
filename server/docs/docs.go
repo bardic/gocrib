@@ -679,6 +679,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/match/{matchId}/player/{playerId}/deck/": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deck"
+                ],
+                "summary": "Get deck by match id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "search for deck by match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "search for deck by player id",
+                        "name": "playerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.GameDeck"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/match/{matchId}/player/{playerId}/kitty": {
             "put": {
                 "consumes": [
@@ -845,6 +891,17 @@ const docTemplate = `{
                 "NegativeInfinity"
             ]
         },
+        "pgtype.Text": {
+            "type": "object",
+            "properties": {
+                "string": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
         "pgtype.Timestamptz": {
             "type": "object",
             "properties": {
@@ -867,23 +924,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                }
-            }
-        },
-        "queries.Card": {
-            "type": "object",
-            "properties": {
-                "art": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "suit": {
-                    "$ref": "#/definitions/queries.Cardsuit"
-                },
-                "value": {
-                    "$ref": "#/definitions/queries.Cardvalue"
                 }
             }
         },
@@ -952,28 +992,6 @@ const docTemplate = `{
                 "CardvalueJoker"
             ]
         },
-        "queries.Deck": {
-            "type": "object",
-            "properties": {
-                "cutmatchcardid": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "queries.DeckMatchcard": {
-            "type": "object",
-            "properties": {
-                "deckid": {
-                    "type": "integer"
-                },
-                "matchcardid": {
-                    "type": "integer"
-                }
-            }
-        },
         "queries.Gamestate": {
             "type": "string",
             "enum": [
@@ -1010,17 +1028,44 @@ const docTemplate = `{
         "queries.GetMatchCardsRow": {
             "type": "object",
             "properties": {
-                "card": {
-                    "$ref": "#/definitions/queries.Card"
+                "art": {
+                    "$ref": "#/definitions/pgtype.Text"
                 },
-                "deck": {
-                    "$ref": "#/definitions/queries.Deck"
+                "cardid": {
+                    "type": "integer"
                 },
-                "deckMatchcard": {
-                    "$ref": "#/definitions/queries.DeckMatchcard"
+                "currowner": {
+                    "type": "integer"
                 },
-                "matchcard": {
-                    "$ref": "#/definitions/queries.Matchcard"
+                "cutmatchcardid": {
+                    "type": "integer"
+                },
+                "deckid": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "id_2": {
+                    "type": "integer"
+                },
+                "id_3": {
+                    "type": "integer"
+                },
+                "matchcardid": {
+                    "type": "integer"
+                },
+                "origowner": {
+                    "type": "integer"
+                },
+                "state": {
+                    "$ref": "#/definitions/queries.NullCardstate"
+                },
+                "suit": {
+                    "$ref": "#/definitions/queries.NullCardsuit"
+                },
+                "value": {
+                    "$ref": "#/definitions/queries.NullCardvalue"
                 }
             }
         },
@@ -1085,6 +1130,42 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/queries.Cardstate"
+                }
+            }
+        },
+        "queries.NullCardstate": {
+            "type": "object",
+            "properties": {
+                "cardstate": {
+                    "$ref": "#/definitions/queries.Cardstate"
+                },
+                "valid": {
+                    "description": "Valid is true if Cardstate is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
+        "queries.NullCardsuit": {
+            "type": "object",
+            "properties": {
+                "cardsuit": {
+                    "$ref": "#/definitions/queries.Cardsuit"
+                },
+                "valid": {
+                    "description": "Valid is true if Cardsuit is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
+        "queries.NullCardvalue": {
+            "type": "object",
+            "properties": {
+                "cardvalue": {
+                    "$ref": "#/definitions/queries.Cardvalue"
+                },
+                "valid": {
+                    "description": "Valid is true if Cardvalue is not NULL",
+                    "type": "boolean"
                 }
             }
         },

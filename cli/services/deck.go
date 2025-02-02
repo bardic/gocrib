@@ -13,6 +13,11 @@ func GetDeckByMatchId(id int) tea.Msg {
 	return url(endPoint, http.MethodGet, "")
 }
 
+func GetDeckByPlayIdAndMatchId(playerId, matchId int) tea.Msg {
+	endPoint := endPointBuilder(EndPointDeckByPlayerAndMatchId, strconv.Itoa(matchId), strconv.Itoa(playerId))
+	return url(endPoint, http.MethodGet, "")
+}
+
 func endPointBuilder(endpoint string, args ...string) string {
 	for _, arg := range args {
 		endpoint = strings.Replace(endpoint, "%s", arg, 1)

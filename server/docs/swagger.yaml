@@ -10,6 +10,13 @@ definitions:
     - Infinity
     - Finite
     - NegativeInfinity
+  pgtype.Text:
+    properties:
+      string:
+        type: string
+      valid:
+        type: boolean
+    type: object
   pgtype.Timestamptz:
     properties:
       infinityModifier:
@@ -25,17 +32,6 @@ definitions:
         type: integer
       name:
         type: string
-    type: object
-  queries.Card:
-    properties:
-      art:
-        type: string
-      id:
-        type: integer
-      suit:
-        $ref: '#/definitions/queries.Cardsuit'
-      value:
-        $ref: '#/definitions/queries.Cardvalue'
     type: object
   queries.Cardstate:
     enum:
@@ -93,20 +89,6 @@ definitions:
     - CardvalueQueen
     - CardvalueKing
     - CardvalueJoker
-  queries.Deck:
-    properties:
-      cutmatchcardid:
-        type: integer
-      id:
-        type: integer
-    type: object
-  queries.DeckMatchcard:
-    properties:
-      deckid:
-        type: integer
-      matchcardid:
-        type: integer
-    type: object
   queries.Gamestate:
     enum:
     - New
@@ -139,14 +121,32 @@ definitions:
     - GamestateLost
   queries.GetMatchCardsRow:
     properties:
-      card:
-        $ref: '#/definitions/queries.Card'
-      deck:
-        $ref: '#/definitions/queries.Deck'
-      deckMatchcard:
-        $ref: '#/definitions/queries.DeckMatchcard'
-      matchcard:
-        $ref: '#/definitions/queries.Matchcard'
+      art:
+        $ref: '#/definitions/pgtype.Text'
+      cardid:
+        type: integer
+      currowner:
+        type: integer
+      cutmatchcardid:
+        type: integer
+      deckid:
+        type: integer
+      id:
+        type: integer
+      id_2:
+        type: integer
+      id_3:
+        type: integer
+      matchcardid:
+        type: integer
+      origowner:
+        type: integer
+      state:
+        $ref: '#/definitions/queries.NullCardstate'
+      suit:
+        $ref: '#/definitions/queries.NullCardsuit'
+      value:
+        $ref: '#/definitions/queries.NullCardvalue'
     type: object
   queries.Match:
     properties:
@@ -189,6 +189,30 @@ definitions:
         type: integer
       state:
         $ref: '#/definitions/queries.Cardstate'
+    type: object
+  queries.NullCardstate:
+    properties:
+      cardstate:
+        $ref: '#/definitions/queries.Cardstate'
+      valid:
+        description: Valid is true if Cardstate is not NULL
+        type: boolean
+    type: object
+  queries.NullCardsuit:
+    properties:
+      cardsuit:
+        $ref: '#/definitions/queries.Cardsuit'
+      valid:
+        description: Valid is true if Cardsuit is not NULL
+        type: boolean
+    type: object
+  queries.NullCardvalue:
+    properties:
+      cardvalue:
+        $ref: '#/definitions/queries.Cardvalue'
+      valid:
+        description: Valid is true if Cardvalue is not NULL
+        type: boolean
     type: object
   vo.GameCard:
     properties:
@@ -736,6 +760,37 @@ paths:
       summary: Get player by barcode
       tags:
       - players
+  /match/{matchId}/player/{playerId}/deck/:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search for deck by match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: search for deck by player id
+        in: path
+        name: playerId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/vo.GameDeck'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get deck by match id
+      tags:
+      - deck
   /match/{matchId}/player/{playerId}/kitty:
     put:
       consumes:

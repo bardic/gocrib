@@ -40,7 +40,9 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 		LocalPlayerID:  &localPlayerId,
 	}
 
-	return cardView.Render(utils.IdFromCards(gameMatch.Players[0].Hand))
+	ids := utils.IdFromCards(gameMatch.Players[0].Hand)
+
+	return cardView.Render(ids)
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {

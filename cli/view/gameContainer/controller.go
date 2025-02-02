@@ -30,13 +30,13 @@ func (ctrl *Controller) Update(msg tea.Msg, oldGameMatch *vo.GameMatch) tea.Cmd 
 		ctrl.timerStarted = true
 	}
 
-	var gameMatch *vo.GameMatch
 	switch msg := msg.(type) {
 	case timer.TickMsg: // Polling update
 		var cmd tea.Cmd
+		var gameMatch *vo.GameMatch
 		ctrl.timer, cmd = ctrl.timer.Update(msg)
 
-		resp := services.GetPlayerMatch(ctrl.Controller.Model.(*container.Model).Match.ID)
+		resp := services.GetMatchById(ctrl.Controller.Model.(*container.Model).Match.ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
 
 		if err != nil {
@@ -49,7 +49,7 @@ func (ctrl *Controller) Update(msg tea.Msg, oldGameMatch *vo.GameMatch) tea.Cmd 
 
 	}
 
-	cmd := ctrl.Controller.Update(msg, gameMatch)
+	cmd := ctrl.Controller.Update(msg, ctrl.Controller.Model.(*container.Model).Match)
 	cmds = append(cmds, cmd)
 	return tea.Batch(cmds...)
 }

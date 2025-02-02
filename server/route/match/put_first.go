@@ -35,6 +35,16 @@ func DetermineFirst(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	match, err := OnDetermineFirst(matchId)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, match)
+}
+
+func OnDetermineFirst(matchId int) (*vo.GameMatch, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -44,24 +54,24 @@ func DetermineFirst(c echo.Context) error {
 	m, err := q.GetMatchById(ctx, &matchId)
 
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err)
+		return nil, err
 	}
 
 	var match *vo.GameMatch
 	err = json.Unmarshal(m, &match)
 
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err)
+		return nil, err
 	}
 
 	players, err := q.GetMatchPlayersByMatchId(ctx, &matchId)
 
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err)
+		return nil, err
 	}
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return nil, err
 	}
 
 	turnOrder := 1
@@ -80,7 +90,7 @@ func DetermineFirst(c echo.Context) error {
 			})
 
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, err)
+				return nil, err
 			}
 
 			err = q.UpdateDealerForMatch(ctx, queries.UpdateDealerForMatchParams{
@@ -89,7 +99,7 @@ func DetermineFirst(c echo.Context) error {
 			})
 
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, err)
+				return nil, err
 			}
 		}
 
@@ -101,9 +111,29 @@ func DetermineFirst(c echo.Context) error {
 		Gamestate: queries.GamestateDeal,
 	})
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+	p := []vo.GamePlayer{}
+	for _, player := range players {
+		p = append(p, vo.GamePlayer{
+			Player: queries.Player{
+				ID:        player.ID,
+				Accountid: player.Accountid,
+
+				Isready: player.Isready,
+			},
+			Hand:  []queries.Matchcard{},
+			Play:  []queries.Matchcard{},
+			Kitty: []queries.Matchcard{},
+		})
 	}
 
-	return c.JSON(http.StatusOK, updatedMatch)
+	gameMatch := vo.GameMatch{
+		Match:   updatedMatch,
+		Players: p,
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &gameMatch, nil
 }
