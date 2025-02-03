@@ -7,10 +7,9 @@ import (
 	"strconv"
 
 	"github.com/bardic/gocrib/queries/queries"
+	"github.com/bardic/gocrib/vo"
 
 	conn "github.com/bardic/gocrib/server/db"
-
-	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )
@@ -43,7 +42,7 @@ func UpdatePlay(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	details := &vo.HandModifier{}
+	details := vo.HandModifier{}
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

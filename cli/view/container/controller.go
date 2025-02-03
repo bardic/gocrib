@@ -37,7 +37,7 @@ func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
 	}
 
 	containerHeader := ctrl.View.Render(cardIds)
-	viewRender := containerModel.Subview.Render(gamematch)
+	viewRender := containerModel.Subcontroller.Render(gamematch)
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
 }
@@ -62,9 +62,13 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 			break
 		}
 
-		cmds = append(cmds, func() tea.Msg {
-			return resp
-		})
+		switch r := resp.(type) {
+		case vo.ChangeTabMsg:
+			cmds = append(cmds, func() tea.Msg {
+				return r
+			})
+		}
+
 	case vo.ChangeTabMsg:
 		ctrl.ChangeTab(msg.TabIndex)
 	}
@@ -101,6 +105,8 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		return vo.ChangeTabMsg{
 			TabIndex: containerView.ActiveTab,
 		}
+	default:
+		containerModel.Subcontroller.ParseInput(msg)
 	}
 
 	return msg
@@ -110,11 +116,11 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 	containerModel := ctrl.Model.(*Model)
 	// deckId := containerModel.Match.Deckid
 
-	hand := getPlayerHand(containerModel.LocalPlayer.ID, containerModel.Match.Players)
+	// hand := getPlayerHand(containerModel.LocalPlayer.ID, containerModel.Match.Players)
 
 	switch tabIndex {
 	case 0:
-		containerModel.Subview = &board.Controller{
+		containerModel.Subcontroller = &board.Controller{
 			Controller: &cliVO.Controller{
 				Model: &board.Model{
 					ViewModel: cliVO.ViewModel{
@@ -131,7 +137,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			},
 		}
 	case 1:
-		containerModel.Subview = ctrl.CreateController(
+		containerModel.Subcontroller = ctrl.CreateController(
 			"Play",
 			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
@@ -141,17 +147,17 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			),
 		)
 	case 2:
-		containerModel.Subview = ctrl.CreateController(
+		containerModel.Subcontroller = ctrl.CreateController(
 			"Hand",
 			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
 				*containerModel.LocalPlayer.ID,
 				*containerModel.Match.ID,
-				hand, //THIS IS THE WRONG PLAYER~!!!!!
+				utils.IdFromCards(containerModel.LocalPlayer.Hand), //THIS IS THE WRONG PLAYER~!!!!!
 			),
 		)
 	case 3:
-		containerModel.Subview = ctrl.CreateController(
+		containerModel.Subcontroller = ctrl.CreateController(
 			"Kitty",
 			containerModel.Match.Gamestate,
 			ctrl.getHandModelForCardIds(
@@ -162,7 +168,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 		)
 	}
 
-	containerModel.Subview.Init()
+	containerModel.Subcontroller.Init()
 
 }
 

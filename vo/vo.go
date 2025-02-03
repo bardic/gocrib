@@ -65,8 +65,7 @@ type MatchDetailsResponse struct {
 }
 
 type HandModifier struct {
-	SenderId *int
-	CardIds  []int
+	CardIds []int
 }
 
 type ScoreResults struct {

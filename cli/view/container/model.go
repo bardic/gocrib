@@ -7,11 +7,11 @@ import (
 
 type Model struct {
 	cliVO.IModel
-	Tabs        []cliVO.Tab
-	State       vo.ViewState
-	States      []vo.ViewState
-	Match       *vo.GameMatch
-	Subview     cliVO.IController
-	LocalPlayer vo.GamePlayer
-	ActiveTab   int
+	Tabs          []cliVO.Tab
+	State         vo.ViewState
+	States        []vo.ViewState
+	Match         *vo.GameMatch
+	Subcontroller cliVO.IController
+	LocalPlayer   vo.GamePlayer
+	ActiveTab     int
 }

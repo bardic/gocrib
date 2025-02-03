@@ -42,6 +42,8 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 
 	ids := utils.IdFromCards(gameMatch.Players[0].Hand)
 
+	ctrl.Model.(*Model).CardIds = ids
+
 	return cardView.Render(ids)
 }
 
@@ -68,13 +70,23 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	case "enter":
 		switch cardModel.State {
 		case queries.GamestateDiscard:
-			services.PutKitty(vo.HandModifier{
-				// MatchId:  ctrl.ID,
-				// PlayerId: cardModel.LocalPlayerID,
-				CardIds: cardModel.SelectedCardIds,
-			})
+			services.PutKitty(
+				ctrl.ID,
+				&cardModel.LocalPlayerID,
+				vo.HandModifier{
+					CardIds: cardModel.SelectedCardIds,
+				},
+			)
+
+			//fmt.Println(msg)
 		case queries.GamestatePlay:
-			services.PutPlay(vo.HandModifier{})
+			services.PutPlay(
+				ctrl.ID,
+				&cardModel.LocalPlayerID,
+				vo.HandModifier{
+					CardIds: cardModel.SelectedCardIds,
+				},
+			)
 		}
 	}
 

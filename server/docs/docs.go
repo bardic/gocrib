@@ -1322,9 +1322,6 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
-                },
-                "senderId": {
-                    "type": "integer"
                 }
             }
         },

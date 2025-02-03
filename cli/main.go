@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/bardic/gocrib/queries/queries"
 
@@ -70,7 +69,7 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		})
 	case vo.StateChangeMsg:
-		fmt.Println(msg.NewState)
+		// fmt.Println(msg.NewState)
 		switch msg.NewState {
 		case vo.LobbyView:
 			activeMatchId := 0 //TODO what the fuck is this doing

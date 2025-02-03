@@ -315,8 +315,6 @@ definitions:
         items:
           type: integer
         type: array
-      senderId:
-        type: integer
     type: object
   vo.MatchDetailsResponse:
     properties:

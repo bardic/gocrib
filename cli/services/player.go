@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/vo"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -21,22 +22,26 @@ func GetPlayer(playerId int) tea.Msg {
 	return url(EndPointPlayer+"/?id="+pid, http.MethodGet, "")
 }
 
-func PutKitty(req vo.HandModifier) tea.Msg {
-	b, err := json.Marshal(req)
+func PutKitty(matchId, playerId *int, cards vo.HandModifier) tea.Msg {
+	b, err := json.Marshal(cards)
 	if err != nil {
 		return err
 	}
 
-	return url(EndPointKitty, http.MethodPut, string(b))
+	endpoint := utils.EndPointBuilder(EndPointKitty, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
+
+	return url(endpoint, http.MethodPut, string(b))
 }
 
-func PutPlay(req vo.HandModifier) tea.Msg {
-	b, err := json.Marshal(req)
+func PutPlay(matchId, playerId *int, cards vo.HandModifier) tea.Msg {
+	b, err := json.Marshal(cards)
 	if err != nil {
 		return err
 	}
 
-	return url(EndPointPlay, http.MethodPut, string(b))
+	endpoint := utils.EndPointBuilder(EndPointKitty, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
+
+	return url(endpoint, http.MethodPut, string(b))
 }
 
 func PostPlayer(accountId int) tea.Msg {

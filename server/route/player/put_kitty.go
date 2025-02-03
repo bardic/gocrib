@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
+	"github.com/bardic/gocrib/vo"
 
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/route/helpers"
-	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
 )

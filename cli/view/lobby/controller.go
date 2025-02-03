@@ -56,7 +56,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			MatchId:  &id,
 		}
 	case "n":
-		match := utils.CreateGame(lobbyModel.AccountId)
+		match := CreateGame(lobbyModel.AccountId)
 
 		return vo.StateChangeMsg{
 			NewState:  vo.CreateGameView,
@@ -85,6 +85,15 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	}
 
 	return nil
+}
+
+func CreateGame(accountId *int) vo.MatchDetailsResponse {
+	newMatch := services.PostPlayerMatch(accountId).([]byte)
+
+	var matchDetails vo.MatchDetailsResponse
+	json.Unmarshal(newMatch, &matchDetails)
+
+	return matchDetails
 }
 
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {

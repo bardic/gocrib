@@ -3,24 +3,17 @@ package services
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
+	"github.com/bardic/gocrib/cli/utils"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func GetDeckByMatchId(id int) tea.Msg {
-	endPoint := endPointBuilder(EndPointDeckById, strconv.Itoa(id))
+	endPoint := utils.EndPointBuilder(EndPointDeckById, strconv.Itoa(id))
 	return url(endPoint, http.MethodGet, "")
 }
 
 func GetDeckByPlayIdAndMatchId(playerId, matchId int) tea.Msg {
-	endPoint := endPointBuilder(EndPointDeckByPlayerAndMatchId, strconv.Itoa(matchId), strconv.Itoa(playerId))
+	endPoint := utils.EndPointBuilder(EndPointDeckByPlayerAndMatchId, strconv.Itoa(matchId), strconv.Itoa(playerId))
 	return url(endPoint, http.MethodGet, "")
-}
-
-func endPointBuilder(endpoint string, args ...string) string {
-	for _, arg := range args {
-		endpoint = strings.Replace(endpoint, "%s", arg, 1)
-	}
-	return endpoint
 }

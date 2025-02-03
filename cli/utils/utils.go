@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"slices"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/bardic/gocrib/queries/queries"
 
-	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
@@ -72,14 +70,14 @@ func GetPlayerByAccountId(accountId *int, players []*queries.Player) (*queries.P
 	return nil, errors.New("no player found")
 }
 
-func CreateGame(accountId *int) vo.MatchDetailsResponse {
-	newMatch := services.PostPlayerMatch(accountId).([]byte)
+// func CreateGame(accountId *int) vo.MatchDetailsResponse {
+// 	newMatch := services.PostPlayerMatch(accountId).([]byte)
 
-	var matchDetails vo.MatchDetailsResponse
-	json.Unmarshal(newMatch, &matchDetails)
+// 	var matchDetails vo.MatchDetailsResponse
+// 	json.Unmarshal(newMatch, &matchDetails)
 
-	return matchDetails
-}
+// 	return matchDetails
+// }
 
 func GetPlayerForAccountId(id *int, match *vo.GameMatch) *vo.GamePlayer {
 	for _, player := range match.Players {
@@ -205,4 +203,11 @@ func IdFromCards(cards []queries.Matchcard) []int {
 	}
 
 	return ids
+}
+
+func EndPointBuilder(endpoint string, args ...string) string {
+	for _, arg := range args {
+		endpoint = strings.Replace(endpoint, "%s", arg, 1)
+	}
+	return endpoint
 }
