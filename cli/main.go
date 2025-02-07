@@ -22,7 +22,7 @@ import (
 type CLI struct {
 	GameInitd         bool
 	ViewStateName     vo.ViewStateName
-	ActivePlayerId    *int
+	currentPlayer     *vo.GamePlayer
 	account           *queries.Account
 	matchId           *int
 	currentController cliVO.IController
@@ -111,6 +111,16 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (cli *CLI) createMatchView(match *vo.GameMatch) {
+	player := &vo.GamePlayer{}
+	resp := services.GetPlayerByForMatchAndAccount(match.ID, cli.account.ID)
+	err := json.Unmarshal(resp.([]byte), player)
+
+	if err != nil {
+		utils.Logger.Sugar().Error(err)
+	}
+
+	cli.currentPlayer = player
+
 	gameContainerModel := &container.Model{
 		Tabs: []cliVO.Tab{
 			{
@@ -131,7 +141,7 @@ func (cli *CLI) createMatchView(match *vo.GameMatch) {
 			},
 		},
 		Match:       match,
-		LocalPlayer: match.Players[0],
+		LocalPlayer: *player,
 		ActiveTab:   0,
 	}
 
@@ -171,6 +181,7 @@ func (m *CLI) View() string {
 		return styles.ViewStyle.Render(m.currentController.Render(nil))
 	case *gameContainer.Controller:
 		match := m.currentController.(*gameContainer.Controller).Model.(*container.Model).Match
+		m.currentController.(*gameContainer.Controller).Model.(*container.Model).LocalPlayer = *m.currentPlayer
 		return styles.ViewStyle.Render(m.currentController.Render(match))
 	default:
 		return "No view"

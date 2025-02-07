@@ -33,6 +33,17 @@ definitions:
       name:
         type: string
     type: object
+  queries.Card:
+    properties:
+      art:
+        type: string
+      id:
+        type: integer
+      suit:
+        $ref: '#/definitions/queries.Cardsuit'
+      value:
+        $ref: '#/definitions/queries.Cardvalue'
+    type: object
   queries.Cardstate:
     enum:
     - Deck
@@ -216,22 +227,10 @@ definitions:
     type: object
   vo.GameCard:
     properties:
-      art:
-        type: string
-      cardid:
-        type: integer
-      currowner:
-        type: integer
-      id:
-        type: integer
-      origowner:
-        type: integer
-      state:
-        $ref: '#/definitions/queries.Cardstate'
-      suit:
-        $ref: '#/definitions/queries.Cardsuit'
-      value:
-        $ref: '#/definitions/queries.Cardvalue'
+      card:
+        $ref: '#/definitions/queries.Card'
+      match:
+        $ref: '#/definitions/queries.Matchcard'
     type: object
   vo.GameDeck:
     properties:
@@ -421,6 +420,39 @@ paths:
           description: Unprocessable Entity
           schema: {}
       summary: Get match by id
+      tags:
+      - match
+  /match/{matchId}/account/{accountId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: account id
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/queries.GetMatchCardsRow'
+            type: array
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get match card by match id
       tags:
       - match
   /match/{matchId}/cards:

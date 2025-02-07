@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/vo"
+	"github.com/bardic/gocrib/cli/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -45,12 +45,9 @@ func PostPlayerMatch(accountId *int) tea.Msg {
 }
 
 func CutDeck(matchId int, cutIndex string) tea.Msg {
-	req := vo.CutDeckReq{
-		MatchId:  &matchId,
-		CutIndex: cutIndex,
-	}
+	endpoint := utils.EndPointBuilder(EndPointMatchCutDeck, strconv.Itoa(matchId), cutIndex)
 
-	return sendReq(EndPointMatchCutDeck, http.MethodPut, req)
+	return sendReq(endpoint, http.MethodPut, "")
 }
 
 func sendReq(endPoint string, method string, body interface{}) tea.Msg {

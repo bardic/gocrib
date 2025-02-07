@@ -55,15 +55,15 @@ func GetDeckByMatchId(c echo.Context) error {
 	gameCards := []*vo.GameCard{}
 	for _, card := range cards {
 		gameCards = append(gameCards, &vo.GameCard{
-			Matchcard: queries.Matchcard{
-				ID:        card.ID_2,
+			Match: queries.Matchcard{
+				ID:        card.Matchcardid,
 				Cardid:    card.Cardid,
 				Origowner: card.Origowner,
 				Currowner: card.Currowner,
 				State:     card.State.Cardstate,
 			},
 			Card: queries.Card{
-				ID:    card.ID_2,
+				ID:    card.Cardid,
 				Value: card.Value.Cardvalue,
 				Suit:  card.Suit.Cardsuit,
 				Art:   card.Art.String,

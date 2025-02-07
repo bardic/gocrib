@@ -51,6 +51,11 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
+	switch msg.String() {
+	case "enter":
+		return ctrl.Enter()
+	}
+
 	return msg
 }
 

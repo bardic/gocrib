@@ -138,9 +138,9 @@ func scanForFlush(cardIdsInHand []*int) ([]vo.Scores, error) {
 	matchesFlush := true
 	for _, card := range gameplayCardsInHand {
 		if flushSuit == nil {
-			flushSuit = &card.Suit
+			flushSuit = &card.Card.Suit
 		} else {
-			matchesFlush = flushSuit == &card.Suit
+			matchesFlush = flushSuit == &card.Card.Suit
 		}
 	}
 
@@ -162,7 +162,7 @@ func scanForRuns(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	}
 
 	sort.Slice(gameplayCardsInPlay, func(i, j int) bool {
-		return gameplayCardsInPlay[i].Value < gameplayCardsInPlay[j].Value
+		return gameplayCardsInPlay[i].Card.Value < gameplayCardsInPlay[j].Card.Value
 	})
 
 	var pointsFound []vo.Scores
@@ -175,9 +175,9 @@ func scanForRuns(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	gameCard2 := gameplayCardsInPlay[1]
 	gameCard3 := gameplayCardsInPlay[2]
 
-	details1 := cardDetails(gameCard1.Value)
-	details2 := cardDetails(gameCard2.Value)
-	details3 := cardDetails(gameCard3.Value)
+	details1 := cardDetails(gameCard1.Card.Value)
+	details2 := cardDetails(gameCard2.Card.Value)
+	details3 := cardDetails(gameCard3.Card.Value)
 
 	var pointsToGain *int
 
@@ -193,7 +193,7 @@ func scanForRuns(cardIdsInPlay []*int) ([]vo.Scores, error) {
 		}
 
 		gameCard4 := gameplayCardsInPlay[3]
-		details4 := cardDetails(gameCard4.Value)
+		details4 := cardDetails(gameCard4.Card.Value)
 
 		if *details3.Value+1 == *details4.Value {
 			pointsToGain = &Four
@@ -306,7 +306,7 @@ func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	}
 
 	sort.Slice(gameplayCardsInPlay, func(i, j int) bool {
-		return gameplayCardsInPlay[i].Value < gameplayCardsInPlay[j].Value
+		return gameplayCardsInPlay[i].Card.Value < gameplayCardsInPlay[j].Card.Value
 	})
 
 	var pointsFound []vo.Scores
@@ -318,8 +318,8 @@ func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	gameCard1 := gameplayCardsInPlay[0]
 	gameCard2 := gameplayCardsInPlay[1]
 
-	details1 := cardDetails(gameCard1.Value)
-	details2 := cardDetails(gameCard2.Value)
+	details1 := cardDetails(gameCard1.Card.Value)
+	details2 := cardDetails(gameCard2.Card.Value)
 
 	if details1.Value == details2.Value {
 		pointsFound = append(pointsFound, vo.Scores{
@@ -333,7 +333,7 @@ func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	}
 
 	gameCard3 := gameplayCardsInPlay[2]
-	details3 := cardDetails(gameCard3.Value)
+	details3 := cardDetails(gameCard3.Card.Value)
 
 	if details1.Value == details3.Value {
 		pointsFound = append(pointsFound, vo.Scores{
@@ -354,7 +354,7 @@ func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	}
 
 	gameCard4 := gameplayCardsInPlay[3]
-	details4 := cardDetails(gameCard4.Value)
+	details4 := cardDetails(gameCard4.Card.Value)
 
 	if details1.Value == details4.Value {
 		pointsFound = append(pointsFound, vo.Scores{
@@ -391,8 +391,8 @@ func scanForFifthteens(gameplayCardsIdsInPlay []*int) ([]vo.Scores, error) {
 	//find if any combination of cardsInPlay equals 15
 	for i := 0; i < len(cardsInPlay); i++ {
 		for j := i; j < len(cardsInPlay); j++ {
-			details1 := cardDetails(cardsInPlay[i].Value)
-			details2 := cardDetails(cardsInPlay[j].Value)
+			details1 := cardDetails(cardsInPlay[i].Card.Value)
+			details2 := cardDetails(cardsInPlay[j].Card.Value)
 			// details3 := cardDetails(cardsInPlay[k].Value)
 
 			if *details1.Value+*details2.Value == 15 {
@@ -411,9 +411,9 @@ func scanForFifthteens(gameplayCardsIdsInPlay []*int) ([]vo.Scores, error) {
 	for i := 0; i < len(cardsInPlay); i++ {
 		for j := i; j < len(cardsInPlay); j++ {
 			for k := j; k < len(cardsInPlay); k++ {
-				details1 := cardDetails(cardsInPlay[i].Value)
-				details2 := cardDetails(cardsInPlay[j].Value)
-				details3 := cardDetails(cardsInPlay[k].Value)
+				details1 := cardDetails(cardsInPlay[i].Card.Value)
+				details2 := cardDetails(cardsInPlay[j].Card.Value)
+				details3 := cardDetails(cardsInPlay[k].Card.Value)
 
 				if *details1.Value+*details2.Value+*details3.Value == 15 && i != j && j != k {
 					pointsFound = append(pointsFound, vo.Scores{
@@ -440,9 +440,9 @@ func scanRightJackCut(gameplayCardsIdsInPlay []*int, match vo.GameMatch) ([]vo.S
 	}
 
 	for i := 0; i < len(cardsInPlay); i++ {
-		details1 := cardDetails(cardsInPlay[i].Value)
+		details1 := cardDetails(cardsInPlay[i].Card.Value)
 
-		if details1.Value == &Eleven && cardsInPlay[i].Suit == cut[0].Suit {
+		if details1.Value == &Eleven && cardsInPlay[i].Card.Suit == cut[0].Card.Suit {
 			return []vo.Scores{{
 				Cards: []vo.GameCard{cardsInPlay[0], cardsInPlay[1]},
 				Point: &One,
@@ -481,9 +481,9 @@ func scanForThirtyOne(gameplayCardsIdsInPlay []*int) ([]vo.Scores, error) {
 		return pointsFound, nil
 	}
 
-	details1 := cardDetails(cardsInPlay[0].Value)
-	details2 := cardDetails(cardsInPlay[1].Value)
-	details3 := cardDetails(cardsInPlay[2].Value)
+	details1 := cardDetails(cardsInPlay[0].Card.Value)
+	details2 := cardDetails(cardsInPlay[1].Card.Value)
+	details3 := cardDetails(cardsInPlay[2].Card.Value)
 
 	if *details1.Value+*details2.Value+*details3.Value == 31 {
 		pointsFound = append(pointsFound, vo.Scores{
@@ -496,7 +496,7 @@ func scanForThirtyOne(gameplayCardsIdsInPlay []*int) ([]vo.Scores, error) {
 		return pointsFound, nil
 	}
 
-	details4 := cardDetails(cardsInPlay[3].Value)
+	details4 := cardDetails(cardsInPlay[3].Card.Value)
 
 	if *details1.Value+*details2.Value+*details4.Value == 31 {
 		pointsFound = append(pointsFound, vo.Scores{
@@ -554,7 +554,7 @@ func scanForLastCard(m vo.GameMatch) ([]vo.Scores, error) {
 
 	total := 0
 	for _, card := range cardsInPlay {
-		details := cardDetails(card.Value)
+		details := cardDetails(card.Card.Value)
 		total = total + *details.Value
 	}
 
@@ -591,7 +591,7 @@ func scanJackOnCut(match vo.GameMatch) ([]vo.Scores, error) {
 		return []vo.Scores{}, err
 	}
 
-	details := cardDetails(cardsInPlay[0].Value)
+	details := cardDetails(cardsInPlay[0].Card.Value)
 
 	if details.Order == &Eleven {
 		return []vo.Scores{{

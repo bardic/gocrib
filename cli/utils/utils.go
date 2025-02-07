@@ -21,11 +21,11 @@ var Logger *zap.Logger
 func GetCardById(id int, deck *vo.GameDeck) *vo.GameCard {
 	for _, card := range deck.Cards {
 		gameCard := &vo.GameCard{
-			Matchcard: card.Matchcard,
-			Card:      card.Card,
+			Match: card.Match,
+			Card:  card.Card,
 		}
 
-		if *card.Matchcard.Cardid == id {
+		if *card.Match.Cardid == id {
 			return gameCard
 		}
 	}

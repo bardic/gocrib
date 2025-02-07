@@ -32,12 +32,12 @@ func GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	pid := c.Param("matchId")
-	playerId, err := strconv.Atoi(pid)
+	// pid := c.Param("matchId")
+	// playerId, err := strconv.Atoi(pid)
 
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
+	// if err != nil {
+	// 	return c.JSON(http.StatusBadRequest, err)
+	// }
 
 	db := conn.Pool()
 	defer db.Close()
@@ -51,10 +51,7 @@ func GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	cards, err := q.GetMatchCardsByPlayerIdAndDeckId(ctx, queries.GetMatchCardsByPlayerIdAndDeckIdParams{
-		ID:        &id,
-		Currowner: &playerId,
-	})
+	cards, err := q.GetMatchCardsByPlayerIdAndDeckId(ctx, &id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -63,15 +60,15 @@ func GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 	gameCards := []*vo.GameCard{}
 	for _, card := range cards {
 		gameCards = append(gameCards, &vo.GameCard{
-			Matchcard: queries.Matchcard{
-				ID:        card.ID_2,
-				Cardid:    card.Cardid,
+			Match: queries.Matchcard{
+				ID:        card.Matchcardid,
+				Cardid:    card.Matchcardcardid,
 				Origowner: card.Origowner,
 				Currowner: card.Currowner,
 				State:     card.State.Cardstate,
 			},
 			Card: queries.Card{
-				ID:    card.ID_2,
+				ID:    card.Cardid,
 				Value: card.Value.Cardvalue,
 				Suit:  card.Suit.Cardsuit,
 				Art:   card.Art.String,

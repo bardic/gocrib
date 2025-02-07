@@ -14,10 +14,11 @@ const (
 	//Game
 	EndPointGame = BaseUrl + "/game/playCard"
 	//Player
-	EndPointPlayer      = BaseUrl + "/match/%s/player"
-	EndPointKitty       = BaseUrl + "/match/%s/player/%s/kitty"
-	EndPointPlay        = BaseUrl + "/match/%s/player/%s/play"
-	EndPointPlayerReady = BaseUrl + "/match/%s/player/%s/ready"
+	EndPointPlayer                     = BaseUrl + "/match/%s/player"
+	EndPointKitty                      = BaseUrl + "/match/%s/player/%s/kitty"
+	EndPointPlayerByForMatchAndAccount = BaseUrl + "/match/%s/account/%s"
+	EndPointPlay                       = BaseUrl + "/match/%s/player/%s/play"
+	EndPointPlayerReady                = BaseUrl + "/match/%s/player/%s/ready"
 	//Match
 	EndPointMatch                  = BaseUrl + "/match"
 	EndPointMatchState             = BaseUrl + "/match/%s/state"
@@ -25,7 +26,7 @@ const (
 	EndPointOpenMatch              = BaseUrl + "/open"
 	EndPointMatchCard              = BaseUrl + "/match/%s/card"
 	EndPointGameplayCardsByMatch   = BaseUrl + "/match/%s/cards?id=%s"
-	EndPointMatchCutDeck           = BaseUrl + "/match/%s/cut"
+	EndPointMatchCutDeck           = BaseUrl + "/match/%s/cut/%s"
 	EndPointDeckById               = BaseUrl + "/match/%s/deck"
 	EndPointDeckByPlayerAndMatchId = BaseUrl + "/match/%s/player/%s/deck"
 	//Deck

@@ -62,7 +62,6 @@ func UpdateKitty(c echo.Context) error {
 			Origowner: &playerId,
 			Currowner: &playerId,
 		})
-
 	}
 
 	err = helpers.UpdateGameState(&matchId, queries.GamestateCut)

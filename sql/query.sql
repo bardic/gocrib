@@ -373,8 +373,15 @@ WHERE
 SELECT 
     deck_matchcard.*, 
     deck.*,
-    matchcard.*,
-    card.*
+    matchcard.id as matchcardid,
+    matchcard.cardid as matchcardcardid,
+    matchcard.origowner,
+    matchcard.currowner,
+    matchcard.state,
+    card.id as cardid,
+    card.value,
+    card.suit,
+    card.art
 FROM 
     deck_matchcard
 LEFT JOIN
@@ -382,9 +389,9 @@ LEFT JOIN
 LEFT JOIN
     deck ON deck_matchcard.deckid=deck.id
 LEFT JOIN
-    card ON deck_matchcard.matchcardId=card.id
+    card ON matchcard.cardid =card.id
 WHERE
-     deck.id = $1 AND (matchcard.currowner = $2 OR matchcard.currowner IS NULL);
+     deck.id = $1;
 
 -- name: ResetDeckState :exec
 UPDATE matchcard m SET state = 'Deck', origowner = null, currowner = null FROM matchcard
@@ -512,3 +519,73 @@ LEFT JOIN
 WHERE
     match_player.matchid = $1;
 
+
+-- name: GetPlayerByAccountAndMatchIdJSON :one
+SELECT
+    json_build_object(
+        'id', p.id,
+        'accountid', p.accountid,
+        'score', p.score,
+        'isready', p.isready,
+        'art', p.art,
+        'hand',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Hand'
+        ),
+        'kitty',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Kitty'
+        ),
+        'play',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Play'
+        )
+    )
+FROM player as p
+LEFT JOIN
+    match_player ON p.id=match_player.playerid
+WHERE
+    match_player.matchid = $1 AND p.accountid = $2;
+
+-- name: GetPlayerByMatchAndAccountId :one
+SELECT 
+    player.*
+FROM
+    player
+LEFT JOIN
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1 AND player.accountid = $2;

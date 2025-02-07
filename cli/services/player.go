@@ -22,6 +22,12 @@ func GetPlayer(playerId int) tea.Msg {
 	return url(EndPointPlayer+"/?id="+pid, http.MethodGet, "")
 }
 
+func GetPlayerByForMatchAndAccount(matchId, playerId *int) tea.Msg {
+	endpoint := utils.EndPointBuilder(EndPointPlayerByForMatchAndAccount, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
+
+	return url(endpoint, http.MethodGet, "")
+}
+
 func PutKitty(matchId, playerId *int, cards vo.HandModifier) tea.Msg {
 	b, err := json.Marshal(cards)
 	if err != nil {

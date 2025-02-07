@@ -36,9 +36,9 @@ func (view *View) Render(hand []int) string {
 			continue
 		}
 
-		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Value)
+		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Card.Value)
 		styledCard := styles.ModelStyle.Render(cardStr)
-		if slices.Index(view.SelectedCardIds, *c.Matchcard.Cardid) > -1 {
+		if slices.Index(view.SelectedCardIds, *c.Match.ID) > -1 {
 			if int(i) == view.ActiveCardId {
 				styledCard = styles.SelectedFocusedStyle.Render(cardStr)
 			} else {

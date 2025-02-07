@@ -27,20 +27,29 @@ func (ctrl *Controller) Init() {
 }
 
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
+	model := ctrl.Model.(*Model)
 	cardView := ctrl.View.(*View)
-	cardView.ActiveCardId = ctrl.Model.(*Model).ActiveSlotIndex
-	cardView.SelectedCardIds = ctrl.Model.(*Model).SelectedCardIds
+	cardView.ActiveCardId = model.ActiveSlotIndex
+	cardView.SelectedCardIds = model.SelectedCardIds
+	cardView.Deck = model.Deck
 
-	localPlayerId := 0
+	localPlayerId := model.LocalPlayerID
 
 	cardView.UIFooterVO = &vo.UIFooterVO{
-		ActivePlayerId: gameMatch.Players[0].ID,
+		ActivePlayerId: gameMatch.Currentplayerturn,
 		MatchId:        gameMatch.Match.ID,
 		GameState:      gameMatch.Match.Gamestate,
 		LocalPlayerID:  &localPlayerId,
 	}
 
-	ids := utils.IdFromCards(gameMatch.Players[0].Hand)
+	var localPlayer vo.GamePlayer
+	for _, player := range ctrl.Players {
+		if *player.ID == model.LocalPlayerID {
+			localPlayer = player
+		}
+	}
+
+	ids := utils.IdFromCards(localPlayer.Hand)
 
 	ctrl.Model.(*Model).CardIds = ids
 

@@ -163,8 +163,8 @@ func CreateGameDeck(matchId *int) (*vo.GameDeck, error) {
 		}
 
 		gameCard := &vo.GameCard{
-			Matchcard: matchCard,
-			Card:      card,
+			Match: matchCard,
+			Card:  card,
 		}
 
 		matchcards = append(matchcards, gameCard)

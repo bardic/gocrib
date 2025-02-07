@@ -503,8 +503,15 @@ const getMatchCardsByPlayerIdAndDeckId = `-- name: GetMatchCardsByPlayerIdAndDec
 SELECT 
     deck_matchcard.deckid, deck_matchcard.matchcardid, 
     deck.id, deck.cutmatchcardid,
-    matchcard.id, matchcard.cardid, matchcard.origowner, matchcard.currowner, matchcard.state,
-    card.id, card.value, card.suit, card.art
+    matchcard.id as matchcardid,
+    matchcard.cardid as matchcardcardid,
+    matchcard.origowner,
+    matchcard.currowner,
+    matchcard.state,
+    card.id as cardid,
+    card.value,
+    card.suit,
+    card.art
 FROM 
     deck_matchcard
 LEFT JOIN
@@ -512,34 +519,29 @@ LEFT JOIN
 LEFT JOIN
     deck ON deck_matchcard.deckid=deck.id
 LEFT JOIN
-    card ON deck_matchcard.matchcardId=card.id
+    card ON matchcard.cardid =card.id
 WHERE
-     deck.id = $1 AND (matchcard.currowner = $2 OR matchcard.currowner IS NULL)
+     deck.id = $1
 `
 
-type GetMatchCardsByPlayerIdAndDeckIdParams struct {
-	ID        *int
-	Currowner *int
-}
-
 type GetMatchCardsByPlayerIdAndDeckIdRow struct {
-	Deckid         *int
-	Matchcardid    *int
-	ID             *int
-	Cutmatchcardid *int
-	ID_2           *int
-	Cardid         *int
-	Origowner      *int
-	Currowner      *int
-	State          NullCardstate
-	ID_3           *int
-	Value          NullCardvalue
-	Suit           NullCardsuit
-	Art            pgtype.Text
+	Deckid          *int
+	Matchcardid     *int
+	ID              *int
+	Cutmatchcardid  *int
+	Matchcardid_2   *int
+	Matchcardcardid *int
+	Origowner       *int
+	Currowner       *int
+	State           NullCardstate
+	Cardid          *int
+	Value           NullCardvalue
+	Suit            NullCardsuit
+	Art             pgtype.Text
 }
 
-func (q *Queries) GetMatchCardsByPlayerIdAndDeckId(ctx context.Context, arg GetMatchCardsByPlayerIdAndDeckIdParams) ([]GetMatchCardsByPlayerIdAndDeckIdRow, error) {
-	rows, err := q.db.Query(ctx, getMatchCardsByPlayerIdAndDeckId, arg.ID, arg.Currowner)
+func (q *Queries) GetMatchCardsByPlayerIdAndDeckId(ctx context.Context, id *int) ([]GetMatchCardsByPlayerIdAndDeckIdRow, error) {
+	rows, err := q.db.Query(ctx, getMatchCardsByPlayerIdAndDeckId, id)
 	if err != nil {
 		return nil, err
 	}
@@ -552,12 +554,12 @@ func (q *Queries) GetMatchCardsByPlayerIdAndDeckId(ctx context.Context, arg GetM
 			&i.Matchcardid,
 			&i.ID,
 			&i.Cutmatchcardid,
-			&i.ID_2,
-			&i.Cardid,
+			&i.Matchcardid_2,
+			&i.Matchcardcardid,
 			&i.Origowner,
 			&i.Currowner,
 			&i.State,
-			&i.ID_3,
+			&i.Cardid,
 			&i.Value,
 			&i.Suit,
 			&i.Art,
@@ -925,6 +927,79 @@ func (q *Queries) GetPlayer(ctx context.Context, id *int) (Player, error) {
 	return i, err
 }
 
+const getPlayerByAccountAndMatchIdJSON = `-- name: GetPlayerByAccountAndMatchIdJSON :one
+SELECT
+    json_build_object(
+        'id', p.id,
+        'accountid', p.accountid,
+        'score', p.score,
+        'isready', p.isready,
+        'art', p.art,
+        'hand',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Hand'
+        ),
+        'kitty',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Kitty'
+        ),
+        'play',
+        (
+            SELECT
+                json_agg(
+                    json_build_object(
+                        'id', m.id,
+                        'cardid', m.cardid,
+                        'origowner', m.origowner,
+                        'currowner', m.currowner,
+                        'state', m.state
+                    )
+                )
+            FROM matchcard AS m
+            WHERE m.currowner = p.id AND m.state = 'Play'
+        )
+    )
+FROM player as p
+LEFT JOIN
+    match_player ON p.id=match_player.playerid
+WHERE
+    match_player.matchid = $1 AND p.accountid = $2
+`
+
+type GetPlayerByAccountAndMatchIdJSONParams struct {
+	Matchid   *int
+	Accountid *int
+}
+
+func (q *Queries) GetPlayerByAccountAndMatchIdJSON(ctx context.Context, arg GetPlayerByAccountAndMatchIdJSONParams) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getPlayerByAccountAndMatchIdJSON, arg.Matchid, arg.Accountid)
+	var json_build_object []byte
+	err := row.Scan(&json_build_object)
+	return json_build_object, err
+}
+
 const getPlayerById = `-- name: GetPlayerById :one
 SELECT 	
 	p.id, p.accountid, p.score, p.isready, p.art,
@@ -970,6 +1045,35 @@ func (q *Queries) GetPlayerById(ctx context.Context, currowner *int) (GetPlayerB
 		&i.Hand,
 		&i.Board,
 		&i.Kitty,
+	)
+	return i, err
+}
+
+const getPlayerByMatchAndAccountId = `-- name: GetPlayerByMatchAndAccountId :one
+SELECT 
+    player.id, player.accountid, player.score, player.isready, player.art
+FROM
+    player
+LEFT JOIN
+    match_player ON player.id=match_player.playerid
+WHERE
+    match_player.matchid = $1 AND player.accountid = $2
+`
+
+type GetPlayerByMatchAndAccountIdParams struct {
+	Matchid   *int
+	Accountid *int
+}
+
+func (q *Queries) GetPlayerByMatchAndAccountId(ctx context.Context, arg GetPlayerByMatchAndAccountIdParams) (Player, error) {
+	row := q.db.QueryRow(ctx, getPlayerByMatchAndAccountId, arg.Matchid, arg.Accountid)
+	var i Player
+	err := row.Scan(
+		&i.ID,
+		&i.Accountid,
+		&i.Score,
+		&i.Isready,
+		&i.Art,
 	)
 	return i, err
 }

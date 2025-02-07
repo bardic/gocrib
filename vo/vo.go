@@ -20,8 +20,8 @@ type GameDeck struct {
 }
 
 type GameCard struct {
-	queries.Matchcard
-	queries.Card
+	Match queries.Matchcard
+	Card  queries.Card
 }
 
 type GameCardDetails struct {

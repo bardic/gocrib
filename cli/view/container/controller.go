@@ -32,12 +32,13 @@ func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
 	containerModel := ctrl.Model.(*Model)
 
 	cardIds := []int{}
-	for _, card := range gamematch.Players[0].Hand {
+
+	for _, card := range containerModel.LocalPlayer.Hand {
 		cardIds = append(cardIds, *card.Cardid)
 	}
 
 	containerHeader := ctrl.View.Render(cardIds)
-	viewRender := containerModel.Subcontroller.Render(gamematch)
+	viewRender := containerModel.Subcontroller.Render(containerModel.Match)
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
 }
@@ -45,12 +46,13 @@ func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 	// var cmd tea.Cmd
 	var cmds []tea.Cmd
-	// containerModel := ctrl.Model.(*Model)
-	// subView := containerModel.Subview
+	containerModel := ctrl.Model.(*Model)
+	subView := containerModel.Subcontroller
 
-	// if gameMatch != nil {
-	// 	cmd = subView.Update(msg, gameMatch)
-	// }
+	if gameMatch != nil {
+		cmd := subView.Update(msg, gameMatch)
+		cmds = append(cmds, cmd)
+	}
 
 	// cmds = append(cmds, cmd)
 
@@ -224,19 +226,20 @@ func (ctrl *Controller) CreateController(name string, currentState queries.Games
 	}
 }
 
-func (ctrl *Controller) getGameDeckForMatchId(matchId int) *vo.GameDeck {
-	var deck *vo.GameDeck
-	resp := services.GetDeckByMatchId(matchId)
-	err := json.Unmarshal(resp.([]byte), &deck)
-	if err != nil {
-		utils.Logger.Sugar().Error(err)
-	}
+// func (ctrl *Controller) getGameDeckForMatchId(matchId int) *vo.GameDeck {
+// 	var deck *vo.GameDeck
+// 	resp := services.GetDeckByMatchId(matchId)
+// 	err := json.Unmarshal(resp.([]byte), &deck)
+// 	if err != nil {
+// 		utils.Logger.Sugar().Error(err)
+// 	}
 
-	return deck
-}
+// 	return deck
+// }
 
 func (ctrl *Controller) getDeckByPlayerIdAndMatchId(playerId, matchId int) *vo.GameDeck {
 	var deck *vo.GameDeck
+
 	resp := services.GetDeckByPlayIdAndMatchId(playerId, matchId)
 	err := json.Unmarshal(resp.([]byte), &deck)
 	if err != nil {

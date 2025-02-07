@@ -71,6 +71,7 @@ func v1Routes(g *echo.Group) {
 	//Match
 	matchGroup := g.Group("/match/:matchId")
 	matchGroup.GET("/cards", match.GetMatchCardsForMatchId)
+	matchGroup.GET("/account/:accountId", match.GetPlayerIdForMatchAndAccount)
 	matchGroup.PUT("/cut/:cutIndex", match.CutDeck)
 	matchGroup.PUT("/join/:accountId", match.JoinMatch)
 	matchGroup.PUT("/deal", match.Deal)

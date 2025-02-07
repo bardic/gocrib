@@ -183,6 +183,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/match/{matchId}/account/{accountId}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Get match card by match id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "matchId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "account id",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/queries.GetMatchCardsRow"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/match/{matchId}/cards": {
             "get": {
                 "consumes": [
@@ -927,6 +976,23 @@ const docTemplate = `{
                 }
             }
         },
+        "queries.Card": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "suit": {
+                    "$ref": "#/definitions/queries.Cardsuit"
+                },
+                "value": {
+                    "$ref": "#/definitions/queries.Cardvalue"
+                }
+            }
+        },
         "queries.Cardstate": {
             "type": "string",
             "enum": [
@@ -1172,29 +1238,11 @@ const docTemplate = `{
         "vo.GameCard": {
             "type": "object",
             "properties": {
-                "art": {
-                    "type": "string"
+                "card": {
+                    "$ref": "#/definitions/queries.Card"
                 },
-                "cardid": {
-                    "type": "integer"
-                },
-                "currowner": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "origowner": {
-                    "type": "integer"
-                },
-                "state": {
-                    "$ref": "#/definitions/queries.Cardstate"
-                },
-                "suit": {
-                    "$ref": "#/definitions/queries.Cardsuit"
-                },
-                "value": {
-                    "$ref": "#/definitions/queries.Cardvalue"
+                "match": {
+                    "$ref": "#/definitions/queries.Matchcard"
                 }
             }
         },
