@@ -70,10 +70,6 @@ func OnDetermineFirst(matchId int) (*vo.GameMatch, error) {
 		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
 	turnOrder := 1
 	for _, player := range players {
 		q.UpdatePlayerTurnOrder(ctx, queries.UpdatePlayerTurnOrderParams{

@@ -174,16 +174,6 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 
 }
 
-func getPlayerHand(playerId *int, players []vo.GamePlayer) []int {
-	for _, p := range players {
-		if p.ID == playerId {
-			return utils.IdFromCards(p.Hand)
-		}
-	}
-
-	return []int{}
-}
-
 func (ctrl *Controller) getHandModelForCardIds(localPlayerId, matchId int, cardIds []int) *cliVO.HandVO {
 	//gameDeck := ctrl.getGameDeckForMatchId(matchId)
 	gameDeck := ctrl.getDeckByPlayerIdAndMatchId(localPlayerId, matchId)
