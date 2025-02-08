@@ -15,11 +15,11 @@ const (
 )
 
 type IController interface {
-	Init()
 	Render(gameMatch *vo.GameMatch) string
 	ParseInput(tea.KeyMsg) tea.Msg
 	Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd
 	GetState() ControllerState
+	GetModel() IModel
 }
 
 type IView interface {
@@ -42,15 +42,42 @@ type HandVO struct {
 }
 
 type IModel interface {
+	GetMatch() *vo.GameMatch
+	GetPlayer() *vo.GamePlayer
 }
 
 type ViewModel struct {
 	Name string
 }
 
-type Controller struct {
-	View  IView
-	Model IModel
+func (m ViewModel) GetMatch() *vo.GameMatch {
+	return m.GetMatch()
+}
+
+func (m ViewModel) GetPlayer() *vo.GamePlayer {
+	return m.GetPlayer()
+}
+
+type GameController struct {
+	View       IView
+	Model      IModel
+	Controller IController
+}
+
+func (ctrl *GameController) GetModel() IModel {
+	return ctrl.Model
+}
+
+func (ctrl *GameController) GetView() IView {
+	return ctrl.View
+}
+
+func (ctrl *GameController) SetModel(model IModel) {
+	ctrl.Model = model
+}
+
+func (ctrl *GameController) SetView(view IView) {
+	ctrl.View = view
 }
 
 type Tab struct {

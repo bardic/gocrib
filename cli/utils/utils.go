@@ -70,15 +70,6 @@ func GetPlayerByAccountId(accountId *int, players []*queries.Player) (*queries.P
 	return nil, errors.New("no player found")
 }
 
-// func CreateGame(accountId *int) vo.MatchDetailsResponse {
-// 	newMatch := services.PostPlayerMatch(accountId).([]byte)
-
-// 	var matchDetails vo.MatchDetailsResponse
-// 	json.Unmarshal(newMatch, &matchDetails)
-
-// 	return matchDetails
-// }
-
 func GetPlayerForAccountId(id *int, match *vo.GameMatch) *vo.GamePlayer {
 	for _, player := range match.Players {
 		if player.Accountid == id {
@@ -88,22 +79,6 @@ func GetPlayerForAccountId(id *int, match *vo.GameMatch) *vo.GamePlayer {
 
 	return nil
 }
-
-// func GetVisibleCards(activeTab int, player queries.Player) []*int {
-// 	var cards []*int
-// 	switch activeTab {
-// 	case 0:
-// 		cards = nil
-// 	case 1:
-// 		cards = player.Play
-// 	case 2:
-// 		cards = player.Hand
-// 	case 3:
-// 		cards = player.Kitty
-// 	}
-
-// 	return cards
-// }
 
 func BuildCommonFooter(activePlayerId, localPlayerId, matchId *int, gameState queries.Gamestate) string {
 	f := fmt.Sprintf("\nState: %v | Local/Active Player : %v/%v | Match ID: %v ", gameState, localPlayerId, activePlayerId, matchId)

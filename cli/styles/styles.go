@@ -57,6 +57,8 @@ var (
 			Width(75).
 			Height(12)
 
+	ActiveCard = WindowStyle.Align(lipgloss.Center, lipgloss.Center).Render("Active View")
+
 	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
 	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
 )

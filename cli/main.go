@@ -9,7 +9,6 @@ import (
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/view/container"
-	"github.com/bardic/gocrib/cli/view/gameContainer"
 	"github.com/bardic/gocrib/cli/view/lobby"
 	"github.com/bardic/gocrib/cli/view/login"
 	cliVO "github.com/bardic/gocrib/cli/vo"
@@ -20,39 +19,29 @@ import (
 )
 
 type CLI struct {
-	GameInitd         bool
-	ViewStateName     vo.ViewStateName
-	currentPlayer     *vo.GamePlayer
 	account           *queries.Account
-	matchId           *int
 	currentController cliVO.IController
-	isOpponent        bool
-	// GameMatch         *vo.GameMatch
 }
 
 func main() {
 	utils.Logger, _ = utils.NewLogger()
-	defer utils.Logger.Sync() // flushes buffer, if any
+	defer utils.Logger.Sync()
 
-	p := tea.NewProgram(newModel())
+	p := tea.NewProgram(newCLIModel(login.New()))
 
 	if _, err := p.Run(); err != nil {
 		utils.Logger.Sugar().Error(err)
 	}
 }
 
-func (m *CLI) Init() tea.Cmd {
-	return textinput.Blink
+func newCLIModel(activeController cliVO.IController) *CLI {
+	return &CLI{
+		currentController: activeController,
+	}
 }
 
-func newModel() *CLI {
-	m := &CLI{
-		currentController: &login.Controller{},
-	}
-
-	m.currentController.Init()
-
-	return m
+func (cli *CLI) Init() tea.Cmd {
+	return textinput.Blink
 }
 
 func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -69,12 +58,11 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		})
 	case vo.StateChangeMsg:
-		// fmt.Println(msg.NewState)
 		switch msg.NewState {
 		case vo.LobbyView:
-			activeMatchId := 0 //TODO what the fuck is this doing
+			activeMatchId := 0
 			cli.currentController = &lobby.Controller{
-				Controller: cliVO.Controller{
+				GameController: cliVO.GameController{
 					Model: lobby.Model{
 						ViewModel: cliVO.ViewModel{
 							Name: "Lobby",
@@ -85,22 +73,16 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					View: &lobby.View{},
 				},
 			}
-			cli.ViewStateName = vo.LobbyView
 
 			services.GetOpenMatches()
 		case vo.JoinGameView:
-			cli.isOpponent = true
 			fallthrough
 		case vo.CreateGameView:
-			cli.matchId = msg.MatchId
-
 			resp := services.GetMatchById(msg.MatchId)
 			err := json.Unmarshal(resp.([]byte), &match)
 			if err != nil {
 				utils.Logger.Sugar().Error(err)
 			}
-
-			//cli.GameMatch = match
 
 			cli.createMatchView(match)
 		}
@@ -119,58 +101,7 @@ func (cli *CLI) createMatchView(match *vo.GameMatch) {
 		utils.Logger.Sugar().Error(err)
 	}
 
-	cli.currentPlayer = player
-
-	gameContainerModel := &container.Model{
-		Tabs: []cliVO.Tab{
-			{
-				Title:    "Board",
-				TabState: vo.BoardView,
-			},
-			{
-				Title:    "Play",
-				TabState: vo.PlayView,
-			},
-			{
-				Title:    "Hand",
-				TabState: vo.HandView,
-			},
-			{
-				Title:    "Kitty",
-				TabState: vo.KittyView,
-			},
-		},
-		Match:       match,
-		LocalPlayer: *player,
-		ActiveTab:   0,
-	}
-
-	containerView := &container.View{
-		ActiveTab: gameContainerModel.ActiveTab,
-		Tabs:      gameContainerModel.Tabs,
-	}
-
-	cli.currentController = &gameContainer.Controller{
-		Controller: &container.Controller{
-			Controller: &cliVO.Controller{
-				Model: gameContainerModel,
-				View:  containerView,
-			},
-		},
-	}
-
-	ctrl := cli.currentController.(*gameContainer.Controller)
-	ctrl.Init()
-}
-
-func GetMatchForId(msg vo.StateChangeMsg) (*vo.GameMatch, error) {
-	var match *vo.GameMatch
-	resp := services.GetMatchById(msg.MatchId)
-	err := json.Unmarshal(resp.([]byte), &match)
-	if err != nil {
-		utils.Logger.Sugar().Error(err)
-	}
-	return match, err
+	cli.currentController = container.NewController(match, player)
 }
 
 func (m *CLI) View() string {
@@ -179,9 +110,9 @@ func (m *CLI) View() string {
 		return styles.ViewStyle.Render(m.currentController.Render(nil))
 	case *lobby.Controller:
 		return styles.ViewStyle.Render(m.currentController.Render(nil))
-	case *gameContainer.Controller:
-		match := m.currentController.(*gameContainer.Controller).Model.(*container.Model).Match
-		m.currentController.(*gameContainer.Controller).Model.(*container.Model).LocalPlayer = *m.currentPlayer
+	case *container.Controller:
+		model := m.currentController.GetModel().(*container.Model)
+		match := model.Match
 		return styles.ViewStyle.Render(m.currentController.Render(match))
 	default:
 		return "No view"

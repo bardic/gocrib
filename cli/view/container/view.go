@@ -14,6 +14,13 @@ type View struct {
 	Tabs      []cliVO.Tab
 }
 
+func NewView(model *Model) *View {
+	return &View{
+		ActiveTab: model.ActiveTab,
+		Tabs:      model.Tabs,
+	}
+}
+
 func (view *View) Init() {
 
 }

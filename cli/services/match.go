@@ -32,15 +32,6 @@ func JoinMatch(accountId, activeMatchId int) tea.Msg {
 }
 
 func PostPlayerMatch(accountId *int) tea.Msg {
-	// eloRangeMin := 1
-	// eloRangeMax := 3000
-	// // req := vo.MatchRequirements{
-	// // 	AccountId:   accountId,
-	// // 	IsPrivate:   false,
-	// // 	EloRangeMin: &eloRangeMin,
-	// // 	EloRangeMax: &eloRangeMax,
-	// // }
-
 	return sendReq(EndPointMatch+"/"+strconv.Itoa(*accountId), http.MethodPost, nil)
 }
 

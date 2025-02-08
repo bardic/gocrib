@@ -11,14 +11,13 @@ import (
 )
 
 type Controller struct {
-	*cliVO.Controller
+	*cliVO.GameController
 }
 
-func (ctrl *Controller) GetState() cliVO.ControllerState {
-	return cliVO.BoardControllerState
-}
-
-func (ctrl *Controller) Init() {
+func NewBoard() *Controller {
+	ctrl := &Controller{
+		GameController: &cliVO.GameController{},
+	}
 	boardModel := ctrl.Model.(*Model)
 	ctrl.View = &View{
 		State:         queries.GamestateCut,
@@ -26,8 +25,13 @@ func (ctrl *Controller) Init() {
 		LocalPlayerId: boardModel.LocalPlayerId,
 	}
 
-	ctrl.View.Init()
+	ctrl.View.(*View).Init()
 
+	return ctrl
+}
+
+func (ctrl *Controller) GetState() cliVO.ControllerState {
+	return cliVO.BoardControllerState
 }
 
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
@@ -41,11 +45,11 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 }
 
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
-	gameView := ctrl.View.(*View)
+	// gameView := ctrl.View.(*View)
 	var cmd tea.Cmd
 
-	gameView.cutInput, cmd = gameView.cutInput.Update(msg)
-	gameView.cutInput.Focus()
+	// gameView.cutInput, cmd = gameView.cutInput.Update(msg)
+	// gameView.cutInput.Focus()
 
 	return cmd
 }

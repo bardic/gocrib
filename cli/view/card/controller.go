@@ -1,6 +1,7 @@
 package card
 
 import (
+	"encoding/json"
 	"slices"
 
 	"github.com/bardic/gocrib/queries/queries"
@@ -14,16 +15,45 @@ import (
 )
 
 type Controller struct {
-	*cliVO.Controller
+	*cliVO.GameController
 	*vo.GameMatch
+}
+
+func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Controller {
+	ctrl := &Controller{
+		GameController: &cliVO.GameController{},
+		GameMatch:      match,
+	}
+
+	handModel := ctrl.getHandModelForCardIds(
+		*player.ID,
+		*match.ID,
+		utils.IdFromCards(player.Play),
+	)
+
+	m := &Model{
+		ViewModel: &cliVO.ViewModel{
+			Name: name,
+		},
+		ActiveSlotIndex: 0,
+		SelectedCardIds: []int{},
+		Deck:            handModel.Deck,
+		HandVO:          handModel,
+		State:           match.Match.Gamestate,
+	}
+
+	v := &View{
+		Deck: m.HandVO.Deck,
+	}
+
+	ctrl.Model = m
+	ctrl.View = v
+
+	return ctrl
 }
 
 func (ctrl *Controller) GetState() cliVO.ControllerState {
 	return cliVO.LobbyControllerState
-}
-
-func (ctrl *Controller) Init() {
-
 }
 
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
@@ -86,8 +116,6 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 					CardIds: cardModel.SelectedCardIds,
 				},
 			)
-
-			//fmt.Println(msg)
 		case queries.GamestatePlay:
 			services.PutPlay(
 				ctrl.ID,
@@ -98,9 +126,6 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			)
 		}
 	}
-
-	// cardView.ActiveCardId = cardModel.ActiveSlotIndex
-	// cardView.SelectedCardIds = cardModel.SelectedCardIds
 
 	return nil
 }
@@ -118,4 +143,28 @@ func (ctrl *Controller) updateActiveSlotIndex(delta int) {
 	} else if cardModel.ActiveSlotIndex > int(len(cardModel.CardIds))-1 {
 		cardModel.ActiveSlotIndex = 0
 	}
+}
+
+func (ctrl *Controller) getHandModelForCardIds(localPlayerId, matchId int, cardIds []int) *cliVO.HandVO {
+	gameDeck := ctrl.getDeckByPlayerIdAndMatchId(localPlayerId, matchId)
+
+	handModel := &cliVO.HandVO{
+		LocalPlayerID: localPlayerId,
+		CardIds:       cardIds,
+		Deck:          gameDeck,
+	}
+
+	return handModel
+}
+
+func (ctrl *Controller) getDeckByPlayerIdAndMatchId(playerId, matchId int) *vo.GameDeck {
+	var deck *vo.GameDeck
+
+	resp := services.GetDeckByPlayIdAndMatchId(playerId, matchId)
+	err := json.Unmarshal(resp.([]byte), &deck)
+	if err != nil {
+		utils.Logger.Sugar().Error(err)
+	}
+
+	return deck
 }

@@ -14,6 +14,10 @@ type GameMatch struct {
 	Players []GamePlayer
 }
 
+func (m GameMatch) SetMatch(match queries.Match) {
+	m.Match = match
+}
+
 type GameDeck struct {
 	*queries.Deck
 	Cards []*GameCard

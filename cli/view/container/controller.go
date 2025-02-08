@@ -2,8 +2,7 @@ package container
 
 import (
 	"encoding/json"
-
-	"github.com/bardic/gocrib/queries/queries"
+	"time"
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
@@ -13,19 +12,36 @@ import (
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
+	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Controller struct {
-	*cliVO.Controller
+	*cliVO.GameController
+	timer        timer.Model
+	timerStarted bool
+}
+
+func (ctrl *Controller) Init() {
+
+}
+
+func NewController(match *vo.GameMatch, player *vo.GamePlayer) *Controller {
+	model := NewModel(match, player)
+	view := NewView(model)
+	ctrl := &Controller{
+		GameController: &cliVO.GameController{
+			Model: model,
+			View:  view,
+		},
+	}
+
+	ctrl.ChangeTab(0)
+	return ctrl
 }
 
 func (ctrl *Controller) GetState() cliVO.ControllerState {
 	return cliVO.LoginControllerState
-}
-
-func (ctrl *Controller) Init() {
-	ctrl.ChangeTab(0)
 }
 
 func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
@@ -33,31 +49,35 @@ func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
 
 	cardIds := []int{}
 
-	for _, card := range containerModel.LocalPlayer.Hand {
+	for _, card := range containerModel.GetPlayer().Hand {
 		cardIds = append(cardIds, *card.Cardid)
 	}
 
-	containerHeader := ctrl.View.Render(cardIds)
-	viewRender := containerModel.Subcontroller.Render(containerModel.Match)
+	containerHeader := ctrl.GetView().Render(cardIds)
+	viewRender := containerModel.GetSubcontroller().Render(containerModel.Match)
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
 }
 
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
-	// var cmd tea.Cmd
 	var cmds []tea.Cmd
-	containerModel := ctrl.Model.(*Model)
-	subView := containerModel.Subcontroller
+	containerModel := ctrl.GetModel().(*Model)
+	subView := containerModel.GetSubcontroller()
 
 	if gameMatch != nil {
 		cmd := subView.Update(msg, gameMatch)
 		cmds = append(cmds, cmd)
 	}
 
-	// cmds = append(cmds, cmd)
+	if !ctrl.timerStarted {
+		ctrl.timer = timer.NewWithInterval(time.Hour, time.Second*1)
+		cmd := ctrl.timer.Init()
+		cmds = append(cmds, cmd)
+		ctrl.timerStarted = true
+	}
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg: //User input
+	case tea.KeyMsg:
 		resp := ctrl.ParseInput(msg)
 
 		if resp == nil {
@@ -70,7 +90,21 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 				return r
 			})
 		}
+	case timer.TickMsg: // Polling update
+		var cmd tea.Cmd
+		var gameMatch *vo.GameMatch
+		ctrl.timer, cmd = ctrl.timer.Update(msg)
 
+		resp := services.GetMatchById(ctrl.GetModel().GetMatch().ID)
+		err := json.Unmarshal(resp.([]byte), &gameMatch)
+
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+
+		ctrl.GetModel().(*Model).Match = gameMatch
+
+		cmds = append(cmds, cmd)
 	case vo.ChangeTabMsg:
 		ctrl.ChangeTab(msg.TabIndex)
 	}
@@ -79,9 +113,8 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
-	containerModel := ctrl.Model.(*Model)
-	containerView := ctrl.View.(*View)
-	//subView := containerModel.Subview
+	containerModel := ctrl.GetModel().(*Model)
+	containerView := ctrl.GetView().(*View)
 
 	switch msg.String() {
 	case "ctrl+c", "q":
@@ -115,15 +148,12 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 }
 
 func (ctrl *Controller) ChangeTab(tabIndex int) {
-	containerModel := ctrl.Model.(*Model)
-	// deckId := containerModel.Match.Deckid
-
-	// hand := getPlayerHand(containerModel.LocalPlayer.ID, containerModel.Match.Players)
+	containerModel := ctrl.GetModel().(*Model)
 
 	switch tabIndex {
 	case 0:
 		containerModel.Subcontroller = &board.Controller{
-			Controller: &cliVO.Controller{
+			GameController: &cliVO.GameController{
 				Model: &board.Model{
 					ViewModel: cliVO.ViewModel{
 						Name: "Game",
@@ -139,102 +169,24 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 			},
 		}
 	case 1:
-		containerModel.Subcontroller = ctrl.CreateController(
+		containerModel.Subcontroller = card.NewController(
 			"Play",
-			containerModel.Match.Gamestate,
-			ctrl.getHandModelForCardIds(
-				*containerModel.LocalPlayer.ID,
-				*containerModel.Match.ID,
-				utils.IdFromCards(containerModel.LocalPlayer.Play),
-			),
+			ctrl.Model.GetMatch(),
+			containerModel.LocalPlayer,
 		)
 	case 2:
-		containerModel.Subcontroller = ctrl.CreateController(
+
+		containerModel.Subcontroller = card.NewController(
 			"Hand",
-			containerModel.Match.Gamestate,
-			ctrl.getHandModelForCardIds(
-				*containerModel.LocalPlayer.ID,
-				*containerModel.Match.ID,
-				utils.IdFromCards(containerModel.LocalPlayer.Hand), //THIS IS THE WRONG PLAYER~!!!!!
-			),
+			ctrl.Model.GetMatch(),
+			containerModel.LocalPlayer,
 		)
 	case 3:
-		containerModel.Subcontroller = ctrl.CreateController(
+
+		containerModel.Subcontroller = card.NewController(
 			"Kitty",
-			containerModel.Match.Gamestate,
-			ctrl.getHandModelForCardIds(
-				*containerModel.LocalPlayer.ID,
-				*containerModel.Match.ID,
-				utils.IdFromCards(containerModel.LocalPlayer.Kitty),
-			),
+			ctrl.Model.GetMatch(),
+			containerModel.LocalPlayer,
 		)
 	}
-
-	containerModel.Subcontroller.Init()
-
-}
-
-func (ctrl *Controller) getHandModelForCardIds(localPlayerId, matchId int, cardIds []int) *cliVO.HandVO {
-	//gameDeck := ctrl.getGameDeckForMatchId(matchId)
-	gameDeck := ctrl.getDeckByPlayerIdAndMatchId(localPlayerId, matchId)
-
-	handModel := &cliVO.HandVO{
-		LocalPlayerID: localPlayerId,
-		CardIds:       cardIds,
-		Deck:          gameDeck,
-	}
-
-	return handModel
-}
-
-func (ctrl *Controller) CreateController(name string, currentState queries.Gamestate, handModel *cliVO.HandVO) cliVO.IController {
-	m := &card.Model{
-		ViewModel: &cliVO.ViewModel{
-			Name: name,
-		},
-		ActiveSlotIndex: 0,
-		SelectedCardIds: []int{},
-		Deck:            handModel.Deck,
-		HandVO:          handModel,
-		State:           currentState,
-	}
-
-	v := &card.View{
-		// ActiveCardId:   m.ActiveSlotIndex,
-		Deck: m.HandVO.Deck,
-		// ActivePlayerId: m.HandVO.LocalPlayerID,
-		// MatchId:        ctrl.Model.(*Model).Match.ID,
-		// GameState:      ctrl.Model.(*Model).Match.Gamestate,
-	}
-
-	return &card.Controller{
-		Controller: &cliVO.Controller{
-			Model: m,
-			View:  v,
-		},
-		GameMatch: ctrl.Model.(*Model).Match,
-	}
-}
-
-// func (ctrl *Controller) getGameDeckForMatchId(matchId int) *vo.GameDeck {
-// 	var deck *vo.GameDeck
-// 	resp := services.GetDeckByMatchId(matchId)
-// 	err := json.Unmarshal(resp.([]byte), &deck)
-// 	if err != nil {
-// 		utils.Logger.Sugar().Error(err)
-// 	}
-
-// 	return deck
-// }
-
-func (ctrl *Controller) getDeckByPlayerIdAndMatchId(playerId, matchId int) *vo.GameDeck {
-	var deck *vo.GameDeck
-
-	resp := services.GetDeckByPlayIdAndMatchId(playerId, matchId)
-	err := json.Unmarshal(resp.([]byte), &deck)
-	if err != nil {
-		utils.Logger.Sugar().Error(err)
-	}
-
-	return deck
 }
