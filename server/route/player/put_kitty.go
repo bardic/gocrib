@@ -64,7 +64,10 @@ func UpdateKitty(c echo.Context) error {
 		})
 	}
 
-	err = helpers.UpdateGameState(&matchId, queries.GamestateCut)
+	err = q.MarkPlayerReady(ctx, queries.MarkPlayerReadyParams{
+		Isready: true,
+		ID:      &playerId,
+	})
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -74,6 +77,25 @@ func UpdateKitty(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	allReady := true
+	for _, player := range m.Players {
+		if !player.Isready {
+			allReady = false
+			break
+		}
+	}
+
+	if allReady {
+		err = q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{
+			Gamestate: queries.GamestateCut,
+			ID:        &matchId,
+		})
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
 	}
 
 	return c.JSON(http.StatusOK, m)

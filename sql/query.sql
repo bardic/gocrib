@@ -589,3 +589,6 @@ LEFT JOIN
     match_player ON player.id=match_player.playerid
 WHERE
     match_player.matchid = $1 AND player.accountid = $2;
+
+-- name: MarkPlayerReady :exec
+UPDATE player SET isReady = $1 WHERE id = $2;

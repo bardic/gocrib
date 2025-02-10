@@ -48,11 +48,13 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 }
 
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
-	// gameView := ctrl.View.(*View)
+	gameView := ctrl.View.(*View)
 	var cmd tea.Cmd
 
-	// gameView.cutInput, cmd = gameView.cutInput.Update(msg)
-	// gameView.cutInput.Focus()
+	if gameMatch.Gamestate == queries.GamestateCut {
+		gameView.cutInput, cmd = gameView.cutInput.Update(msg)
+		gameView.cutInput.Focus()
+	}
 
 	return cmd
 }

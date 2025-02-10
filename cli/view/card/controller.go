@@ -18,12 +18,15 @@ import (
 type Controller struct {
 	*game.Controller
 	*vo.GameMatch
+	tabName string
 }
 
 func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Controller {
+
 	ctrl := &Controller{
 		Controller: &game.Controller{},
 		GameMatch:  match,
+		tabName:    name,
 	}
 
 	handModel := ctrl.getHandModelForCardIds(
@@ -77,11 +80,19 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 		}
 	}
 
-	ids := utils.IdFromCards(localPlayer.Hand)
+	var cardIds []int
+	switch ctrl.tabName {
+	case "Play":
+		cardIds = utils.IdFromCards(localPlayer.Play)
+	case "Hand":
+		cardIds = utils.IdFromCards(localPlayer.Hand)
+	case "Kitty":
+		cardIds = utils.IdFromCards(localPlayer.Kitty)
+	}
 
-	ctrl.Model.(*Model).CardIds = ids
+	ctrl.Model.(*Model).CardIds = cardIds
 
-	return cardView.Render(ids)
+	return cardView.Render(cardIds)
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
@@ -107,6 +118,10 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	case "enter":
 		switch cardModel.State {
 		case queries.GamestateDiscard:
+			activePlayer := utils.GetPlayerForAccountId(&cardModel.LocalPlayerID, ctrl.GameMatch)
+			if activePlayer.Isready {
+				return nil
+			}
 			services.PutKitty(
 				ctrl.ID,
 				&cardModel.LocalPlayerID,

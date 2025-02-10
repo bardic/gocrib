@@ -51,6 +51,9 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		return tea.Quit()
 	case "enter", "view_update":
 		utils.Logger.Info("Enter")
+		if len(lobbyView.LobbyTable.Rows()) == 0 {
+			return nil
+		}
 		idStr := lobbyView.LobbyTable.SelectedRow()[0]
 		id, err := strconv.Atoi(idStr)
 		if err != nil {

@@ -1292,6 +1292,20 @@ func (q *Queries) JoinMatch(ctx context.Context, arg JoinMatchParams) error {
 	return err
 }
 
+const markPlayerReady = `-- name: MarkPlayerReady :exec
+UPDATE player SET isReady = $1 WHERE id = $2
+`
+
+type MarkPlayerReadyParams struct {
+	Isready bool
+	ID      *int
+}
+
+func (q *Queries) MarkPlayerReady(ctx context.Context, arg MarkPlayerReadyParams) error {
+	_, err := q.db.Exec(ctx, markPlayerReady, arg.Isready, arg.ID)
+	return err
+}
+
 const passTurn = `-- name: PassTurn :exec
 UPDATE match m
 SET currentplayerturn = 
