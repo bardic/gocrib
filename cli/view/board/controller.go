@@ -33,6 +33,10 @@ func NewBoard() *Controller {
 	return ctrl
 }
 
+func (ctrl *Controller) ShowInput() {
+	ctrl.View.(*View).ShowCutInput()
+}
+
 func (ctrl *Controller) GetState() cliVO.ControllerState {
 	return cliVO.BoardControllerState
 }
@@ -48,14 +52,8 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 }
 
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
-	gameView := ctrl.View.(*View)
 	var cmd tea.Cmd
-
-	if gameMatch.Gamestate == queries.GamestateCut {
-		gameView.cutInput, cmd = gameView.cutInput.Update(msg)
-		gameView.cutInput.Focus()
-	}
-
+	ctrl.View.(*View).Update(msg)
 	return cmd
 }
 
@@ -63,6 +61,8 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	switch msg.String() {
 	case "enter":
 		return ctrl.Enter()
+		// default:
+		// 	ctrl.View.(*View).Update(msg)
 	}
 
 	return msg
@@ -73,7 +73,7 @@ func (ctrl *Controller) Enter() tea.Msg {
 	boardModel := ctrl.Model.(*Model)
 	switch boardModel.GameMatch.Gamestate {
 	case queries.GamestateCut:
-		boardModel.CutIndex = boardView.cutInput.Value()
+		boardModel.CutIndex = boardView.CutInput.Value()
 		resp := services.CutDeck(*boardModel.GameMatch.ID, boardModel.CutIndex)
 		playerId := utils.GetPlayerForAccountId(boardModel.Account.ID, boardModel.GameMatch).ID
 		services.PlayerReady(playerId, boardModel.GameMatch.ID)

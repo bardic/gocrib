@@ -12,10 +12,11 @@ import (
 	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type View struct {
-	cutInput      textinput.Model
+	CutInput      textinput.Model
 	isLoading     bool
 	State         queries.Gamestate
 	LocalPlayerId *int
@@ -31,13 +32,16 @@ func (view *View) Init() {
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
 	}
+}
 
-	view.cutInput = textinput.New()
-	view.cutInput.Placeholder = "0"
-	view.cutInput.CharLimit = 5
-	view.cutInput.Focus()
-	view.cutInput.Width = 5
+func (view *View) ShowCutInput() {
+	view.CutInput = textinput.New()
+	view.CutInput.Placeholder = "0"
+	view.CutInput.CharLimit = 5
+	view.CutInput.Focus()
+	view.CutInput.Width = 5
 	view.isLoading = false
+
 }
 
 func (view *View) Render(hand []int) string {
@@ -49,7 +53,7 @@ func (view *View) Render(hand []int) string {
 	viewBuilder := strings.Builder{}
 
 	if view.State == queries.GamestateCut {
-		viewBuilder.WriteString(view.cutInput.View() + " \n")
+		viewBuilder.WriteString(view.CutInput.View() + " \n")
 	} else {
 		viewBuilder.WriteString("\n")
 	}
@@ -65,6 +69,11 @@ func (view *View) Render(hand []int) string {
 	doc.WriteString(view.BuildFooter())
 
 	return doc.String()
+}
+
+func (view *View) Update(msg tea.Msg) {
+	view.CutInput, _ = view.CutInput.Update(msg)
+
 }
 
 func (view *View) BuildHeader() string {

@@ -21,6 +21,7 @@ type Controller struct {
 	*game.Controller
 	timer        timer.Model
 	timerStarted bool
+	tabIndex     int
 }
 
 func (ctrl *Controller) Init() {
@@ -110,6 +111,10 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 		ctrl.ChangeTab(msg.TabIndex)
 	}
 
+	if ctrl.tabIndex == 0 {
+		containerModel.Subcontroller.Update(msg, gameMatch)
+	}
+
 	return tea.Batch(cmds...)
 }
 
@@ -150,9 +155,10 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 func (ctrl *Controller) ChangeTab(tabIndex int) {
 	containerModel := ctrl.Controller.GetModel().(*Model)
-
+	ctrl.tabIndex = tabIndex
 	switch tabIndex {
 	case 0:
+
 		containerModel.Subcontroller = &board.Controller{
 			Controller: &game.Controller{
 				Model: &board.Model{
@@ -168,6 +174,9 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 				},
 			},
 		}
+
+		containerModel.Subcontroller.(*board.Controller).ShowInput()
+
 	case 1:
 		containerModel.Subcontroller = card.NewController(
 			"Play",
