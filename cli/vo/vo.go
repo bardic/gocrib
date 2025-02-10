@@ -1,6 +1,7 @@
 package vo
 
 import (
+	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -47,37 +48,17 @@ type IModel interface {
 }
 
 type ViewModel struct {
-	Name string
+	Name      string
+	AccountId *int
+	Gamematch *vo.GameMatch
 }
 
 func (m ViewModel) GetMatch() *vo.GameMatch {
-	return m.GetMatch()
+	return m.Gamematch
 }
 
 func (m ViewModel) GetPlayer() *vo.GamePlayer {
-	return m.GetPlayer()
-}
-
-type GameController struct {
-	View       IView
-	Model      IModel
-	Controller IController
-}
-
-func (ctrl *GameController) GetModel() IModel {
-	return ctrl.Model
-}
-
-func (ctrl *GameController) GetView() IView {
-	return ctrl.View
-}
-
-func (ctrl *GameController) SetModel(model IModel) {
-	ctrl.Model = model
-}
-
-func (ctrl *GameController) SetView(view IView) {
-	ctrl.View = view
+	return utils.GetPlayerForAccountId(m.AccountId, m.Gamematch)
 }
 
 type Tab struct {

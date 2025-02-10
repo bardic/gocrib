@@ -107,9 +107,9 @@ func OnDetermineFirst(matchId int) (*vo.GameMatch, error) {
 		Gamestate: queries.GamestateDeal,
 	})
 
-	p := []vo.GamePlayer{}
+	p := []*vo.GamePlayer{}
 	for _, player := range players {
-		p = append(p, vo.GamePlayer{
+		p = append(p, &vo.GamePlayer{
 			Player: queries.Player{
 				ID:        player.ID,
 				Accountid: player.Accountid,
@@ -123,7 +123,7 @@ func OnDetermineFirst(matchId int) (*vo.GameMatch, error) {
 	}
 
 	gameMatch := vo.GameMatch{
-		Match:   updatedMatch,
+		Match:   &updatedMatch,
 		Players: p,
 	}
 

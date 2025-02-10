@@ -10,13 +10,13 @@ type GamePlayer struct {
 }
 
 type GameMatch struct {
-	queries.Match
-	Players []GamePlayer
+	*queries.Match
+	Players []*GamePlayer
 }
 
-func (m GameMatch) SetMatch(match queries.Match) {
-	m.Match = match
-}
+// func (m GameMatch) SetMatch(match *queries.Match) {
+// 	m.Match = match
+// }
 
 type GameDeck struct {
 	*queries.Deck

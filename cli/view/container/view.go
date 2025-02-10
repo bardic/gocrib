@@ -3,7 +3,7 @@ package container
 import (
 	"strings"
 
-	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/styles"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 
 	"github.com/charmbracelet/lipgloss"
@@ -27,7 +27,7 @@ func (view *View) Init() {
 
 func (view *View) Render(hand []int) string {
 	doc := strings.Builder{}
-	renderedTabs := utils.RenderTabs(view.Tabs, view.ActiveTab)
+	renderedTabs := styles.RenderTabs(view.Tabs, view.ActiveTab)
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, "──────────────────────────────────────────┐"))
 

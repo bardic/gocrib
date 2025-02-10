@@ -9,6 +9,7 @@ import (
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/view/container"
+	"github.com/bardic/gocrib/cli/view/game"
 	"github.com/bardic/gocrib/cli/view/lobby"
 	"github.com/bardic/gocrib/cli/view/login"
 	cliVO "github.com/bardic/gocrib/cli/vo"
@@ -60,15 +61,14 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case vo.StateChangeMsg:
 		switch msg.NewState {
 		case vo.LobbyView:
-			activeMatchId := 0
 			cli.currentController = &lobby.Controller{
-				GameController: cliVO.GameController{
+				Controller: &game.Controller{
 					Model: lobby.Model{
 						ViewModel: cliVO.ViewModel{
-							Name: "Lobby",
+							Name:      "Lobby",
+							AccountId: msg.AccountId,
+							Gamematch: &vo.GameMatch{},
 						},
-						ActiveMatchId: &activeMatchId,
-						AccountId:     msg.AccountId,
 					},
 					View: &lobby.View{},
 				},
@@ -112,7 +112,7 @@ func (m *CLI) View() string {
 		return styles.ViewStyle.Render(m.currentController.Render(nil))
 	case *container.Controller:
 		model := m.currentController.GetModel().(*container.Model)
-		match := model.Match
+		match := model.ViewModel.Gamematch
 		return styles.ViewStyle.Render(m.currentController.Render(match))
 	default:
 		return "No view"

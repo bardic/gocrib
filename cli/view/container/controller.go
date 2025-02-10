@@ -9,6 +9,7 @@ import (
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/view/board"
 	"github.com/bardic/gocrib/cli/view/card"
+	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -17,7 +18,7 @@ import (
 )
 
 type Controller struct {
-	*cliVO.GameController
+	*game.Controller
 	timer        timer.Model
 	timerStarted bool
 }
@@ -30,7 +31,7 @@ func NewController(match *vo.GameMatch, player *vo.GamePlayer) *Controller {
 	model := NewModel(match, player)
 	view := NewView(model)
 	ctrl := &Controller{
-		GameController: &cliVO.GameController{
+		Controller: &game.Controller{
 			Model: model,
 			View:  view,
 		},
@@ -54,7 +55,7 @@ func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
 	}
 
 	containerHeader := ctrl.GetView().Render(cardIds)
-	viewRender := containerModel.GetSubcontroller().Render(containerModel.Match)
+	viewRender := containerModel.GetSubcontroller().Render(containerModel.ViewModel.Gamematch)
 
 	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
 }
@@ -102,7 +103,7 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 			utils.Logger.Sugar().Error(err)
 		}
 
-		ctrl.GetModel().(*Model).Match = gameMatch
+		ctrl.Controller.GetModel().(*Model).ViewModel.Gamematch = gameMatch
 
 		cmds = append(cmds, cmd)
 	case vo.ChangeTabMsg:
@@ -148,45 +149,44 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 }
 
 func (ctrl *Controller) ChangeTab(tabIndex int) {
-	containerModel := ctrl.GetModel().(*Model)
+	containerModel := ctrl.Controller.GetModel().(*Model)
 
 	switch tabIndex {
 	case 0:
 		containerModel.Subcontroller = &board.Controller{
-			GameController: &cliVO.GameController{
+			Controller: &game.Controller{
 				Model: &board.Model{
 					ViewModel: cliVO.ViewModel{
 						Name: "Game",
 					},
-					GameMatch:     containerModel.Match,
-					LocalPlayerId: containerModel.LocalPlayer.ID,
+					GameMatch: containerModel.ViewModel.Gamematch,
 				},
 				View: &board.View{
-					Match:         containerModel.Match,
-					LocalPlayerId: containerModel.LocalPlayer.ID,
-					State:         containerModel.Match.Gamestate,
+					Match:         containerModel.ViewModel.Gamematch,
+					LocalPlayerId: containerModel.ViewModel.GetPlayer().ID,
+					State:         containerModel.ViewModel.Gamematch.Gamestate,
 				},
 			},
 		}
 	case 1:
 		containerModel.Subcontroller = card.NewController(
 			"Play",
-			ctrl.Model.GetMatch(),
-			containerModel.LocalPlayer,
+			containerModel.GetMatch(),
+			containerModel.GetPlayer(),
 		)
 	case 2:
 
 		containerModel.Subcontroller = card.NewController(
 			"Hand",
-			ctrl.Model.GetMatch(),
-			containerModel.LocalPlayer,
+			containerModel.GetMatch(),
+			containerModel.GetPlayer(),
 		)
 	case 3:
 
 		containerModel.Subcontroller = card.NewController(
 			"Kitty",
-			ctrl.Model.GetMatch(),
-			containerModel.LocalPlayer,
+			containerModel.GetMatch(),
+			containerModel.GetPlayer(),
 		)
 	}
 }

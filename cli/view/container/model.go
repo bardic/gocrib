@@ -1,24 +1,22 @@
 package container
 
 import (
+	"github.com/bardic/gocrib/cli/utils"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 )
 
 type Model struct {
-	cliVO.IModel
+	cliVO.ViewModel
 	Tabs          []cliVO.Tab
 	State         vo.ViewState
 	States        []vo.ViewState
-	Match         *vo.GameMatch
 	Subcontroller cliVO.IController
-	LocalPlayer   *vo.GamePlayer
 	ActiveTab     int
 }
 
 func NewModel(match *vo.GameMatch, player *vo.GamePlayer) *Model {
 	return &Model{
-
 		Tabs: []cliVO.Tab{
 			{
 				Title:    "Board",
@@ -37,9 +35,13 @@ func NewModel(match *vo.GameMatch, player *vo.GamePlayer) *Model {
 				TabState: vo.KittyView,
 			},
 		},
-		Match:       match,
-		LocalPlayer: player,
-		ActiveTab:   0,
+		ViewModel: cliVO.ViewModel{
+			Name:      "Container",
+			AccountId: player.Accountid,
+			Gamematch: match,
+		},
+
+		ActiveTab: 0,
 	}
 }
 
@@ -48,9 +50,9 @@ func (m *Model) GetSubcontroller() cliVO.IController {
 }
 
 func (m *Model) GetMatch() *vo.GameMatch {
-	return m.Match
+	return m.Gamematch
 }
 
 func (m *Model) GetPlayer() *vo.GamePlayer {
-	return m.LocalPlayer
+	return utils.GetPlayerForAccountId(m.AccountId, m.Gamematch)
 }

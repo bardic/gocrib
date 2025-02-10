@@ -4,6 +4,8 @@ import (
 	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/cli/services"
+	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -11,18 +13,19 @@ import (
 )
 
 type Controller struct {
-	*cliVO.GameController
+	*game.Controller
 }
 
 func NewBoard() *Controller {
 	ctrl := &Controller{
-		GameController: &cliVO.GameController{},
+		Controller: &game.Controller{},
 	}
 	boardModel := ctrl.Model.(*Model)
+
 	ctrl.View = &View{
 		State:         queries.GamestateCut,
 		Match:         boardModel.GameMatch,
-		LocalPlayerId: boardModel.LocalPlayerId,
+		LocalPlayerId: utils.GetPlayerForAccountId(boardModel.Account.ID, boardModel.GameMatch).ID,
 	}
 
 	ctrl.View.(*View).Init()
@@ -70,7 +73,8 @@ func (ctrl *Controller) Enter() tea.Msg {
 	case queries.GamestateCut:
 		boardModel.CutIndex = boardView.cutInput.Value()
 		resp := services.CutDeck(*boardModel.GameMatch.ID, boardModel.CutIndex)
-		services.PlayerReady(boardModel.LocalPlayerId, boardModel.GameMatch.ID)
+		playerId := utils.GetPlayerForAccountId(boardModel.Account.ID, boardModel.GameMatch).ID
+		services.PlayerReady(playerId, boardModel.GameMatch.ID)
 		return resp
 	}
 

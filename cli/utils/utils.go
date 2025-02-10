@@ -1,18 +1,14 @@
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"strings"
 
 	"github.com/bardic/gocrib/queries/queries"
 
-	"github.com/bardic/gocrib/cli/styles"
-	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
-	"github.com/charmbracelet/lipgloss"
 	"go.uber.org/zap"
 )
 
@@ -61,27 +57,26 @@ func NewLogger() (*zap.Logger, error) {
 	return cfg.Build()
 }
 
-func GetPlayerByAccountId(accountId *int, players []*queries.Player) (*queries.Player, error) {
-	for _, p := range players {
-		if p.Accountid == accountId {
-			return p, nil
-		}
-	}
-	return nil, errors.New("no player found")
-}
-
 func GetPlayerForAccountId(id *int, match *vo.GameMatch) *vo.GamePlayer {
 	for _, player := range match.Players {
-		if player.Accountid == id {
-			return &player
+		if *player.Accountid == *id {
+			return player
 		}
 	}
 
 	return nil
 }
 
-func BuildCommonFooter(activePlayerId, localPlayerId, matchId *int, gameState queries.Gamestate) string {
-	f := fmt.Sprintf("\nState: %v | Local/Active Player : %v/%v | Match ID: %v ", gameState, localPlayerId, activePlayerId, matchId)
+func BuildCommonFooter(match *vo.GameMatch, localplayer *vo.GamePlayer) string {
+	localPlayerId := "-"
+	activePlayerId := "-"
+
+	if localplayer != nil {
+		localPlayerId = fmt.Sprintf("%v", &localplayer.ID)
+		activePlayerId = fmt.Sprintf("%v", &match.Currentplayerturn)
+	}
+
+	f := fmt.Sprintf("\nState: %v | Local/Active Player : %v/%v | Match ID: %v ", match.Gamestate, localPlayerId, activePlayerId, fmt.Sprintf("%v", &match.ID))
 	f += "\ntab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
 	return f
 }
@@ -112,7 +107,7 @@ const (
 	Empty  PegState = "○"
 )
 
-func DrawRow(players []vo.GamePlayer, pegsToDraw, scoreOffet int) string {
+func DrawRow(players []*vo.GamePlayer, pegsToDraw, scoreOffet int) string {
 	viewBuilder := strings.Builder{}
 	for _, player := range players {
 		viewBuilder.WriteString("\n")
@@ -134,36 +129,7 @@ func DrawRow(players []vo.GamePlayer, pegsToDraw, scoreOffet int) string {
 	return viewBuilder.String()
 }
 
-func RenderTabs(tabs []cliVO.Tab, activeTab int) []string {
-	var renderedTabs []string
-
-	for i, t := range tabs {
-		var style lipgloss.Style
-		isFirst, isLast, isActive := i == 0, i == len(tabs)-1, i == activeTab
-		if isActive {
-			style = styles.ActiveTabStyle
-		} else {
-			style = styles.InactiveTabStyle
-		}
-		border, _, _, _, _ := style.GetBorder()
-		if isFirst && isActive {
-			border.BottomLeft = "│"
-		} else if isFirst && !isActive {
-			border.BottomLeft = "├"
-		} else if isLast && isActive {
-			border.BottomRight = "└"
-		} else if isLast && !isActive {
-			border.BottomRight = "┴"
-		}
-
-		style = style.Border(border)
-		renderedTabs = append(renderedTabs, style.Render(t.Title))
-	}
-
-	return renderedTabs
-}
-
-func GetPlayerIds(players []vo.GamePlayer) []*int {
+func GetPlayerIds(players []*vo.GamePlayer) []*int {
 	var playIds []*int
 	for _, p := range players {
 		playIds = append(playIds, p.ID)

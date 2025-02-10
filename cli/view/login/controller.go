@@ -8,6 +8,7 @@ import (
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/view/container"
+	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -15,7 +16,7 @@ import (
 )
 
 type Controller struct {
-	cliVO.GameController
+	*game.Controller
 }
 
 func (ctrl *Controller) GetModel() cliVO.IModel {
@@ -23,7 +24,11 @@ func (ctrl *Controller) GetModel() cliVO.IModel {
 }
 
 func New() *Controller {
-	ctrl := &Controller{}
+	ctrl := &Controller{
+		Controller: &game.Controller{
+			Model: &container.Model{},
+		},
+	}
 
 	ctrl.Model = LoginModel{
 		cliVO.ViewModel{

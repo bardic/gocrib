@@ -56,7 +56,7 @@ func PlayerReady(c echo.Context) error {
 	return c.JSON(http.StatusOK, nil)
 }
 
-func arePlayersReady(players []vo.GamePlayer) bool {
+func arePlayersReady(players []*vo.GamePlayer) bool {
 	ready := true
 
 	// if len(players) < 2 {

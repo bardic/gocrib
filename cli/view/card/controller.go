@@ -8,6 +8,7 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
+	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -15,14 +16,14 @@ import (
 )
 
 type Controller struct {
-	*cliVO.GameController
+	*game.Controller
 	*vo.GameMatch
 }
 
 func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Controller {
 	ctrl := &Controller{
-		GameController: &cliVO.GameController{},
-		GameMatch:      match,
+		Controller: &game.Controller{},
+		GameMatch:  match,
 	}
 
 	handModel := ctrl.getHandModelForCardIds(
@@ -37,14 +38,11 @@ func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Con
 		},
 		ActiveSlotIndex: 0,
 		SelectedCardIds: []int{},
-		Deck:            handModel.Deck,
 		HandVO:          handModel,
 		State:           match.Match.Gamestate,
 	}
 
-	v := &View{
-		Deck: m.HandVO.Deck,
-	}
+	v := NewCardView(match, player, handModel.Deck)
 
 	ctrl.Model = m
 	ctrl.View = v
@@ -72,7 +70,7 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 		LocalPlayerID:  &localPlayerId,
 	}
 
-	var localPlayer vo.GamePlayer
+	var localPlayer *vo.GamePlayer
 	for _, player := range ctrl.Players {
 		if *player.ID == model.LocalPlayerID {
 			localPlayer = player

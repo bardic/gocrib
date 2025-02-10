@@ -42,7 +42,7 @@ func (view *View) Init() {
 func (view *View) Render(hand []int) string {
 	doc := strings.Builder{}
 
-	renderedTabs := utils.RenderTabs([]cliVO.Tab{
+	renderedTabs := styles.RenderTabs([]cliVO.Tab{
 		{
 			Title:    "Lobby",
 			TabState: vo.OpenMatches,
@@ -95,7 +95,7 @@ func getActiveView() (table.Model, error) {
 
 	m := getOpenMatches()
 
-	var matches []vo.GameMatch
+	var matches []*vo.GameMatch
 	err := json.Unmarshal(m.([]byte), &matches)
 
 	if err != nil {

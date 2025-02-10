@@ -4,7 +4,6 @@ import (
 	"github.com/bardic/gocrib/queries/queries"
 
 	cliVO "github.com/bardic/gocrib/cli/vo"
-	"github.com/bardic/gocrib/vo"
 )
 
 type Model struct {
@@ -13,5 +12,4 @@ type Model struct {
 	State           queries.Gamestate
 	ActiveSlotIndex int
 	SelectedCardIds []int
-	Deck            *vo.GameDeck
 }

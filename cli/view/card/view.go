@@ -12,12 +12,20 @@ import (
 )
 
 type View struct {
-	// *cliVO.HandVO
 	ActiveCardId    int
 	SelectedCardIds []int
+	Match           *vo.GameMatch
+	LocalPlayer     *vo.GamePlayer
 	Deck            *vo.GameDeck
-
 	*vo.UIFooterVO
+}
+
+func NewCardView(match *vo.GameMatch, localPlayer *vo.GamePlayer, deck *vo.GameDeck) *View {
+	return &View{
+		Match:       match,
+		LocalPlayer: localPlayer,
+		Deck:        deck,
+	}
 }
 
 func (view *View) Init() {
@@ -64,12 +72,7 @@ func (view *View) BuildHeader() string {
 }
 
 func (view *View) BuildFooter() string {
-	f := utils.BuildCommonFooter(
-		view.ActivePlayerId,
-		view.LocalPlayerID,
-		view.MatchId,
-		view.GameState,
-	)
+	f := utils.BuildCommonFooter(view.Match, view.LocalPlayer)
 
 	return f
 }

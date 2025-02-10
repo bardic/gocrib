@@ -7,10 +7,8 @@ import (
 
 type Model struct {
 	cliVO.ViewModel
-	ActiveMatchId *int
-	AccountId     *int
 }
 
 func (m Model) GetMatch() *vo.GameMatch {
-	return m.GetMatch()
+	return m.Gamematch
 }

@@ -73,10 +73,10 @@ func GetMatch(id *int) (*vo.GameMatch, error) {
 		gamePlayers = append(gamePlayers, gameplayer)
 	}
 
-	gameplayers := []vo.GamePlayer{}
+	gameplayers := []*vo.GamePlayer{}
 	for _, p := range gamePlayers {
 
-		player := vo.GamePlayer{
+		player := &vo.GamePlayer{
 			Player: queries.Player{
 				ID:        p.ID,
 				Accountid: p.Accountid,
