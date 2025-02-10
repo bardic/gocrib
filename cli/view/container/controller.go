@@ -166,6 +166,7 @@ func (ctrl *Controller) ChangeTab(tabIndex int) {
 						Name: "Game",
 					},
 					GameMatch: containerModel.ViewModel.Gamematch,
+					AccountId: ctrl.GetModel().GetPlayer().Player.Accountid,
 				},
 				View: &board.View{
 					Match:         containerModel.ViewModel.Gamematch,

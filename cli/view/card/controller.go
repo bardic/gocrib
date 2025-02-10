@@ -97,7 +97,7 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	cardModel := ctrl.Model.(*Model)
-	// cardView := ctrl.View.(*View)
+
 	switch msg.String() {
 	//Highlight card to the right
 	case "right":

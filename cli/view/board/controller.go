@@ -25,7 +25,7 @@ func NewBoard() *Controller {
 	ctrl.View = &View{
 		State:         queries.GamestateCut,
 		Match:         boardModel.GameMatch,
-		LocalPlayerId: utils.GetPlayerForAccountId(boardModel.Account.ID, boardModel.GameMatch).ID,
+		LocalPlayerId: utils.GetPlayerForAccountId(boardModel.AccountId, boardModel.GameMatch).ID,
 	}
 
 	ctrl.View.(*View).Init()
@@ -61,8 +61,6 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	switch msg.String() {
 	case "enter":
 		return ctrl.Enter()
-		// default:
-		// 	ctrl.View.(*View).Update(msg)
 	}
 
 	return msg
@@ -75,8 +73,6 @@ func (ctrl *Controller) Enter() tea.Msg {
 	case queries.GamestateCut:
 		boardModel.CutIndex = boardView.CutInput.Value()
 		resp := services.CutDeck(*boardModel.GameMatch.ID, boardModel.CutIndex)
-		playerId := utils.GetPlayerForAccountId(boardModel.Account.ID, boardModel.GameMatch).ID
-		services.PlayerReady(playerId, boardModel.GameMatch.ID)
 		return resp
 	}
 
