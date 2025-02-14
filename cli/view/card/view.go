@@ -2,7 +2,6 @@ package card
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
@@ -17,6 +16,7 @@ type View struct {
 	Match           *vo.GameMatch
 	LocalPlayer     *vo.GamePlayer
 	Deck            *vo.GameDeck
+	Tabname         string
 	*vo.UIFooterVO
 }
 
@@ -32,9 +32,19 @@ func (view *View) Init() {
 	// view.ActiveCardId = 0
 }
 
-func (view *View) Render(hand []int) string {
+func (view *View) Render() string {
 	var s string
 	var cardViews []string
+
+	var hand []int
+	switch view.Tabname {
+	case "Play":
+		hand = utils.IdFromCards(view.LocalPlayer.Play)
+	case "Hand":
+		hand = utils.IdFromCards(view.LocalPlayer.Hand)
+	case "Kitty":
+		hand = utils.IdFromCards(view.LocalPlayer.Kitty)
+	}
 
 	s += view.BuildHeader()
 	for i := 0; i < len(hand); i++ {
@@ -45,18 +55,20 @@ func (view *View) Render(hand []int) string {
 		}
 
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Card.Value)
-		styledCard := styles.ModelStyle.Render(cardStr)
-		if slices.Index(view.SelectedCardIds, *c.Match.ID) > -1 {
-			if int(i) == view.ActiveCardId {
-				styledCard = styles.SelectedFocusedStyle.Render(cardStr)
-			} else {
-				styledCard = styles.FocusedModelStyle.Render(cardStr)
-			}
-		} else {
-			if int(i) == view.ActiveCardId {
+		var styledCard string
+
+		styledCard = styles.ModelStyle.Render(cardStr)
+
+		if i == view.ActiveCardId {
+			styledCard = styles.SelectedFocusedStyle.Render(cardStr)
+		}
+
+		for _, v := range view.SelectedCardIds {
+			if v == hand[i] {
 				styledCard = styles.FocusedModelStyle.Render(cardStr)
 			}
 		}
+
 		cardViews = append(cardViews, styledCard)
 	}
 

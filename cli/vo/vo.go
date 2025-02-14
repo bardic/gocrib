@@ -21,10 +21,11 @@ type IController interface {
 	Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd
 	GetState() ControllerState
 	GetModel() IModel
+	GetName() string
 }
 
 type IView interface {
-	Render(hand []int) string
+	Render() string
 	Init()
 	BuildHeader() string
 	BuildFooter() string
@@ -45,6 +46,7 @@ type HandVO struct {
 type IModel interface {
 	GetMatch() *vo.GameMatch
 	GetPlayer() *vo.GamePlayer
+	SetMatch(match *vo.GameMatch)
 }
 
 type ViewModel struct {
@@ -53,11 +55,15 @@ type ViewModel struct {
 	Gamematch *vo.GameMatch
 }
 
-func (m ViewModel) GetMatch() *vo.GameMatch {
+func (m *ViewModel) SetMatch(match *vo.GameMatch) {
+	m.Gamematch = match
+}
+
+func (m *ViewModel) GetMatch() *vo.GameMatch {
 	return m.Gamematch
 }
 
-func (m ViewModel) GetPlayer() *vo.GamePlayer {
+func (m *ViewModel) GetPlayer() *vo.GamePlayer {
 	return utils.GetPlayerForAccountId(m.AccountId, m.Gamematch)
 }
 

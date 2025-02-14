@@ -1,11 +1,10 @@
 package styles
 
 import (
-	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/charmbracelet/lipgloss"
 )
 
-func RenderTabs(tabs []cliVO.Tab, activeTab int) []string {
+func RenderTabs(tabs []string, activeTab int) []string {
 	var renderedTabs []string
 
 	for i, t := range tabs {
@@ -28,7 +27,7 @@ func RenderTabs(tabs []cliVO.Tab, activeTab int) []string {
 		}
 
 		style = style.Border(border)
-		renderedTabs = append(renderedTabs, style.Render(t.Title))
+		renderedTabs = append(renderedTabs, style.Render(t))
 	}
 
 	return renderedTabs

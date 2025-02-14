@@ -9,7 +9,6 @@ import (
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/view/board"
 	"github.com/bardic/gocrib/cli/view/card"
-	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -18,10 +17,12 @@ import (
 )
 
 type Controller struct {
-	*game.Controller
+	View         *View
+	Model        *Model
 	timer        timer.Model
 	timerStarted bool
 	tabIndex     int
+	tabs         map[int]cliVO.IController
 }
 
 func (ctrl *Controller) Init() {
@@ -29,17 +30,30 @@ func (ctrl *Controller) Init() {
 }
 
 func NewController(match *vo.GameMatch, player *vo.GamePlayer) *Controller {
-	model := NewModel(match, player)
-	view := NewView(model)
+	tabs := createTabs(match, player)
 	ctrl := &Controller{
-		Controller: &game.Controller{
-			Model: model,
-			View:  view,
-		},
+		Model: NewModel(match, player),
+		View:  NewView(0, tabs),
 	}
 
-	ctrl.ChangeTab(0)
+	ctrl.tabs = tabs
+
+	ctrl.ChangeTab(vo.ChangeTabMsg{
+		TabIndex: 0,
+	})
 	return ctrl
+}
+
+func (ctrl *Controller) GetModel() cliVO.IModel {
+	return ctrl.Model
+}
+
+func (ctrl *Controller) GetView() cliVO.IView {
+	return ctrl.View
+}
+
+func (ctrl *Controller) GetName() string {
+	return "Container"
 }
 
 func (ctrl *Controller) GetState() cliVO.ControllerState {
@@ -47,29 +61,13 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 }
 
 func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
-	containerModel := ctrl.Model.(*Model)
+	viewRender := ctrl.Model.Subcontroller.Render(gamematch)
 
-	cardIds := []int{}
-
-	for _, card := range containerModel.GetPlayer().Hand {
-		cardIds = append(cardIds, *card.Cardid)
-	}
-
-	containerHeader := ctrl.GetView().Render(cardIds)
-	viewRender := containerModel.GetSubcontroller().Render(containerModel.ViewModel.Gamematch)
-
-	return containerHeader + "\n" + styles.WindowStyle.Render(viewRender)
+	return ctrl.View.Render() + "\n" + styles.WindowStyle.Render(viewRender)
 }
 
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 	var cmds []tea.Cmd
-	containerModel := ctrl.GetModel().(*Model)
-	subView := containerModel.GetSubcontroller()
-
-	if gameMatch != nil {
-		cmd := subView.Update(msg, gameMatch)
-		cmds = append(cmds, cmd)
-	}
 
 	if !ctrl.timerStarted {
 		ctrl.timer = timer.NewWithInterval(time.Hour, time.Second*1)
@@ -97,106 +95,91 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 		var gameMatch *vo.GameMatch
 		ctrl.timer, cmd = ctrl.timer.Update(msg)
 
-		resp := services.GetMatchById(ctrl.GetModel().GetMatch().ID)
+		resp := services.GetMatchById(ctrl.Model.GetMatch().ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
 
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
 
-		ctrl.Controller.GetModel().(*Model).ViewModel.Gamematch = gameMatch
-
+		ctrl.Model.SetMatch(gameMatch)
+		// ctrl.Model.Subcontroller.Render(gameMatch)
 		cmds = append(cmds, cmd)
 	case vo.ChangeTabMsg:
-		ctrl.ChangeTab(msg.TabIndex)
-	}
-
-	if ctrl.tabIndex == 0 {
-		containerModel.Subcontroller.Update(msg, gameMatch)
+		ctrl.ChangeTab(msg)
+		ctrl.tabs[ctrl.tabIndex].Update(msg, ctrl.Model.GetMatch())
 	}
 
 	return tea.Batch(cmds...)
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
-	containerModel := ctrl.GetModel().(*Model)
-	containerView := ctrl.GetView().(*View)
-
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "tab":
-		containerView.ActiveTab = containerView.ActiveTab + 1
-		if containerView.ActiveTab >= len(containerView.Tabs) {
-			containerView.ActiveTab = 0
+		ctrl.View.ActiveTab = ctrl.View.ActiveTab + 1
+		if ctrl.View.ActiveTab >= len(ctrl.View.Tabs) {
+			ctrl.View.ActiveTab = 0
 		}
-		containerModel.State = containerView.Tabs[containerView.ActiveTab].TabState
 		return vo.ChangeTabMsg{
-			TabIndex: containerView.ActiveTab,
+			TabIndex: ctrl.View.ActiveTab,
 		}
 
 	case "shift+tab":
-		containerView.ActiveTab = containerView.ActiveTab - 1
+		ctrl.View.ActiveTab = ctrl.View.ActiveTab - 1
 
-		if containerView.ActiveTab < 0 {
-			containerView.ActiveTab = len(containerView.Tabs) - 1
+		if ctrl.View.ActiveTab < 0 {
+			ctrl.View.ActiveTab = len(ctrl.View.Tabs) - 1
 		}
 
-		containerModel.State = containerView.Tabs[containerView.ActiveTab].TabState
 		return vo.ChangeTabMsg{
-			TabIndex: containerView.ActiveTab,
+			TabIndex: ctrl.View.ActiveTab,
 		}
 	default:
-		containerModel.Subcontroller.ParseInput(msg)
+		ctrl.Model.Subcontroller.ParseInput(msg)
 	}
 
 	return msg
 }
 
-func (ctrl *Controller) ChangeTab(tabIndex int) {
-	containerModel := ctrl.Controller.GetModel().(*Model)
+func (ctrl *Controller) ChangeTab(msg tea.Msg) {
+	tabIndex := msg.(vo.ChangeTabMsg).TabIndex
+	if ctrl.tabs == nil {
+		ctrl.tabs = map[int]cliVO.IController{}
+	}
+
 	ctrl.tabIndex = tabIndex
-	switch tabIndex {
-	case 0:
 
-		containerModel.Subcontroller = &board.Controller{
-			Controller: &game.Controller{
-				Model: &board.Model{
-					ViewModel: cliVO.ViewModel{
-						Name: "Game",
-					},
-					GameMatch: containerModel.ViewModel.Gamematch,
-					AccountId: ctrl.GetModel().GetPlayer().Player.Accountid,
-				},
-				View: &board.View{
-					Match:         containerModel.ViewModel.Gamematch,
-					LocalPlayerId: containerModel.ViewModel.GetPlayer().ID,
-					State:         containerModel.ViewModel.Gamematch.Gamestate,
-				},
-			},
-		}
+	val, ok := ctrl.tabs[tabIndex]
+	if ok {
+		ctrl.Model.Subcontroller = val
+		val.Update(msg, ctrl.Model.GetMatch())
+		return
+	}
 
-		containerModel.Subcontroller.(*board.Controller).ShowInput()
+}
 
-	case 1:
-		containerModel.Subcontroller = card.NewController(
+func createTabs(gameMatch *vo.GameMatch, player *vo.GamePlayer) map[int]cliVO.IController {
+	return map[int]cliVO.IController{
+		0: board.NewBoard(
+			gameMatch,
+			player,
+		),
+		1: card.NewController(
 			"Play",
-			containerModel.GetMatch(),
-			containerModel.GetPlayer(),
-		)
-	case 2:
-
-		containerModel.Subcontroller = card.NewController(
+			gameMatch,
+			player,
+		),
+		2: card.NewController(
 			"Hand",
-			containerModel.GetMatch(),
-			containerModel.GetPlayer(),
-		)
-	case 3:
-
-		containerModel.Subcontroller = card.NewController(
+			gameMatch,
+			player,
+		),
+		3: card.NewController(
 			"Kitty",
-			containerModel.GetMatch(),
-			containerModel.GetPlayer(),
-		)
+			gameMatch,
+			player,
+		),
 	}
 }

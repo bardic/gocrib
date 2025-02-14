@@ -20,7 +20,8 @@ type View struct {
 	isLoading     bool
 	State         queries.Gamestate
 	LocalPlayerId *int
-	Match         *vo.GameMatch
+
+	Match *vo.GameMatch
 }
 
 var boardRowLen int = 50
@@ -32,6 +33,8 @@ func (view *View) Init() {
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
 	}
+
+	view.ShowCutInput()
 }
 
 func (view *View) ShowCutInput() {
@@ -44,7 +47,7 @@ func (view *View) ShowCutInput() {
 
 }
 
-func (view *View) Render(hand []int) string {
+func (view *View) Render() string {
 	if view.isLoading {
 		return "Loading..."
 	}

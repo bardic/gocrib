@@ -11,13 +11,13 @@ import (
 
 type View struct {
 	ActiveTab int
-	Tabs      []cliVO.Tab
+	Tabs      map[int]cliVO.IController
 }
 
-func NewView(model *Model) *View {
+func NewView(activeTab int, tabs map[int]cliVO.IController) *View {
 	return &View{
-		ActiveTab: model.ActiveTab,
-		Tabs:      model.Tabs,
+		ActiveTab: activeTab,
+		Tabs:      tabs,
 	}
 }
 
@@ -25,9 +25,9 @@ func (view *View) Init() {
 
 }
 
-func (view *View) Render(hand []int) string {
+func (view *View) Render() string {
 	doc := strings.Builder{}
-	renderedTabs := styles.RenderTabs(view.Tabs, view.ActiveTab)
+	renderedTabs := styles.RenderTabs([]string{"Board", "Play", "Hand", "Kitty"}, view.ActiveTab)
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...))
 	doc.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, "──────────────────────────────────────────┐"))
 

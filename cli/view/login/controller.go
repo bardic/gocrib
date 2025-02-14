@@ -8,7 +8,6 @@ import (
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/view/container"
-	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -16,45 +15,35 @@ import (
 )
 
 type Controller struct {
-	*game.Controller
+	LoginModel
+	View
+}
+
+func NewLogin() *Controller {
+	ctrl := &Controller{
+		LoginModel: LoginModel{
+			cliVO.ViewModel{
+				Name: "Login",
+			},
+		},
+		View: View{},
+	}
+
+	ctrl.View.Init()
+
+	return ctrl
 }
 
 func (ctrl *Controller) GetModel() cliVO.IModel {
 	return &container.Model{}
 }
 
-func New() *Controller {
-	ctrl := &Controller{
-		Controller: &game.Controller{
-			Model: &container.Model{},
-		},
-	}
-
-	ctrl.Model = LoginModel{
-		cliVO.ViewModel{
-			Name: "Login",
-		},
-	}
-
-	ctrl.View = &View{}
-	ctrl.View.Init()
-
-	return ctrl
-}
-
 func (ctrl *Controller) GetState() cliVO.ControllerState {
 	return cliVO.LoginControllerState
 }
 
-func (ctrl *Controller) Init() {
-	ctrl.Model = LoginModel{
-		cliVO.ViewModel{
-			Name: "Login",
-		},
-	}
-
-	ctrl.View = &View{}
-	ctrl.View.Init()
+func (ctrl *Controller) GetName() string {
+	return "Login"
 }
 
 func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
@@ -62,14 +51,12 @@ func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
-	loginView := ctrl.View.(*View)
-
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "enter", "view_update":
 		utils.Logger.Info("Enter")
-		idStr := loginView.loginIdField.Value()
+		idStr := ctrl.View.loginIdField.Value()
 
 		var accountDetails queries.Account
 		msg := services.Login(idStr)
@@ -82,13 +69,12 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 }
 
 func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
-	loginView := ctrl.View.(*View)
 
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	loginView.loginIdField.Focus()
-	loginView.loginIdField, cmd = loginView.loginIdField.Update(msg)
+	ctrl.View.loginIdField.Focus()
+	ctrl.View.loginIdField, cmd = ctrl.View.loginIdField.Update(msg)
 
 	cmds = append(cmds, cmd)
 

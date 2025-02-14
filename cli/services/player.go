@@ -45,7 +45,7 @@ func PutPlay(matchId, playerId *int, cards vo.HandModifier) tea.Msg {
 		return err
 	}
 
-	endpoint := utils.EndPointBuilder(EndPointKitty, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
+	endpoint := utils.EndPointBuilder(EndPointPlay, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
 
 	return url(endpoint, http.MethodPut, string(b))
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/view/container"
 	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
@@ -19,13 +18,33 @@ type Controller struct {
 }
 
 func (ctrl *Controller) GetModel() cliVO.IModel {
-	return &container.Model{}
+	return &Model{}
 }
 
-func New() Controller {
-	return Controller{
+func (ctrl *Controller) GetView() cliVO.IView {
+	return &View{}
+}
+
+func (ctrl *Controller) GetName() string {
+	return "Lobby"
+}
+
+func (ctrl *Controller) SetMatch(match *vo.GameMatch) {
+
+}
+
+func NewLobby(msg vo.StateChangeMsg) *Controller {
+	return &Controller{
 		Controller: &game.Controller{
-			Model: &container.Model{},
+			Model: &Model{
+				ViewModel: cliVO.ViewModel{
+					Name:      "Lobby",
+					AccountId: msg.AccountId,
+				},
+			},
+			View: &View{
+				ActiveLandingTab: 0,
+			},
 		},
 	}
 }
@@ -35,16 +54,16 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 }
 
 func (ctrl *Controller) Init() {
-	ctrl.Model = Model{}
-	ctrl.View = &View{}
+
 }
+
 func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
-	return ctrl.View.Render(nil)
+	return ctrl.View.Render()
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	lobbyView := ctrl.View.(*View)
-	lobbyModel := ctrl.Model.(Model)
+	lobbyModel := ctrl.Model.(*Model)
 
 	switch msg.String() {
 	case "ctrl+c", "q":

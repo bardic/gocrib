@@ -8,7 +8,6 @@ import (
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
-	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -39,20 +38,9 @@ func (view *View) Init() {
 	view.LobbyTabNames = []string{"Open Matches", "Available Matches"}
 }
 
-func (view *View) Render(hand []int) string {
+func (view *View) Render() string {
 	doc := strings.Builder{}
-
-	renderedTabs := styles.RenderTabs([]cliVO.Tab{
-		{
-			Title:    "Lobby",
-			TabState: vo.OpenMatches,
-		},
-		{
-			Title:    "Active",
-			TabState: vo.AvailableMatches,
-		},
-	}, view.ActiveLandingTab)
-
+	renderedTabs := styles.RenderTabs([]string{"Open Matches", "Available Matches"}, 0)
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
 	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "─────────────────────────────────────────────────────────┐")

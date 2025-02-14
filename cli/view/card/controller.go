@@ -2,6 +2,7 @@ package card
 
 import (
 	"encoding/json"
+	"fmt"
 	"slices"
 
 	"github.com/bardic/gocrib/queries/queries"
@@ -30,7 +31,7 @@ func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Con
 	}
 
 	handModel := ctrl.getHandModelForCardIds(
-		*player.ID,
+		*player.Accountid,
 		*match.ID,
 		utils.IdFromCards(player.Play),
 	)
@@ -57,6 +58,10 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 	return cliVO.LobbyControllerState
 }
 
+func (ctrl *Controller) GetName() string {
+	return ctrl.tabName
+}
+
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 	model := ctrl.Model.(*Model)
 	cardView := ctrl.View.(*View)
@@ -73,26 +78,37 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
 		LocalPlayerID:  &localPlayerId,
 	}
 
-	var localPlayer *vo.GamePlayer
-	for _, player := range ctrl.Players {
-		if *player.ID == model.LocalPlayerID {
-			localPlayer = player
+	cardView.Tabname = ctrl.tabName
+	cardView.Match = gameMatch
+
+	player := utils.GetPlayerForAccountId(&localPlayerId, gameMatch)
+	cardView.LocalPlayer = player
+
+	if player == nil {
+		fmt.Println("Player is nil")
+	}
+
+	var hand []int
+
+	switch cardView.Tabname {
+	case "Play":
+		if player.Play != nil {
+			hand = utils.IdFromCards(player.Play)
+		}
+
+	case "Hand":
+		if player.Hand != nil {
+			hand = utils.IdFromCards(player.Hand)
+		}
+	case "Kitty":
+		if player.Kitty != nil {
+			hand = utils.IdFromCards(player.Kitty)
 		}
 	}
 
-	var cardIds []int
-	switch ctrl.tabName {
-	case "Play":
-		cardIds = utils.IdFromCards(localPlayer.Play)
-	case "Hand":
-		cardIds = utils.IdFromCards(localPlayer.Hand)
-	case "Kitty":
-		cardIds = utils.IdFromCards(localPlayer.Kitty)
-	}
+	model.HandVO = ctrl.getHandModelForCardIds(*player.Accountid, *gameMatch.Match.ID, hand)
 
-	ctrl.Model.(*Model).CardIds = cardIds
-
-	return cardView.Render(cardIds)
+	return cardView.Render()
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
@@ -107,6 +123,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		ctrl.updateActiveSlotIndex(-1)
 	//Select card
 	case " ":
+		fmt.Println("")
 		idx := slices.Index(
 			cardModel.SelectedCardIds,
 			cardModel.CardIds[cardModel.ActiveSlotIndex])
@@ -124,7 +141,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			}
 			services.PutKitty(
 				ctrl.ID,
-				&cardModel.LocalPlayerID,
+				&cardModel.LocalPlayerID, //this is wrong. Should not be account id
 				vo.HandModifier{
 					CardIds: cardModel.SelectedCardIds,
 				},

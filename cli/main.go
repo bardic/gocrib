@@ -9,7 +9,6 @@ import (
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/cli/view/container"
-	"github.com/bardic/gocrib/cli/view/game"
 	"github.com/bardic/gocrib/cli/view/lobby"
 	"github.com/bardic/gocrib/cli/view/login"
 	cliVO "github.com/bardic/gocrib/cli/vo"
@@ -28,7 +27,7 @@ func main() {
 	utils.Logger, _ = utils.NewLogger()
 	defer utils.Logger.Sync()
 
-	p := tea.NewProgram(newCLIModel(login.New()))
+	p := tea.NewProgram(newCLIModel(login.NewLogin()))
 
 	if _, err := p.Run(); err != nil {
 		utils.Logger.Sugar().Error(err)
@@ -61,20 +60,7 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case vo.StateChangeMsg:
 		switch msg.NewState {
 		case vo.LobbyView:
-			cli.currentController = &lobby.Controller{
-				Controller: &game.Controller{
-					Model: lobby.Model{
-						ViewModel: cliVO.ViewModel{
-							Name:      "Lobby",
-							AccountId: msg.AccountId,
-							Gamematch: &vo.GameMatch{},
-						},
-					},
-					View: &lobby.View{},
-				},
-			}
-
-			services.GetOpenMatches()
+			cli.currentController = lobby.NewLobby(msg)
 		case vo.JoinGameView:
 			fallthrough
 		case vo.CreateGameView:

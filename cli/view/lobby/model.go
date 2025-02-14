@@ -9,6 +9,6 @@ type Model struct {
 	cliVO.ViewModel
 }
 
-func (m Model) GetMatch() *vo.GameMatch {
+func (m *Model) GetMatch() *vo.GameMatch {
 	return m.Gamematch
 }
