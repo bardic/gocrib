@@ -7,35 +7,23 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/view/container"
 	cliVO "github.com/bardic/gocrib/cli/vo"
-	"github.com/bardic/gocrib/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Controller struct {
-	LoginModel
-	View
+	model *Model
+	view  *View
 }
 
 func NewLogin() *Controller {
 	ctrl := &Controller{
-		LoginModel: LoginModel{
-			cliVO.ViewModel{
-				Name: "Login",
-			},
-		},
-		View: View{},
+		model: &Model{},
+		view:  NewLoginView(),
 	}
 
-	ctrl.View.Init()
-
 	return ctrl
-}
-
-func (ctrl *Controller) GetModel() cliVO.IModel {
-	return &container.Model{}
 }
 
 func (ctrl *Controller) GetState() cliVO.ControllerState {
@@ -46,8 +34,8 @@ func (ctrl *Controller) GetName() string {
 	return "Login"
 }
 
-func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
-	return ctrl.View.Render(nil)
+func (ctrl *Controller) Render() string {
+	return ctrl.view.Render()
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
@@ -56,7 +44,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		return tea.Quit()
 	case "enter", "view_update":
 		utils.Logger.Info("Enter")
-		idStr := ctrl.View.loginIdField.Value()
+		idStr := ctrl.view.loginIdField.Value()
 
 		var accountDetails queries.Account
 		msg := services.Login(idStr)
@@ -68,13 +56,13 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	ctrl.View.loginIdField.Focus()
-	ctrl.View.loginIdField, cmd = ctrl.View.loginIdField.Update(msg)
+	ctrl.view.loginIdField.Focus()
+	ctrl.view.loginIdField, cmd = ctrl.view.loginIdField.Update(msg)
 
 	cmds = append(cmds, cmd)
 

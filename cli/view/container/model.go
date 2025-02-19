@@ -7,16 +7,21 @@ import (
 )
 
 type Model struct {
-	cliVO.ViewModel
+	AccountId     *int
+	Gamematch     *vo.GameMatch
+	GameDeck      *vo.GameDeck
 	Tabs          []cliVO.Tab
 	State         vo.ViewState
 	States        []vo.ViewState
-	Subcontroller cliVO.IController
+	Subcontroller cliVO.IGameController
 	ActiveTab     int
 }
 
-func NewModel(match *vo.GameMatch, player *vo.GamePlayer) *Model {
+func NewModel(match *vo.GameMatch, player *vo.GamePlayer, gameDeck *vo.GameDeck) *Model {
 	return &Model{
+		GameDeck:  gameDeck,
+		AccountId: player.Accountid,
+		Gamematch: match,
 		Tabs: []cliVO.Tab{
 			{
 				Title:    "Board",
@@ -35,12 +40,6 @@ func NewModel(match *vo.GameMatch, player *vo.GamePlayer) *Model {
 				TabState: vo.KittyView,
 			},
 		},
-		ViewModel: cliVO.ViewModel{
-			Name:      "Container",
-			AccountId: player.Accountid,
-			Gamematch: match,
-		},
-
 		ActiveTab: 0,
 	}
 }

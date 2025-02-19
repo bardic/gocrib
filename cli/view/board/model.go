@@ -1,12 +1,10 @@
 package board
 
-import (
-	cliVO "github.com/bardic/gocrib/cli/vo"
-)
+import "github.com/bardic/gocrib/queries/queries"
 
 type Model struct {
-	cliVO.ViewModel
-	AccountId *int
-	CutIndex  string
-	// GameMatch *vo.GameMatch
+	AccountId   *int
+	CutIndex    string
+	GameMatchId *int
+	Gamestate   queries.Gamestate
 }

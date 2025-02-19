@@ -4,7 +4,6 @@ import (
 	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -12,35 +11,27 @@ import (
 )
 
 type Controller struct {
-	*game.Controller
+	view  *View
+	model *Model
 }
 
 func NewBoard(gameMatch *vo.GameMatch, player *vo.GamePlayer) *Controller {
 	ctrl := &Controller{
-		Controller: &game.Controller{
-			Model: &Model{
-				ViewModel: cliVO.ViewModel{
-					Gamematch: gameMatch,
-					Name:      "Board",
-					AccountId: player.Accountid,
-				},
-				AccountId: player.Accountid,
-			},
-			View: &View{
-				State:         queries.GamestateCut,
-				Match:         gameMatch,
-				LocalPlayerId: player.Accountid,
-			},
+		model: &Model{
+			AccountId: player.Accountid,
+		},
+		view: &View{
+			State:         queries.GamestateCut,
+			Match:         gameMatch,
+			LocalPlayerId: player.Accountid,
 		},
 	}
-
-	ctrl.View.(*View).Init()
 
 	return ctrl
 }
 
 func (ctrl *Controller) ShowInput() {
-	ctrl.View.(*View).ShowCutInput()
+	ctrl.view.ShowCutInput()
 }
 
 func (ctrl *Controller) GetState() cliVO.ControllerState {
@@ -51,19 +42,13 @@ func (ctrl *Controller) GetName() string {
 	return "Board"
 }
 
-func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
-	ids := []int{}
-
-	for _, card := range gameMatch.Players[0].Hand {
-		ids = append(ids, *card.Cardid)
-	}
-
-	return ctrl.View.Render()
+func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) string {
+	return ctrl.view.Render()
 }
 
-func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	ctrl.View.(*View).Update(msg)
+	ctrl.view.Update(msg)
 	return cmd
 }
 
@@ -77,15 +62,12 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 }
 
 func (ctrl *Controller) Enter() tea.Msg {
-	boardView := ctrl.View.(*View)
-	boardModel := ctrl.Model.(*Model)
-	switch boardModel.ViewModel.Gamematch.Gamestate {
+	switch ctrl.model.Gamestate {
 	case queries.GamestateCut:
-		boardModel.CutIndex = boardView.CutInput.Value()
-		resp := services.CutDeck(*boardModel.ViewModel.Gamematch.ID, boardModel.CutIndex)
+		resp := services.CutDeck(*ctrl.model.GameMatchId, ctrl.view.CutInput.Value())
 		return resp
 	case queries.GamestatePlay:
-		resp := services.PutPlay(boardModel.AccountId, boardModel.ViewModel.Gamematch.ID, vo.HandModifier{})
+		resp := services.PutPlay(ctrl.model.AccountId, ctrl.model.GameMatchId, vo.HandModifier{})
 		return resp
 	}
 

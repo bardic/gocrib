@@ -75,6 +75,9 @@ func (view *View) Render() string {
 }
 
 func (view *View) Update(msg tea.Msg) {
+	if view.isLoading {
+		return
+	}
 	view.CutInput, _ = view.CutInput.Update(msg)
 
 }

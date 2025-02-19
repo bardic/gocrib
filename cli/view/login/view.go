@@ -14,6 +14,12 @@ type View struct {
 	isLoginIdFieldSet bool
 }
 
+func NewLoginView() *View {
+	v := &View{}
+	v.Init()
+	return v
+}
+
 func (view *View) Init() {
 	if view.isLoginIdFieldSet {
 		return
@@ -26,7 +32,7 @@ func (view *View) Init() {
 	view.isLoginIdFieldSet = true
 }
 
-func (view *View) Render(hand []int) string {
+func (view *View) Render() string {
 	doc := strings.Builder{}
 	doc.WriteString("Login \n")
 	doc.WriteString(view.loginIdField.View())

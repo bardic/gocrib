@@ -11,10 +11,10 @@ import (
 
 type View struct {
 	ActiveTab int
-	Tabs      map[int]cliVO.IController
+	Tabs      map[int]cliVO.IGameController
 }
 
-func NewView(activeTab int, tabs map[int]cliVO.IController) *View {
+func NewView(activeTab int, tabs map[int]cliVO.IGameController) *View {
 	return &View{
 		ActiveTab: activeTab,
 		Tabs:      tabs,

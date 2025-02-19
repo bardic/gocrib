@@ -13,18 +13,19 @@ import (
 type View struct {
 	ActiveCardId    int
 	SelectedCardIds []int
-	Match           *vo.GameMatch
-	LocalPlayer     *vo.GamePlayer
-	Deck            *vo.GameDeck
-	Tabname         string
+	// Match           *vo.GameMatch
+	LocalPlayer *vo.GamePlayer
+	// Deck            *vo.GameDeck
+	Tabname string
 	*vo.UIFooterVO
 }
 
-func NewCardView(match *vo.GameMatch, localPlayer *vo.GamePlayer, deck *vo.GameDeck) *View {
+func NewCardView(match *vo.GameMatch, localPlayer *vo.GamePlayer, deck *vo.GameDeck, tabName string) *View {
 	return &View{
-		Match:       match,
+		// Match:       match,
 		LocalPlayer: localPlayer,
-		Deck:        deck,
+		// Deck:        deck,
+		Tabname: tabName,
 	}
 }
 
@@ -32,23 +33,17 @@ func (view *View) Init() {
 	// view.ActiveCardId = 0
 }
 
-func (view *View) Render() string {
+func (view *View) Update(gameMatch *vo.GameMatch) error {
+	return nil
+}
+
+func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []int) string {
 	var s string
 	var cardViews []string
 
-	var hand []int
-	switch view.Tabname {
-	case "Play":
-		hand = utils.IdFromCards(view.LocalPlayer.Play)
-	case "Hand":
-		hand = utils.IdFromCards(view.LocalPlayer.Hand)
-	case "Kitty":
-		hand = utils.IdFromCards(view.LocalPlayer.Kitty)
-	}
-
 	s += view.BuildHeader()
 	for i := 0; i < len(hand); i++ {
-		c := utils.GetCardById(hand[i], view.Deck)
+		c := utils.GetCardById(hand[i], gameDeck)
 
 		if c == nil {
 			continue
@@ -74,7 +69,7 @@ func (view *View) Render() string {
 
 	s += lipgloss.JoinHorizontal(lipgloss.Top, cardViews...)
 
-	s += "\n" + view.BuildFooter()
+	s += "\n" + view.BuildFooter(gameMatch)
 
 	return s
 }
@@ -83,8 +78,8 @@ func (view *View) BuildHeader() string {
 	return ""
 }
 
-func (view *View) BuildFooter() string {
-	f := utils.BuildCommonFooter(view.Match, view.LocalPlayer)
+func (view *View) BuildFooter(gameMatch *vo.GameMatch) string {
+	f := utils.BuildCommonFooter(gameMatch, view.LocalPlayer)
 
 	return f
 }

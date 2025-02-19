@@ -1,15 +1,12 @@
 package card
 
 import (
-	"encoding/json"
-	"fmt"
 	"slices"
 
 	"github.com/bardic/gocrib/queries/queries"
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -17,39 +14,26 @@ import (
 )
 
 type Controller struct {
-	*game.Controller
-	*vo.GameMatch
-	tabName string
+	model *Model
+	view  *View
 }
 
 func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Controller {
 
 	ctrl := &Controller{
-		Controller: &game.Controller{},
-		GameMatch:  match,
-		tabName:    name,
-	}
-
-	handModel := ctrl.getHandModelForCardIds(
-		*player.Accountid,
-		*match.ID,
-		utils.IdFromCards(player.Play),
-	)
-
-	m := &Model{
-		ViewModel: &cliVO.ViewModel{
-			Name: name,
+		model: &Model{
+			ActiveSlotIndex: 0,
+			SelectedCardIds: []int{},
+			State:           match.Match.Gamestate,
+			HandVO:          &cliVO.HandVO{},
+			LocalPlayer:     player,
+			Name:            name,
 		},
-		ActiveSlotIndex: 0,
-		SelectedCardIds: []int{},
-		HandVO:          handModel,
-		State:           match.Match.Gamestate,
 	}
 
-	v := NewCardView(match, player, handModel.Deck)
+	v := NewCardView(match, player, ctrl.model.HandVO.Deck, name)
 
-	ctrl.Model = m
-	ctrl.View = v
+	ctrl.view = v
 
 	return ctrl
 }
@@ -59,60 +43,33 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 }
 
 func (ctrl *Controller) GetName() string {
-	return ctrl.tabName
+	return ctrl.model.Name
 }
 
-func (ctrl *Controller) Render(gameMatch *vo.GameMatch) string {
-	model := ctrl.Model.(*Model)
-	cardView := ctrl.View.(*View)
-	cardView.ActiveCardId = model.ActiveSlotIndex
-	cardView.SelectedCardIds = model.SelectedCardIds
-	cardView.Deck = model.Deck
+func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) string {
+	ctrl.model.State = gameMatch.Match.Gamestate
+	ctrl.model.HandVO.Deck = gameDeck
 
-	localPlayerId := model.LocalPlayerID
-
-	cardView.UIFooterVO = &vo.UIFooterVO{
-		ActivePlayerId: gameMatch.Currentplayerturn,
-		MatchId:        gameMatch.Match.ID,
-		GameState:      gameMatch.Match.Gamestate,
-		LocalPlayerID:  &localPlayerId,
-	}
-
-	cardView.Tabname = ctrl.tabName
-	cardView.Match = gameMatch
-
-	player := utils.GetPlayerForAccountId(&localPlayerId, gameMatch)
-	cardView.LocalPlayer = player
-
-	if player == nil {
-		fmt.Println("Player is nil")
-	}
+	p := utils.GetPlayerForAccountId(ctrl.model.LocalPlayer.Accountid, gameMatch)
 
 	var hand []int
-
-	switch cardView.Tabname {
+	switch ctrl.model.Name {
 	case "Play":
-		if player.Play != nil {
-			hand = utils.IdFromCards(player.Play)
-		}
-
+		hand = utils.IdFromCards(p.Play)
 	case "Hand":
-		if player.Hand != nil {
-			hand = utils.IdFromCards(player.Hand)
-		}
+		hand = utils.IdFromCards(p.Hand)
 	case "Kitty":
-		if player.Kitty != nil {
-			hand = utils.IdFromCards(player.Kitty)
-		}
+		hand = utils.IdFromCards(p.Kitty)
+	default:
+		return "Error: Unknown tabname"
 	}
 
-	model.HandVO = ctrl.getHandModelForCardIds(*player.Accountid, *gameMatch.Match.ID, hand)
+	ctrl.model.CardIds = hand
 
-	return cardView.Render()
+	return ctrl.view.Render(gameMatch, gameDeck, hand)
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
-	cardModel := ctrl.Model.(*Model)
 
 	switch msg.String() {
 	//Highlight card to the right
@@ -123,35 +80,32 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		ctrl.updateActiveSlotIndex(-1)
 	//Select card
 	case " ":
-		fmt.Println("")
 		idx := slices.Index(
-			cardModel.SelectedCardIds,
-			cardModel.CardIds[cardModel.ActiveSlotIndex])
+			ctrl.model.SelectedCardIds,
+			ctrl.model.CardIds[ctrl.model.ActiveSlotIndex])
 		if idx > -1 {
-			cardModel.SelectedCardIds = slices.Delete(cardModel.SelectedCardIds, 0, idx+1)
+			ctrl.model.SelectedCardIds = slices.Delete(ctrl.model.SelectedCardIds, 0, idx+1)
 		} else {
-			cardModel.SelectedCardIds = append(cardModel.SelectedCardIds, cardModel.CardIds[cardModel.ActiveSlotIndex])
+			ctrl.model.SelectedCardIds = append(ctrl.model.SelectedCardIds, ctrl.model.CardIds[ctrl.model.ActiveSlotIndex])
 		}
+
+		ctrl.view.SelectedCardIds = ctrl.model.SelectedCardIds
 	case "enter":
-		switch cardModel.State {
+		switch ctrl.model.State {
 		case queries.GamestateDiscard:
-			activePlayer := utils.GetPlayerForAccountId(&cardModel.LocalPlayerID, ctrl.GameMatch)
-			if activePlayer.Isready {
-				return nil
-			}
 			services.PutKitty(
-				ctrl.ID,
-				&cardModel.LocalPlayerID, //this is wrong. Should not be account id
+				ctrl.model.GameMatchId,
+				&ctrl.model.LocalPlayerID, //this is wrong. Should not be account id
 				vo.HandModifier{
-					CardIds: cardModel.SelectedCardIds,
+					CardIds: ctrl.model.SelectedCardIds,
 				},
 			)
 		case queries.GamestatePlay:
 			services.PutPlay(
-				ctrl.ID,
-				&cardModel.LocalPlayerID,
+				ctrl.model.GameMatchId,
+				&ctrl.model.LocalPlayerID,
 				vo.HandModifier{
-					CardIds: cardModel.SelectedCardIds,
+					CardIds: ctrl.model.SelectedCardIds,
 				},
 			)
 		}
@@ -159,13 +113,15 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 	return nil
 }
-func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
-	ctrl.Render(gameMatch)
-	return nil
+
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	//ctrl.view.Update(msg)
+	return cmd
 }
 
 func (ctrl *Controller) updateActiveSlotIndex(delta int) {
-	cardModel := ctrl.Model.(*Model)
+	cardModel := ctrl.model
 	cardModel.ActiveSlotIndex += delta
 
 	if cardModel.ActiveSlotIndex < 0 {
@@ -173,28 +129,6 @@ func (ctrl *Controller) updateActiveSlotIndex(delta int) {
 	} else if cardModel.ActiveSlotIndex > int(len(cardModel.CardIds))-1 {
 		cardModel.ActiveSlotIndex = 0
 	}
-}
 
-func (ctrl *Controller) getHandModelForCardIds(localPlayerId, matchId int, cardIds []int) *cliVO.HandVO {
-	gameDeck := ctrl.getDeckByPlayerIdAndMatchId(localPlayerId, matchId)
-
-	handModel := &cliVO.HandVO{
-		LocalPlayerID: localPlayerId,
-		CardIds:       cardIds,
-		Deck:          gameDeck,
-	}
-
-	return handModel
-}
-
-func (ctrl *Controller) getDeckByPlayerIdAndMatchId(playerId, matchId int) *vo.GameDeck {
-	var deck *vo.GameDeck
-
-	resp := services.GetDeckByPlayIdAndMatchId(playerId, matchId)
-	err := json.Unmarshal(resp.([]byte), &deck)
-	if err != nil {
-		utils.Logger.Sugar().Error(err)
-	}
-
-	return deck
+	ctrl.view.ActiveCardId = cardModel.ActiveSlotIndex
 }

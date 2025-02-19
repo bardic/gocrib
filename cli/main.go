@@ -20,7 +20,7 @@ import (
 
 type CLI struct {
 	account           *queries.Account
-	currentController cliVO.IController
+	currentController cliVO.IUIController
 }
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 	}
 }
 
-func newCLIModel(activeController cliVO.IController) *CLI {
+func newCLIModel(activeController cliVO.IUIController) *CLI {
 	return &CLI{
 		currentController: activeController,
 	}
@@ -74,12 +74,14 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	cmds = append(cmds, cli.currentController.Update(msg, match))
+	cmds = append(cmds, cli.currentController.Update(msg))
 	return cli, tea.Batch(cmds...)
 }
 
 func (cli *CLI) createMatchView(match *vo.GameMatch) {
 	player := &vo.GamePlayer{}
+
+	var gameDeck vo.GameDeck
 	resp := services.GetPlayerByForMatchAndAccount(match.ID, cli.account.ID)
 	err := json.Unmarshal(resp.([]byte), player)
 
@@ -87,19 +89,24 @@ func (cli *CLI) createMatchView(match *vo.GameMatch) {
 		utils.Logger.Sugar().Error(err)
 	}
 
-	cli.currentController = container.NewController(match, player)
+	resp = services.GetDeckByPlayIdAndMatchId(*player.ID, *match.ID)
+	err = json.Unmarshal(resp.([]byte), &gameDeck)
+
+	if err != nil {
+		utils.Logger.Sugar().Error(err)
+	}
+
+	cli.currentController = container.NewController(match, player, &gameDeck)
 }
 
 func (m *CLI) View() string {
 	switch m.currentController.(type) {
 	case *login.Controller:
-		return styles.ViewStyle.Render(m.currentController.Render(nil))
+		return styles.ViewStyle.Render(m.currentController.Render())
 	case *lobby.Controller:
-		return styles.ViewStyle.Render(m.currentController.Render(nil))
+		return styles.ViewStyle.Render(m.currentController.Render())
 	case *container.Controller:
-		model := m.currentController.GetModel().(*container.Model)
-		match := model.ViewModel.Gamematch
-		return styles.ViewStyle.Render(m.currentController.Render(match))
+		return styles.ViewStyle.Render(m.currentController.Render())
 	default:
 		return "No view"
 	}

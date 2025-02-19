@@ -17,23 +17,23 @@ import (
 )
 
 type Controller struct {
-	View         *View
-	Model        *Model
+	view         *View
+	model        *Model
 	timer        timer.Model
 	timerStarted bool
 	tabIndex     int
-	tabs         map[int]cliVO.IController
+	tabs         map[int]cliVO.IGameController
 }
 
 func (ctrl *Controller) Init() {
 
 }
 
-func NewController(match *vo.GameMatch, player *vo.GamePlayer) *Controller {
+func NewController(match *vo.GameMatch, player *vo.GamePlayer, gameDeck *vo.GameDeck) *Controller {
 	tabs := createTabs(match, player)
 	ctrl := &Controller{
-		Model: NewModel(match, player),
-		View:  NewView(0, tabs),
+		model: NewModel(match, player, gameDeck),
+		view:  NewView(0, tabs),
 	}
 
 	ctrl.tabs = tabs
@@ -44,14 +44,6 @@ func NewController(match *vo.GameMatch, player *vo.GamePlayer) *Controller {
 	return ctrl
 }
 
-func (ctrl *Controller) GetModel() cliVO.IModel {
-	return ctrl.Model
-}
-
-func (ctrl *Controller) GetView() cliVO.IView {
-	return ctrl.View
-}
-
 func (ctrl *Controller) GetName() string {
 	return "Container"
 }
@@ -60,13 +52,13 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 	return cliVO.LoginControllerState
 }
 
-func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
-	viewRender := ctrl.Model.Subcontroller.Render(gamematch)
+func (ctrl *Controller) Render() string {
+	viewRender := ctrl.model.Subcontroller.Render(ctrl.model.Gamematch, ctrl.model.GameDeck)
 
-	return ctrl.View.Render() + "\n" + styles.WindowStyle.Render(viewRender)
+	return ctrl.view.Render() + "\n" + styles.WindowStyle.Render(viewRender)
 }
 
-func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmds []tea.Cmd
 
 	if !ctrl.timerStarted {
@@ -93,22 +85,34 @@ func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
 	case timer.TickMsg: // Polling update
 		var cmd tea.Cmd
 		var gameMatch *vo.GameMatch
+		var gameDeck *vo.GameDeck
+
 		ctrl.timer, cmd = ctrl.timer.Update(msg)
 
-		resp := services.GetMatchById(ctrl.Model.GetMatch().ID)
+		resp := services.GetMatchById(ctrl.model.GetMatch().ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
 
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
 
-		ctrl.Model.SetMatch(gameMatch)
-		// ctrl.Model.Subcontroller.Render(gameMatch)
+		resp = services.GetDeckByPlayIdAndMatchId(*ctrl.model.GetPlayer().ID, *ctrl.model.GetMatch().ID)
+
+		err = json.Unmarshal(resp.([]byte), &gameDeck)
+
+		if err != nil {
+			utils.Logger.Sugar().Error(err)
+		}
+
+		ctrl.model.Gamematch = gameMatch
+		ctrl.model.GameDeck = gameDeck
 		cmds = append(cmds, cmd)
 	case vo.ChangeTabMsg:
 		ctrl.ChangeTab(msg)
-		ctrl.tabs[ctrl.tabIndex].Update(msg, ctrl.Model.GetMatch())
+
 	}
+
+	cmds = append(cmds, ctrl.model.Subcontroller.Update(msg))
 
 	return tea.Batch(cmds...)
 }
@@ -118,50 +122,48 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "tab":
-		ctrl.View.ActiveTab = ctrl.View.ActiveTab + 1
-		if ctrl.View.ActiveTab >= len(ctrl.View.Tabs) {
-			ctrl.View.ActiveTab = 0
+		ctrl.view.ActiveTab = ctrl.view.ActiveTab + 1
+		if ctrl.view.ActiveTab >= len(ctrl.view.Tabs) {
+			ctrl.view.ActiveTab = 0
 		}
 		return vo.ChangeTabMsg{
-			TabIndex: ctrl.View.ActiveTab,
+			TabIndex: ctrl.view.ActiveTab,
 		}
 
 	case "shift+tab":
-		ctrl.View.ActiveTab = ctrl.View.ActiveTab - 1
+		ctrl.view.ActiveTab = ctrl.view.ActiveTab - 1
 
-		if ctrl.View.ActiveTab < 0 {
-			ctrl.View.ActiveTab = len(ctrl.View.Tabs) - 1
+		if ctrl.view.ActiveTab < 0 {
+			ctrl.view.ActiveTab = len(ctrl.view.Tabs) - 1
 		}
 
 		return vo.ChangeTabMsg{
-			TabIndex: ctrl.View.ActiveTab,
+			TabIndex: ctrl.view.ActiveTab,
 		}
 	default:
-		ctrl.Model.Subcontroller.ParseInput(msg)
+		return ctrl.model.Subcontroller.ParseInput(msg)
 	}
-
-	return msg
 }
 
 func (ctrl *Controller) ChangeTab(msg tea.Msg) {
 	tabIndex := msg.(vo.ChangeTabMsg).TabIndex
 	if ctrl.tabs == nil {
-		ctrl.tabs = map[int]cliVO.IController{}
+		ctrl.tabs = map[int]cliVO.IGameController{}
 	}
 
 	ctrl.tabIndex = tabIndex
 
 	val, ok := ctrl.tabs[tabIndex]
 	if ok {
-		ctrl.Model.Subcontroller = val
-		val.Update(msg, ctrl.Model.GetMatch())
+		ctrl.model.Subcontroller = val
+		// val.Update(msg)
 		return
 	}
 
 }
 
-func createTabs(gameMatch *vo.GameMatch, player *vo.GamePlayer) map[int]cliVO.IController {
-	return map[int]cliVO.IController{
+func createTabs(gameMatch *vo.GameMatch, player *vo.GamePlayer) map[int]cliVO.IGameController {
+	return map[int]cliVO.IGameController{
 		0: board.NewBoard(
 			gameMatch,
 			player,

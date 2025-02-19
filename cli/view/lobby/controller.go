@@ -6,7 +6,6 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
-	"github.com/bardic/gocrib/cli/view/game"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -14,37 +13,17 @@ import (
 )
 
 type Controller struct {
-	*game.Controller
-}
-
-func (ctrl *Controller) GetModel() cliVO.IModel {
-	return &Model{}
-}
-
-func (ctrl *Controller) GetView() cliVO.IView {
-	return &View{}
-}
-
-func (ctrl *Controller) GetName() string {
-	return "Lobby"
-}
-
-func (ctrl *Controller) SetMatch(match *vo.GameMatch) {
-
+	model *Model
+	view  *View
 }
 
 func NewLobby(msg vo.StateChangeMsg) *Controller {
 	return &Controller{
-		Controller: &game.Controller{
-			Model: &Model{
-				ViewModel: cliVO.ViewModel{
-					Name:      "Lobby",
-					AccountId: msg.AccountId,
-				},
-			},
-			View: &View{
-				ActiveLandingTab: 0,
-			},
+		model: &Model{
+			playerAccountId: msg.AccountId,
+		},
+		view: &View{
+			ActiveLandingTab: 0,
 		},
 	}
 }
@@ -53,17 +32,21 @@ func (ctrl *Controller) GetState() cliVO.ControllerState {
 	return cliVO.LobbyControllerState
 }
 
+func (ctrl *Controller) GetName() string {
+	return "Login"
+}
+
 func (ctrl *Controller) Init() {
 
 }
 
-func (ctrl *Controller) Render(gamematch *vo.GameMatch) string {
-	return ctrl.View.Render()
+func (ctrl *Controller) Render() string {
+	return ctrl.view.Render()
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
-	lobbyView := ctrl.View.(*View)
-	lobbyModel := ctrl.Model.(*Model)
+	lobbyView := ctrl.view
+	lobbyModel := ctrl.model
 
 	switch msg.String() {
 	case "ctrl+c", "q":
@@ -80,7 +63,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		var matchDetails vo.MatchDetailsResponse
-		msg := services.JoinMatch(*lobbyModel.AccountId, int(id))
+		msg := services.JoinMatch(*lobbyModel.playerAccountId, int(id))
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
 
 		if err != nil {
@@ -92,11 +75,11 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			MatchId:  &id,
 		}
 	case "n":
-		match := CreateGame(lobbyModel.AccountId)
+		match := CreateGame(lobbyModel.playerAccountId)
 
 		return vo.StateChangeMsg{
 			NewState:  vo.CreateGameView,
-			AccountId: lobbyModel.AccountId,
+			AccountId: lobbyModel.playerAccountId,
 			MatchId:   match.MatchId,
 		}
 	case "tab":
@@ -132,11 +115,11 @@ func CreateGame(accountId *int) vo.MatchDetailsResponse {
 	return matchDetails
 }
 
-func (ctrl *Controller) Update(msg tea.Msg, gameMatch *vo.GameMatch) tea.Cmd {
+func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	lobbyView := ctrl.View.(*View)
+	lobbyView := ctrl.view
 	lobbyView.LobbyTable.Focus()
 
 	updatedField, cmd := lobbyView.LobbyTable.Update(msg)
