@@ -28,6 +28,7 @@ func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Con
 			HandVO:          &cliVO.HandVO{},
 			LocalPlayer:     player,
 			Name:            name,
+			GameMatchId:     match.Match.ID,
 		},
 	}
 
@@ -95,7 +96,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		case queries.GamestateDiscard:
 			services.PutKitty(
 				ctrl.model.GameMatchId,
-				&ctrl.model.LocalPlayerID, //this is wrong. Should not be account id
+				ctrl.model.LocalPlayer.ID,
 				vo.HandModifier{
 					CardIds: ctrl.model.SelectedCardIds,
 				},
