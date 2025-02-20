@@ -27,6 +27,8 @@ func NewBoard(gameMatch *vo.GameMatch, player *vo.GamePlayer) *Controller {
 		},
 	}
 
+	ctrl.view.Init()
+
 	return ctrl
 }
 
@@ -48,8 +50,11 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) s
 
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
+	var cmds []tea.Cmd = []tea.Cmd{}
 	ctrl.view.Update(msg)
-	return cmd
+	cmds = append(cmds, cmd)
+
+	return tea.Batch(cmds...)
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {

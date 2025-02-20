@@ -40,6 +40,7 @@ func (view *View) Init() {
 func (view *View) ShowCutInput() {
 	view.CutInput = textinput.New()
 	view.CutInput.Placeholder = "0"
+	view.CutInput.Cursor.Blink = true
 	view.CutInput.CharLimit = 5
 	view.CutInput.Focus()
 	view.CutInput.Width = 5
@@ -78,6 +79,8 @@ func (view *View) Update(msg tea.Msg) {
 	if view.isLoading {
 		return
 	}
+
+	view.CutInput.Focus()
 	view.CutInput, _ = view.CutInput.Update(msg)
 
 }
