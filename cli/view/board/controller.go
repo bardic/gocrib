@@ -18,7 +18,9 @@ type Controller struct {
 func NewBoard(gameMatch *vo.GameMatch, player *vo.GamePlayer) *Controller {
 	ctrl := &Controller{
 		model: &Model{
-			AccountId: player.Accountid,
+			AccountId:   player.Accountid,
+			GameMatchId: gameMatch.Match.ID,
+			Gamestate:   gameMatch.Match.Gamestate,
 		},
 		view: &View{
 			State:         queries.GamestateCut,
@@ -45,6 +47,7 @@ func (ctrl *Controller) GetName() string {
 }
 
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) string {
+	ctrl.model.Gamestate = gameMatch.Match.Gamestate
 	return ctrl.view.Render()
 }
 
