@@ -16,6 +16,7 @@ import (
 )
 
 // Return match details if the player is able to join the match
+// Lengthyy was here
 //
 //	@Summary	Join match by id
 //	@Description
@@ -80,7 +81,7 @@ func OnDeal(matchId int) (*vo.GameMatch, error) {
 				State:     queries.CardstateHand,
 				Origowner: players[i].ID,
 				Currowner: players[i].ID,
-				ID:        card.Cardid,
+				ID:        card.ID_2,
 			})
 		}
 	}

@@ -68,6 +68,12 @@ type MatchDetailsResponse struct {
 	GameState queries.Gamestate
 }
 
+type Meow struct {
+	Matchid  int
+	Playerid int
+	Details  HandModifier
+}
+
 type HandModifier struct {
 	CardIds []int
 }

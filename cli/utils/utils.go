@@ -21,7 +21,7 @@ func GetCardById(id int, deck *vo.GameDeck) *vo.GameCard {
 			Card:  card.Card,
 		}
 
-		if *card.Match.Cardid == id {
+		if *card.Match.ID == id {
 			return gameCard
 		}
 	}
@@ -140,7 +140,7 @@ func GetPlayerIds(players []*vo.GamePlayer) []*int {
 func IdFromCards(cards []queries.Matchcard) []int {
 	var ids []int
 	for _, c := range cards {
-		ids = append(ids, *c.Cardid)
+		ids = append(ids, *c.ID)
 	}
 
 	return ids

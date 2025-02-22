@@ -101,14 +101,18 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 					CardIds: ctrl.model.SelectedCardIds,
 				},
 			)
+
+			ctrl.model.SelectedCardIds = []int{}
 		case queries.GamestatePlay:
 			services.PutPlay(
 				ctrl.model.GameMatchId,
-				&ctrl.model.LocalPlayerID,
+				ctrl.model.LocalPlayer.ID,
 				vo.HandModifier{
 					CardIds: ctrl.model.SelectedCardIds,
 				},
 			)
+
+			ctrl.model.SelectedCardIds = []int{}
 		}
 	}
 

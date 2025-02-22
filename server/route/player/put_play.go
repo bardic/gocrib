@@ -42,7 +42,7 @@ func UpdatePlay(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	details := vo.HandModifier{}
+	details := &vo.HandModifier{}
 	if err := c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -58,7 +58,7 @@ func UpdatePlay(c echo.Context) error {
 		q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
 			State:     queries.CardstatePlay,
 			Origowner: &playerId,
-			Currowner: nil,
+			Currowner: &playerId,
 			ID:        &cardId,
 		})
 	}
