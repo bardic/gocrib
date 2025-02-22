@@ -14,5 +14,6 @@ type Model struct {
 	SelectedCardIds []int
 	Name            string
 	LocalPlayer     *vo.GamePlayer
+	ActivePlayerId  *int
 	GameMatchId     *int
 }

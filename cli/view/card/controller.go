@@ -27,6 +27,7 @@ func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Con
 			State:           match.Match.Gamestate,
 			HandVO:          &cliVO.HandVO{},
 			LocalPlayer:     player,
+			ActivePlayerId:  match.Match.Currentplayerturn,
 			Name:            name,
 			GameMatchId:     match.Match.ID,
 		},
@@ -50,6 +51,7 @@ func (ctrl *Controller) GetName() string {
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) string {
 	ctrl.model.State = gameMatch.Match.Gamestate
 	ctrl.model.HandVO.Deck = gameDeck
+	ctrl.model.ActivePlayerId = gameMatch.Match.Currentplayerturn
 
 	p := utils.GetPlayerForAccountId(ctrl.model.LocalPlayer.Accountid, gameMatch)
 
@@ -96,7 +98,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		case queries.GamestateDiscard:
 			services.PutKitty(
 				ctrl.model.GameMatchId,
-				ctrl.model.LocalPlayer.ID,
+				ctrl.model.ActivePlayerId,
 				vo.HandModifier{
 					CardIds: ctrl.model.SelectedCardIds,
 				},
