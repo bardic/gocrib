@@ -28,13 +28,13 @@ func GetPlayerByForMatchAndAccount(matchId, playerId *int) tea.Msg {
 	return url(endpoint, http.MethodGet, "")
 }
 
-func PutKitty(matchId, playerId *int, cards vo.HandModifier) tea.Msg {
+func PutKitty(matchId, fromPlayerId, toPlayerId *int, cards vo.HandModifier) tea.Msg {
 	b, err := json.Marshal(cards)
 	if err != nil {
 		return err
 	}
 
-	endpoint := utils.EndPointBuilder(EndPointKitty, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
+	endpoint := utils.EndPointBuilder(EndPointKitty, strconv.Itoa(*matchId), strconv.Itoa(*fromPlayerId), strconv.Itoa(*toPlayerId))
 
 	return url(endpoint, http.MethodPut, string(b))
 }

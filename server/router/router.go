@@ -84,7 +84,7 @@ func v1Routes(g *echo.Group) {
 	//Player
 	matchGroup.GET("/player/:playerId", player.GetPlayer)
 	playerGroup := matchGroup.Group("/player/:playerId")
-	playerGroup.PUT("/kitty", player.UpdateKitty)
+	playerGroup.PUT("/to/:toPlayerId/kitty", player.UpdateKitty)
 	playerGroup.GET("/deck", deck.GetDeckByPlayerIdAndMatchId)
 
 	playerGroup.PUT("/play", player.UpdatePlay)

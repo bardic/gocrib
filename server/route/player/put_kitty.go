@@ -23,13 +23,14 @@ import (
 //	@Accept		json
 //	@Produce	json
 //	@Param		matchId		path		int	true	"match id"'
-//	@Param		playerId	path		int	true	"player id"'
+//	@Param		playerId	path		int	true	"from player id"'
+//	@Param		toPlayerId	path		int	true	"to player id"'
 //	@Param		details	body		vo.HandModifier	true	"array of ids to add to kitty"
 //	@Success	200		{object}	queries.Match
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/match/{matchId}/player/{playerId}/kitty [put]
+//	@Router		/match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/kitty [put]
 func UpdateKitty(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 
@@ -37,7 +38,13 @@ func UpdateKitty(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	playerId, err := strconv.Atoi(c.Param("playerId"))
+	fromPlayerId, err := strconv.Atoi(c.Param("playerId"))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	toPlayerId, err := strconv.Atoi(c.Param("toPlayerId"))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -59,14 +66,14 @@ func UpdateKitty(c echo.Context) error {
 		q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
 			ID:        &cardId,
 			State:     queries.CardstateKitty,
-			Origowner: &playerId,
-			Currowner: &playerId,
+			Origowner: &fromPlayerId,
+			Currowner: &toPlayerId,
 		})
 	}
 
 	err = q.MarkPlayerReady(ctx, queries.MarkPlayerReadyParams{
 		Isready: true,
-		ID:      &playerId,
+		ID:      &fromPlayerId,
 	})
 
 	if err != nil {

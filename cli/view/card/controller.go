@@ -98,6 +98,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		case queries.GamestateDiscard:
 			services.PutKitty(
 				ctrl.model.GameMatchId,
+				ctrl.model.LocalPlayer.ID,
 				ctrl.model.ActivePlayerId,
 				vo.HandModifier{
 					CardIds: ctrl.model.SelectedCardIds,
