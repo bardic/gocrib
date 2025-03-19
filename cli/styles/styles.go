@@ -3,30 +3,33 @@ package styles
 import "github.com/charmbracelet/lipgloss"
 
 var (
+	ValueTopLeft    = lipgloss.NewStyle().Align(lipgloss.Left, lipgloss.Top)
+	ValueBottoRight = lipgloss.NewStyle().Align(lipgloss.Right, lipgloss.Bottom)
+
 	ModelStyle = lipgloss.NewStyle().
 			Width(10).
 			Height(5).
-			Align(lipgloss.Center, lipgloss.Center).
-			BorderStyle(lipgloss.HiddenBorder())
+		// Align(lipgloss.Left, lipgloss.Top).
+		BorderStyle(lipgloss.HiddenBorder())
 
 	SelectedStyle = lipgloss.NewStyle().
 			Width(10).
 			Height(5).
-			Align(lipgloss.Center, lipgloss.Center).
+			Align(lipgloss.Left, lipgloss.Top).
 			BorderStyle(lipgloss.ThickBorder()).
 			BorderForeground(lipgloss.Color("10"))
 
 	SelectedFocusedStyle = lipgloss.NewStyle().
 				Width(10).
 				Height(5).
-				Align(lipgloss.Center, lipgloss.Center).
+				Align(lipgloss.Left, lipgloss.Top).
 				BorderStyle(lipgloss.ThickBorder()).
 				BorderForeground(lipgloss.Color("69"))
 
 	FocusedModelStyle = lipgloss.NewStyle().
 				Width(10).
 				Height(5).
-				Align(lipgloss.Center, lipgloss.Center).
+				Align(lipgloss.Left, lipgloss.Top).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(lipgloss.Color("69"))
 
@@ -57,10 +60,22 @@ var (
 			Width(75).
 			Height(12)
 
-	ActiveCard = WindowStyle.Align(lipgloss.Center, lipgloss.Center).Render("Active View")
+	ActiveCard = WindowStyle.Align(lipgloss.Left, lipgloss.Top).Render("Active View")
 
 	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
 	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
+
+	Player1 = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000"))
+	Player2 = lipgloss.NewStyle().Foreground(lipgloss.Color("#00FF00"))
+	Player3 = lipgloss.NewStyle().Foreground(lipgloss.Color("#0000FF"))
+	Player4 = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFF00"))
+
+	PlayerStyles = []lipgloss.Style{
+		Player1,
+		Player2,
+		Player3,
+		Player4,
+	}
 )
 
 func tabBorderWithBottom(left, middle, right string) lipgloss.Border {

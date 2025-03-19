@@ -5,7 +5,9 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/queries/queries"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/bardic/gocrib/vo"
 
@@ -68,17 +70,30 @@ func GetPlayerForAccountId(id *int, match *vo.GameMatch) *vo.GamePlayer {
 }
 
 func BuildCommonFooter(match *vo.GameMatch, localplayer *vo.GamePlayer) string {
-	localPlayerId := "-"
-	activePlayerId := "-"
+	currentPlayerTurn := "-"
 
-	if localplayer != nil {
-		localPlayerId = fmt.Sprintf("%v", &localplayer.ID)
-		activePlayerId = fmt.Sprintf("%v", &match.Currentplayerturn)
+	if match.Currentplayerturn != nil {
+		currentPlayerTurn = fmt.Sprintf("%d", *match.Currentplayerturn)
 	}
 
-	f := fmt.Sprintf("\nState: %v | Local/Active Player : %v/%v | Match ID: %v ", match.Gamestate, localPlayerId, activePlayerId, fmt.Sprintf("%v", &match.ID))
-	f += "\ntab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
-	return f
+	f := fmt.Sprintf("State: %v\nActive Player: %v\nMatch ID: %d\n", match.Gamestate, currentPlayerTurn, *match.ID)
+	playerString := "Players: \n"
+
+	for i, v := range match.Players {
+		playerString += styles.PlayerStyles[i].Render(fmt.Sprintf("%d:%d", *v.ID, *v.Score))
+		playerString += "\n"
+
+	}
+
+	controls := "tab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
+
+	padding := lipgloss.NewStyle().Padding(0, 10, 0, 0)
+
+	cols := lipgloss.JoinHorizontal(lipgloss.Top, padding.Render(f), playerString)
+
+	cols = fmt.Sprintf("\n\n%s\n%s", cols, controls)
+
+	return cols
 }
 
 func IsPlayerTurn(playerId, matchId int) bool {

@@ -840,65 +840,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/match/{matchId}/player/{playerId}/play": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Update play",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "match id",
-                        "name": "matchId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "player id",
-                        "name": "playerId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "HandModifier object",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/vo.HandModifier"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Match"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/open": {
             "get": {
                 "consumes": [
@@ -1354,6 +1295,9 @@ const docTemplate = `{
                     }
                 },
                 "score": {
+                    "type": "integer"
+                },
+                "turnOrder": {
                     "type": "integer"
                 }
             }

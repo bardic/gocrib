@@ -300,6 +300,8 @@ definitions:
         type: array
       score:
         type: integer
+      turnOrder:
+        type: integer
     type: object
   vo.Hand:
     properties:
@@ -866,46 +868,6 @@ paths:
       summary: Get deck by match id
       tags:
       - deck
-  /match/{matchId}/player/{playerId}/play:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      - description: player id
-        in: path
-        name: playerId
-        required: true
-        type: integer
-      - description: HandModifier object
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/vo.HandModifier'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Match'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update play
-      tags:
-      - match
   /match/player/ready:
     put:
       consumes:

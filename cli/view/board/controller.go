@@ -74,9 +74,6 @@ func (ctrl *Controller) Enter() tea.Msg {
 	case queries.GamestateCut:
 		resp := services.CutDeck(*ctrl.model.GameMatchId, ctrl.view.CutInput.Value())
 		return resp
-	case queries.GamestatePlay:
-		resp := services.PutPlay(ctrl.model.AccountId, ctrl.model.GameMatchId, vo.HandModifier{})
-		return resp
 	}
 
 	return nil

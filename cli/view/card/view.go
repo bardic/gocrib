@@ -52,16 +52,29 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Card.Value)
 		var styledCard string
 
-		styledCard = styles.ModelStyle.Render(cardStr)
+		top := lipgloss.Place(0, 0, lipgloss.Right, lipgloss.Bottom, cardStr)
+
+		bottom := lipgloss.Place(8, 5, lipgloss.Right, lipgloss.Bottom, cardStr)
+
+		styledCard = styles.ModelStyle.Render(top, bottom)
 
 		if i == view.ActiveCardId {
-			styledCard = styles.SelectedFocusedStyle.Render(cardStr)
+			styledCard = styles.SelectedFocusedStyle.Render(top, bottom)
 		}
 
 		for _, v := range view.SelectedCardIds {
 			if v == hand[i] {
-				styledCard = styles.FocusedModelStyle.Render(cardStr)
+				styledCard = styles.FocusedModelStyle.Render(top, bottom)
 			}
+		}
+
+		//Original owner seems to be account id and not match player id
+
+		if c.Match.Origowner != nil {
+			styledCard = styles.PlayerStyles[*c.Match.Origowner].Render(styledCard)
+		} else {
+			styledCard = styles.PlayerStyles[*c.Match.Currowner].Render(styledCard)
+
 		}
 
 		cardViews = append(cardViews, styledCard)

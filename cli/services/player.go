@@ -15,13 +15,6 @@ type PReady struct {
 	PlayerId *int
 }
 
-func GetPlayer(playerId int) tea.Msg {
-	id := int(playerId)
-	pid := strconv.Itoa(id)
-
-	return url(EndPointPlayer+"/?id="+pid, http.MethodGet, "")
-}
-
 func GetPlayerByForMatchAndAccount(matchId, playerId *int) tea.Msg {
 	endpoint := utils.EndPointBuilder(EndPointPlayerByForMatchAndAccount, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
 
@@ -39,13 +32,13 @@ func PutKitty(matchId, fromPlayerId, toPlayerId *int, cards vo.HandModifier) tea
 	return url(endpoint, http.MethodPut, string(b))
 }
 
-func PutPlay(matchId, playerId *int, cards vo.HandModifier) tea.Msg {
+func PutPlay(matchId, fromPlayerId, toPlayerId *int, cards vo.HandModifier) tea.Msg {
 	b, err := json.Marshal(cards)
 	if err != nil {
 		return err
 	}
 
-	endpoint := utils.EndPointBuilder(EndPointPlay, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
+	endpoint := utils.EndPointBuilder(EndPointPlay, strconv.Itoa(*matchId), strconv.Itoa(*fromPlayerId), strconv.Itoa(*toPlayerId))
 
 	return url(endpoint, http.MethodPut, string(b))
 }

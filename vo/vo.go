@@ -4,9 +4,10 @@ import "github.com/bardic/gocrib/queries/queries"
 
 type GamePlayer struct {
 	queries.Player
-	Hand  []queries.Matchcard
-	Play  []queries.Matchcard
-	Kitty []queries.Matchcard
+	TurnOrder int
+	Hand      []queries.Matchcard
+	Play      []queries.Matchcard
+	Kitty     []queries.Matchcard
 }
 
 type GameMatch struct {

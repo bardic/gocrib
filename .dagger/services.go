@@ -32,7 +32,7 @@ func (c *CribService) migrationService(src *dagger.Directory, p *dagger.Service)
 func (c *CribService) postgresService(withPort bool) *dagger.Service {
 	p := c.
 		postgres(withPort).
-		AsService(dagger.ContainerAsServiceOpts{UseEntrypoint: true}).
+		AsService().
 		WithHostname(dbHostName)
 
 	return p

@@ -510,7 +510,7 @@ SELECT
                     )
                 )
             FROM matchcard AS m
-            WHERE m.currowner = p.id AND m.state = 'Play'
+            WHERE m.state = 'Play'
         )
     )
 FROM player as p
@@ -528,6 +528,7 @@ SELECT
         'score', p.score,
         'isready', p.isready,
         'art', p.art,
+        'turnOrder', match_player.turnOrder, 
         'hand',
         (
             SELECT

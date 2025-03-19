@@ -10,6 +10,7 @@ import (
 	"github.com/bardic/gocrib/vo"
 
 	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/route/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,13 +23,15 @@ import (
 //	@Accept		json
 //	@Produce	json
 //	@Param		matchId		path		int	true	"match id"'
-//	@Param		playerId	path		int	true	"player id"'
-//	@Param		details	body		vo.HandModifier	true	"HandModifier object"
+//	@Param		playerId	path		int	true	"from player id"'
+//	@Param		toPlayerId	path		int	true	"to player id"'
+// 	@Param		details	body		vo.HandModifier	true	"HandModifier object"
 //	@Success	200		{object}	queries.Match
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
-//	@Router		/match/{matchId}/player/{playerId}/play [put]
+//	@Router		/match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/play [put]
+
 func UpdatePlay(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 
@@ -36,7 +39,13 @@ func UpdatePlay(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	playerId, err := strconv.Atoi(c.Param("playerId"))
+	fromPlayerId, err := strconv.Atoi(c.Param("playerId"))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	toPlayerId, err := strconv.Atoi(c.Param("toPlayerId"))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -57,8 +66,8 @@ func UpdatePlay(c echo.Context) error {
 	for _, cardId := range details.CardIds {
 		q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
 			State:     queries.CardstatePlay,
-			Origowner: &playerId,
-			Currowner: &playerId,
+			Origowner: &fromPlayerId,
+			Currowner: &toPlayerId,
 			ID:        &cardId,
 		})
 	}
@@ -68,7 +77,7 @@ func UpdatePlay(c echo.Context) error {
 	orderedPlayers, err := q.GetMatchPlayerOrdered(ctx, &matchId)
 
 	for i, player := range orderedPlayers {
-		if *player.ID == playerId {
+		if *player.ID == toPlayerId {
 			playerIndex := i
 			nextPlayer := orderedPlayers[(playerIndex+1)%len(orderedPlayers)]
 			err := q.UpdateCurrentPlayerTurn(ctx, queries.UpdateCurrentPlayerTurnParams{
@@ -87,14 +96,11 @@ func UpdatePlay(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	match, err := q.UpdateGameState(ctx, queries.UpdateGameStateParams{
-		ID:        &matchId,
-		Gamestate: queries.GamestatePassTurn,
-	})
+	m, err := helpers.GetMatch(&matchId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, match)
+	return c.JSON(http.StatusOK, m)
 }

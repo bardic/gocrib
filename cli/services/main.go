@@ -17,7 +17,7 @@ const (
 	EndPointPlayer                     = BaseUrl + "/match/%s/player"
 	EndPointKitty                      = BaseUrl + "/match/%s/player/%s/to/%s/kitty"
 	EndPointPlayerByForMatchAndAccount = BaseUrl + "/match/%s/account/%s"
-	EndPointPlay                       = BaseUrl + "/match/%s/player/%s/play"
+	EndPointPlay                       = BaseUrl + "/match/%s/player/%s/to/%s/play"
 	EndPointPlayerReady                = BaseUrl + "/match/%s/player/%s/ready"
 	//Match
 	EndPointMatch                  = BaseUrl + "/match"
