@@ -6,6 +6,7 @@ import (
 
 	"github.com/bardic/gocrib/queries/queries"
 	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/route/deck"
 	"github.com/bardic/gocrib/vo"
 	"github.com/labstack/echo/v4"
 )
@@ -26,19 +27,26 @@ import (
 //	@Router		/match/{matchId}/player/{id} [get]
 func GetPlayer(c echo.Context) error {
 	id := c.Param("id")
-	//match := c.Param("matchId")
+	// match := c.Param("matchId")
 
 	p1Id, err := strconv.Atoi(id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
+
+	gameDeck, err := deck.ParseQueryCardsToGameCards(c, p1Id)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
 	ctx := c.Request().Context()
 
-	p, err := q.GetPlayer(ctx, &p1Id)
+	player, err := q.GetPlayer(ctx, &p1Id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -72,11 +80,28 @@ func GetPlayer(c echo.Context) error {
 	}
 
 	gamePlayer := vo.GamePlayer{
-		Player: p,
-		Hand:   hand,
-		Play:   play,
-		Kitty:  kitty,
+		Player: player,
+		Hand:   createGameCard(gameDeck, hand),
+		Play:   createGameCard(gameDeck, play),
+		Kitty:  createGameCard(gameDeck, kitty),
 	}
 
 	return c.JSON(http.StatusOK, gamePlayer)
+}
+
+func createGameCard(deck vo.GameDeck, cards []queries.Matchcard) []vo.GameCard {
+	cardCollection := []vo.GameCard{}
+
+	for _, card := range cards {
+		for _, gameCard := range deck.Cards {
+			if gameCard.Card.ID == card.Cardid {
+				cardCollection = append(cardCollection, vo.GameCard{
+					Match: card,
+					Card:  gameCard.Card,
+				})
+			}
+		}
+	}
+
+	return cardCollection
 }

@@ -5,14 +5,21 @@ import "github.com/bardic/gocrib/queries/queries"
 type GamePlayer struct {
 	queries.Player
 	TurnOrder int
-	Hand      []queries.Matchcard
-	Play      []queries.Matchcard
-	Kitty     []queries.Matchcard
+	Hand      []GameCard
+	Play      []GameCard
+	Kitty     []GameCard
 }
 
 type GameMatch struct {
 	*queries.Match
 	Players []*GamePlayer
+}
+
+type ScoreMatch struct {
+	ActivePlayerId *int
+	PlayerSeekId   *int
+	CardsInPlay    *[]GameCard
+	Players        *[]GamePlayer
 }
 
 // func (m GameMatch) SetMatch(match *queries.Match) {

@@ -284,7 +284,7 @@ definitions:
         type: string
       hand:
         items:
-          $ref: '#/definitions/queries.Matchcard'
+          $ref: '#/definitions/vo.GameCard'
         type: array
       id:
         type: integer
@@ -292,11 +292,11 @@ definitions:
         type: boolean
       kitty:
         items:
-          $ref: '#/definitions/queries.Matchcard'
+          $ref: '#/definitions/vo.GameCard'
         type: array
       play:
         items:
-          $ref: '#/definitions/queries.Matchcard'
+          $ref: '#/definitions/vo.GameCard'
         type: array
       score:
         type: integer
@@ -842,12 +842,12 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: search for deck by match id
+      - description: search for deck by match playerId
         in: path
         name: matchId
         required: true
         type: integer
-      - description: search for deck by player id
+      - description: search for deck by player playerId
         in: path
         name: playerId
         required: true
@@ -865,7 +865,7 @@ paths:
         "422":
           description: Unprocessable Entity
           schema: {}
-      summary: Get deck by match id
+      summary: Get deck by match playerId
       tags:
       - deck
   /match/player/ready:

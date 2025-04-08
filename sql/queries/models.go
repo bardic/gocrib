@@ -228,6 +228,11 @@ type DeckMatchcard struct {
 	Matchcardid *int
 }
 
+type GameCard struct {
+	Match Matchcard
+	Card  Card
+}
+
 type Match struct {
 	ID                 *int
 	Creationdate       pgtype.Timestamptz

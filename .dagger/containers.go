@@ -21,7 +21,7 @@ func (c *CribService) sqlc(src *dagger.Directory) *dagger.Container {
 
 func (c *CribService) postgres(withPort bool) *dagger.Container {
 	p := dag.Container().
-		From("postgres:latest").
+		From("postgres:16.8-alpine3.20").
 		WithEnvVariable("POSTGRES_USER", "postgres").
 		WithEnvVariable("POSTGRES_PASSWORD", "example").
 		WithEnvVariable("POSTGRES_DB", "cribbage")

@@ -1,8 +1,8 @@
 package game
 
 import (
-	"errors"
-	"sort"
+	"cmp"
+	"slices"
 
 	"github.com/bardic/gocrib/queries/queries"
 
@@ -36,46 +36,69 @@ func cardsInPlay(players []*vo.GamePlayer) []*int {
 	return cardIds
 }
 
-func countPegs(m vo.GameMatch) (vo.ScoreResults, error) {
+func countPegs(scoreVO vo.ScoreMatch) (vo.ScoreResults, error) {
 	res := vo.ScoreResults{}
 
-	r, err := scanForThirtyOne(cardsInPlay(m.Players))
+	// c, err := getGameplayCardsForIds(cardsInPlay(m.Players))
+	// matchActivePlayerId := 1
+	// scoringPlayerId := 1
+	// playerHands := []vo.GamePlayer{}
+
+	// if err != nil {
+	// 	return vo.ScoreResults{}, err
+	// }
+
+	// cut, err := getCut(m)
+
+	// if err != nil {
+	// 	return vo.ScoreResults{}, err
+	// }
+
+	r, err := scanForThirtyOne(*scoreVO.CardsInPlay)
 	if err != nil {
 		return vo.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	if len(m.Turnpasstimestamps) == 0 {
-		r, err = scanJackOnCut(m)
+	// if len(m.Turnpasstimestamps) == 0 {
+	// 	r, err = scanJackOnCut(cut)
+	// 	if err != nil {
+	// 		return vo.ScoreResults{}, err
+	// 	}
+	// 	res.Results = append(res.Results, r...)
+	// }
+
+	r, err = scanForFifteens(*scoreVO.CardsInPlay)
+	if err != nil {
+		return vo.ScoreResults{}, err
+	}
+	res.Results = append(res.Results, r...)
+
+	// r, err = scanForLastCard(matchActivePlayerId, scoringPlayerId, c, playerHands)
+	// if err != nil {
+	// 	return vo.ScoreResults{}, err
+	// }
+	// res.Results = append(res.Results, r...)
+
+	r, err = scanForMatchingKinds(*scoreVO.CardsInPlay)
+	if err != nil {
+		return vo.ScoreResults{}, err
+	}
+	res.Results = append(res.Results, r...)
+
+	r, err = scanForRuns(*scoreVO.CardsInPlay)
+	if err != nil {
+		return vo.ScoreResults{}, err
+	}
+	res.Results = append(res.Results, r...)
+
+	if scoreVO.ActivePlayerId != nil && scoreVO.Players != nil {
+		r, err = scanForLastCard(*scoreVO.ActivePlayerId, *scoreVO.CardsInPlay, *scoreVO.Players)
 		if err != nil {
 			return vo.ScoreResults{}, err
 		}
 		res.Results = append(res.Results, r...)
 	}
-
-	r, err = scanForFifthteens(cardsInPlay(m.Players))
-	if err != nil {
-		return vo.ScoreResults{}, err
-	}
-	res.Results = append(res.Results, r...)
-
-	r, err = scanForLastCard(m)
-	if err != nil {
-		return vo.ScoreResults{}, err
-	}
-	res.Results = append(res.Results, r...)
-
-	r, err = scanForMatchingKinds(cardsInPlay(m.Players))
-	if err != nil {
-		return vo.ScoreResults{}, err
-	}
-	res.Results = append(res.Results, r...)
-
-	r, err = scanForRuns(cardsInPlay(m.Players))
-	if err != nil {
-		return vo.ScoreResults{}, err
-	}
-	res.Results = append(res.Results, r...)
 
 	return vo.ScoreResults{Results: res.Results}, nil
 }
@@ -83,43 +106,54 @@ func countPegs(m vo.GameMatch) (vo.ScoreResults, error) {
 func countHand(m vo.GameMatch) (vo.ScoreResults, error) {
 	res := vo.ScoreResults{}
 
-	r, err := scanForThirtyOne(cardsInPlay(m.Players))
+	c, err := getGameplayCardsForIds(cardsInPlay(m.Players))
+	matchActivePlayerId := 1
+	// scoringPlayerId := 1
+	playerHands := []vo.GamePlayer{}
+
+	if err != nil {
+		return vo.ScoreResults{}, err
+	}
+
+	cut, err := getCut(m)
+
+	r, err := scanForThirtyOne(c)
 	if err != nil {
 		return vo.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanRightJackCut(cardsInPlay(m.Players), m)
+	r, err = scanRightJackCut(c, cut)
 	if err != nil {
 		return vo.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForFifthteens(cardsInPlay(m.Players))
+	r, err = scanForFifteens(c)
 	if err != nil {
 		return vo.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForLastCard(m)
+	r, err = scanForLastCard(matchActivePlayerId, c, playerHands)
 	if err != nil {
 		return vo.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForMatchingKinds(cardsInPlay(m.Players))
+	r, err = scanForMatchingKinds(c)
 	if err != nil {
 		return vo.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForRuns(cardsInPlay(m.Players))
+	r, err = scanForRuns(c)
 	if err != nil {
 		return vo.ScoreResults{}, err
 	}
 	res.Results = append(res.Results, r...)
 
-	r, err = scanForFlush(cardsInPlay(m.Players))
+	r, err = scanForFlush(c)
 	if err != nil {
 		return vo.ScoreResults{}, err
 	}
@@ -128,19 +162,29 @@ func countHand(m vo.GameMatch) (vo.ScoreResults, error) {
 	return vo.ScoreResults{Results: res.Results}, nil
 }
 
-func scanForFlush(cardIdsInHand []*int) ([]vo.Scores, error) {
-	gameplayCardsInHand, err := getGameplayCardsForIds(cardIdsInHand)
-	if err != nil {
-		return []vo.Scores{}, err
-	}
+func getCut(m vo.GameMatch) (vo.GameCard, error) {
+	return vo.GameCard{
+
+		Card: queries.Card{
+			Value: queries.CardvalueAce,
+			Suit:  queries.CardsuitClubs,
+		},
+	}, nil
+}
+
+func scanForFlush(cardsInPlay []vo.GameCard) ([]vo.Scores, error) {
+	// gameplayCardsInHand, err := getGameplayCardsForIds(cardIdsInHand)
+	// if err != nil {
+	// 	return []vo.Scores{}, err
+	// }
 
 	var flushSuit *queries.Cardsuit
 	matchesFlush := true
-	for _, card := range gameplayCardsInHand {
+	for _, card := range cardsInPlay {
 		if flushSuit == nil {
 			flushSuit = &card.Card.Suit
 		} else {
-			matchesFlush = flushSuit == &card.Card.Suit
+			matchesFlush = *flushSuit == card.Card.Suit
 		}
 	}
 
@@ -155,15 +199,8 @@ func scanForFlush(cardIdsInHand []*int) ([]vo.Scores, error) {
 	return []vo.Scores{}, nil
 }
 
-func scanForRuns(cardIdsInPlay []*int) ([]vo.Scores, error) {
-	gameplayCardsInPlay, err := getGameplayCardsForIds(cardIdsInPlay)
-	if err != nil {
-		return []vo.Scores{}, err
-	}
-
-	sort.Slice(gameplayCardsInPlay, func(i, j int) bool {
-		return gameplayCardsInPlay[i].Card.Value < gameplayCardsInPlay[j].Card.Value
-	})
+func scanForRuns(gameplayCardsInPlay []vo.GameCard) ([]vo.Scores, error) {
+	gameplayCardsInPlay = orderHand(gameplayCardsInPlay)
 
 	var pointsFound []vo.Scores
 
@@ -181,21 +218,21 @@ func scanForRuns(cardIdsInPlay []*int) ([]vo.Scores, error) {
 
 	var pointsToGain *int
 
-	if *details1.Value+1 == *details2.Value && *details2.Value+1 == *details3.Value {
+	if *details1.Order+1 == *details2.Order && *details2.Order+1 == *details3.Order {
 		pointsToGain = &Three
 		pointsFound = []vo.Scores{{
 			Cards: []vo.GameCard{gameCard1, gameCard2, gameCard3},
 			Point: pointsToGain,
 		}}
 
-		if len(gameplayCardsInPlay) < 4 {
+		if len(gameplayCardsInPlay) <= 3 {
 			return pointsFound, nil
 		}
 
 		gameCard4 := gameplayCardsInPlay[3]
 		details4 := cardDetails(gameCard4.Card.Value)
 
-		if *details3.Value+1 == *details4.Value {
+		if *details3.Order+1 == *details4.Order {
 			pointsToGain = &Four
 			pointsFound = []vo.Scores{{
 				Cards: []vo.GameCard{gameCard1, gameCard2, gameCard3, gameCard4},
@@ -204,12 +241,19 @@ func scanForRuns(cardIdsInPlay []*int) ([]vo.Scores, error) {
 		}
 	}
 
-	if *details1.Value+1 == *details2.Value &&
-		*details2.Value+1 == *details3.Value {
+	if len(gameplayCardsInPlay) <= 3 {
+		return pointsFound, nil
+	}
+
+	gameCard4 := gameplayCardsInPlay[3]
+	details4 := cardDetails(gameCard4.Card.Value)
+
+	if *details1.Order+1 == *details2.Order &&
+		*details2.Order+1 == *details4.Order {
 
 		pointsToGain = &Three
 		pointsFound = append(pointsFound, vo.Scores{
-			Cards: []vo.GameCard{gameCard1, gameCard2, gameCard3},
+			Cards: []vo.GameCard{gameCard1, gameCard2, gameCard4},
 			Point: pointsToGain,
 		})
 	}
@@ -299,15 +343,8 @@ func cardDetails(cardValue queries.Cardvalue) vo.GameCardDetails {
 
 }
 
-func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
-	gameplayCardsInPlay, err := getGameplayCardsForIds(cardIdsInPlay)
-	if err != nil {
-		return []vo.Scores{}, err
-	}
-
-	sort.Slice(gameplayCardsInPlay, func(i, j int) bool {
-		return gameplayCardsInPlay[i].Card.Value < gameplayCardsInPlay[j].Card.Value
-	})
+func scanForMatchingKinds(gameplayCardsInPlay []vo.GameCard) ([]vo.Scores, error) {
+	gameplayCardsInPlay = orderHand(gameplayCardsInPlay)
 
 	var pointsFound []vo.Scores
 
@@ -321,7 +358,7 @@ func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	details1 := cardDetails(gameCard1.Card.Value)
 	details2 := cardDetails(gameCard2.Card.Value)
 
-	if details1.Value == details2.Value {
+	if details1.Order == details2.Order {
 		pointsFound = append(pointsFound, vo.Scores{
 			Cards: []vo.GameCard{gameCard1, gameCard2},
 			Point: &Two,
@@ -335,14 +372,14 @@ func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	gameCard3 := gameplayCardsInPlay[2]
 	details3 := cardDetails(gameCard3.Card.Value)
 
-	if details1.Value == details3.Value {
+	if details1.Order == details3.Order {
 		pointsFound = append(pointsFound, vo.Scores{
 			Cards: []vo.GameCard{gameCard1, gameCard3},
 			Point: &Two,
 		})
 	}
 
-	if details2.Value == details3.Value {
+	if details2.Order == details3.Order {
 		pointsFound = append(pointsFound, vo.Scores{
 			Cards: []vo.GameCard{gameCard2, gameCard3},
 			Point: &Two,
@@ -356,21 +393,21 @@ func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	gameCard4 := gameplayCardsInPlay[3]
 	details4 := cardDetails(gameCard4.Card.Value)
 
-	if details1.Value == details4.Value {
+	if details1.Order == details4.Order {
 		pointsFound = append(pointsFound, vo.Scores{
 			Cards: []vo.GameCard{gameCard1, gameCard4},
 			Point: &Two,
 		})
 	}
 
-	if details2.Value == details4.Value {
+	if details2.Order == details4.Order {
 		pointsFound = append(pointsFound, vo.Scores{
 			Cards: []vo.GameCard{gameCard2, gameCard4},
 			Point: &Two,
 		})
 	}
 
-	if details3.Value == details4.Value {
+	if details3.Order == details4.Order {
 		pointsFound = append(pointsFound, vo.Scores{
 			Cards: []vo.GameCard{gameCard3, gameCard4},
 			Point: &Two,
@@ -380,11 +417,11 @@ func scanForMatchingKinds(cardIdsInPlay []*int) ([]vo.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanForFifthteens(gameplayCardsIdsInPlay []*int) ([]vo.Scores, error) {
-	cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
-	if err != nil {
-		return []vo.Scores{}, err
-	}
+func scanForFifteens(cardsInPlay []vo.GameCard) ([]vo.Scores, error) {
+	// cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
+	// if err != nil {
+	// 	return []vo.Scores{}, err
+	// }
 
 	pointsFound := []vo.Scores{}
 
@@ -428,21 +465,21 @@ func scanForFifthteens(gameplayCardsIdsInPlay []*int) ([]vo.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanRightJackCut(gameplayCardsIdsInPlay []*int, match vo.GameMatch) ([]vo.Scores, error) {
-	cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
-	if err != nil {
-		return []vo.Scores{}, err
-	}
+func scanRightJackCut(cardsInPlay []vo.GameCard, cutCard vo.GameCard) ([]vo.Scores, error) {
 
-	cut, err := getGameplayCardsForIds([]*int{match.Cutgamecardid})
-	if err != nil {
-		return []vo.Scores{}, err
-	}
+	// cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
+	// if err != nil {
+	// 	return []vo.Scores{}, err
+	// }
 
+	// cut, err := getGameplayCardsForIds([]*int{match.Cutgamecardid})
+	// if err != nil {
+	// 	return []vo.Scores{}, err
+	// }
 	for i := 0; i < len(cardsInPlay); i++ {
 		details1 := cardDetails(cardsInPlay[i].Card.Value)
 
-		if details1.Value == &Eleven && cardsInPlay[i].Card.Suit == cut[0].Card.Suit {
+		if details1.Order == &Eleven && cardsInPlay[i].Card.Suit == cutCard.Card.Suit {
 			return []vo.Scores{{
 				Cards: []vo.GameCard{cardsInPlay[0], cardsInPlay[1]},
 				Point: &One,
@@ -468,11 +505,11 @@ func getGameplayCardsForIds(ids []*int) ([]vo.GameCard, error) {
 	return []vo.GameCard{}, nil
 }
 
-func scanForThirtyOne(gameplayCardsIdsInPlay []*int) ([]vo.Scores, error) {
-	cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
-	if err != nil {
-		return []vo.Scores{}, err
-	}
+func scanForThirtyOne(cardsInPlay []vo.GameCard) ([]vo.Scores, error) {
+	// cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
+	// if err != nil {
+	// 	return []vo.Scores{}, err
+	// }
 
 	plays := []vo.GameCard{}
 	pointsFound := []vo.Scores{}
@@ -529,76 +566,137 @@ func scanForThirtyOne(gameplayCardsIdsInPlay []*int) ([]vo.Scores, error) {
 	return pointsFound, nil
 }
 
-func scanForLastCard(m vo.GameMatch) ([]vo.Scores, error) {
-	if len(m.Players) < 2 {
-		return []vo.Scores{}, errors.New("too few players")
-	}
-
-	// playerOneCards, err := getGameplayCardsForIds(m.Players[0].Hand)
-
-	// if err != nil {
-	// 	return []vo.Scores{}, err
-	// }
-
-	// playerTwoCards, err := getGameplayCardsForIds(m.Players[1].Hand)
-
-	// if err != nil {
-	// 	return []vo.Scores{}, err
-	// }
-
-	cardsInPlay, err := getGameplayCardsForIds(cardsInPlay(m.Players))
-
-	if err != nil {
-		return []vo.Scores{}, err
-	}
-
+func sum(cards []vo.GameCard) int {
 	total := 0
-	for _, card := range cardsInPlay {
+	for _, card := range cards {
 		details := cardDetails(card.Card.Value)
 		total = total + *details.Value
 	}
 
-	// playerOneCanPlay := false
-	// for _, card := range playerOneCards {
-	// 	details := cardDetails(card.Value)
-	// 	if *details.Value+total <= 31 {
-	// 		playerOneCanPlay = true
-	// 	}
-	// }
+	return total
+}
 
-	// playerTwoCanPlay := false
-	// for _, card := range playerTwoCards {
-	// 	details := cardDetails(card.Value)
-	// 	if *details.Value+total <= 31 {
-	// 		playerTwoCanPlay = true
-	// 	}
-	// }
+func scanForLastCard(currentPlayerTurn int, cardsInPlay []vo.GameCard, players []vo.GamePlayer) ([]vo.Scores, error) {
 
-	// if !playerOneCanPlay && !playerTwoCanPlay {
-	// 	return []vo.Scores{
-	// 		{
-	// 			Point: &One,
-	// 		},
-	// 	}, nil
+	totalInPlay := sum(cardsInPlay)
+
+	if totalInPlay == 31 {
+		return []vo.Scores{
+			{
+				Point: &Two,
+			},
+		}, nil
+	}
+
+	//sort array of players so that the current player is first
+	currnetPlayerIndex := slices.IndexFunc(players, func(i vo.GamePlayer) bool {
+		return *i.ID == currentPlayerTurn
+	})
+
+	players = append(players[currnetPlayerIndex:], players[:currnetPlayerIndex]...)
+
+	hasPlayableCard := false
+	for _, player := range players {
+		//if *player.ID == currentPlayerTurn {
+		//If if a card in this players hand can be added to the cards in play without xceeding 31
+		//then they get a point
+
+		for _, card := range player.Hand {
+			details := cardDetails(card.Card.Value)
+			if *details.Value+totalInPlay <= 31 {
+				hasPlayableCard = true
+			}
+		}
+		//}
+	}
+
+	if hasPlayableCard {
+		return []vo.Scores{
+			{
+				Point: &Zero,
+			},
+		}, nil
+	}
+
+	return []vo.Scores{
+		{
+			Point: &One,
+		},
+	}, nil
+}
+
+func scanForAdditionalPlays(currentPlayerTurn int, cardsInPlay []vo.GameCard, players []vo.GamePlayer) ([]vo.Scores, error) {
+
+	totalInPlay := sum(cardsInPlay)
+
+	if totalInPlay == 31 {
+		return []vo.Scores{
+			{
+				Point: &Two,
+			},
+		}, nil
+	}
+
+	//sort array of players so that the current player is first
+	currnetPlayerIndex := slices.IndexFunc(players, func(i vo.GamePlayer) bool {
+		return *i.ID == currentPlayerTurn
+	})
+
+	players = append(players[currnetPlayerIndex:], players[:currnetPlayerIndex]...)
+
+	for _, player := range players {
+		//if *player.ID == currentPlayerTurn {
+		//If if a card in this players hand can be added to the cards in play without xceeding 31
+		//then they get a point
+
+		for _, card := range player.Hand {
+			details := cardDetails(card.Card.Value)
+			if *details.Value+totalInPlay <= 31 {
+				return []vo.Scores{
+					{
+						Point: &Zero,
+					},
+				}, nil
+			}
+		}
+		//}
+	}
+
+	return []vo.Scores{
+		{
+			Point: &One,
+		},
+	}, nil
+}
+func scanJackOnCut(cutCard vo.GameCard) ([]vo.Scores, error) {
+
+	if cutCard.Card.Value == queries.CardvalueJack {
+		return []vo.Scores{{
+			Cards: []vo.GameCard{},
+			Point: &One,
+		}}, nil
+
+	}
+
+	// details := cardDetails(cutCard.Card.Value)
+
+	// if details.Order == &Eleven {
+	// 	return []vo.Scores{{
+	// 		Cards: []vo.GameCard{},
+	// 		Point: &Two,
+	// 	}}, nil
 	// }
 
 	return []vo.Scores{}, nil
 }
 
-func scanJackOnCut(match vo.GameMatch) ([]vo.Scores, error) {
-	cardsInPlay, err := getGameplayCardsForIds([]*int{match.Cutgamecardid})
-	if err != nil || len(cardsInPlay) == 0 {
-		return []vo.Scores{}, err
-	}
+func orderHand(gameplayCardsInPlay []vo.GameCard) []vo.GameCard {
+	slices.SortFunc(gameplayCardsInPlay, func(i, j vo.GameCard) int {
+		v1 := cardDetails(i.Card.Value).Order
+		v2 := cardDetails(j.Card.Value).Order
 
-	details := cardDetails(cardsInPlay[0].Card.Value)
+		return cmp.Compare(*v1, *v2)
+	})
 
-	if details.Order == &Eleven {
-		return []vo.Scores{{
-			Cards: []vo.GameCard{},
-			Point: &Two,
-		}}, nil
-	}
-
-	return []vo.Scores{}, nil
+	return gameplayCardsInPlay
 }

@@ -152,10 +152,10 @@ func GetPlayerIds(players []*vo.GamePlayer) []*int {
 	return playIds
 }
 
-func IdFromCards(cards []queries.Matchcard) []int {
+func IdFromCards(cards []vo.GameCard) []int {
 	var ids []int
 	for _, c := range cards {
-		ids = append(ids, *c.ID)
+		ids = append(ids, *c.Match.Cardid)
 	}
 
 	return ids

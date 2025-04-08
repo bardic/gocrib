@@ -116,9 +116,9 @@ func OnDetermineFirst(matchId int) (*vo.GameMatch, error) {
 
 				Isready: player.Isready,
 			},
-			Hand:  []queries.Matchcard{},
-			Play:  []queries.Matchcard{},
-			Kitty: []queries.Matchcard{},
+			Hand:  []vo.GameCard{},
+			Play:  []vo.GameCard{},
+			Kitty: []vo.GameCard{},
 		})
 	}
 

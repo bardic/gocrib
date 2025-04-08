@@ -805,18 +805,18 @@ const docTemplate = `{
                 "tags": [
                     "deck"
                 ],
-                "summary": "Get deck by match id",
+                "summary": "Get deck by match playerId",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "search for deck by match id",
+                        "description": "search for deck by match playerId",
                         "name": "matchId",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "search for deck by player id",
+                        "description": "search for deck by player playerId",
                         "name": "playerId",
                         "in": "path",
                         "required": true
@@ -1273,7 +1273,7 @@ const docTemplate = `{
                 "hand": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/queries.Matchcard"
+                        "$ref": "#/definitions/vo.GameCard"
                     }
                 },
                 "id": {
@@ -1285,13 +1285,13 @@ const docTemplate = `{
                 "kitty": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/queries.Matchcard"
+                        "$ref": "#/definitions/vo.GameCard"
                     }
                 },
                 "play": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/queries.Matchcard"
+                        "$ref": "#/definitions/vo.GameCard"
                     }
                 },
                 "score": {
