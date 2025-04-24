@@ -63,7 +63,7 @@ func Pass(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, err)
 	}
 
-	err = q.UpdateCurrentPlayerTurn(ctx, queries.UpdateCurrentPlayerTurnParams{
+	err = q.UpateMatchCurrentPlayerTurn(ctx, queries.UpateMatchCurrentPlayerTurnParams{
 		ID:                &matchId,
 		Currentplayerturn: nextPlayer.ID,
 	})
@@ -81,7 +81,7 @@ func Pass(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	updatedMatch, err := q.UpdateGameState(ctx, queries.UpdateGameStateParams{
+	updatedMatch, err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{
 		ID:        &matchId,
 		Gamestate: queries.GamestateDeal,
 	})

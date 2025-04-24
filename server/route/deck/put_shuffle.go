@@ -41,15 +41,26 @@ func PutShuffle(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	q.ResetDeckState(ctx, &matchId)
+	q.ResetDeckForMatchId(ctx, &matchId)
 
-	cards, err := q.GetMarchCardsByType(ctx, queries.GetMarchCardsByTypeParams{
+	cardResults, err := q.GetCardsForMatchIdAndState(ctx, queries.GetCardsForMatchIdAndStateParams{
 		ID:    &matchId,
 		State: queries.CardstateDeck,
 	})
 
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
+	}
+
+	cards := []queries.Matchcard{}
+	for _, res := range cardResults {
+		cards = append(cards, queries.Matchcard{
+			ID:        res.ID,
+			Cardid:    res.Cardid,
+			Origowner: res.Origowner,
+			Currowner: res.Currowner,
+			State:     res.State,
+		})
 	}
 
 	hand := vo.Hand{

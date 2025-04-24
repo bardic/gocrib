@@ -215,10 +215,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/queries.GetMatchCardsRow"
-                            }
+                            "$ref": "#/definitions/vo.GamePlayer"
                         }
                     },
                     "404": {
@@ -259,7 +256,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/queries.GetMatchCardsRow"
+                                "$ref": "#/definitions/queries.GetCardsForMatchIdRow"
                             }
                         }
                     },
@@ -744,56 +741,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/match/{matchId}/player/{id}": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "players"
-                ],
-                "summary": "Get player by barcode",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "search for match by id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "search for match by id",
-                        "name": "matchId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/vo.GamePlayer"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/match/{matchId}/player/{playerId}/deck/": {
             "get": {
                 "consumes": [
@@ -868,6 +815,49 @@ const docTemplate = `{
                     },
                     "422": {
                         "description": "Unprocessable Entity",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/player/{playerId}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "players"
+                ],
+                "summary": "Get player by playerId",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "search for player by id",
+                        "name": "playerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/vo.GamePlayer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -1039,7 +1029,7 @@ const docTemplate = `{
                 "GamestateLost"
             ]
         },
-        "queries.GetMatchCardsRow": {
+        "queries.GetCardsForMatchIdRow": {
             "type": "object",
             "properties": {
                 "art": {
@@ -1073,7 +1063,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "state": {
-                    "$ref": "#/definitions/queries.NullCardstate"
+                    "$ref": "#/definitions/queries.Cardstate"
                 },
                 "suit": {
                     "$ref": "#/definitions/queries.NullCardsuit"
@@ -1144,18 +1134,6 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/queries.Cardstate"
-                }
-            }
-        },
-        "queries.NullCardstate": {
-            "type": "object",
-            "properties": {
-                "cardstate": {
-                    "$ref": "#/definitions/queries.Cardstate"
-                },
-                "valid": {
-                    "description": "Valid is true if Cardstate is not NULL",
-                    "type": "boolean"
                 }
             }
         },

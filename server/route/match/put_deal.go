@@ -53,13 +53,19 @@ func OnDeal(matchId int) (*vo.GameMatch, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	players, err := q.GetPlayersInMatch(ctx, &matchId)
+	// players, err := q.GetPlayersForMatchId(ctx, &matchId)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	match, err := helpers.GetMatch(&matchId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	numOfPlayers := len(players)
+	numOfPlayers := len(match.Players)
 
 	cardsToDealPerPlayer := 6
 	if numOfPlayers > 2 {
@@ -68,7 +74,7 @@ func OnDeal(matchId int) (*vo.GameMatch, error) {
 
 	// Deal cards
 
-	cards, err := q.GetMatchCards(ctx, &matchId)
+	cards, err := q.GetCardsForMatchId(ctx, &matchId)
 
 	if err != nil {
 		return nil, err
@@ -79,20 +85,20 @@ func OnDeal(matchId int) (*vo.GameMatch, error) {
 			card := cards[(i*cardsToDealPerPlayer)+j]
 			q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
 				State:     queries.CardstateHand,
-				Origowner: players[i].ID,
-				Currowner: players[i].ID,
+				Origowner: match.Players[i].ID,
+				Currowner: match.Players[i].ID,
 				ID:        card.ID_2,
 			})
 		}
 	}
 
-	match, err := helpers.GetMatch(&matchId)
+	// match, err := helpers.GetMatch(&matchId)
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	_, err = q.UpdateGameState(ctx, queries.UpdateGameStateParams{
+	_, err = q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{
 		ID:        &matchId,
 		Gamestate: queries.GamestateDiscard,
 	})

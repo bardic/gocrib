@@ -64,14 +64,14 @@ func OnDetermineFirst(matchId int) (*vo.GameMatch, error) {
 		return nil, err
 	}
 
-	players, err := q.GetMatchPlayersByMatchId(ctx, &matchId)
+	// players, err := q.GetPlayersForMatchId(ctx, &matchId)
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	turnOrder := 1
-	for _, player := range players {
+	for _, player := range match.Players {
 		q.UpdatePlayerTurnOrder(ctx, queries.UpdatePlayerTurnOrderParams{
 			Turnorder: &turnOrder,
 			Matchid:   &matchId,
@@ -80,7 +80,7 @@ func OnDetermineFirst(matchId int) (*vo.GameMatch, error) {
 
 		if turnOrder == 1 {
 
-			err = q.UpdateCurrentPlayerTurn(ctx, queries.UpdateCurrentPlayerTurnParams{
+			err = q.UpateMatchCurrentPlayerTurn(ctx, queries.UpateMatchCurrentPlayerTurnParams{
 				ID:                &matchId,
 				Currentplayerturn: player.ID,
 			})
@@ -102,13 +102,13 @@ func OnDetermineFirst(matchId int) (*vo.GameMatch, error) {
 		turnOrder++
 	}
 
-	updatedMatch, err := q.UpdateGameState(ctx, queries.UpdateGameStateParams{
+	updatedMatch, err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{
 		ID:        &matchId,
 		Gamestate: queries.GamestateDeal,
 	})
 
 	p := []*vo.GamePlayer{}
-	for _, player := range players {
+	for _, player := range match.Players {
 		p = append(p, &vo.GamePlayer{
 			Player: queries.Player{
 				ID:        player.ID,

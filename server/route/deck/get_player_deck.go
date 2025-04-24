@@ -8,8 +8,13 @@ import (
 	"github.com/bardic/gocrib/vo"
 	"github.com/labstack/echo/v4"
 
-	conn "github.com/bardic/gocrib/server/db"
+	"github.com/bardic/gocrib/server/store"
 )
+
+type HandlerPlayerDeck struct {
+	DeckStore *store.DeckStore
+	CardStore *store.CardStore
+}
 
 // Returns the deck for a match playerId
 //
@@ -24,22 +29,22 @@ import (
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId}/player/{playerId}/deck/ [get]
-func GetDeckByPlayerIdAndMatchId(c echo.Context) error {
-	p := c.Param("matchId")
+func (h *HandlerPlayerDeck) GetDeckByPlayerIdAndMatchId(c echo.Context) error {
+	p := c.Param("playerId")
 	playerId, err := strconv.Atoi(p)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	// pid := c.Param("matchId")
-	// playerId, err := strconv.Atoi(pid)
+	pid := c.Param("matchId")
+	matchId, err := strconv.Atoi(pid)
 
-	// if err != nil {
-	// 	return c.JSON(http.StatusBadRequest, err)
-	// }
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
 
-	gameDeck, err := ParseQueryCardsToGameCards(c, playerId)
+	gameDeck, err := h.ParseQueryCardsToGameCards(&matchId, &playerId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -48,45 +53,43 @@ func GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 	return c.JSON(http.StatusOK, gameDeck)
 }
 
-func ParseQueryCardsToGameCards(c echo.Context, playerId int) (vo.GameDeck, error) {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-	ctx := c.Request().Context()
-
-	deck, err := q.GetDeckForMatchId(ctx, &playerId)
-	//deck, err := controller.GetDeckByMatchId(&playerId)
+func (h *HandlerPlayerDeck) ParseQueryCardsToGameCards(matchId, playerId *int) (*vo.GameDeck, error) {
+	deck, err := h.DeckStore.GetDeckForMatchId(matchId)
 
 	if err != nil {
-		return vo.GameDeck{}, c.JSON(http.StatusInternalServerError, err)
+		return nil, err
 	}
 
-	cards, err := q.GetMatchCardsByPlayerIdAndDeckId(ctx, &playerId)
+	params := queries.GetCardsForPlayerIdFromDeckIdParams{
+		Deckid:    deck.ID,
+		Origowner: playerId,
+	}
+	cards, err := h.CardStore.GetCardsForPlayerIdFromDeckId(params)
 
 	if err != nil {
-		return vo.GameDeck{}, c.JSON(http.StatusInternalServerError, err)
+		return nil, err
 	}
 
 	gameCards := []*vo.GameCard{}
 	for _, card := range cards {
 		gameCards = append(gameCards, &vo.GameCard{
 			Match: queries.Matchcard{
-				ID:        card.Matchcardid,
-				Cardid:    card.Matchcardcardid,
+				ID:        card.ID,
+				Cardid:    card.Cardid,
 				Origowner: card.Origowner,
 				Currowner: card.Currowner,
 				State:     card.State.Cardstate,
 			},
 			Card: queries.Card{
 				ID:    card.Cardid,
-				Value: card.Value.Cardvalue,
-				Suit:  card.Suit.Cardsuit,
-				Art:   card.Art.String,
+				Value: card.Value,
+				Suit:  card.Suit,
+				Art:   card.Art,
 			}})
 	}
 
-	gamedeck := vo.GameDeck{
-		Deck:  &deck,
+	gamedeck := &vo.GameDeck{
+		Deck:  deck,
 		Cards: gameCards,
 	}
 

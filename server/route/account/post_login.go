@@ -37,7 +37,7 @@ func Login(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	a, err := q.GetAccount(ctx, id)
+	a, err := q.GetAccountForId(ctx, id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

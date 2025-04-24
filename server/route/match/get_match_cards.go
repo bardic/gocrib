@@ -21,7 +21,7 @@ import (
 //	@Accept		json
 //	@Produce	json
 //	@Param		matchId	path		int	true	"match id"'
-//	@Success	200	{object}	[]queries.GetMatchCardsRow
+//	@Success	200	{object}	[]queries.GetCardsForMatchIdRow
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId}/cards [get]
@@ -40,7 +40,7 @@ func GetMatchCardsForMatchId(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cards, err := q.GetMatchCards(ctx, &id)
+	cards, err := q.GetCardsForMatchId(ctx, &id)
 
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)

@@ -40,29 +40,6 @@
                 "--parseInternal"
             ],
             "type": "shell"
-        },
-        {
-            "label": "player1",
-            "type": "shell",
-            "command": "go run ${workspaceFolder}/cli",
-            "isBackground": true,
-            "problemMatcher": []
-        },
-        {
-            "label": "player2",
-            "type": "shell",
-            "command": "go run ${workspaceFolder}/cli",
-            "isBackground": true,
-            "problemMatcher": []
-        },
-        {
-            "label": "debug_2players",
-            "dependsOn": [
-                "player1",
-                "dlv",
-                "player2"
-            ],
-            "problemMatcher": []
         }
     ]
 }

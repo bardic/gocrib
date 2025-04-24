@@ -54,7 +54,7 @@ func JoinMatch(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = q.JoinMatch(ctx, queries.JoinMatchParams{
+	err = q.PlayerJoinMatch(ctx, queries.PlayerJoinMatchParams{
 		Matchid:  &matchId,
 		Playerid: player.ID,
 	})
@@ -63,7 +63,7 @@ func JoinMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	_, err = q.UpdateGameState(ctx, queries.UpdateGameStateParams{
+	_, err = q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{
 		ID:        &matchId,
 		Gamestate: queries.GamestateDetermine,
 	})

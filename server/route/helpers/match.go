@@ -19,7 +19,7 @@ func UpdateGameState(matchId *int, state queries.Gamestate) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: matchId})
+	_, err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: matchId})
 
 	if err != nil {
 		return err
@@ -56,43 +56,45 @@ func GetMatch(id *int) (*vo.GameMatch, error) {
 	// 	return nil, err
 	// }
 
-	b, err := q.GetPlayerJSON(ctx, id)
+	// playersForMatch, err := q.GetPlayersForMatchId(ctx, id)
+	// // var player vo.GamePlayer
+	// // err = json.Unmarshal(playersForMatch, &player)
 
-	if err != nil {
-		return nil, err
+	// if err != nil {
+	// 	return nil, err
 
-	}
+	// }
 
-	var gamePlayers []vo.GamePlayer
-	for _, gp := range b {
-		var gameplayer vo.GamePlayer
-		err = json.Unmarshal(gp, &gameplayer)
-		if err != nil {
-			return nil, err
-		}
-		gamePlayers = append(gamePlayers, gameplayer)
-	}
+	// var gamePlayers []vo.GamePlayer
+	// for _, player := range playersForMatch {
+	// 	var gameplayer vo.GamePlayer
+	// 	err = json.Unmarshal(player, &gameplayer)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	gamePlayers = append(gamePlayers, gameplayer)
+	// }
 
-	gameplayers := []*vo.GamePlayer{}
-	for _, p := range gamePlayers {
+	// updatedGameplayers := []*vo.GamePlayer{}
+	// for _, p := range gamePlayers {
 
-		player := &vo.GamePlayer{
-			Player: queries.Player{
-				ID:        p.ID,
-				Accountid: p.Accountid,
-				Score:     p.Score,
-				Isready:   p.Isready,
-				Art:       p.Art,
-			},
-			Hand:  p.Hand,
-			Play:  p.Play,
-			Kitty: p.Kitty,
-		}
+	// 	player := &vo.GamePlayer{
+	// 		Player: queries.Player{
+	// 			ID:        p.ID,
+	// 			Accountid: p.Accountid,
+	// 			Score:     p.Score,
+	// 			Isready:   p.Isready,
+	// 			Art:       p.Art,
+	// 		},
+	// 		Hand:  p.Hand,
+	// 		Play:  p.Play,
+	// 		Kitty: p.Kitty,
+	// 	}
 
-		gameplayers = append(gameplayers, player)
-	}
+	// 	updatedGameplayers = append(updatedGameplayers, player)
+	// }
 
-	match.Players = gameplayers
+	// match.Players = updatedGameplayers
 
 	return match, nil
 }
@@ -105,25 +107,27 @@ func GetOpenMatches() ([]queries.Match, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	matchesData, err := q.GetOpenMatches(ctx)
+	matchesData, err := q.GetOpenMatches(ctx, queries.GamestateNew)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var matches []queries.Match
+	// var matches []queries.Match
 
-	for _, matchData := range matchesData {
-		var match queries.Match
-		err = json.Unmarshal(matchData, &match)
-		if err != nil {
-			return nil, err
-		}
+	// for _, matchData := range matchesData {
+	// 	var match queries.Match
+	// 	// err = json.Unmarshal(matchData, &match)
+	// 	// if err != nil {
+	// 	// 	return nil, err
+	// 	// }
 
-		matches = append(matches, match)
-	}
+	// 	match = queries.Match{}
 
-	return matches, nil
+	// 	matches = append(matches, match)
+	// }
+
+	return matchesData, nil
 }
 
 func CreateGameDeck(matchId *int) (*vo.GameDeck, error) {
@@ -152,7 +156,7 @@ func CreateGameDeck(matchId *int) (*vo.GameDeck, error) {
 
 	matchcards := []*vo.GameCard{}
 	for _, card := range cards {
-		matchCard, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
+		matchCard, err := q.CreateMatchCard(ctx, queries.CreateMatchCardParams{
 			Cardid: card.ID,
 			State:  queries.CardstateDeck,
 		},

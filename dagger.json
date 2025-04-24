@@ -1,6 +1,6 @@
 {
   "name": "CribService",
-  "engineVersion": "v0.16.1",
+  "engineVersion": "v0.18.2",
   "sdk": {
     "source": "go"
   },

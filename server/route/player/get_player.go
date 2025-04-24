@@ -5,103 +5,87 @@ import (
 	"strconv"
 
 	"github.com/bardic/gocrib/queries/queries"
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/route/deck"
 	"github.com/bardic/gocrib/vo"
 	"github.com/labstack/echo/v4"
 )
 
 // Create godoc
 //
-//	@Summary	Get player by barcode
+//	@Summary	Get player by playerId
 //	@Description
 //	@Tags		players
 //	@Accept		json
 //	@Produce	json
-//	@Param		id	path		int	true	"search for match by id"'
-//	@Param		matchId	path		int	true	"search for match by id"'
+//	@Param		matchId	path		int	true	"search for player in match"
+//	@Param		playerId	path		int	true	"for id"
 //	@Success	200	{object}	vo.GamePlayer
 //	@Failure	400	{object}	error
 //	@Failure	404	{object}	error
-//	@Failure	500	{object}	error
-//	@Router		/match/{matchId}/player/{id} [get]
-func GetPlayer(c echo.Context) error {
-	id := c.Param("id")
-	// match := c.Param("matchId")
+//	@Failure	50deckHandler0	{object}	error
+//	@Router		/match/{matchId}/player/{playerId} [get]
+func (h *PlayerHandler) GetPlayer(c echo.Context) error {
+	playerId, err := strconv.Atoi(c.Param("playerId"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
 
-	p1Id, err := strconv.Atoi(id)
+	matchId, err := strconv.Atoi(c.Param("matchId"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	player, err := h.playerStore.GetPlayerById(&playerId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	gameDeck, err := deck.ParseQueryCardsToGameCards(c, p1Id)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+	cardStates := []queries.Cardstate{
+		queries.CardstateDeck,
+		queries.CardstateHand,
+		queries.CardstateKitty,
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-	ctx := c.Request().Context()
+	gameHands := make(map[queries.Cardstate][]vo.GameCard, 3)
 
-	player, err := q.GetPlayer(ctx, &p1Id)
+	for _, cardState := range cardStates {
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+		hand, err := h.cardStore.GetCardsForMatchIdAndState(queries.GetCardsForMatchIdAndStateParams{
+			ID:    &matchId,
+			State: cardState,
+		})
 
-	hand, err := q.GetMarchCardsByType(ctx, queries.GetMarchCardsByTypeParams{
-		ID:    &p1Id,
-		State: queries.CardstateHand,
-	})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+		cards := make([]vo.GameCard, len(hand))
+		for i, res := range hand {
+			cards[i] = vo.GameCard{
+				Match: queries.Matchcard{
+					ID:        res.Matchcardid,
+					Cardid:    res.Cardid,
+					Origowner: res.Origowner,
+					Currowner: res.Currowner,
+				},
+				Card: queries.Card{
+					ID:    res.Cardid,
+					Value: res.Value.Cardvalue,
+					Suit:  res.Suit.Cardsuit,
+					Art:   res.Art.String,
+				},
+			}
+		}
 
-	play, err := q.GetMarchCardsByType(ctx, queries.GetMarchCardsByTypeParams{
-		ID:    &p1Id,
-		State: queries.CardstatePlay,
-	})
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	kitty, err := q.GetMarchCardsByType(ctx, queries.GetMarchCardsByTypeParams{
-		ID:    &p1Id,
-		State: queries.CardstateKitty,
-	})
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		gameHands[cardState] = cards
 	}
 
 	gamePlayer := vo.GamePlayer{
 		Player: player,
-		Hand:   createGameCard(gameDeck, hand),
-		Play:   createGameCard(gameDeck, play),
-		Kitty:  createGameCard(gameDeck, kitty),
+		Hand:   gameHands[queries.CardstateHand],
+		Play:   gameHands[queries.CardstatePlay],
+		Kitty:  gameHands[queries.CardstateKitty],
 	}
 
 	return c.JSON(http.StatusOK, gamePlayer)
-}
-
-func createGameCard(deck vo.GameDeck, cards []queries.Matchcard) []vo.GameCard {
-	cardCollection := []vo.GameCard{}
-
-	for _, card := range cards {
-		for _, gameCard := range deck.Cards {
-			if gameCard.Card.ID == card.Cardid {
-				cardCollection = append(cardCollection, vo.GameCard{
-					Match: card,
-					Card:  gameCard.Card,
-				})
-			}
-		}
-	}
-
-	return cardCollection
 }

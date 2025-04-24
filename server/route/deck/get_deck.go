@@ -37,13 +37,12 @@ func GetDeckByMatchId(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	deck, err := q.GetDeckForMatchId(ctx, &id)
-	//deck, err := controller.GetDeckByMatchId(&id)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	cards, err := q.GetMatchCardsByTypeAndDeckId(ctx, queries.GetMatchCardsByTypeAndDeckIdParams{
+	cards, err := q.GetCardsForMatchIdAndState(ctx, queries.GetCardsForMatchIdAndStateParams{
 		ID:    &id,
 		State: "Deck",
 	})
@@ -60,7 +59,7 @@ func GetDeckByMatchId(c echo.Context) error {
 				Cardid:    card.Cardid,
 				Origowner: card.Origowner,
 				Currowner: card.Currowner,
-				State:     card.State.Cardstate,
+				State:     card.State,
 			},
 			Card: queries.Card{
 				ID:    card.Cardid,

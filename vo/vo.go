@@ -3,7 +3,7 @@ package vo
 import "github.com/bardic/gocrib/queries/queries"
 
 type GamePlayer struct {
-	queries.Player
+	*queries.Player
 	TurnOrder int
 	Hand      []GameCard
 	Play      []GameCard
@@ -21,10 +21,6 @@ type ScoreMatch struct {
 	CardsInPlay    *[]GameCard
 	Players        *[]GamePlayer
 }
-
-// func (m GameMatch) SetMatch(match *queries.Match) {
-// 	m.Match = match
-// }
 
 type GameDeck struct {
 	*queries.Deck

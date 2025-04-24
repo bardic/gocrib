@@ -2,7 +2,6 @@ package match
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -24,7 +23,7 @@ import (
 //	@Produce	json
 //	@Param		matchId	path		int	true	"match id"'
 //	@Param		accountId	path		int	true	"account id"'
-//	@Success	200	{object}	[]queries.GetMatchCardsRow
+//	@Success	200	{object}	vo.GamePlayer
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId}/account/{accountId} [get]
@@ -50,7 +49,7 @@ func GetPlayerIdForMatchAndAccount(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	playerData, err := q.GetPlayerByAccountAndMatchIdJSON(ctx, queries.GetPlayerByAccountAndMatchIdJSONParams{
+	playerData, err := q.GetPlayerByMatchAndAccountId(ctx, queries.GetPlayerByMatchAndAccountIdParams{
 		Matchid:   &matchId,
 		Accountid: &accountId,
 	})
@@ -59,10 +58,14 @@ func GetPlayerIdForMatchAndAccount(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, err)
 	}
 
-	var gamePlayer *vo.GamePlayer
-	err = json.Unmarshal(playerData, &gamePlayer)
-	if err != nil {
-		return err
+	gamePlayer := vo.GamePlayer{
+		Player: queries.Player{
+			ID:        playerData.ID,
+			Accountid: playerData.Accountid,
+			Score:     playerData.Score,
+			Isready:   playerData.Isready,
+			Art:       playerData.Art,
+		},
 	}
 
 	return c.JSON(http.StatusOK, gamePlayer)

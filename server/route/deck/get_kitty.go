@@ -41,13 +41,24 @@ func GetKitty(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cards, err := q.GetMarchCardsByType(ctx, queries.GetMarchCardsByTypeParams{
+	cardsResults, err := q.GetCardsForMatchIdAndState(ctx, queries.GetCardsForMatchIdAndStateParams{
 		ID:    &matchId,
 		State: queries.CardstateKitty,
 	})
 
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
+	}
+
+	cards := []queries.Matchcard{}
+	for _, res := range cardsResults {
+		cards = append(cards, queries.Matchcard{
+			ID:        res.ID,
+			Cardid:    res.Cardid,
+			Origowner: res.Origowner,
+			Currowner: res.Currowner,
+			State:     res.State,
+		})
 	}
 
 	hand := vo.Hand{

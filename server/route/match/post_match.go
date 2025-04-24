@@ -79,7 +79,7 @@ func NewMatch(c echo.Context) error {
 	}
 
 	for _, card := range cards {
-		matchCard, err := q.CreateMatchCards(ctx, queries.CreateMatchCardsParams{
+		matchCard, err := q.CreateMatchCard(ctx, queries.CreateMatchCardParams{
 			Cardid: card.ID,
 			State:  queries.CardstateDeck,
 		})
@@ -88,7 +88,7 @@ func NewMatch(c echo.Context) error {
 			return err
 		}
 
-		err = q.InsertDeckMatchCard(ctx, queries.InsertDeckMatchCardParams{
+		err = q.AddCardMatchToDeck(ctx, queries.AddCardMatchToDeckParams{
 			Deckid:      deck.ID,
 			Matchcardid: matchCard.ID,
 		})
@@ -104,7 +104,7 @@ func NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = q.JoinMatch(ctx, queries.JoinMatchParams{
+	err = q.PlayerJoinMatch(ctx, queries.PlayerJoinMatchParams{
 		Matchid:  m.ID,
 		Playerid: p.ID,
 	})

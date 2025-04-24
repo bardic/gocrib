@@ -1,16 +1,11 @@
 package player
 
 import (
-	"context"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
 	"github.com/bardic/gocrib/vo"
-
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/route/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -31,7 +26,7 @@ import (
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/kitty [put]
-func UpdateKitty(c echo.Context) error {
+func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 
 	if err != nil {
@@ -55,23 +50,20 @@ func UpdateKitty(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	for _, cardId := range details.CardIds {
-		q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
+		err := h.cardStore.UpdateMatchCardState(queries.UpdateMatchCardStateParams{
 			ID:        &cardId,
 			State:     queries.CardstateKitty,
 			Origowner: &fromPlayerId,
 			Currowner: &toPlayerId,
 		})
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
 	}
 
-	err = q.MarkPlayerReady(ctx, queries.MarkPlayerReadyParams{
+	err = h.playerStore.UpdatePlayerReady(queries.UpdatePlayerReadyParams{
 		Isready: true,
 		ID:      &fromPlayerId,
 	})
@@ -80,14 +72,10 @@ func UpdateKitty(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m, err := helpers.GetMatch(&matchId)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	match, err := h.matchStore.GetMatch(&matchId)
 
 	allReady := true
-	for _, player := range m.Players {
+	for _, player := range match.Players {
 		if !player.Isready {
 			allReady = false
 			break
@@ -95,7 +83,7 @@ func UpdateKitty(c echo.Context) error {
 	}
 
 	if allReady {
-		err = q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{
+		_, err = h.matchStore.UpdateMatchState(queries.UpdateMatchStateParams{
 			Gamestate: queries.GamestateCut,
 			ID:        &matchId,
 		})
@@ -105,5 +93,5 @@ func UpdateKitty(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, m)
+	return c.JSON(http.StatusOK, match)
 }
