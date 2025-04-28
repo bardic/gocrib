@@ -37,45 +37,12 @@ type GameCardDetails struct {
 	Order *int
 }
 
-type GameActionType int
-
-const (
-	Cut GameActionType = iota
-	Discard
-	Peg
-	Tally
-)
-
-type GameAction struct {
-	MatchId  *int
-	Type     GameActionType
-	CardsIds []*int
-}
-
 //_Comms_
-
-type MatchRequirements struct {
-	AccountId   *int
-	IsPrivate   bool
-	EloRangeMin *int
-	EloRangeMax *int
-}
-
-type CutDeckReq struct {
-	MatchId  *int
-	CutIndex string
-}
 
 type MatchDetailsResponse struct {
 	MatchId   *int
 	PlayerId  *int
 	GameState queries.Gamestate
-}
-
-type Meow struct {
-	Matchid  int
-	Playerid int
-	Details  HandModifier
 }
 
 type HandModifier struct {
@@ -120,26 +87,13 @@ type StateChangeMsg struct {
 	MatchId   *int
 }
 
-type GameStateChangeMsg struct {
-	NewState queries.Gamestate
-	PlayerId *int
-	MatchId  *int
-}
-
 type ChangeTabMsg struct {
 	TabIndex int
 }
 
-type UIFooterVO struct {
-	ActivePlayerId *int
-	MatchId        *int
-	GameState      queries.Gamestate
-	LocalPlayerID  *int
-}
-
 type PlayerReady struct {
-	MatchId  *int // MatchId
-	PlayerId *int // PlayerId
+	MatchId  *int
+	PlayerId *int
 }
 
 type Hand struct {

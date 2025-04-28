@@ -43,9 +43,6 @@ WHERE id=$12;
 -- name: UpateMatchCurrentPlayerTurn :exec
 UPDATE match SET currentplayerturn = $1 WHERE id = $2;
 
--- name: UpdateMatchWithDeckId :exec
-UPDATE match SET deckid = $1 where id = $2;
-
 -- name: UpdateDealerForMatch :exec
 UPDATE match SET dealerid = $1 WHERE id = $2;
 
@@ -101,19 +98,6 @@ LIMIT 1;
 
 -- name: GetOpenMatches :many
 SELECT * FROM match WHERE gameState=$1;
-
--- name: GetMatchForPlayerId :one 
-SELECT 
-    match_player.*,
-    match.*,
-    player.*
-FROM 
-    match_player
-INNER JOIN
-    match ON match_player.matchid=match.id
-LEFT JOIN
-    player ON match_player.playerid=player.id
-WHERE $1 = match_player.playerId LIMIT 1;
 
 -- name: GetMatchCurrentPlayerTurn :one
 SELECT currentplayerturn FROM match WHERE id = $1 LIMIT 1;
@@ -188,25 +172,3 @@ LEFT JOIN
     match_player ON p.id=match_player.playerid
 WHERE
     match_player.matchid = $1;
-
--- name: GetMatchDealer :one  
-SELECT 
-    player.*
-FROM
-    player
-LEFT JOIN
-    match ON player.id=match.dealerid
-WHERE
-    match.id = $1;
-
--- TODO this takes a second param. PRetty sure we can get that from the match object
--- name: GetMatchNextPlayerForMatchId :one
-SELECT 
-    player.*,
-    match_player.turnorder
-FROM
-    player
-LEFT JOIN
-    match_player ON player.id=match_player.playerid
-WHERE
-    match_player.matchid = $1 AND match_player.turnorder = $2 + 1;

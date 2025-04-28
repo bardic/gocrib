@@ -21,8 +21,9 @@ import (
 //	@Success	200	{object}	vo.GamePlayer
 //	@Failure	400	{object}	error
 //	@Failure	404	{object}	error
-//	@Failure	50deckHandler0	{object}	error
+//	@Failure	500	{object}	error
 //	@Router		/match/{matchId}/player/{playerId} [get]
+
 func (h *PlayerHandler) GetPlayer(c echo.Context) error {
 	playerId, err := strconv.Atoi(c.Param("playerId"))
 	if err != nil {
@@ -34,7 +35,7 @@ func (h *PlayerHandler) GetPlayer(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	player, err := h.playerStore.GetPlayerById(&playerId)
+	player, err := h.PlayerStore.GetPlayerById(c, &playerId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -50,7 +51,7 @@ func (h *PlayerHandler) GetPlayer(c echo.Context) error {
 
 	for _, cardState := range cardStates {
 
-		hand, err := h.cardStore.GetCardsForMatchIdAndState(queries.GetCardsForMatchIdAndStateParams{
+		hand, err := h.CardStore.GetCardsForMatchIdAndState(c, queries.GetCardsForMatchIdAndStateParams{
 			ID:    &matchId,
 			State: cardState,
 		})

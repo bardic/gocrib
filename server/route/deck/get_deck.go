@@ -7,8 +7,6 @@ import (
 	"github.com/bardic/gocrib/queries/queries"
 	"github.com/bardic/gocrib/vo"
 	"github.com/labstack/echo/v4"
-
-	conn "github.com/bardic/gocrib/server/db"
 )
 
 // Returns the deck for a match id
@@ -23,27 +21,21 @@ import (
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId}/deck/ [get]
-func GetDeckByMatchId(c echo.Context) error {
-	p := c.Param("matchId")
-	id, err := strconv.Atoi(p)
+func (h *DeckHandler) GetDeckByMatchId(c echo.Context) error {
+	matchId, err := strconv.Atoi(c.Param("matchId"))
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-	ctx := c.Request().Context()
-
-	deck, err := q.GetDeckForMatchId(ctx, &id)
+	deck, err := h.DeckStore.GetDeckForMatchId(c, &matchId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	cards, err := q.GetCardsForMatchIdAndState(ctx, queries.GetCardsForMatchIdAndStateParams{
-		ID:    &id,
+	cards, err := h.CardStore.GetCardsForMatchIdAndState(c, queries.GetCardsForMatchIdAndStateParams{
+		ID:    &matchId,
 		State: "Deck",
 	})
 
@@ -70,7 +62,7 @@ func GetDeckByMatchId(c echo.Context) error {
 	}
 
 	gamedeck := vo.GameDeck{
-		Deck:  &deck,
+		Deck:  deck,
 		Cards: gameCards,
 	}
 

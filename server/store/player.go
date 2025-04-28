@@ -11,25 +11,45 @@ type PlayerStore struct {
 
 func NewPlayerStore(q *queries.Queries, c echo.Context) *PlayerStore {
 	return &PlayerStore{
-		Store: Store{
-			q: q,
-			c: c,
-		},
+		Store: Store{},
 	}
 }
 
-// func (p *PlayerStore) CreatePlayer(params queries.CreatePlayerParams) (*queries.Player, error) {
-// 	player, err := p.q.GetPlayerById(p.c.Request().Context(), params.Accountid)
+func (p *PlayerStore) CreatePlayer(ctx echo.Context, params queries.CreatePlayerParams) (*queries.Player, error) {
+	player, err := p.q().CreatePlayer(ctx.Request().Context(), params)
+	defer p.Close()
+	if err != nil {
+		return nil, err
+	}
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	return &player, nil
+}
 
-// 	return &player, nil
-// }
+func (p *PlayerStore) GetPlayerById(ctx echo.Context, id *int) (*queries.Player, error) {
+	player, err := p.q().GetPlayerById(ctx.Request().Context(), id)
+	defer p.Close()
+	if err != nil {
+		return nil, err
+	}
 
-func (p *PlayerStore) GetPlayerById(id *int) (*queries.Player, error) {
-	player, err := p.q.GetPlayerById(p.c.Request().Context(), id)
+	return &player, nil
+}
+
+func (p *PlayerStore) UpdatePlayerReady(ctx echo.Context, params queries.UpdatePlayerReadyParams) error {
+	err := p.q().UpdatePlayerReady(ctx.Request().Context(), params)
+
+	defer p.Close()
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *PlayerStore) GetPlayerByMatchAndAccountId(ctx echo.Context, params queries.GetPlayerByMatchAndAccountIdParams) (*queries.Player, error) {
+	player, err := p.q().GetPlayerByMatchAndAccountId(ctx.Request().Context(), params)
+
+	defer p.Close()
 
 	if err != nil {
 		return nil, err
@@ -38,6 +58,11 @@ func (p *PlayerStore) GetPlayerById(id *int) (*queries.Player, error) {
 	return &player, nil
 }
 
-func (p *PlayerStore) UpdatePlayerReady(params queries.UpdatePlayerReadyParams) error {
-	return p.q.UpdatePlayerReady(p.c.Request().Context(), params)
+func (p *PlayerStore) PlayerJoinMatch(ctx echo.Context, params queries.PlayerJoinMatchParams) error {
+	err := p.q().PlayerJoinMatch(ctx.Request().Context(), params)
+	defer p.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }

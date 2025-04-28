@@ -11,11 +11,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func GetPlayerMatchState(matchId *int) tea.Msg {
-	id := strconv.Itoa(*matchId)
-	return url(EndPointMatchState+"/?id="+id, http.MethodGet, "")
-}
-
 func GetMatchById(matchId *int) tea.Msg {
 	id := strconv.Itoa(*matchId)
 	return url(EndPointMatch+"/"+id, http.MethodGet, "")

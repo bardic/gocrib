@@ -51,7 +51,7 @@ func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 	}
 
 	for _, cardId := range details.CardIds {
-		err := h.cardStore.UpdateMatchCardState(queries.UpdateMatchCardStateParams{
+		err := h.CardStore.UpdateMatchCardState(c, queries.UpdateMatchCardStateParams{
 			ID:        &cardId,
 			State:     queries.CardstateKitty,
 			Origowner: &fromPlayerId,
@@ -63,7 +63,7 @@ func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 		}
 	}
 
-	err = h.playerStore.UpdatePlayerReady(queries.UpdatePlayerReadyParams{
+	err = h.PlayerStore.UpdatePlayerReady(c, queries.UpdatePlayerReadyParams{
 		Isready: true,
 		ID:      &fromPlayerId,
 	})
@@ -72,7 +72,7 @@ func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	match, err := h.matchStore.GetMatch(&matchId)
+	match, err := h.MatchStore.GetMatch(c, &matchId)
 
 	allReady := true
 	for _, player := range match.Players {
@@ -83,7 +83,7 @@ func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 	}
 
 	if allReady {
-		_, err = h.matchStore.UpdateMatchState(queries.UpdateMatchStateParams{
+		_, err = h.MatchStore.UpdateMatchState(c, queries.UpdateMatchStateParams{
 			Gamestate: queries.GamestateCut,
 			ID:        &matchId,
 		})

@@ -1,14 +1,8 @@
 package match
 
 import (
-	"context"
 	"net/http"
 	"strconv"
-	"time"
-
-	"github.com/bardic/gocrib/queries/queries"
-
-	conn "github.com/bardic/gocrib/server/db"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,7 +19,7 @@ import (
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId}/cards [get]
-func GetMatchCardsForMatchId(c echo.Context) error {
+func (h *MatchHandler) GetMatchCardsForMatchId(c echo.Context) error {
 	p := c.Param("matchId")
 	id, err := strconv.Atoi(p)
 
@@ -33,14 +27,7 @@ func GetMatchCardsForMatchId(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	cards, err := q.GetCardsForMatchId(ctx, &id)
+	cards, err := h.MatchStore.GetCardsForMatchId(c, id)
 
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)

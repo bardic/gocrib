@@ -14,6 +14,5 @@ import "github.com/bardic/gocrib/server/router"
 //	@BasePath					/v1
 func main() {
 
-	r := &router.Router{}
-	r.New()
+	router.NewRouter()
 }

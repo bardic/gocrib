@@ -13,24 +13,15 @@ import (
 type View struct {
 	ActiveCardId    int
 	SelectedCardIds []int
-	// Match           *vo.GameMatch
-	LocalPlayer *vo.GamePlayer
-	// Deck            *vo.GameDeck
-	Tabname string
-	*vo.UIFooterVO
+	LocalPlayer     *vo.GamePlayer
+	Tabname         string
 }
 
 func NewCardView(match *vo.GameMatch, localPlayer *vo.GamePlayer, deck *vo.GameDeck, tabName string) *View {
 	return &View{
-		// Match:       match,
 		LocalPlayer: localPlayer,
-		// Deck:        deck,
-		Tabname: tabName,
+		Tabname:     tabName,
 	}
-}
-
-func (view *View) Init() {
-	// view.ActiveCardId = 0
 }
 
 func (view *View) Update(gameMatch *vo.GameMatch) error {
@@ -42,7 +33,7 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 	var cardViews []string
 
 	s += view.BuildHeader()
-	for i := 0; i < len(hand); i++ {
+	for i := range hand {
 		c := utils.GetCardById(hand[i], gameDeck)
 
 		if c == nil {

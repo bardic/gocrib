@@ -28,7 +28,7 @@ import (
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/{matchId}/pass [put]
-func Pass(c echo.Context) error {
+func (h *MatchHandler) Pass(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 
 	if err != nil {

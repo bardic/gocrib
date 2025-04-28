@@ -7,21 +7,19 @@ package queries
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const addCardMatchToDeck = `-- name: AddCardMatchToDeck :exec
+const addCardToDeck = `-- name: AddCardToDeck :exec
 INSERT INTO deck_matchcard (deckid, matchcardid) VALUES ($1, $2)
 `
 
-type AddCardMatchToDeckParams struct {
+type AddCardToDeckParams struct {
 	Deckid      *int
 	Matchcardid *int
 }
 
-func (q *Queries) AddCardMatchToDeck(ctx context.Context, arg AddCardMatchToDeckParams) error {
-	_, err := q.db.Exec(ctx, addCardMatchToDeck, arg.Deckid, arg.Matchcardid)
+func (q *Queries) AddCardToDeck(ctx context.Context, arg AddCardToDeckParams) error {
+	_, err := q.db.Exec(ctx, addCardToDeck, arg.Deckid, arg.Matchcardid)
 	return err
 }
 
@@ -34,74 +32,6 @@ func (q *Queries) CreateDeck(ctx context.Context) (Deck, error) {
 	var i Deck
 	err := row.Scan(&i.ID, &i.Cutmatchcardid)
 	return i, err
-}
-
-const getCardsForDeckId = `-- name: GetCardsForDeckId :many
-SELECT 
-    deck_matchcard.deckid, deck_matchcard.matchcardid, 
-    deck.id, deck.cutmatchcardid,
-    matchcard.id, matchcard.cardid, matchcard.origowner, matchcard.currowner, matchcard.state,
-    card.id, card.value, card.suit, card.art
-FROM 
-    deck_matchcard
-LEFT JOIN
-    matchcard ON deck_matchcard.matchcardid=matchcard.id
-LEFT JOIN
-    deck ON deck_matchcard.deckid=deck.id
-LEFT JOIN
-    card ON deck_matchcard.matchcardId=card.id
-WHERE
-    deck.id = $1
-`
-
-type GetCardsForDeckIdRow struct {
-	Deckid         *int
-	Matchcardid    *int
-	ID             *int
-	Cutmatchcardid *int
-	ID_2           *int
-	Cardid         *int
-	Origowner      *int
-	Currowner      *int
-	State          NullCardstate
-	ID_3           *int
-	Value          NullCardvalue
-	Suit           NullCardsuit
-	Art            pgtype.Text
-}
-
-func (q *Queries) GetCardsForDeckId(ctx context.Context, id *int) ([]GetCardsForDeckIdRow, error) {
-	rows, err := q.db.Query(ctx, getCardsForDeckId, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetCardsForDeckIdRow
-	for rows.Next() {
-		var i GetCardsForDeckIdRow
-		if err := rows.Scan(
-			&i.Deckid,
-			&i.Matchcardid,
-			&i.ID,
-			&i.Cutmatchcardid,
-			&i.ID_2,
-			&i.Cardid,
-			&i.Origowner,
-			&i.Currowner,
-			&i.State,
-			&i.ID_3,
-			&i.Value,
-			&i.Suit,
-			&i.Art,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getDeckForMatchId = `-- name: GetDeckForMatchId :one

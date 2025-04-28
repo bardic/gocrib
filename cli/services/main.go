@@ -24,15 +24,10 @@ const (
 	EndPointMatchState             = BaseUrl + "/match/%s/state"
 	EndPointJoinMatch              = BaseUrl + "/match/%v/join/%v"
 	EndPointOpenMatch              = BaseUrl + "/open"
-	EndPointMatchCard              = BaseUrl + "/match/%s/card"
-	EndPointGameplayCardsByMatch   = BaseUrl + "/match/%s/cards?id=%s"
 	EndPointMatchCutDeck           = BaseUrl + "/match/%s/cut/%s"
-	EndPointDeckById               = BaseUrl + "/match/%s/deck"
 	EndPointDeckByPlayerAndMatchId = BaseUrl + "/match/%s/player/%s/deck"
-	//Deck
-	EndPointDeck = BaseUrl + "/deck"
 	//Account
-	EndPointLogin = BaseUrl + "/account/login"
+	EndPointLogin = BaseUrl + "/account/login/%s"
 )
 
 func url(url string, method string, json string) tea.Msg {

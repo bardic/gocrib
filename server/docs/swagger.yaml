@@ -321,10 +321,8 @@ definitions:
   vo.PlayerReady:
     properties:
       matchId:
-        description: MatchId
         type: integer
       playerId:
-        description: PlayerId
         type: integer
     type: object
 host: localhost:1323
@@ -334,17 +332,16 @@ info:
   title: cribbage server
   version: 0.0.4
 paths:
-  /account/login/:
+  /account/login/{accountId}:
     post:
       consumes:
       - application/json
       parameters:
-      - description: id to login with
-        in: body
-        name: details
+      - description: account id
+        in: path
+        name: accountId
         required: true
-        schema:
-          type: integer
+        type: integer
       produces:
       - application/json
       responses:
@@ -543,35 +540,6 @@ paths:
       summary: Cut deck by index of card selected
       tags:
       - match
-  /match/{matchId}/deal:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.MatchDetailsResponse'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Join match by id
-      tags:
-      - match
   /match/{matchId}/deck/:
     get:
       consumes:
@@ -656,35 +624,6 @@ paths:
       summary: PutSHuffle
       tags:
       - deck
-  /match/{matchId}/determinefirst/:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.MatchDetailsResponse'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Join match by id
-      tags:
-      - match
   /match/{matchId}/join/{accountId}:
     put:
       consumes:
@@ -876,35 +815,6 @@ paths:
       summary: Get match by id
       tags:
       - match
-  /player/{playerId}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: search for player by id
-        in: path
-        name: playerId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.GamePlayer'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get player by playerId
-      tags:
-      - players
 securityDefinitions:
   BasicAuth:
     type: basic

@@ -20,7 +20,7 @@ import (
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId} [get]
-func GetMatch(c echo.Context) error {
+func (h *MatchHandler) GetMatch(c echo.Context) error {
 	p := c.Param("matchId")
 	id, err := strconv.Atoi(p)
 

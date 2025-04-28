@@ -9,8 +9,7 @@ var (
 	ModelStyle = lipgloss.NewStyle().
 			Width(10).
 			Height(5).
-		// Align(lipgloss.Left, lipgloss.Top).
-		BorderStyle(lipgloss.HiddenBorder())
+			BorderStyle(lipgloss.HiddenBorder())
 
 	SelectedStyle = lipgloss.NewStyle().
 			Width(10).

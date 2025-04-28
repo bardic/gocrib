@@ -29,77 +29,6 @@ import (
 //	@Router		/match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/play [put]
 
 func (h *PlayerHandler) UpdatePlay(c echo.Context) error {
-	// matchId, err := strconv.Atoi(c.Param("matchId"))
-
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err)
-	// }
-
-	// fromPlayerId, err := strconv.Atoi(c.Param("playerId"))
-
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err)
-	// }
-
-	// toPlayerId, err := strconv.Atoi(c.Param("toPlayerId"))
-
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err)
-	// }
-
-	// details := &vo.HandModifier{}
-	// if err := c.Bind(details); err != nil {
-	// 	return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	// }
-
-	// db := conn.Pool()
-	// defer db.Close()
-	// q := queries.New(db)
-	// ctx := context.Background()
-
-	// // Udpate cards to play state
-
-	// for _, cardId := range details.CardIds {
-	// 	q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
-	// 		State:     queries.CardstatePlay,
-	// 		Origowner: &fromPlayerId,
-	// 		Currowner: &toPlayerId,
-	// 		ID:        &cardId,
-	// 	})
-	// }
-
-	// //Pass player turn
-
-	// // orderedPlayers, err := q.GetPlayersForMatchId(ctx, &matchId)
-
-	// m, err := helpers.GetMatch(&matchId)
-
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err)
-	// }
-
-	// for i, player := range m.Players {
-	// 	if *player.ID == toPlayerId {
-	// 		playerIndex := i
-	// 		nextPlayer := m.Players[(playerIndex+1)%len(m.Players)]
-	// 		err := q.UpateMatchCurrentPlayerTurn(ctx, queries.UpateMatchCurrentPlayerTurnParams{
-	// 			ID:                &matchId,
-	// 			Currentplayerturn: nextPlayer.ID,
-	// 		})
-
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 		}
-	// 		break
-	// 	}
-	// }
-
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, err)
-	// }
-
-	// return c.JSON(http.StatusOK, m)
-
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 
 	if err != nil {
@@ -124,7 +53,7 @@ func (h *PlayerHandler) UpdatePlay(c echo.Context) error {
 	}
 
 	for _, cardId := range details.CardIds {
-		err := h.cardStore.UpdateMatchCardState(queries.UpdateMatchCardStateParams{
+		err := h.CardStore.UpdateMatchCardState(c, queries.UpdateMatchCardStateParams{
 			ID:        &cardId,
 			State:     queries.CardstatePlay,
 			Origowner: &fromPlayerId,
@@ -136,13 +65,14 @@ func (h *PlayerHandler) UpdatePlay(c echo.Context) error {
 		}
 	}
 
-	match, err := h.matchStore.GetMatch(&matchId)
+	match, err := h.MatchStore.GetMatch(c, &matchId)
 
 	for i, player := range match.Players {
 		if *player.ID == toPlayerId {
 			playerIndex := i
 			nextPlayer := match.Players[(playerIndex+1)%len(match.Players)]
-			err := q.UpateMatchCurrentPlayerTurn(ctx, queries.UpateMatchCurrentPlayerTurnParams{
+
+			err := h.MatchStore.UpateMatchCurrentPlayerTurn(c, queries.UpateMatchCurrentPlayerTurnParams{
 				ID:                &matchId,
 				Currentplayerturn: nextPlayer.ID,
 			})

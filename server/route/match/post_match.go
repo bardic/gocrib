@@ -1,15 +1,11 @@
 package match
 
 import (
-	"context"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
 
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/route/player"
 	"github.com/bardic/gocrib/vo"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -33,31 +29,20 @@ var (
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/{accountId} [post]
-func NewMatch(c echo.Context) error {
+func (h *MatchHandler) NewMatch(c echo.Context) error {
 	accountId, err := strconv.Atoi(c.Param("accountId"))
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// create deck
-	// create match cards
-	// link with deck_matchcard
-
-	deck, err := q.CreateDeck(ctx)
+	deck, err := h.DeckStore.CreateDeck(c)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m, err := q.CreateMatch(ctx, queries.CreateMatchParams{
+	match, err := h.MatchStore.CreateMatch(c, queries.CreateMatchParams{
 		Privatematch:       false,
 		Elorangemin:        &Zero,
 		Elorangemax:        &Zero,
@@ -72,14 +57,14 @@ func NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	cards, err := q.GetCards(ctx)
+	cards, err := h.CardStore.GetCards(c)
 
 	if err != nil {
 		return err
 	}
 
 	for _, card := range cards {
-		matchCard, err := q.CreateMatchCard(ctx, queries.CreateMatchCardParams{
+		matchCard, err := h.CardStore.CreateMatchCard(c, queries.CreateMatchCardParams{
 			Cardid: card.ID,
 			State:  queries.CardstateDeck,
 		})
@@ -88,7 +73,7 @@ func NewMatch(c echo.Context) error {
 			return err
 		}
 
-		err = q.AddCardMatchToDeck(ctx, queries.AddCardMatchToDeckParams{
+		err = h.DeckStore.AddCardToDeck(c, queries.AddCardToDeckParams{
 			Deckid:      deck.ID,
 			Matchcardid: matchCard.ID,
 		})
@@ -98,15 +83,22 @@ func NewMatch(c echo.Context) error {
 		}
 	}
 
-	p, err := player.NewPlayerQuery(m.ID, &accountId)
+	score := 0
+
+	player, err := h.PlayerStore.CreatePlayer(c, queries.CreatePlayerParams{
+		Accountid: &accountId,
+		Score:     &score,
+		Isready:   false,
+		Art:       "default.png",
+	})
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = q.PlayerJoinMatch(ctx, queries.PlayerJoinMatchParams{
-		Matchid:  m.ID,
-		Playerid: p.ID,
+	err = h.MatchStore.PlayerJoinMatch(c, queries.PlayerJoinMatchParams{
+		Matchid:  match.ID,
+		Playerid: player.ID,
 	})
 
 	if err != nil {
@@ -114,8 +106,8 @@ func NewMatch(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
-		MatchId:   m.ID,
-		PlayerId:  p.ID,
-		GameState: m.Gamestate,
+		MatchId:   match.ID,
+		PlayerId:  player.ID,
+		GameState: match.Gamestate,
 	})
 }

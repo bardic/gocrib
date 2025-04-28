@@ -10,11 +10,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type PReady struct {
-	MatchId  *int
-	PlayerId *int
-}
-
 func GetPlayerByForMatchAndAccount(matchId, playerId *int) tea.Msg {
 	endpoint := utils.EndPointBuilder(EndPointPlayerByForMatchAndAccount, strconv.Itoa(*matchId), strconv.Itoa(*playerId))
 
@@ -41,27 +36,4 @@ func PutPlay(matchId, fromPlayerId, toPlayerId *int, cards vo.HandModifier) tea.
 	endpoint := utils.EndPointBuilder(EndPointPlay, strconv.Itoa(*matchId), strconv.Itoa(*fromPlayerId), strconv.Itoa(*toPlayerId))
 
 	return url(endpoint, http.MethodPut, string(b))
-}
-
-func PostPlayer(accountId int) tea.Msg {
-	return url(EndPointPlayer, http.MethodPost, strconv.Itoa(int(accountId)))
-}
-
-func DeletePlayer(ids []int) tea.Msg {
-	return url(EndPointPlayer, http.MethodDelete, "")
-}
-
-func PlayerReady(playerId, matchId *int) tea.Msg {
-	req := PReady{
-		MatchId:  matchId,
-		PlayerId: playerId,
-	}
-
-	reqStr, err := json.Marshal(req)
-
-	if err != nil {
-		return err
-	}
-
-	return url(EndPointPlayerReady, http.MethodPut, string(reqStr))
 }

@@ -7,14 +7,7 @@ import (
 	"github.com/bardic/gocrib/queries/queries"
 	"github.com/bardic/gocrib/vo"
 	"github.com/labstack/echo/v4"
-
-	"github.com/bardic/gocrib/server/store"
 )
-
-type HandlerPlayerDeck struct {
-	DeckStore *store.DeckStore
-	CardStore *store.CardStore
-}
 
 // Returns the deck for a match playerId
 //
@@ -29,7 +22,7 @@ type HandlerPlayerDeck struct {
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId}/player/{playerId}/deck/ [get]
-func (h *HandlerPlayerDeck) GetDeckByPlayerIdAndMatchId(c echo.Context) error {
+func (h *DeckHandler) GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 	p := c.Param("playerId")
 	playerId, err := strconv.Atoi(p)
 
@@ -44,7 +37,7 @@ func (h *HandlerPlayerDeck) GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	gameDeck, err := h.ParseQueryCardsToGameCards(&matchId, &playerId)
+	gameDeck, err := h.ParseQueryCardsToGameCards(c, &matchId, &playerId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -53,8 +46,8 @@ func (h *HandlerPlayerDeck) GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 	return c.JSON(http.StatusOK, gameDeck)
 }
 
-func (h *HandlerPlayerDeck) ParseQueryCardsToGameCards(matchId, playerId *int) (*vo.GameDeck, error) {
-	deck, err := h.DeckStore.GetDeckForMatchId(matchId)
+func (h *DeckHandler) ParseQueryCardsToGameCards(ctx echo.Context, matchId, playerId *int) (*vo.GameDeck, error) {
+	deck, err := h.DeckStore.GetDeckForMatchId(ctx, matchId)
 
 	if err != nil {
 		return nil, err
@@ -64,7 +57,7 @@ func (h *HandlerPlayerDeck) ParseQueryCardsToGameCards(matchId, playerId *int) (
 		Deckid:    deck.ID,
 		Origowner: playerId,
 	}
-	cards, err := h.CardStore.GetCardsForPlayerIdFromDeckId(params)
+	cards, err := h.CardStore.GetCardsForPlayerIdFromDeckId(ctx, params)
 
 	if err != nil {
 		return nil, err

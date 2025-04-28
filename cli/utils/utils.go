@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/bardic/gocrib/cli/styles"
@@ -28,27 +27,6 @@ func GetCardById(id int, deck *vo.GameDeck) *vo.GameCard {
 		}
 	}
 	return nil
-}
-
-func GetIdsFromCards(c []queries.Card) []*int {
-	ids := []*int{}
-	for _, card := range c {
-		ids = append(ids, card.ID)
-	}
-
-	return ids
-}
-
-func GetCardInHandById(id *int, hand []queries.Card) queries.Card {
-	idx := slices.IndexFunc(hand, func(c queries.Card) bool {
-		return c.ID == id
-	})
-
-	if idx == -1 {
-		return queries.Card{}
-	}
-
-	return hand[idx]
 }
 
 func NewLogger() (*zap.Logger, error) {
@@ -94,10 +72,6 @@ func BuildCommonFooter(match *vo.GameMatch, localplayer *vo.GamePlayer) string {
 	cols = fmt.Sprintf("\n\n%s\n%s", cols, controls)
 
 	return cols
-}
-
-func IsPlayerTurn(playerId, matchId int) bool {
-	return playerId == matchId
 }
 
 func GetCardSuit(card *queries.Card) string {

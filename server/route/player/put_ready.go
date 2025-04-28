@@ -1,13 +1,10 @@
 package player
 
 import (
-	"context"
 	"net/http"
-	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
 
-	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/server/route/helpers"
 	"github.com/bardic/gocrib/vo"
 
@@ -29,13 +26,13 @@ import (
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/player/ready [put]
-func PlayerReady(c echo.Context) error {
+func (h *PlayerHandler) PlayerReady(c echo.Context) error {
 	pReady := new(vo.PlayerReady)
 	if err := c.Bind(pReady); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	_, err := readyPlayerById(pReady.PlayerId)
+	_, err := h.readyPlayerById(c, pReady.PlayerId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
@@ -72,15 +69,8 @@ func arePlayersReady(players []*vo.GamePlayer) bool {
 	return ready
 }
 
-func readyPlayerById(playerId *int) (bool, error) {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err := q.UpdatePlayerReady(ctx, queries.UpdatePlayerReadyParams{
+func (h *PlayerHandler) readyPlayerById(ctx echo.Context, playerId *int) (bool, error) {
+	err := h.PlayerStore.UpdatePlayerReady(ctx, queries.UpdatePlayerReadyParams{
 		ID:      playerId,
 		Isready: true,
 	})
@@ -88,25 +78,6 @@ func readyPlayerById(playerId *int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	return true, nil
-}
-
-func isPlayerReady(playerId int) (bool, error) {
-	// db := conn.Pool()
-	// defer db.Close()
-	// q := queries.New(db)
-
-	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// defer cancel()
-
-	// p, err := q.GetPlayerById(ctx, int(playerId))
-
-	// if err != nil {
-	// 	return false, err
-	// }
-
-	// return p.Isready, nil
 
 	return true, nil
 }
