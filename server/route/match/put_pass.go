@@ -30,7 +30,6 @@ import (
 //	@Router		/match/{matchId}/pass [put]
 func (h *MatchHandler) Pass(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -42,14 +41,12 @@ func (h *MatchHandler) Pass(c echo.Context) error {
 	defer cancel()
 
 	m, err := q.GetMatchById(ctx, &matchId)
-
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
 
 	var match *vo.GameMatch
 	err = json.Unmarshal(m, &match)
-
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
@@ -58,7 +55,6 @@ func (h *MatchHandler) Pass(c echo.Context) error {
 		Matchid: &matchId,
 		Column2: &match.Currentplayerturn,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}
@@ -67,7 +63,6 @@ func (h *MatchHandler) Pass(c echo.Context) error {
 		ID:                &matchId,
 		Currentplayerturn: nextPlayer.ID,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -76,7 +71,6 @@ func (h *MatchHandler) Pass(c echo.Context) error {
 		ID:       &matchId,
 		Dealerid: nextPlayer.ID,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -85,7 +79,6 @@ func (h *MatchHandler) Pass(c echo.Context) error {
 		ID:        &matchId,
 		Gamestate: queries.GamestateDeal,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

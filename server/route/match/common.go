@@ -1,4 +1,4 @@
-package helpers
+package match
 
 import (
 	"context"
@@ -20,7 +20,6 @@ func UpdateGameState(matchId *int, state queries.Gamestate) error {
 	defer cancel()
 
 	_, err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: matchId})
-
 	if err != nil {
 		return err
 	}
@@ -37,7 +36,6 @@ func GetMatch(id *int) (*vo.GameMatch, error) {
 	defer cancel()
 
 	m, err := q.GetMatchById(ctx, id)
-
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +46,7 @@ func GetMatch(id *int) (*vo.GameMatch, error) {
 		return nil, err
 	}
 
-	//TODO Add player info here to the gamematch object
+	// TODO Add player info here to the gamematch object
 
 	// players, err := q.GetPlayersByMatchId(ctx, id)
 
@@ -108,24 +106,9 @@ func GetOpenMatches() ([]queries.Match, error) {
 	defer cancel()
 
 	matchesData, err := q.GetOpenMatches(ctx, queries.GamestateNew)
-
 	if err != nil {
 		return nil, err
 	}
-
-	// var matches []queries.Match
-
-	// for _, matchData := range matchesData {
-	// 	var match queries.Match
-	// 	// err = json.Unmarshal(matchData, &match)
-	// 	// if err != nil {
-	// 	// 	return nil, err
-	// 	// }
-
-	// 	match = queries.Match{}
-
-	// 	matches = append(matches, match)
-	// }
 
 	return matchesData, nil
 }

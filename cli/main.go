@@ -84,14 +84,12 @@ func (cli *CLI) createMatchView(match *vo.GameMatch) {
 	var gameDeck vo.GameDeck
 	resp := services.GetPlayerByForMatchAndAccount(match.ID, cli.account.ID)
 	err := json.Unmarshal(resp.([]byte), player)
-
 	if err != nil {
 		utils.Logger.Sugar().Error(err)
 	}
 
 	resp = services.GetDeckByPlayIdAndMatchId(*player.ID, *match.ID)
 	err = json.Unmarshal(resp.([]byte), &gameDeck)
-
 	if err != nil {
 		utils.Logger.Sugar().Error(err)
 	}

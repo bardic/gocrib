@@ -9,7 +9,6 @@ import (
 )
 
 func Pool() *pgxpool.Pool {
-
 	s, b := os.LookupEnv("GOCRIB_HOST")
 
 	host := s

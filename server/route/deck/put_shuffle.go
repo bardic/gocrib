@@ -12,7 +12,7 @@ import (
 
 // Create godoc
 //
-//	@Summary	PutSHuffle
+//	@Summary	Shuffle
 //	@Description
 //	@Tags		deck
 //	@Accept		json
@@ -25,13 +25,11 @@ import (
 //	@Router		/match/{matchId}/deck/shuffle [put]
 func (h *DeckHandler) PutShuffle(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	err = h.DeckStore.ResetDeckForMatchId(c, &matchId)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -40,7 +38,6 @@ func (h *DeckHandler) PutShuffle(c echo.Context) error {
 		ID:    &matchId,
 		State: queries.CardstateDeck,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}

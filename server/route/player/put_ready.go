@@ -5,7 +5,7 @@ import (
 
 	"github.com/bardic/gocrib/queries/queries"
 
-	"github.com/bardic/gocrib/server/route/helpers"
+	"github.com/bardic/gocrib/server/route/match"
 	"github.com/bardic/gocrib/vo"
 
 	"github.com/labstack/echo/v4"
@@ -33,21 +33,19 @@ func (h *PlayerHandler) PlayerReady(c echo.Context) error {
 	}
 
 	_, err := h.readyPlayerById(c, pReady.PlayerId)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	match, err := helpers.GetMatch(pReady.MatchId)
-
+	m, err := match.GetMatch(pReady.MatchId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	if arePlayersReady(match.Players) {
+	if arePlayersReady(m.Players) {
 		// TODO
 		// /controller.Deal(match)
-		helpers.UpdateGameState(match.ID, queries.GamestateDiscard)
+		match.UpdateGameState(m.ID, queries.GamestateDiscard)
 	}
 
 	return c.JSON(http.StatusOK, nil)
@@ -74,7 +72,6 @@ func (h *PlayerHandler) readyPlayerById(ctx echo.Context, playerId *int) (bool, 
 		ID:      playerId,
 		Isready: true,
 	})
-
 	if err != nil {
 		return false, err
 	}

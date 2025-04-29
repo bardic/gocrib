@@ -6,8 +6,6 @@ import (
 
 	"github.com/bardic/gocrib/queries/queries"
 
-	"github.com/bardic/gocrib/server/route/helpers"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,13 +25,11 @@ import (
 //	@Router		/match/{matchId}/cut/{cutId} [put]
 func (h *MatchHandler) CutDeck(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	cutIndex, err := strconv.Atoi(c.Param("cutIndex"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -42,19 +38,16 @@ func (h *MatchHandler) CutDeck(c echo.Context) error {
 		ID:            &matchId,
 		Cutgamecardid: &cutIndex,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = helpers.UpdateGameState(&matchId, queries.GamestatePlay)
-
+	err = UpdateGameState(&matchId, queries.GamestatePlay)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m, err := helpers.GetMatch(&matchId)
-
+	m, err := GetMatch(&matchId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

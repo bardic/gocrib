@@ -28,19 +28,16 @@ import (
 //	@Router		/match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/kitty [put]
 func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	fromPlayerId, err := strconv.Atoi(c.Param("playerId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	toPlayerId, err := strconv.Atoi(c.Param("toPlayerId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -57,7 +54,6 @@ func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 			Origowner: &fromPlayerId,
 			Currowner: &toPlayerId,
 		})
-
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
@@ -67,7 +63,6 @@ func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 		Isready: true,
 		ID:      &fromPlayerId,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -87,7 +82,6 @@ func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
 			Gamestate: queries.GamestateCut,
 			ID:        &matchId,
 		})
-
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}

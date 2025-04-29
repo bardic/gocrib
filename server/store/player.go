@@ -9,12 +9,6 @@ type PlayerStore struct {
 	Store
 }
 
-func NewPlayerStore(q *queries.Queries, c echo.Context) *PlayerStore {
-	return &PlayerStore{
-		Store: Store{},
-	}
-}
-
 func (p *PlayerStore) CreatePlayer(ctx echo.Context, params queries.CreatePlayerParams) (*queries.Player, error) {
 	player, err := p.q().CreatePlayer(ctx.Request().Context(), params)
 	defer p.Close()

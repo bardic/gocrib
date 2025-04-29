@@ -12,9 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var (
-	Zero = 0
-)
+var Zero = 0
 
 // Create godoc
 //
@@ -31,13 +29,11 @@ var (
 //	@Router		/match/{accountId} [post]
 func (h *MatchHandler) NewMatch(c echo.Context) error {
 	accountId, err := strconv.Atoi(c.Param("accountId"))
-
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	deck, err := h.DeckStore.CreateDeck(c)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -52,13 +48,11 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 		Gamestate:          queries.GamestateNew,
 		Art:                "default.png",
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	cards, err := h.CardStore.GetCards(c)
-
 	if err != nil {
 		return err
 	}
@@ -68,7 +62,6 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 			Cardid: card.ID,
 			State:  queries.CardstateDeck,
 		})
-
 		if err != nil {
 			return err
 		}
@@ -77,7 +70,6 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 			Deckid:      deck.ID,
 			Matchcardid: matchCard.ID,
 		})
-
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
@@ -91,7 +83,6 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 		Isready:   false,
 		Art:       "default.png",
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -100,7 +91,6 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 		Matchid:  match.ID,
 		Playerid: player.ID,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

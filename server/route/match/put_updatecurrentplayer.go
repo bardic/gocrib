@@ -9,7 +9,6 @@ import (
 	"github.com/bardic/gocrib/queries/queries"
 
 	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/route/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -30,13 +29,11 @@ import (
 //	@Router		/match/{matchId}/currentPlayer/{playerId} [put]
 func (h *MatchHandler) UpdateCurrentPLayer(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	playerId, err := strconv.Atoi(c.Param("playerId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -52,13 +49,11 @@ func (h *MatchHandler) UpdateCurrentPLayer(c echo.Context) error {
 		ID:                &matchId,
 		Currentplayerturn: &playerId,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m, err := helpers.GetMatch(&matchId)
-
+	m, err := GetMatch(&matchId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

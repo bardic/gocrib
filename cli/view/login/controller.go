@@ -57,7 +57,6 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 }
 
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
-
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
@@ -67,7 +66,7 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg: //User input
+	case tea.KeyMsg: // User input
 		resp := ctrl.ParseInput(msg)
 
 		if resp == nil {
@@ -77,7 +76,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		cmds = append(cmds, func() tea.Msg {
 			return resp
 		})
-
 	}
 
 	return tea.Batch(cmds...)

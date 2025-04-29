@@ -9,36 +9,31 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Returns the deck for a match playerId
-//
-//	@Summary	Get deck by match playerId
-//	@Description
-//	@Tags		deck
-//	@Accept		json
-//	@Produce	json
-//	@Param		matchId	path		int	true	"search for deck by match playerId"'
-//	@Param		playerId	path		int	true	"search for deck by player playerId"'
-//	@Success	200	{object}	vo.GameDeck
-//	@Failure	404	{object}	error
-//	@Failure	422	{object}	error
-//	@Router		/match/{matchId}/player/{playerId}/deck/ [get]
+// @Summary	Get deck
+// @Description Returns the deck for a matchId and playerId
+// @Tags		deck
+// @Accept		json
+// @Produce	json
+// @Param		matchId	path		int	true	"matchId"'
+// @Param		playerId	path		int	true	"playerId"'
+// @Success	200	{object}	vo.GameDeck
+// @Failure	404	{object}	error
+// @Failure	422	{object}	error
+// @Router		/match/{matchId}/player/{playerId}/deck/ [get]
 func (h *DeckHandler) GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 	p := c.Param("playerId")
 	playerId, err := strconv.Atoi(p)
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	pid := c.Param("matchId")
 	matchId, err := strconv.Atoi(pid)
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	gameDeck, err := h.ParseQueryCardsToGameCards(c, &matchId, &playerId)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -48,7 +43,6 @@ func (h *DeckHandler) GetDeckByPlayerIdAndMatchId(c echo.Context) error {
 
 func (h *DeckHandler) ParseQueryCardsToGameCards(ctx echo.Context, matchId, playerId *int) (*vo.GameDeck, error) {
 	deck, err := h.DeckStore.GetDeckForMatchId(ctx, matchId)
-
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +52,6 @@ func (h *DeckHandler) ParseQueryCardsToGameCards(ctx echo.Context, matchId, play
 		Origowner: playerId,
 	}
 	cards, err := h.CardStore.GetCardsForPlayerIdFromDeckId(ctx, params)
-
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +71,8 @@ func (h *DeckHandler) ParseQueryCardsToGameCards(ctx echo.Context, matchId, play
 				Value: card.Value,
 				Suit:  card.Suit,
 				Art:   card.Art,
-			}})
+			},
+		})
 	}
 
 	gamedeck := &vo.GameDeck{

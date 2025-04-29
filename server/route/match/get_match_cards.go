@@ -20,15 +20,12 @@ import (
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId}/cards [get]
 func (h *MatchHandler) GetMatchCardsForMatchId(c echo.Context) error {
-	p := c.Param("matchId")
-	id, err := strconv.Atoi(p)
-
+	matchId, err := strconv.Atoi(c.Param("matchId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	cards, err := h.MatchStore.GetCardsForMatchId(c, id)
-
+	cards, err := h.MatchStore.GetCardsForMatchId(c, matchId)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)
 	}

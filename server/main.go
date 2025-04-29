@@ -13,6 +13,5 @@ import "github.com/bardic/gocrib/server/router"
 //	@host						localhost:1323
 //	@BasePath					/v1
 func main() {
-
 	router.NewRouter()
 }

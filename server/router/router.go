@@ -1,7 +1,8 @@
-// Description: Main router for the server, sets up the echo server and routes
 package router
 
 import (
+	"net/http"
+
 	_ "github.com/bardic/gocrib/server/docs"
 
 	"github.com/bardic/gocrib/server/route/account"
@@ -11,8 +12,6 @@ import (
 
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -37,20 +36,6 @@ func NewRouter() *echo.Echo {
 }
 
 func v1Routes(g *echo.Group) {
-
-	// db := conn.Pool()
-	// defer db.Close()
-	// q := queries.New(db)
-
-	// b := BaseHandler{
-	// 	AccountStore: store.AccountStore(&q),
-	// 	PlayerStore:  *store.NewPlayerStore(&queries, ctx),
-	// 	DeckStore:    *store.NewDeckStore(&queries, ctx),
-	// 	CardStore:    *store.NewCardStore(&queries, ctx),
-	// 	MatchStore:   *store.NewMatchStore(&queries, ctx),
-	// }
-	// handler := route.NewHandler()
-
 	matchHandler := match.NewHandler()
 	deckHandler := deck.NewHandler()
 	playerHandler := player.NewHandler()
@@ -60,7 +45,7 @@ func v1Routes(g *echo.Group) {
 	g.GET("/match/:matchId", matchHandler.GetMatch)
 	g.POST("/match/:accountId", matchHandler.NewMatch)
 
-	//Match
+	// Match
 	matchGroup := g.Group("/match/:matchId")
 	matchGroup.GET("/cards", matchHandler.GetMatchCardsForMatchId)
 	matchGroup.GET("/account/:accountId", matchHandler.GetPlayerIdForMatchAndAccount)
@@ -69,7 +54,7 @@ func v1Routes(g *echo.Group) {
 	matchGroup.PUT("/pass", matchHandler.Pass)
 	matchGroup.PUT("/currentPlayer/:playerId", matchHandler.UpdateCurrentPLayer)
 
-	//Player
+	// Player
 	matchGroup.GET("/player/:playerId", playerHandler.GetPlayer)
 	playerGroup := g.Group("/player/:playerId")
 	playerGroup.PUT("/to/:toPlayerId/kitty", playerHandler.UpdateKitty)
@@ -77,13 +62,13 @@ func v1Routes(g *echo.Group) {
 	playerGroup.PUT("/ready", playerHandler.PlayerReady)
 	playerGroup.GET("/deck", deckHandler.GetDeckByPlayerIdAndMatchId)
 
-	//Deck
+	// Deck
 	matchGroup.GET("/deck", deckHandler.GetDeckByMatchId)
 	deckGroup := matchGroup.Group("/deck")
 	deckGroup.GET("/kitty", deckHandler.GetKitty)
 	deckGroup.PUT("/shuffle", deckHandler.PutShuffle)
 
-	//Account
+	// Account
 	accountGroup := g.Group("/account")
 	accountGroup.POST("/login/:accountId", accountHandler.Login)
 }

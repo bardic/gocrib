@@ -9,27 +9,23 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Returns the deck for a match id
-//
-//	@Summary	Get deck by match id
-//	@Description
-//	@Tags		deck
-//	@Accept		json
-//	@Produce	json
-//	@Param		matchId	path		int	true	"search for deck by match id"'
-//	@Success	200	{object}	vo.GameDeck
-//	@Failure	404	{object}	error
-//	@Failure	422	{object}	error
-//	@Router		/match/{matchId}/deck/ [get]
+// @Summary	Get deck
+// @Description Get vo.GameDeck by match id
+// @Tags		deck
+// @Accept		json
+// @Produce	json
+// @Param		matchId	path		int	true	"match id"'
+// @Success	200	{object}	vo.GameDeck
+// @Failure	404	{object}	error
+// @Failure	422	{object}	error
+// @Router		/match/{matchId}/deck/ [get]
 func (h *DeckHandler) GetDeckByMatchId(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	deck, err := h.DeckStore.GetDeckForMatchId(c, &matchId)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -38,7 +34,6 @@ func (h *DeckHandler) GetDeckByMatchId(c echo.Context) error {
 		ID:    &matchId,
 		State: "Deck",
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -58,7 +53,8 @@ func (h *DeckHandler) GetDeckByMatchId(c echo.Context) error {
 				Value: card.Value.Cardvalue,
 				Suit:  card.Suit.Cardsuit,
 				Art:   card.Art.String,
-			}})
+			},
+		})
 	}
 
 	gamedeck := vo.GameDeck{

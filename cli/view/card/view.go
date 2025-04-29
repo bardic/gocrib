@@ -59,13 +59,12 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 			}
 		}
 
-		//Original owner seems to be account id and not match player id
+		// Original owner seems to be account id and not match player id
 
 		if c.Match.Origowner != nil {
 			styledCard = styles.PlayerStyles[*c.Match.Origowner].Render(styledCard)
 		} else {
 			styledCard = styles.PlayerStyles[*c.Match.Currowner].Render(styledCard)
-
 		}
 
 		cardViews = append(cardViews, styledCard)

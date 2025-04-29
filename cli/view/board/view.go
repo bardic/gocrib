@@ -24,8 +24,10 @@ type View struct {
 	Match *vo.GameMatch
 }
 
-var boardRowLen int = 50
-var boardEndRowLen int = 31
+var (
+	boardRowLen    int = 50
+	boardEndRowLen int = 31
+)
 
 func (view *View) Init() {
 	matchMsg := services.GetMatchById(view.Match.ID)
@@ -45,7 +47,6 @@ func (view *View) ShowCutInput() {
 	view.CutInput.Focus()
 	view.CutInput.Width = 5
 	view.isLoading = false
-
 }
 
 func (view *View) Render() string {
@@ -62,11 +63,11 @@ func (view *View) Render() string {
 		viewBuilder.WriteString("\n")
 	}
 
-	//Row 1
+	// Row 1
 	viewBuilder.WriteString(utils.DrawRow(view.Match.Players, boardRowLen, 0))
-	//Row 2
+	// Row 2
 	viewBuilder.WriteString(utils.DrawRow(view.Match.Players, boardRowLen, boardRowLen))
-	//Row 3
+	// Row 3
 	viewBuilder.WriteString(utils.DrawRow(view.Match.Players, boardEndRowLen, boardRowLen*2))
 
 	doc.WriteString(viewBuilder.String())
@@ -82,7 +83,6 @@ func (view *View) Update(msg tea.Msg) {
 
 	view.CutInput.Focus()
 	view.CutInput, _ = view.CutInput.Update(msg)
-
 }
 
 func (view *View) BuildHeader() string {

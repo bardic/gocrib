@@ -9,12 +9,6 @@ type AccountStore struct {
 	Store
 }
 
-func NewAccountStore() *AccountStore {
-	return &AccountStore{
-		Store: Store{},
-	}
-}
-
 func (a *AccountStore) GetAccountById(ctx echo.Context, id *int) (*queries.Account, error) {
 	account, err := a.q().GetAccountForId(ctx.Request().Context(), id)
 	defer a.Close()

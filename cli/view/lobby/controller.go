@@ -37,7 +37,6 @@ func (ctrl *Controller) GetName() string {
 }
 
 func (ctrl *Controller) Init() {
-
 }
 
 func (ctrl *Controller) Render() string {
@@ -65,7 +64,6 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		var matchDetails vo.MatchDetailsResponse
 		msg := services.JoinMatch(*lobbyModel.playerAccountId, int(id))
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
-
 		if err != nil {
 			return tea.Quit
 		}
@@ -128,7 +126,7 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg: //User input
+	case tea.KeyMsg: // User input
 		resp := ctrl.ParseInput(msg)
 
 		if resp == nil {
@@ -138,7 +136,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		cmds = append(cmds, func() tea.Msg {
 			return resp
 		})
-
 	}
 
 	return tea.Batch(cmds...)

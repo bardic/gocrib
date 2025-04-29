@@ -36,7 +36,6 @@ func (h *PlayerHandler) GetPlayer(c echo.Context) error {
 	}
 
 	player, err := h.PlayerStore.GetPlayerById(c, &playerId)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -55,7 +54,6 @@ func (h *PlayerHandler) GetPlayer(c echo.Context) error {
 			ID:    &matchId,
 			State: cardState,
 		})
-
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}

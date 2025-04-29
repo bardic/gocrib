@@ -9,12 +9,6 @@ type CardStore struct {
 	Store
 }
 
-func NewCardStore() *CardStore {
-	return &CardStore{
-		Store: Store{},
-	}
-}
-
 func (p *CardStore) GetCardsForPlayerIdFromDeckId(ctx echo.Context, params queries.GetCardsForPlayerIdFromDeckIdParams) ([]queries.GetCardsForPlayerIdFromDeckIdRow, error) {
 	cards, err := p.q().GetCardsForPlayerIdFromDeckId(ctx.Request().Context(), params)
 	defer p.Close()

@@ -9,12 +9,6 @@ type DeckStore struct {
 	Store
 }
 
-func NewDeckStore() *DeckStore {
-	return &DeckStore{
-		Store: Store{},
-	}
-}
-
 func (p *DeckStore) GetDeckForMatchId(ctx echo.Context, matchId *int) (*queries.Deck, error) {
 	deck, err := p.q().GetDeckForMatchId(ctx.Request().Context(), matchId)
 

@@ -85,7 +85,6 @@ func getActiveView() (table.Model, error) {
 
 	var matches []*vo.GameMatch
 	err := json.Unmarshal(m.([]byte), &matches)
-
 	if err != nil {
 		return table.Model{}, err
 	}

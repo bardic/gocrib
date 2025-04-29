@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/server/route/helpers"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,13 +21,12 @@ import (
 //	@Router		/match/{matchId} [get]
 func (h *MatchHandler) GetMatch(c echo.Context) error {
 	p := c.Param("matchId")
-	id, err := strconv.Atoi(p)
-
+	matchId, err := strconv.Atoi(p)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	m, err := helpers.GetMatch(&id)
+	m, err := h.MatchStore.GetMatch(c, &matchId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

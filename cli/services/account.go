@@ -10,5 +10,4 @@ import (
 func Login(accountId string) tea.Msg {
 	endPoint := utils.EndPointBuilder(EndPointLogin, accountId)
 	return url(endPoint, http.MethodPost, "")
-	// return url(EndPointLogin, http.MethodPost, "")
 }

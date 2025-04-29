@@ -38,7 +38,6 @@ func CutDeck(matchId int, cutIndex string) tea.Msg {
 
 func sendReq(endPoint string, method string, body interface{}) tea.Msg {
 	b, err := json.Marshal(body)
-
 	if err != nil {
 		return err
 	}

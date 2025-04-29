@@ -3,7 +3,6 @@ package match
 import (
 	"net/http"
 
-	"github.com/bardic/gocrib/server/route/helpers"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,7 +18,7 @@ import (
 //	@Failure	422	{object}	error
 //	@Router		/open [get]
 func (h *MatchHandler) GetOpenMatches(c echo.Context) error {
-	v, err := helpers.GetOpenMatches()
+	v, err := GetOpenMatches()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

@@ -19,7 +19,6 @@ type Controller struct {
 }
 
 func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Controller {
-
 	ctrl := &Controller{
 		model: &Model{
 			ActiveSlotIndex: 0,
@@ -73,15 +72,14 @@ func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) s
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
-
 	switch msg.String() {
-	//Highlight card to the right
+	// Highlight card to the right
 	case "right":
 		ctrl.updateActiveSlotIndex(1)
-	//Highlight card to the left
+	// Highlight card to the left
 	case "left":
 		ctrl.updateActiveSlotIndex(-1)
-	//Select card
+	// Select card
 	case " ":
 		idx := slices.Index(
 			ctrl.model.SelectedCardIds,
@@ -125,7 +123,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	//ctrl.view.Update(msg)
+	// ctrl.view.Update(msg)
 	return cmd
 }
 

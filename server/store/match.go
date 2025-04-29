@@ -12,12 +12,6 @@ type MatchStore struct {
 	Store
 }
 
-func NewMatchStore(q *queries.Queries, c echo.Context) *MatchStore {
-	return &MatchStore{
-		Store: Store{},
-	}
-}
-
 func (p *MatchStore) GetMatch(ctx echo.Context, matchId *int) (*vo.GameMatch, error) {
 	m, err := p.q().GetMatchById(ctx.Request().Context(), matchId)
 
@@ -38,7 +32,6 @@ func (p *MatchStore) GetMatch(ctx echo.Context, matchId *int) (*vo.GameMatch, er
 
 func (p *MatchStore) UpdateMatchState(ctx echo.Context, params queries.UpdateMatchStateParams) (queries.Match, error) {
 	match, err := p.q().UpdateMatchState(ctx.Request().Context(), params)
-
 	if err != nil {
 		return queries.Match{}, err
 	}

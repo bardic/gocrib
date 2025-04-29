@@ -6,8 +6,6 @@ import (
 
 	"github.com/bardic/gocrib/queries/queries"
 
-	"github.com/bardic/gocrib/server/route/helpers"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,13 +25,11 @@ import (
 //	@Router		/match/{matchId}/join/{accountId} [put]
 func (h *MatchHandler) JoinMatch(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	accountId, err := strconv.Atoi(c.Param("accountId"))
-
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -46,7 +42,6 @@ func (h *MatchHandler) JoinMatch(c echo.Context) error {
 		Isready:   false,
 		Art:       "default.png",
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -55,19 +50,16 @@ func (h *MatchHandler) JoinMatch(c echo.Context) error {
 		Matchid:  &matchId,
 		Playerid: player.ID,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	_, err = helpers.GetMatch(&matchId)
-
+	_, err = GetMatch(&matchId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	match, err := h.MatchStore.GetMatch(c, &matchId)
-
 	if err != nil {
 		return err
 	}
@@ -85,7 +77,6 @@ func (h *MatchHandler) JoinMatch(c echo.Context) error {
 				ID:                &matchId,
 				Currentplayerturn: player.ID,
 			})
-
 			if err != nil {
 				return err
 			}
@@ -94,7 +85,6 @@ func (h *MatchHandler) JoinMatch(c echo.Context) error {
 				ID:       &matchId,
 				Dealerid: player.ID,
 			})
-
 			if err != nil {
 				return err
 			}
@@ -113,7 +103,6 @@ func (h *MatchHandler) JoinMatch(c echo.Context) error {
 	// Deal cards
 
 	cards, err := h.MatchStore.GetCardsForMatchId(c, matchId)
-
 	if err != nil {
 		return err
 	}
@@ -135,7 +124,6 @@ func (h *MatchHandler) JoinMatch(c echo.Context) error {
 		ID:        &matchId,
 		Gamestate: queries.GamestateDiscard,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

@@ -26,7 +26,6 @@ type Controller struct {
 }
 
 func (ctrl *Controller) Init() {
-
 }
 
 func NewController(match *vo.GameMatch, player *vo.GamePlayer, gameDeck *vo.GameDeck) *Controller {
@@ -91,7 +90,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 
 		resp := services.GetMatchById(ctrl.model.GetMatch().ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
-
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
@@ -99,7 +97,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		resp = services.GetDeckByPlayIdAndMatchId(*ctrl.model.GetPlayer().ID, *ctrl.model.GetMatch().ID)
 
 		err = json.Unmarshal(resp.([]byte), &gameDeck)
-
 		if err != nil {
 			utils.Logger.Sugar().Error(err)
 		}
@@ -159,7 +156,6 @@ func (ctrl *Controller) ChangeTab(msg tea.Msg) {
 		// val.Update(msg)
 		return
 	}
-
 }
 
 func createTabs(gameMatch *vo.GameMatch, player *vo.GamePlayer) map[int]cliVO.IGameController {

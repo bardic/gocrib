@@ -30,19 +30,16 @@ import (
 
 func (h *PlayerHandler) UpdatePlay(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	fromPlayerId, err := strconv.Atoi(c.Param("playerId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	toPlayerId, err := strconv.Atoi(c.Param("toPlayerId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -59,7 +56,6 @@ func (h *PlayerHandler) UpdatePlay(c echo.Context) error {
 			Origowner: &fromPlayerId,
 			Currowner: &toPlayerId,
 		})
-
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
@@ -76,7 +72,6 @@ func (h *PlayerHandler) UpdatePlay(c echo.Context) error {
 				ID:                &matchId,
 				Currentplayerturn: nextPlayer.ID,
 			})
-
 			if err != nil {
 				fmt.Println(err)
 			}

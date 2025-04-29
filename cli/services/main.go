@@ -11,22 +11,22 @@ import (
 
 const (
 	BaseUrl = "http://localhost:1323/v1"
-	//Game
+	// Game
 	EndPointGame = BaseUrl + "/game/playCard"
-	//Player
+	// Player
 	EndPointPlayer                     = BaseUrl + "/match/%s/player"
 	EndPointKitty                      = BaseUrl + "/match/%s/player/%s/to/%s/kitty"
 	EndPointPlayerByForMatchAndAccount = BaseUrl + "/match/%s/account/%s"
 	EndPointPlay                       = BaseUrl + "/match/%s/player/%s/to/%s/play"
 	EndPointPlayerReady                = BaseUrl + "/match/%s/player/%s/ready"
-	//Match
+	// Match
 	EndPointMatch                  = BaseUrl + "/match"
 	EndPointMatchState             = BaseUrl + "/match/%s/state"
 	EndPointJoinMatch              = BaseUrl + "/match/%v/join/%v"
 	EndPointOpenMatch              = BaseUrl + "/open"
 	EndPointMatchCutDeck           = BaseUrl + "/match/%s/cut/%s"
 	EndPointDeckByPlayerAndMatchId = BaseUrl + "/match/%s/player/%s/deck"
-	//Account
+	// Account
 	EndPointLogin = BaseUrl + "/account/login/%s"
 )
 
@@ -53,11 +53,9 @@ func url(url string, method string, json string) tea.Msg {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		return err
 	}
 
 	return body
-
 }
