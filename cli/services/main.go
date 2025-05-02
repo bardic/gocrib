@@ -11,21 +11,17 @@ import (
 
 const (
 	BaseUrl = "http://localhost:1323/v1"
-	// Game
-	EndPointGame = BaseUrl + "/game/playCard"
 	// Player
-	EndPointPlayer                     = BaseUrl + "/match/%s/player"
 	EndPointKitty                      = BaseUrl + "/match/%s/player/%s/to/%s/kitty"
-	EndPointPlayerByForMatchAndAccount = BaseUrl + "/match/%s/account/%s"
 	EndPointPlay                       = BaseUrl + "/match/%s/player/%s/to/%s/play"
-	EndPointPlayerReady                = BaseUrl + "/match/%s/player/%s/ready"
+	EndPointPlayerByForMatchAndAccount = BaseUrl + "/match/%s/account/%s"
 	// Match
-	EndPointMatch                  = BaseUrl + "/match"
-	EndPointMatchState             = BaseUrl + "/match/%s/state"
-	EndPointJoinMatch              = BaseUrl + "/match/%v/join/%v"
+	EndPointMatch                  = BaseUrl + "/match/%s"
 	EndPointOpenMatch              = BaseUrl + "/open"
+	EndPointMatchState             = BaseUrl + "/match/%s/state"
 	EndPointMatchCutDeck           = BaseUrl + "/match/%s/cut/%s"
 	EndPointDeckByPlayerAndMatchId = BaseUrl + "/match/%s/player/%s/deck"
+	EndPointJoinMatch              = BaseUrl + "/match/%s/join/%s"
 	// Account
 	EndPointLogin = BaseUrl + "/account/login/%s"
 )

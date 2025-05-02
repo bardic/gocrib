@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 
 	"github.com/bardic/gocrib/queries/queries"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
+	logger "github.com/bardic/gocrib/cli/utils/log"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -39,18 +40,26 @@ func (ctrl *Controller) Render() string {
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
+	l := logger.Get()
+	defer l.Sync()
+
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "enter", "view_update":
-		utils.Logger.Info("Enter")
+		l.Sugar().Info("Enter")
 		idStr := ctrl.view.loginIdField.Value()
 
 		var accountDetails queries.Account
 		msg := services.Login(idStr)
 		json.Unmarshal(msg.([]byte), &accountDetails)
 
-		return accountDetails
+		return vo.StateChangeMsg{
+			NewState:  vo.LobbyView,
+			AccountId: accountDetails.ID,
+		}
+
+		// return accountDetails
 	}
 
 	return nil

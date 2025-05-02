@@ -9,11 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/bardic/gocrib/vo"
-
-	"go.uber.org/zap"
 )
-
-var Logger *zap.Logger
 
 func GetCardById(id int, deck *vo.GameDeck) *vo.GameCard {
 	for _, card := range deck.Cards {
@@ -27,14 +23,6 @@ func GetCardById(id int, deck *vo.GameDeck) *vo.GameCard {
 		}
 	}
 	return nil
-}
-
-func NewLogger() (*zap.Logger, error) {
-	cfg := zap.NewProductionConfig()
-	cfg.OutputPaths = []string{
-		"crib.log",
-	}
-	return cfg.Build()
 }
 
 func GetPlayerForAccountId(id *int, match *vo.GameMatch) *vo.GamePlayer {

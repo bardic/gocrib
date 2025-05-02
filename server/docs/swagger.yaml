@@ -336,6 +336,8 @@ paths:
     post:
       consumes:
       - application/json
+      description: Login route for account - takes an account id and returns the account
+        details
       parameters:
       - description: account id
         in: path
@@ -544,8 +546,9 @@ paths:
     get:
       consumes:
       - application/json
+      description: Get vo.GameDeck by match id
       parameters:
-      - description: search for deck by match id
+      - description: match id
         in: path
         name: matchId
         required: true
@@ -563,13 +566,14 @@ paths:
         "422":
           description: Unprocessable Entity
           schema: {}
-      summary: Get deck by match id
+      summary: Get deck
       tags:
       - deck
   /match/{matchId}/deck/kitty:
     get:
       consumes:
       - application/json
+      description: Get the kitty for a match id
       parameters:
       - description: match id
         in: path
@@ -592,9 +596,9 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: GetKitty
+      summary: Get Kitty
       tags:
-      - match
+      - deck
   /match/{matchId}/deck/shuffle:
     put:
       consumes:
@@ -621,7 +625,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: PutSHuffle
+      summary: Shuffle
       tags:
       - deck
   /match/{matchId}/join/{accountId}:
@@ -736,13 +740,14 @@ paths:
     get:
       consumes:
       - application/json
+      description: Returns the deck for a matchId and playerId
       parameters:
-      - description: search for deck by match playerId
+      - description: matchId
         in: path
         name: matchId
         required: true
         type: integer
-      - description: search for deck by player playerId
+      - description: playerId
         in: path
         name: playerId
         required: true
@@ -760,7 +765,7 @@ paths:
         "422":
           description: Unprocessable Entity
           schema: {}
-      summary: Get deck by match playerId
+      summary: Get deck
       tags:
       - deck
   /match/player/ready:

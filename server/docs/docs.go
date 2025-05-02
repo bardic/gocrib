@@ -17,6 +17,7 @@ const docTemplate = `{
     "paths": {
         "/account/login/{accountId}": {
             "post": {
+                "description": "Login route for account - takes an account id and returns the account details",
                 "consumes": [
                     "application/json"
                 ],
@@ -371,6 +372,7 @@ const docTemplate = `{
         },
         "/match/{matchId}/deck/": {
             "get": {
+                "description": "Get vo.GameDeck by match id",
                 "consumes": [
                     "application/json"
                 ],
@@ -380,11 +382,11 @@ const docTemplate = `{
                 "tags": [
                     "deck"
                 ],
-                "summary": "Get deck by match id",
+                "summary": "Get deck",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "search for deck by match id",
+                        "description": "match id",
                         "name": "matchId",
                         "in": "path",
                         "required": true
@@ -410,6 +412,7 @@ const docTemplate = `{
         },
         "/match/{matchId}/deck/kitty": {
             "get": {
+                "description": "Get the kitty for a match id",
                 "consumes": [
                     "application/json"
                 ],
@@ -417,9 +420,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "match"
+                    "deck"
                 ],
-                "summary": "GetKitty",
+                "summary": "Get Kitty",
                 "parameters": [
                     {
                         "type": "integer",
@@ -462,7 +465,7 @@ const docTemplate = `{
                 "tags": [
                     "deck"
                 ],
-                "summary": "PutSHuffle",
+                "summary": "Shuffle",
                 "parameters": [
                     {
                         "type": "integer",
@@ -655,6 +658,7 @@ const docTemplate = `{
         },
         "/match/{matchId}/player/{playerId}/deck/": {
             "get": {
+                "description": "Returns the deck for a matchId and playerId",
                 "consumes": [
                     "application/json"
                 ],
@@ -664,18 +668,18 @@ const docTemplate = `{
                 "tags": [
                     "deck"
                 ],
-                "summary": "Get deck by match playerId",
+                "summary": "Get deck",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "search for deck by match playerId",
+                        "description": "matchId",
                         "name": "matchId",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "search for deck by player playerId",
+                        "description": "playerId",
                         "name": "playerId",
                         "in": "path",
                         "required": true

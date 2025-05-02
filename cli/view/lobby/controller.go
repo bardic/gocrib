@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
+	logger "github.com/bardic/gocrib/cli/utils/log"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -44,6 +44,8 @@ func (ctrl *Controller) Render() string {
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
+	l := logger.Get()
+	defer l.Sync()
 	lobbyView := ctrl.view
 	lobbyModel := ctrl.model
 
@@ -51,7 +53,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "enter", "view_update":
-		utils.Logger.Info("Enter")
+		l.Sugar().Info("Enter")
 		if len(lobbyView.LobbyTable.Rows()) == 0 {
 			return nil
 		}

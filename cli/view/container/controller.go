@@ -6,7 +6,7 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/utils"
+	logger "github.com/bardic/gocrib/cli/utils/log"
 	"github.com/bardic/gocrib/cli/view/board"
 	"github.com/bardic/gocrib/cli/view/card"
 	cliVO "github.com/bardic/gocrib/cli/vo"
@@ -28,10 +28,36 @@ type Controller struct {
 func (ctrl *Controller) Init() {
 }
 
-func NewController(match *vo.GameMatch, player *vo.GamePlayer, gameDeck *vo.GameDeck) *Controller {
+func NewController(msg vo.StateChangeMsg) *Controller {
+	l := logger.Get()
+	defer l.Sync()
+
+	var match *vo.GameMatch
+
+	resp := services.GetMatchById(msg.MatchId)
+	err := json.Unmarshal(resp.([]byte), &match)
+	if err != nil {
+		l.Sugar().Error(err)
+	}
+
+	player := &vo.GamePlayer{}
+
+	var gameDeck vo.GameDeck
+	resp = services.GetPlayerByForMatchAndAccount(match.ID, msg.AccountId)
+	err = json.Unmarshal(resp.([]byte), player)
+	if err != nil {
+		l.Sugar().Error(err)
+	}
+
+	resp = services.GetDeckByPlayIdAndMatchId(*player.ID, *match.ID)
+	err = json.Unmarshal(resp.([]byte), &gameDeck)
+	if err != nil {
+		l.Sugar().Error(err)
+	}
+
 	tabs := createTabs(match, player)
 	ctrl := &Controller{
-		model: NewModel(match, player, gameDeck),
+		model: NewModel(match, player, &gameDeck),
 		view:  NewView(0, tabs),
 	}
 
@@ -58,6 +84,9 @@ func (ctrl *Controller) Render() string {
 }
 
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+	l := logger.Get()
+	defer l.Sync()
+
 	var cmds []tea.Cmd
 
 	if !ctrl.timerStarted {
@@ -91,14 +120,14 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		resp := services.GetMatchById(ctrl.model.GetMatch().ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
 		if err != nil {
-			utils.Logger.Sugar().Error(err)
+			l.Sugar().Error(err)
 		}
 
 		resp = services.GetDeckByPlayIdAndMatchId(*ctrl.model.GetPlayer().ID, *ctrl.model.GetMatch().ID)
 
 		err = json.Unmarshal(resp.([]byte), &gameDeck)
 		if err != nil {
-			utils.Logger.Sugar().Error(err)
+			l.Sugar().Error(err)
 		}
 
 		ctrl.model.Gamematch = gameMatch

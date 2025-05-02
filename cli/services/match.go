@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,8 +11,8 @@ import (
 )
 
 func GetMatchById(matchId *int) tea.Msg {
-	id := strconv.Itoa(*matchId)
-	return url(EndPointMatch+"/"+id, http.MethodGet, "")
+	endpoint := utils.EndPointBuilder(EndPointMatch, strconv.Itoa(*matchId))
+	return url(endpoint, http.MethodGet, "")
 }
 
 func GetOpenMatches() tea.Msg {
@@ -21,13 +20,13 @@ func GetOpenMatches() tea.Msg {
 }
 
 func JoinMatch(accountId, activeMatchId int) tea.Msg {
-	u := fmt.Sprintf(EndPointJoinMatch, activeMatchId, accountId)
-
-	return url(u, http.MethodPut, "")
+	endpoint := utils.EndPointBuilder(EndPointJoinMatch, strconv.Itoa(activeMatchId), strconv.Itoa(accountId))
+	return url(endpoint, http.MethodPut, "")
 }
 
 func PostPlayerMatch(accountId *int) tea.Msg {
-	return sendReq(EndPointMatch+"/"+strconv.Itoa(*accountId), http.MethodPost, nil)
+	endpoint := utils.EndPointBuilder(EndPointMatch, strconv.Itoa(*accountId))
+	return sendReq(endpoint, http.MethodPost, nil)
 }
 
 func CutDeck(matchId int, cutIndex string) tea.Msg {
