@@ -23,7 +23,7 @@ import (
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/{matchId}/cut/{cutId} [put]
-func (h *MatchHandler) CutDeck(c echo.Context) error {
+func (h *Handler) CutDeck(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

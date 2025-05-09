@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetPlayerIDForMatchAndAccount route
 // @Summary	Get match card by match id
 // @Description
 // @Tags		match
@@ -21,20 +22,20 @@ import (
 // @Failure	404	{object}	error
 // @Failure	422	{object}	error
 // @Router		/match/{matchId}/account/{accountId} [get]
-func (h *MatchHandler) GetPlayerIdForMatchAndAccount(c echo.Context) error {
-	matchId, err := strconv.Atoi(c.Param("matchId"))
+func (h *Handler) GetPlayerIDForMatchAndAccount(c echo.Context) error {
+	matchID, err := strconv.Atoi(c.Param("matchId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	accountId, err := strconv.Atoi(c.Param("accountId"))
+	accountID, err := strconv.Atoi(c.Param("accountId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	playerData, err := h.PlayerStore.GetPlayerByMatchAndAccountId(c, queries.GetPlayerByMatchAndAccountIdParams{
-		Matchid:   &matchId,
-		Accountid: &accountId,
+	playerData, err := h.PlayerStore.GetPlayerByMatchAndAccountID(c, queries.GetPlayerByMatchAndAccountIdParams{
+		Matchid:   &matchID,
+		Accountid: &accountID,
 	})
 	if err != nil {
 		return c.JSON(http.StatusNotFound, err)

@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Returns a match by id
+// GetMatch route
 //
 //	@Summary	Get match by id
 //	@Description
@@ -19,14 +19,14 @@ import (
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/match/{matchId} [get]
-func (h *MatchHandler) GetMatch(c echo.Context) error {
+func (h *Handler) GetMatch(c echo.Context) error {
 	p := c.Param("matchId")
-	matchId, err := strconv.Atoi(p)
+	matchID, err := strconv.Atoi(p)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	m, err := h.MatchStore.GetMatch(c, &matchId)
+	m, err := h.MatchStore.GetMatch(c, &matchID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

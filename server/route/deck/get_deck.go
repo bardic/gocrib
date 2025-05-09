@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetDeckByMatchID route
 // @Summary	Get deck
 // @Description Get vo.GameDeck by match id
 // @Tags		deck
@@ -19,19 +20,19 @@ import (
 // @Failure	404	{object}	error
 // @Failure	422	{object}	error
 // @Router		/match/{matchId}/deck/ [get]
-func (h *DeckHandler) GetDeckByMatchId(c echo.Context) error {
-	matchId, err := strconv.Atoi(c.Param("matchId"))
+func (h *Handler) GetDeckByMatchID(c echo.Context) error {
+	matchID, err := strconv.Atoi(c.Param("matchId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	deck, err := h.DeckStore.GetDeckForMatchId(c, &matchId)
+	deck, err := h.DeckStore.GetDeckForMatchID(c, &matchID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	cards, err := h.CardStore.GetCardsForMatchIdAndState(c, queries.GetCardsForMatchIdAndStateParams{
-		ID:    &matchId,
+	cards, err := h.CardStore.GetCardsForMatchIDAndState(c, queries.GetCardsForMatchIdAndStateParams{
+		ID:    &matchID,
 		State: "Deck",
 	})
 	if err != nil {

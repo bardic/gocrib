@@ -29,47 +29,47 @@ import (
 //	@Router		/match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/play [put]
 
 func (h *PlayerHandler) UpdatePlay(c echo.Context) error {
-	matchId, err := strconv.Atoi(c.Param("matchId"))
+	matchID, err := strconv.Atoi(c.Param("matchId"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	fromPlayerId, err := strconv.Atoi(c.Param("playerId"))
+	fromPlayerID, err := strconv.Atoi(c.Param("playerId"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	toPlayerId, err := strconv.Atoi(c.Param("toPlayerId"))
+	toPlayerID, err := strconv.Atoi(c.Param("toPlayerId"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	details := &vo.HandModifier{}
-	if err := c.Bind(details); err != nil {
+	if err = c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	for _, cardId := range details.CardIds {
-		err := h.CardStore.UpdateMatchCardState(c, queries.UpdateMatchCardStateParams{
-			ID:        &cardId,
+	for _, cardID := range details.CardIDs {
+		err = h.CardStore.UpdateMatchCardState(c, queries.UpdateMatchCardStateParams{
+			ID:        &cardID,
 			State:     queries.CardstatePlay,
-			Origowner: &fromPlayerId,
-			Currowner: &toPlayerId,
+			Origowner: &fromPlayerID,
+			Currowner: &toPlayerID,
 		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 	}
 
-	match, err := h.MatchStore.GetMatch(c, &matchId)
+	match, err := h.MatchStore.GetMatch(c, &matchID)
 
 	for i, player := range match.Players {
-		if *player.ID == toPlayerId {
+		if *player.ID == toPlayerID {
 			playerIndex := i
 			nextPlayer := match.Players[(playerIndex+1)%len(match.Players)]
 
-			err := h.MatchStore.UpateMatchCurrentPlayerTurn(c, queries.UpateMatchCurrentPlayerTurnParams{
-				ID:                &matchId,
+			err = h.MatchStore.UpateMatchCurrentPlayerTurn(c, queries.UpateMatchCurrentPlayerTurnParams{
+				ID:                &matchID,
 				Currentplayerturn: nextPlayer.ID,
 			})
 			if err != nil {

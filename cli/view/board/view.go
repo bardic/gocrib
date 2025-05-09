@@ -19,18 +19,17 @@ type View struct {
 	CutInput      textinput.Model
 	isLoading     bool
 	State         queries.Gamestate
-	LocalPlayerId *int
-
-	Match *vo.GameMatch
+	LocalPlayerID *int
+	Match         *vo.GameMatch
 }
 
 var (
-	boardRowLen    int = 50
-	boardEndRowLen int = 31
+	boardRowLen    = 50
+	boardEndRowLen = 31
 )
 
 func (view *View) Init() {
-	matchMsg := services.GetMatchById(view.Match.ID)
+	matchMsg := services.GetMatchByID(view.Match.ID)
 	var match *queries.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
@@ -90,7 +89,7 @@ func (view *View) BuildHeader() string {
 }
 
 func (view *View) BuildFooter() string {
-	p := utils.GetPlayerForAccountId(view.LocalPlayerId, view.Match)
+	p := utils.GetPlayerForAccountID(view.LocalPlayerID, view.Match)
 	f := utils.BuildCommonFooter(
 		view.Match,
 		p,

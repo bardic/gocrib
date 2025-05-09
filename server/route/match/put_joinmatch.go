@@ -23,7 +23,7 @@ import (
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/{matchId}/join/{accountId} [put]
-func (h *MatchHandler) JoinMatch(c echo.Context) error {
+func (h *Handler) JoinMatch(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -102,7 +102,7 @@ func (h *MatchHandler) JoinMatch(c echo.Context) error {
 
 	// Deal cards
 
-	cards, err := h.MatchStore.GetCardsForMatchId(c, matchId)
+	cards, err := h.MatchStore.GetCardsForMatchID(c, matchId)
 	if err != nil {
 		return err
 	}

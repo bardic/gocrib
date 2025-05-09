@@ -16,8 +16,8 @@ type GameMatch struct {
 }
 
 type ScoreMatch struct {
-	ActivePlayerId *int
-	PlayerSeekId   *int
+	ActivePlayerID *int
+	PlayerSeekID   *int
 	CardsInPlay    *[]GameCard
 	Players        *[]GamePlayer
 }
@@ -37,16 +37,14 @@ type GameCardDetails struct {
 	Order *int
 }
 
-//_Comms_
-
 type MatchDetailsResponse struct {
-	MatchId   *int
-	PlayerId  *int
+	MatchID   *int
+	PlayerID  *int
 	GameState queries.Gamestate
 }
 
 type HandModifier struct {
-	CardIds []int
+	CardIDs []int
 }
 
 type ScoreResults struct {
@@ -83,8 +81,8 @@ const (
 
 type StateChangeMsg struct {
 	NewState  ViewStateName
-	AccountId *int
-	MatchId   *int
+	AccountID *int
+	MatchID   *int
 }
 
 type ChangeTabMsg struct {
@@ -92,8 +90,8 @@ type ChangeTabMsg struct {
 }
 
 type PlayerReady struct {
-	MatchId  *int
-	PlayerId *int
+	MatchID  *int
+	PlayerID *int
 }
 
 type Hand struct {

@@ -9,8 +9,8 @@ type DeckStore struct {
 	Store
 }
 
-func (p *DeckStore) GetDeckForMatchId(ctx echo.Context, matchId *int) (*queries.Deck, error) {
-	deck, err := p.q().GetDeckForMatchId(ctx.Request().Context(), matchId)
+func (p *DeckStore) GetDeckForMatchID(ctx echo.Context, matchID *int) (*queries.Deck, error) {
+	deck, err := p.q().GetDeckForMatchId(ctx.Request().Context(), matchID)
 
 	defer p.Close()
 
@@ -45,8 +45,8 @@ func (p *DeckStore) AddCardToDeck(ctx echo.Context, params queries.AddCardToDeck
 	return nil
 }
 
-func (p *DeckStore) ResetDeckForMatchId(ctx echo.Context, matchId *int) error {
-	err := p.q().ResetDeckForMatchId(ctx.Request().Context(), matchId)
+func (p *DeckStore) ResetDeckForMatchID(ctx echo.Context, matchID *int) error {
+	err := p.q().ResetDeckForMatchId(ctx.Request().Context(), matchID)
 
 	defer p.Close()
 

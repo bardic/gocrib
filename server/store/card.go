@@ -9,7 +9,10 @@ type CardStore struct {
 	Store
 }
 
-func (p *CardStore) GetCardsForPlayerIdFromDeckId(ctx echo.Context, params queries.GetCardsForPlayerIdFromDeckIdParams) ([]queries.GetCardsForPlayerIdFromDeckIdRow, error) {
+func (p *CardStore) GetCardsForPlayerIDFromDeckID(
+	ctx echo.Context,
+	params queries.GetCardsForPlayerIdFromDeckIdParams,
+) ([]queries.GetCardsForPlayerIdFromDeckIdRow, error) {
 	cards, err := p.q().GetCardsForPlayerIdFromDeckId(ctx.Request().Context(), params)
 	defer p.Close()
 
@@ -20,7 +23,10 @@ func (p *CardStore) GetCardsForPlayerIdFromDeckId(ctx echo.Context, params queri
 	return cards, nil
 }
 
-func (p *CardStore) GetCardsForMatchIdAndState(ctx echo.Context, params queries.GetCardsForMatchIdAndStateParams) ([]queries.GetCardsForMatchIdAndStateRow, error) {
+func (p *CardStore) GetCardsForMatchIDAndState(
+	ctx echo.Context,
+	params queries.GetCardsForMatchIdAndStateParams,
+) ([]queries.GetCardsForMatchIdAndStateRow, error) {
 	cards, err := p.q().GetCardsForMatchIdAndState(ctx.Request().Context(), params)
 	defer p.Close()
 

@@ -7,7 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func Login(accountId string) tea.Msg {
-	endPoint := utils.EndPointBuilder(EndPointLogin, accountId)
+func Login(accountID string) tea.Msg {
+	endPoint := utils.EndPointBuilder(EndPointLogin, accountID)
 	return url(endPoint, http.MethodPost, "")
 }

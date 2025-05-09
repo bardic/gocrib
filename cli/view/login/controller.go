@@ -48,15 +48,18 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		return tea.Quit()
 	case "enter", "view_update":
 		l.Sugar().Info("Enter")
-		idStr := ctrl.view.loginIdField.Value()
+		idStr := ctrl.view.loginIDField.Value()
 
 		var accountDetails queries.Account
 		msg := services.Login(idStr)
-		json.Unmarshal(msg.([]byte), &accountDetails)
+		err := json.Unmarshal(msg.([]byte), &accountDetails)
+		if err != nil {
+			return nil
+		}
 
 		return vo.StateChangeMsg{
 			NewState:  vo.LobbyView,
-			AccountId: accountDetails.ID,
+			AccountID: accountDetails.ID,
 		}
 
 		// return accountDetails
@@ -69,8 +72,8 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	ctrl.view.loginIdField.Focus()
-	ctrl.view.loginIdField, cmd = ctrl.view.loginIdField.Update(msg)
+	ctrl.view.loginIDField.Focus()
+	ctrl.view.loginIDField, cmd = ctrl.view.loginIDField.Update(msg)
 
 	cmds = append(cmds, cmd)
 

@@ -20,16 +20,22 @@ import (
 func NewRouter() *echo.Echo {
 	e := echo.New()
 	e.Logger.SetLevel(log.DEBUG)
+
+	// Add middleware to remove trailing slashes
 	e.Pre(middleware.RemoveTrailingSlash())
 
+	// Add swaggger router
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
+	// Add index router to return the version
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Cribbage  v0.0.1")
 	})
 
+	// Register v1 routes
 	v1Routes(e.Group("/v1"))
 
+	// Start Server
 	e.Logger.Fatal(e.Start(":1323"))
 
 	return e
@@ -47,8 +53,8 @@ func v1Routes(g *echo.Group) {
 
 	// Match
 	matchGroup := g.Group("/match/:matchId")
-	matchGroup.GET("/cards", matchHandler.GetMatchCardsForMatchId)
-	matchGroup.GET("/account/:accountId", matchHandler.GetPlayerIdForMatchAndAccount)
+	matchGroup.GET("/cards", matchHandler.GetMatchCardsForMatchID)
+	matchGroup.GET("/account/:accountId", matchHandler.GetPlayerIDForMatchAndAccount)
 	matchGroup.PUT("/cut/:cutIndex", matchHandler.CutDeck)
 	matchGroup.PUT("/join/:accountId", matchHandler.JoinMatch)
 
@@ -58,7 +64,7 @@ func v1Routes(g *echo.Group) {
 	playerGroup.PUT("/to/:toPlayerId/play", playerHandler.UpdatePlay)
 
 	// Deck
-	matchGroup.GET("/deck", deckHandler.GetDeckByMatchId)
+	matchGroup.GET("/deck", deckHandler.GetDeckByMatchID)
 
 	// Account
 	accountGroup := g.Group("/account")

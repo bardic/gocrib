@@ -8,7 +8,6 @@ import (
 )
 
 func TestThirtyOne(t *testing.T) {
-
 	expectedPointSets := 1
 	expectedPoints := 2
 
@@ -62,7 +61,6 @@ func TestNoThirtyOne(t *testing.T) {
 }
 
 func TestRunOfFour(t *testing.T) {
-
 	expectedPoints := 4
 
 	hand := []vo.GameCard{
@@ -99,7 +97,6 @@ func TestRunOfFour(t *testing.T) {
 }
 
 func TestRunOfThree(t *testing.T) {
-
 	expectedPoints := 3
 	hand := []vo.GameCard{
 		{
@@ -592,13 +589,13 @@ func TestPeggingWithFifteens(t *testing.T) {
 	}
 
 	scoreMatch := vo.ScoreMatch{
-		ActivePlayerId: nil,
-		PlayerSeekId:   nil,
+		ActivePlayerID: nil,
+		PlayerSeekID:   nil,
 		CardsInPlay:    &cardsInPlay,
 		Players:        nil,
 	}
 
-	//test pegging
+	// test pegging
 	scores, err := countPegs(scoreMatch)
 	if len(scores.Results) != 1 || err != nil {
 		t.Fatalf(`countPegs() = %v, %v, want match for %#q`, scores, err, 0)
@@ -628,13 +625,13 @@ func TestPeggingWithRunAndFifteens(t *testing.T) {
 	}
 
 	scoreMatch := vo.ScoreMatch{
-		ActivePlayerId: nil,
-		PlayerSeekId:   nil,
+		ActivePlayerID: nil,
+		PlayerSeekID:   nil,
 		CardsInPlay:    &cardsInPlay,
 		Players:        nil,
 	}
 
-	//test pegging
+	// test pegging
 	scores, err := countPegs(scoreMatch)
 	if len(scores.Results) != 2 || err != nil {
 		t.Fatalf(`countPegs() = %v, %v, want match for %#q`, scores, err, 0)
@@ -806,13 +803,13 @@ func TestPeggingMakingKinds(t *testing.T) {
 	}
 
 	scoreMatch := vo.ScoreMatch{
-		ActivePlayerId: nil,
-		PlayerSeekId:   nil,
+		ActivePlayerID: nil,
+		PlayerSeekID:   nil,
 		CardsInPlay:    &cardsInPlay,
 		Players:        nil,
 	}
 
-	//test pegging
+	// test pegging
 	scores, err := countPegs(scoreMatch)
 	if len(scores.Results) != 1 || err != nil {
 		t.Fatalf(`countPegs() = %v, %v, want match for %#q`, scores, err, 0)
@@ -842,13 +839,13 @@ func TestPeggingRun(t *testing.T) {
 	}
 
 	scoreMatch := vo.ScoreMatch{
-		ActivePlayerId: nil,
-		PlayerSeekId:   nil,
+		ActivePlayerID: nil,
+		PlayerSeekID:   nil,
 		CardsInPlay:    &cardsInPlay,
 		Players:        nil,
 	}
 
-	//test pegging
+	// test pegging
 	scores, err := countPegs(scoreMatch)
 	if len(scores.Results) != 1 || err != nil {
 		t.Fatalf(`countPegs() = %v, %v, want match for %#q`, scores, err, 0)
@@ -884,13 +881,13 @@ func TestPeggingRunOfFour(t *testing.T) {
 	}
 
 	scoreMatch := vo.ScoreMatch{
-		ActivePlayerId: nil,
-		PlayerSeekId:   nil,
+		ActivePlayerID: nil,
+		PlayerSeekID:   nil,
 		CardsInPlay:    &cardsInPlay,
 		Players:        nil,
 	}
 
-	//test pegging
+	// test pegging
 	scores, err := countPegs(scoreMatch)
 	if len(scores.Results) != 1 || err != nil {
 		t.Fatalf(`countPegs() = %v, %v, want match for %#q`, scores, err, 0)

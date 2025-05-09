@@ -20,7 +20,7 @@ type Controller struct {
 func NewLobby(msg vo.StateChangeMsg) *Controller {
 	return &Controller{
 		model: &Model{
-			playerAccountId: msg.AccountId,
+			playerAccountID: msg.AccountID,
 		},
 		view: &View{
 			ActiveLandingTab: 0,
@@ -64,7 +64,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		var matchDetails vo.MatchDetailsResponse
-		msg := services.JoinMatch(*lobbyModel.playerAccountId, int(id))
+		msg := services.JoinMatch(*lobbyModel.playerAccountID, id)
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
 		if err != nil {
 			return tea.Quit
@@ -72,19 +72,19 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 		return vo.StateChangeMsg{
 			NewState: vo.JoinGameView,
-			MatchId:  &id,
+			MatchID:  &id,
 		}
 	case "n":
-		match := CreateGame(lobbyModel.playerAccountId)
+		match := CreateGame(lobbyModel.playerAccountID)
 
 		return vo.StateChangeMsg{
 			NewState:  vo.CreateGameView,
-			AccountId: lobbyModel.playerAccountId,
-			MatchId:   match.MatchId,
+			AccountID: lobbyModel.playerAccountID,
+			MatchID:   match.MatchID,
 		}
 	case "tab":
 
-		lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab + 1
+		lobbyView.ActiveLandingTab++
 
 		switch lobbyView.ActiveLandingTab {
 		case 0:
@@ -93,7 +93,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			lobbyView.LobbyViewState = vo.AvailableMatches
 		}
 	case "shift+tab":
-		lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab - 1
+		lobbyView.ActiveLandingTab--
 
 		switch lobbyView.ActiveLandingTab {
 		case 0:
@@ -106,11 +106,14 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func CreateGame(accountId *int) vo.MatchDetailsResponse {
-	newMatch := services.PostPlayerMatch(accountId).([]byte)
+func CreateGame(accountID *int) vo.MatchDetailsResponse {
+	newMatch := services.PostPlayerMatch(accountID).([]byte)
 
 	var matchDetails vo.MatchDetailsResponse
-	json.Unmarshal(newMatch, &matchDetails)
+	err := json.Unmarshal(newMatch, &matchDetails)
+	if err != nil {
+		return vo.MatchDetailsResponse{}
+	}
 
 	return matchDetails
 }

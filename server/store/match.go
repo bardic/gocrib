@@ -12,8 +12,8 @@ type MatchStore struct {
 	Store
 }
 
-func (p *MatchStore) GetMatch(ctx echo.Context, matchId *int) (*vo.GameMatch, error) {
-	m, err := p.q().GetMatchById(ctx.Request().Context(), matchId)
+func (p *MatchStore) GetMatch(ctx echo.Context, matchID *int) (*vo.GameMatch, error) {
+	m, err := p.q().GetMatchById(ctx.Request().Context(), matchID)
 
 	defer p.Close()
 
@@ -41,7 +41,10 @@ func (p *MatchStore) UpdateMatchState(ctx echo.Context, params queries.UpdateMat
 	return match, nil
 }
 
-func (p *MatchStore) UpateMatchCurrentPlayerTurn(ctx echo.Context, params queries.UpateMatchCurrentPlayerTurnParams) error {
+func (p *MatchStore) UpateMatchCurrentPlayerTurn(
+	ctx echo.Context,
+	params queries.UpateMatchCurrentPlayerTurnParams,
+) error {
 	err := p.q().UpateMatchCurrentPlayerTurn(ctx.Request().Context(), params)
 	defer p.Close()
 	if err != nil {
@@ -51,7 +54,7 @@ func (p *MatchStore) UpateMatchCurrentPlayerTurn(ctx echo.Context, params querie
 	return nil
 }
 
-func (p *MatchStore) GetCardsForMatchId(ctx echo.Context, id int) ([]queries.GetCardsForMatchIdRow, error) {
+func (p *MatchStore) GetCardsForMatchID(ctx echo.Context, id int) ([]queries.GetCardsForMatchIdRow, error) {
 	cards, err := p.q().GetCardsForMatchId(ctx.Request().Context(), &id)
 
 	defer p.Close()

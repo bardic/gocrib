@@ -1,4 +1,3 @@
 package login
 
-type Model struct {
-}
+type Model struct{}

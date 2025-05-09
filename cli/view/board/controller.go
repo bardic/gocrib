@@ -18,14 +18,14 @@ type Controller struct {
 func NewBoard(gameMatch *vo.GameMatch, player *vo.GamePlayer) *Controller {
 	ctrl := &Controller{
 		model: &Model{
-			AccountId:   player.Accountid,
-			GameMatchId: gameMatch.Match.ID,
-			Gamestate:   gameMatch.Match.Gamestate,
+			AccountID:   player.Accountid,
+			GameMatchID: gameMatch.ID,
+			Gamestate:   gameMatch.Gamestate,
 		},
 		view: &View{
 			State:         queries.GamestateCut,
 			Match:         gameMatch,
-			LocalPlayerId: player.Accountid,
+			LocalPlayerID: player.Accountid,
 		},
 	}
 
@@ -47,13 +47,13 @@ func (ctrl *Controller) GetName() string {
 }
 
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) string {
-	ctrl.model.Gamestate = gameMatch.Match.Gamestate
+	ctrl.model.Gamestate = gameMatch.Gamestate
 	return ctrl.view.Render()
 }
 
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	var cmds []tea.Cmd = []tea.Cmd{}
+	cmds := []tea.Cmd{}
 	ctrl.view.Update(msg)
 	cmds = append(cmds, cmd)
 
@@ -72,7 +72,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 func (ctrl *Controller) Enter() tea.Msg {
 	switch ctrl.model.Gamestate {
 	case queries.GamestateCut:
-		resp := services.CutDeck(*ctrl.model.GameMatchId, ctrl.view.CutInput.Value())
+		resp := services.CutDeck(*ctrl.model.GameMatchID, ctrl.view.CutInput.Value())
 		return resp
 	}
 

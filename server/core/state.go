@@ -6,12 +6,13 @@ import (
 
 type State struct {
 	state   *queries.Gamestate
-	matchId *int
+	matchID *int
 }
 
 func (s *State) GetState() *queries.Gamestate {
 	return s.state
 }
+
 func (s *State) SetState(state *queries.Gamestate) error {
 	s.state = state
 	return nil

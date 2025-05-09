@@ -33,7 +33,8 @@ func Get() *zap.Logger {
 			Compress:   true,
 		})
 
-		level := zap.InfoLevel
+		stdoutLevel := zap.DebugLevel
+		level := zap.DebugLevel
 		levelEnv := os.Getenv("LOG_LEVEL")
 		if levelEnv != "" {
 			levelFromEnv, err := zapcore.ParseLevel(levelEnv)
@@ -47,6 +48,7 @@ func Get() *zap.Logger {
 		}
 
 		logLevel := zap.NewAtomicLevelAt(level)
+		stdoutLogLevel := zap.NewAtomicLevelAt(stdoutLevel)
 
 		productionCfg := zap.NewProductionEncoderConfig()
 		productionCfg.TimeKey = "timestamp"
@@ -73,7 +75,7 @@ func Get() *zap.Logger {
 		// log to multiple destinations (console and file)
 		// extra fields are added to the JSON output alone
 		core := zapcore.NewTee(
-			zapcore.NewCore(consoleEncoder, stdout, logLevel),
+			zapcore.NewCore(consoleEncoder, stdout, stdoutLogLevel),
 			zapcore.NewCore(fileEncoder, file, logLevel).
 				With(
 					[]zapcore.Field{
@@ -95,8 +97,8 @@ func Get() *zap.Logger {
 func FromCtx(ctx context.Context) *zap.Logger {
 	if l, ok := ctx.Value(ctxKey{}).(*zap.Logger); ok {
 		return l
-	} else if l := logger; l != nil {
-		return l
+	} else if logger != nil {
+		return logger
 	}
 
 	return zap.NewNop()

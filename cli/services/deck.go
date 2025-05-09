@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func GetDeckByPlayIdAndMatchId(playerId, matchId int) tea.Msg {
-	endPoint := utils.EndPointBuilder(EndPointDeckByPlayerAndMatchId, strconv.Itoa(matchId), strconv.Itoa(playerId))
+func GetDeckByPlayIDAndMatchID(playerID, matchID int) tea.Msg {
+	endPoint := utils.EndPointBuilder(EndPointDeckByPlayerAndMatchID, strconv.Itoa(matchID), strconv.Itoa(playerID))
 	return url(endPoint, http.MethodGet, "")
 }

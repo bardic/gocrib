@@ -25,16 +25,13 @@ type Controller struct {
 	tabs         map[int]cliVO.IGameController
 }
 
-func (ctrl *Controller) Init() {
-}
-
 func NewController(msg vo.StateChangeMsg) *Controller {
 	l := logger.Get()
 	defer l.Sync()
 
 	var match *vo.GameMatch
 
-	resp := services.GetMatchById(msg.MatchId)
+	resp := services.GetMatchByID(msg.MatchID)
 	err := json.Unmarshal(resp.([]byte), &match)
 	if err != nil {
 		l.Sugar().Error(err)
@@ -43,13 +40,13 @@ func NewController(msg vo.StateChangeMsg) *Controller {
 	player := &vo.GamePlayer{}
 
 	var gameDeck vo.GameDeck
-	resp = services.GetPlayerByForMatchAndAccount(match.ID, msg.AccountId)
+	resp = services.GetPlayerByForMatchAndAccount(match.ID, msg.AccountID)
 	err = json.Unmarshal(resp.([]byte), player)
 	if err != nil {
 		l.Sugar().Error(err)
 	}
 
-	resp = services.GetDeckByPlayIdAndMatchId(*player.ID, *match.ID)
+	resp = services.GetDeckByPlayIDAndMatchID(*player.ID, *match.ID)
 	err = json.Unmarshal(resp.([]byte), &gameDeck)
 	if err != nil {
 		l.Sugar().Error(err)
@@ -67,6 +64,9 @@ func NewController(msg vo.StateChangeMsg) *Controller {
 		TabIndex: 0,
 	})
 	return ctrl
+}
+
+func (ctrl *Controller) Init() {
 }
 
 func (ctrl *Controller) GetName() string {
@@ -117,13 +117,13 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 
 		ctrl.timer, cmd = ctrl.timer.Update(msg)
 
-		resp := services.GetMatchById(ctrl.model.GetMatch().ID)
+		resp := services.GetMatchByID(ctrl.model.GetMatch().ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
 		if err != nil {
 			l.Sugar().Error(err)
 		}
 
-		resp = services.GetDeckByPlayIdAndMatchId(*ctrl.model.GetPlayer().ID, *ctrl.model.GetMatch().ID)
+		resp = services.GetDeckByPlayIDAndMatchID(*ctrl.model.GetPlayer().ID, *ctrl.model.GetMatch().ID)
 
 		err = json.Unmarshal(resp.([]byte), &gameDeck)
 		if err != nil {
@@ -135,7 +135,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		cmds = append(cmds, cmd)
 	case vo.ChangeTabMsg:
 		ctrl.ChangeTab(msg)
-
 	}
 
 	cmds = append(cmds, ctrl.model.Subcontroller.Update(msg))
@@ -148,7 +147,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "tab":
-		ctrl.view.ActiveTab = ctrl.view.ActiveTab + 1
+		ctrl.view.ActiveTab++
 		if ctrl.view.ActiveTab >= len(ctrl.view.Tabs) {
 			ctrl.view.ActiveTab = 0
 		}
@@ -157,7 +156,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 	case "shift+tab":
-		ctrl.view.ActiveTab = ctrl.view.ActiveTab - 1
+		ctrl.view.ActiveTab--
 
 		if ctrl.view.ActiveTab < 0 {
 			ctrl.view.ActiveTab = len(ctrl.view.Tabs) - 1

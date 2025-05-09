@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// @Summary	Login
+// Login route
 // @Description Login route for account - takes an account id and returns the account details
 // @Tags		account
 // @Accept		json
@@ -17,13 +17,13 @@ import (
 // @Failure	400		{object}	error
 // @Failure	500		{object}	error
 // @Router		/account/login/{accountId} [post]
-func (h *AccountHandler) Login(c echo.Context) error {
-	accountId, err := strconv.Atoi(c.Param("accountId"))
+func (h *Handler) Login(c echo.Context) error {
+	accountID, err := strconv.Atoi(c.Param("accountId"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	account, err := h.AccountStore.GetAccountById(c, &accountId)
+	account, err := h.AccountStore.GetAccountByID(c, &accountID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

@@ -19,7 +19,7 @@ func (p *PlayerStore) CreatePlayer(ctx echo.Context, params queries.CreatePlayer
 	return &player, nil
 }
 
-func (p *PlayerStore) GetPlayerById(ctx echo.Context, id *int) (*queries.Player, error) {
+func (p *PlayerStore) GetPlayerByID(ctx echo.Context, id *int) (*queries.Player, error) {
 	player, err := p.q().GetPlayerById(ctx.Request().Context(), id)
 	defer p.Close()
 	if err != nil {
@@ -40,7 +40,10 @@ func (p *PlayerStore) UpdatePlayerReady(ctx echo.Context, params queries.UpdateP
 	return nil
 }
 
-func (p *PlayerStore) GetPlayerByMatchAndAccountId(ctx echo.Context, params queries.GetPlayerByMatchAndAccountIdParams) (*queries.Player, error) {
+func (p *PlayerStore) GetPlayerByMatchAndAccountID(
+	ctx echo.Context,
+	params queries.GetPlayerByMatchAndAccountIdParams,
+) (*queries.Player, error) {
 	player, err := p.q().GetPlayerByMatchAndAccountId(ctx.Request().Context(), params)
 
 	defer p.Close()

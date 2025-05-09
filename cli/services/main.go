@@ -1,8 +1,9 @@
-// Services are the CLIs connection to the backend. If you look in server/route you'll see a coorsponding package for each service.
+// Package services are the CLIs connection to the backend. If you look in server/route you'll see a coorsponding package for each service.
 package services
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 
@@ -10,31 +11,29 @@ import (
 )
 
 const (
-	BaseUrl = "http://localhost:1323/v1"
-	// Player
-	EndPointKitty                      = BaseUrl + "/match/%s/player/%s/to/%s/kitty"
-	EndPointPlay                       = BaseUrl + "/match/%s/player/%s/to/%s/play"
-	EndPointPlayerByForMatchAndAccount = BaseUrl + "/match/%s/account/%s"
-	// Match
-	EndPointMatch                  = BaseUrl + "/match/%s"
-	EndPointOpenMatch              = BaseUrl + "/open"
-	EndPointMatchState             = BaseUrl + "/match/%s/state"
-	EndPointMatchCutDeck           = BaseUrl + "/match/%s/cut/%s"
-	EndPointDeckByPlayerAndMatchId = BaseUrl + "/match/%s/player/%s/deck"
-	EndPointJoinMatch              = BaseUrl + "/match/%s/join/%s"
-	// Account
-	EndPointLogin = BaseUrl + "/account/login/%s"
+	BaseURL                            = "http://localhost:1323/v1"
+	EndPointKitty                      = BaseURL + "/match/%s/player/%s/to/%s/kitty"
+	EndPointPlay                       = BaseURL + "/match/%s/player/%s/to/%s/play"
+	EndPointPlayerByForMatchAndAccount = BaseURL + "/match/%s/account/%s"
+	EndPointMatch                      = BaseURL + "/match/%s"
+	EndPointOpenMatch                  = BaseURL + "/open"
+	EndPointMatchState                 = BaseURL + "/match/%s/state"
+	EndPointMatchCutDeck               = BaseURL + "/match/%s/cut/%s"
+	EndPointDeckByPlayerAndMatchID     = BaseURL + "/match/%s/player/%s/deck"
+	EndPointJoinMatch                  = BaseURL + "/match/%s/join/%s"
+	EndPointLogin                      = BaseURL + "/account/login/%s"
 )
 
 func url(url string, method string, json string) tea.Msg {
 	var buf *bytes.Buffer
-	buf = bytes.NewBuffer([]byte(json))
+	buf = bytes.NewBufferString(json)
 
 	if json == "" {
 		buf = bytes.NewBuffer(nil)
 	}
 
-	req, err := http.NewRequest(method, url, buf)
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, method, url, buf)
 	if err != nil {
 		return err
 	}

@@ -5,30 +5,35 @@ import (
 	"strconv"
 
 	"github.com/bardic/gocrib/queries/queries"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/bardic/gocrib/vo"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
+
+	logger "github.com/bardic/gocrib/cli/utils/log"
 )
 
-var Zero = 0
+var zero = 0
 
-// Create godoc
-//
-//	@Summary	Create new match
-//	@Description
-//	@Tags		match
-//	@Accept		json
-//	@Produce	json
-//	@Param		accountId	path		int	true	"account id"'
-//	@Success	200		{object}	int
-//	@Failure	400		{object}	error
-//	@Failure	404		{object}	error
-//	@Failure	500		{object}	error
-//	@Router		/match/{accountId} [post]
-func (h *MatchHandler) NewMatch(c echo.Context) error {
-	accountId, err := strconv.Atoi(c.Param("accountId"))
+// NewMatch route
+// @Summary	Create new match
+// @Description
+// @Tags		match
+// @Accept		json
+// @Produce	json
+// @Param		accountId	path		int	true	"account id"'
+// @Success	200		{object}	int
+// @Failure	400		{object}	error
+// @Failure	404		{object}	error
+// @Failure	500		{object}	error
+// @Router		/match/{accountId} [post]
+func (h *Handler) NewMatch(c echo.Context) error {
+	l := logger.Get()
+	defer l.Sync()
+
+	accountID, err := strconv.Atoi(c.Param("accountId"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -40,10 +45,10 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 
 	match, err := h.MatchStore.CreateMatch(c, queries.CreateMatchParams{
 		Privatematch:       false,
-		Elorangemin:        &Zero,
-		Elorangemax:        &Zero,
+		Elorangemin:        &zero,
+		Elorangemax:        &zero,
 		Deckid:             deck.ID,
-		Cutgamecardid:      &Zero,
+		Cutgamecardid:      &zero,
 		Turnpasstimestamps: []pgtype.Timestamptz{},
 		Gamestate:          queries.GamestateNew,
 		Art:                "default.png",
@@ -57,7 +62,11 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 		return err
 	}
 
+	l.Log(zapcore.DebugLevel, "Cards")
+
 	for _, card := range cards {
+		l.Log(zapcore.DebugLevel, "Card"+strconv.Itoa(*card.ID))
+
 		matchCard, err := h.CardStore.CreateMatchCard(c, queries.CreateMatchCardParams{
 			Cardid: card.ID,
 			State:  queries.CardstateDeck,
@@ -66,6 +75,7 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 			return err
 		}
 
+		l.Log(zapcore.DebugLevel, "Card"+strconv.Itoa(*matchCard.ID))
 		err = h.DeckStore.AddCardToDeck(c, queries.AddCardToDeckParams{
 			Deckid:      deck.ID,
 			Matchcardid: matchCard.ID,
@@ -78,7 +88,7 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 	score := 0
 
 	player, err := h.PlayerStore.CreatePlayer(c, queries.CreatePlayerParams{
-		Accountid: &accountId,
+		Accountid: &accountID,
 		Score:     &score,
 		Isready:   false,
 		Art:       "default.png",
@@ -96,8 +106,8 @@ func (h *MatchHandler) NewMatch(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
-		MatchId:   match.ID,
-		PlayerId:  player.ID,
+		MatchID:   match.ID,
+		PlayerID:  player.ID,
 		GameState: match.Gamestate,
 	})
 }

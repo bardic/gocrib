@@ -295,13 +295,6 @@ definitions:
       turnOrder:
         type: integer
     type: object
-  vo.Hand:
-    properties:
-      cards:
-        items:
-          $ref: '#/definitions/queries.Matchcard'
-        type: array
-    type: object
   vo.HandModifier:
     properties:
       cardIds:
@@ -313,13 +306,6 @@ definitions:
     properties:
       gameState:
         $ref: '#/definitions/queries.Gamestate'
-      matchId:
-        type: integer
-      playerId:
-        type: integer
-    type: object
-  vo.PlayerReady:
-    properties:
       matchId:
         type: integer
       playerId:
@@ -474,40 +460,6 @@ paths:
       summary: Get match card by match id
       tags:
       - match
-  /match/{matchId}/currentPlayer/{playerId}:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      - description: playerId id
-        in: path
-        name: playerId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: integer
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update the matches current palyer
-      tags:
-      - match
   /match/{matchId}/cut/{cutId}:
     put:
       consumes:
@@ -569,65 +521,6 @@ paths:
       summary: Get deck
       tags:
       - deck
-  /match/{matchId}/deck/kitty:
-    get:
-      consumes:
-      - application/json
-      description: Get the kitty for a match id
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.Hand'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Get Kitty
-      tags:
-      - deck
-  /match/{matchId}/deck/shuffle:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.Hand'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Shuffle
-      tags:
-      - deck
   /match/{matchId}/join/{accountId}:
     put:
       consumes:
@@ -641,35 +534,6 @@ paths:
       - description: account id
         in: path
         name: accountId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.MatchDetailsResponse'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Join match by id
-      tags:
-      - match
-  /match/{matchId}/pass:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
         required: true
         type: integer
       produces:
@@ -736,68 +600,6 @@ paths:
       summary: Update kitty with ids
       tags:
       - match
-  /match/{matchId}/player/{playerId}/deck/:
-    get:
-      consumes:
-      - application/json
-      description: Returns the deck for a matchId and playerId
-      parameters:
-      - description: matchId
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      - description: playerId
-        in: path
-        name: playerId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.GameDeck'
-        "404":
-          description: Not Found
-          schema: {}
-        "422":
-          description: Unprocessable Entity
-          schema: {}
-      summary: Get deck
-      tags:
-      - deck
-  /match/player/ready:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: player id to update
-        in: body
-        name: pReady
-        required: true
-        schema:
-          $ref: '#/definitions/vo.PlayerReady'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: boolean
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update player by id to be ready. Returns true if all players are ready
-      tags:
-      - players
   /open:
     get:
       consumes:

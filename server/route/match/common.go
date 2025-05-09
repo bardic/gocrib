@@ -11,15 +11,22 @@ import (
 	"github.com/bardic/gocrib/vo"
 )
 
-func UpdateGameState(matchId *int, state queries.Gamestate) error {
+const (
+	CtxTimeout = 5 * time.Second
+)
+
+func UpdateGameState(matchID *int, state queries.Gamestate) error {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		CtxTimeout,
+	)
 	defer cancel()
 
-	_, err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: matchId})
+	_, err := q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{Gamestate: state, ID: matchID})
 	if err != nil {
 		return err
 	}
@@ -32,7 +39,10 @@ func GetMatch(id *int) (*vo.GameMatch, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		CtxTimeout,
+	)
 	defer cancel()
 
 	m, err := q.GetMatchById(ctx, id)
@@ -102,7 +112,10 @@ func GetOpenMatches() ([]queries.Match, error) {
 	defer db.Close()
 	q := queries.New(db)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		CtxTimeout,
+	)
 	defer cancel()
 
 	matchesData, err := q.GetOpenMatches(ctx, queries.GamestateNew)

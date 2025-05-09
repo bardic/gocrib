@@ -11,13 +11,13 @@ import (
 )
 
 type View struct {
-	ActiveCardId    int
-	SelectedCardIds []int
+	ActiveCardID    int
+	SelectedCardIDs []int
 	LocalPlayer     *vo.GamePlayer
 	Tabname         string
 }
 
-func NewCardView(match *vo.GameMatch, localPlayer *vo.GamePlayer, deck *vo.GameDeck, tabName string) *View {
+func NewCardView(localPlayer *vo.GamePlayer, tabName string) *View {
 	return &View{
 		LocalPlayer: localPlayer,
 		Tabname:     tabName,
@@ -34,7 +34,7 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 
 	s += view.BuildHeader()
 	for i := range hand {
-		c := utils.GetCardById(hand[i], gameDeck)
+		c := utils.GetCardByID(hand[i], gameDeck)
 
 		if c == nil {
 			continue
@@ -49,11 +49,11 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 
 		styledCard = styles.ModelStyle.Render(top, bottom)
 
-		if i == view.ActiveCardId {
+		if i == view.ActiveCardID {
 			styledCard = styles.SelectedFocusedStyle.Render(top, bottom)
 		}
 
-		for _, v := range view.SelectedCardIds {
+		for _, v := range view.SelectedCardIDs {
 			if v == hand[i] {
 				styledCard = styles.FocusedModelStyle.Render(top, bottom)
 			}

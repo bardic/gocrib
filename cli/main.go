@@ -48,29 +48,30 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmds []tea.Cmd
 
-	stateMsg := msg.(vo.StateChangeMsg)
-
-	switch stateMsg.NewState {
-	case vo.LobbyView:
-		cli.currentController = lobby.NewLobby(stateMsg)
-	case vo.JoinGameView:
-		fallthrough
-	case vo.CreateGameView:
-		cli.currentController = container.NewController(stateMsg)
+	switch msg := msg.(type) {
+	case vo.StateChangeMsg:
+		switch msg.NewState {
+		case vo.LobbyView:
+			cli.currentController = lobby.NewLobby(msg)
+		case vo.JoinGameView:
+			fallthrough
+		case vo.CreateGameView:
+			cli.currentController = container.NewController(msg)
+		}
 	}
 
-	cmds = append(cmds, cli.currentController.Update(stateMsg))
+	cmds = append(cmds, cli.currentController.Update(msg))
 	return cli, tea.Batch(cmds...)
 }
 
-func (m *CLI) View() string {
-	switch m.currentController.(type) {
+func (cli *CLI) View() string {
+	switch cli.currentController.(type) {
 	case *login.Controller:
-		return styles.ViewStyle.Render(m.currentController.Render())
+		return styles.ViewStyle.Render(cli.currentController.Render())
 	case *lobby.Controller:
-		return styles.ViewStyle.Render(m.currentController.Render())
+		return cli.currentController.Render()
 	case *container.Controller:
-		return styles.ViewStyle.Render(m.currentController.Render())
+		return styles.ViewStyle.Render(cli.currentController.Render())
 	default:
 		return "No view"
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Create godoc
+// GetOpenMatches route
 //
 //	@Summary	Get match by id
 //	@Description
@@ -17,7 +17,7 @@ import (
 //	@Failure	404	{object}	error
 //	@Failure	422	{object}	error
 //	@Router		/open [get]
-func (h *MatchHandler) GetOpenMatches(c echo.Context) error {
+func (h *Handler) GetOpenMatches(c echo.Context) error {
 	v, err := GetOpenMatches()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)

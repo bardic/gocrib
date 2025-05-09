@@ -2,10 +2,10 @@ package deck
 
 import "github.com/bardic/gocrib/server/route"
 
-type DeckHandler struct {
+type Handler struct {
 	route.BaseHandler
 }
 
-func NewHandler() *DeckHandler {
-	return &DeckHandler{}
+func NewHandler() *Handler {
+	return &Handler{}
 }

@@ -3,66 +3,8 @@ package styles
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	ValueTopLeft    = lipgloss.NewStyle().Align(lipgloss.Left, lipgloss.Top)
-	ValueBottoRight = lipgloss.NewStyle().Align(lipgloss.Right, lipgloss.Bottom)
-
-	ModelStyle = lipgloss.NewStyle().
-			Width(10).
-			Height(5).
-			BorderStyle(lipgloss.HiddenBorder())
-
-	SelectedStyle = lipgloss.NewStyle().
-			Width(10).
-			Height(5).
-			Align(lipgloss.Left, lipgloss.Top).
-			BorderStyle(lipgloss.ThickBorder()).
-			BorderForeground(lipgloss.Color("10"))
-
-	SelectedFocusedStyle = lipgloss.NewStyle().
-				Width(10).
-				Height(5).
-				Align(lipgloss.Left, lipgloss.Top).
-				BorderStyle(lipgloss.ThickBorder()).
-				BorderForeground(lipgloss.Color("69"))
-
-	FocusedModelStyle = lipgloss.NewStyle().
-				Width(10).
-				Height(5).
-				Align(lipgloss.Left, lipgloss.Top).
-				BorderStyle(lipgloss.NormalBorder()).
-				BorderForeground(lipgloss.Color("69"))
-
-	HelpStyle = lipgloss.
-			NewStyle().
-			Foreground(lipgloss.Color("241"))
-
-	ViewStyle = lipgloss.
-			NewStyle().
-			Padding(1, 2, 1, 2)
-
-	highlightColor = lipgloss.
-			AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-
-	InactiveTabStyle = lipgloss.NewStyle().
-				Border(inactiveTabBorder, true).
-				BorderForeground(highlightColor).
-				Padding(0, 1)
-
-	ActiveTabStyle = InactiveTabStyle.
-			Border(activeTabBorder, true)
-
-	WindowStyle = lipgloss.NewStyle().
-			BorderForeground(highlightColor).
-			Padding(1, 0).
-			Border(lipgloss.NormalBorder()).
-			BorderTop(false).
-			Width(75).
-			Height(12)
-
-	ActiveCard = WindowStyle.Align(lipgloss.Left, lipgloss.Top).Render("Active View")
-
-	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
-	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
+	NormalBorderColour  = lipgloss.Color("10")
+	FocusedBorderColour = lipgloss.Color("69")
 
 	Player1 = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000"))
 	Player2 = lipgloss.NewStyle().Foreground(lipgloss.Color("#00FF00"))
@@ -75,6 +17,70 @@ var (
 		Player3,
 		Player4,
 	}
+
+	TabColour = lipgloss.
+			AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+
+	HelpColour = lipgloss.
+			NewStyle().
+			Foreground(lipgloss.Color("241"))
+)
+
+var (
+	LineStyle = lipgloss.NewStyle().
+			Width(10).
+			Height(5)
+
+	ModelStyle = LineStyle.
+			BorderStyle(lipgloss.HiddenBorder())
+
+	CardStyle = LineStyle.
+			Align(lipgloss.Left, lipgloss.Top).
+			BorderStyle(lipgloss.ThickBorder())
+
+	SelectedStyle = CardStyle.
+			BorderForeground(NormalBorderColour)
+
+	SelectedFocusedStyle = CardStyle.
+				BorderForeground(FocusedBorderColour)
+
+	FocusedModelStyle = LineStyle.
+				Align(lipgloss.Left, lipgloss.Top).
+				BorderStyle(lipgloss.NormalBorder()).
+				BorderForeground(FocusedBorderColour)
+
+	ViewStyle = lipgloss.
+			NewStyle().
+			Padding(1, 2, 1, 2)
+
+	InactiveTabStyle = lipgloss.NewStyle().
+				Border(inactiveTabBorder, true).
+				BorderForeground(TabColour).
+				Padding(0, 1)
+
+	ActiveTabStyle = InactiveTabStyle.
+			Border(activeTabBorder, true)
+
+	WindowStyle = lipgloss.NewStyle().
+			BorderForeground(TabColour).
+			Padding(1, 0).
+			Border(lipgloss.NormalBorder()).
+			BorderTop(true).
+			Width(75).
+			Height(12)
+
+	WithStyleWithTabs = lipgloss.NewStyle().
+				BorderForeground(TabColour).
+				Padding(1, 0).
+				Border(lipgloss.NormalBorder()).
+				BorderTop(false).
+				Width(75).
+				Height(12)
+
+	ActiveCard = WindowStyle.Align(lipgloss.Left, lipgloss.Top).Render("Active View")
+
+	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
+	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
 )
 
 func tabBorderWithBottom(left, middle, right string) lipgloss.Border {

@@ -2,10 +2,10 @@ package match
 
 import "github.com/bardic/gocrib/server/route"
 
-type MatchHandler struct {
+type Handler struct {
 	route.BaseHandler
 }
 
-func NewHandler() *MatchHandler {
-	return &MatchHandler{}
+func NewHandler() *Handler {
+	return &Handler{}
 }
