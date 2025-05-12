@@ -64,25 +64,31 @@ func (h *Handler) NewMatch(c echo.Context) error {
 
 	l.Log(zapcore.DebugLevel, "Cards")
 
-	for _, card := range cards {
+	deckCards := make([]queries.AddCardToDeckParams, len(cards))
+	matchCards := make([]queries.CreateMatchCardParams, len(cards))
+
+	for i, card := range cards {
 		l.Log(zapcore.DebugLevel, "Card"+strconv.Itoa(*card.ID))
 
-		matchCard, err := h.CardStore.CreateMatchCard(c, queries.CreateMatchCardParams{
+		matchCards[i] = queries.CreateMatchCardParams{
 			Cardid: card.ID,
 			State:  queries.CardstateDeck,
-		})
-		if err != nil {
-			return err
 		}
 
-		l.Log(zapcore.DebugLevel, "Card"+strconv.Itoa(*matchCard.ID))
-		err = h.DeckStore.AddCardToDeck(c, queries.AddCardToDeckParams{
+		deckCards[i] = queries.AddCardToDeckParams{
 			Deckid:      deck.ID,
-			Matchcardid: matchCard.ID,
-		})
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			Matchcardid: card.ID, // TODO: This is wrong. should get the id from the matchcards table, not the card id
 		}
+	}
+
+	err = h.CardStore.CreateMatchCard(c, matchCards)
+	if err != nil {
+		return err
+	}
+
+	err = h.DeckStore.AddCardToDeck(c, deckCards)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	score := 0

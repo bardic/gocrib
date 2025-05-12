@@ -119,3 +119,12 @@ func (p *MatchStore) UpdateDealerForMatch(ctx echo.Context, params queries.Updat
 	}
 	return nil
 }
+
+func (p *MatchStore) GetOpenMatches(ctx echo.Context) ([]queries.Match, error) {
+	matchesData, err := p.q().GetOpenMatches(ctx.Request().Context(), queries.GamestateNew)
+	if err != nil {
+		return nil, err
+	}
+
+	return matchesData, nil
+}

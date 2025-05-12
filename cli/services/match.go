@@ -11,7 +11,12 @@ import (
 )
 
 func GetMatchByID(matchID *int) tea.Msg {
-	endpoint := utils.EndPointBuilder(EndPointMatch, strconv.Itoa(*matchID))
+	matchIDStr := ""
+	if matchID != nil {
+		matchIDStr = strconv.Itoa(*matchID)
+	}
+
+	endpoint := utils.EndPointBuilder(EndPointMatch, matchIDStr)
 	return url(endpoint, http.MethodGet, "")
 }
 

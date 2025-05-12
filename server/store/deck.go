@@ -33,8 +33,10 @@ func (p *DeckStore) CreateDeck(ctx echo.Context) (queries.Deck, error) {
 	return deck, nil
 }
 
-func (p *DeckStore) AddCardToDeck(ctx echo.Context, params queries.AddCardToDeckParams) error {
-	err := p.q().AddCardToDeck(ctx.Request().Context(), params)
+func (p *DeckStore) AddCardToDeck(ctx echo.Context, params []queries.AddCardToDeckParams) error {
+	// err := p.q().AddardToDeck(ctx.Request().Context(), params)
+
+	_, err := p.q().AddCardToDeck(ctx.Request().Context(), params)
 
 	defer p.Close()
 

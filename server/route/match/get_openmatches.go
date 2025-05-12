@@ -18,7 +18,7 @@ import (
 //	@Failure	422	{object}	error
 //	@Router		/open [get]
 func (h *Handler) GetOpenMatches(c echo.Context) error {
-	v, err := GetOpenMatches()
+	v, err := h.MatchStore.GetOpenMatches(c)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

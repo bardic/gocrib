@@ -58,19 +58,14 @@ func (p *CardStore) GetCards(ctx echo.Context) ([]queries.Card, error) {
 	return cards, nil
 }
 
-func (p *CardStore) CreateMatchCard(ctx echo.Context, params queries.CreateMatchCardParams) (queries.Matchcard, error) {
-	mc, err := p.q().CreateMatchCard(ctx.Request().Context(), queries.CreateMatchCardParams{
-		Cardid:    params.Cardid,
-		Origowner: params.Origowner,
-		Currowner: params.Currowner,
-		State:     params.State,
-	})
+func (p *CardStore) CreateMatchCard(ctx echo.Context, params []queries.CreateMatchCardParams) error {
+	_, err := p.q().CreateMatchCard(ctx.Request().Context(), params)
 
 	defer p.Close()
 
 	if err != nil {
-		return queries.Matchcard{}, err
+		return err
 	}
 
-	return mc, nil
+	return nil
 }

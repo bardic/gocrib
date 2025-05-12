@@ -11,33 +11,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createMatchCard = `-- name: CreateMatchCard :one
-INSERT INTO matchcard (cardid, origowner, currowner, state) VALUES ($1, $2, $3, $4) RETURNING id, cardid, origowner, currowner, state
-`
-
 type CreateMatchCardParams struct {
 	Cardid    *int
 	Origowner *int
 	Currowner *int
 	State     Cardstate
-}
-
-func (q *Queries) CreateMatchCard(ctx context.Context, arg CreateMatchCardParams) (Matchcard, error) {
-	row := q.db.QueryRow(ctx, createMatchCard,
-		arg.Cardid,
-		arg.Origowner,
-		arg.Currowner,
-		arg.State,
-	)
-	var i Matchcard
-	err := row.Scan(
-		&i.ID,
-		&i.Cardid,
-		&i.Origowner,
-		&i.Currowner,
-		&i.State,
-	)
-	return i, err
 }
 
 const getCards = `-- name: GetCards :many

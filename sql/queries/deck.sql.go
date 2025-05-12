@@ -9,18 +9,9 @@ import (
 	"context"
 )
 
-const addCardToDeck = `-- name: AddCardToDeck :exec
-INSERT INTO deck_matchcard (deckid, matchcardid) VALUES ($1, $2)
-`
-
 type AddCardToDeckParams struct {
 	Deckid      *int
 	Matchcardid *int
-}
-
-func (q *Queries) AddCardToDeck(ctx context.Context, arg AddCardToDeckParams) error {
-	_, err := q.db.Exec(ctx, addCardToDeck, arg.Deckid, arg.Matchcardid)
-	return err
 }
 
 const createDeck = `-- name: CreateDeck :one

@@ -106,22 +106,3 @@ func GetMatch(id *int) (*vo.GameMatch, error) {
 
 	return match, nil
 }
-
-func GetOpenMatches() ([]queries.Match, error) {
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		CtxTimeout,
-	)
-	defer cancel()
-
-	matchesData, err := q.GetOpenMatches(ctx, queries.GamestateNew)
-	if err != nil {
-		return nil, err
-	}
-
-	return matchesData, nil
-}

@@ -297,7 +297,7 @@ definitions:
     type: object
   vo.HandModifier:
     properties:
-      cardIds:
+      cardIDs:
         items:
           type: integer
         type: array
@@ -306,9 +306,9 @@ definitions:
     properties:
       gameState:
         $ref: '#/definitions/queries.Gamestate'
-      matchId:
+      matchID:
         type: integer
-      playerId:
+      playerID:
         type: integer
     type: object
 host: localhost:1323
@@ -343,7 +343,6 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Login
       tags:
       - account
   /match/{accountId}:

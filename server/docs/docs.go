@@ -27,7 +27,6 @@ const docTemplate = `{
                 "tags": [
                     "account"
                 ],
-                "summary": "Login",
                 "parameters": [
                     {
                         "type": "integer",
@@ -884,7 +883,7 @@ const docTemplate = `{
         "vo.HandModifier": {
             "type": "object",
             "properties": {
-                "cardIds": {
+                "cardIDs": {
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -898,10 +897,10 @@ const docTemplate = `{
                 "gameState": {
                     "$ref": "#/definitions/queries.Gamestate"
                 },
-                "matchId": {
+                "matchID": {
                     "type": "integer"
                 },
-                "playerId": {
+                "playerID": {
                     "type": "integer"
                 }
             }
