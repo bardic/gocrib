@@ -3,7 +3,7 @@ package vo
 import "github.com/bardic/gocrib/queries/queries"
 
 type GamePlayer struct {
-	queries.Player
+	*queries.Player
 	TurnOrder int
 	Hand      []GameCard
 	Play      []GameCard
@@ -16,15 +16,11 @@ type GameMatch struct {
 }
 
 type ScoreMatch struct {
-	ActivePlayerId *int
-	PlayerSeekId   *int
+	ActivePlayerID *int
+	PlayerSeekID   *int
 	CardsInPlay    *[]GameCard
 	Players        *[]GamePlayer
 }
-
-// func (m GameMatch) SetMatch(match *queries.Match) {
-// 	m.Match = match
-// }
 
 type GameDeck struct {
 	*queries.Deck
@@ -41,49 +37,14 @@ type GameCardDetails struct {
 	Order *int
 }
 
-type GameActionType int
-
-const (
-	Cut GameActionType = iota
-	Discard
-	Peg
-	Tally
-)
-
-type GameAction struct {
-	MatchId  *int
-	Type     GameActionType
-	CardsIds []*int
-}
-
-//_Comms_
-
-type MatchRequirements struct {
-	AccountId   *int
-	IsPrivate   bool
-	EloRangeMin *int
-	EloRangeMax *int
-}
-
-type CutDeckReq struct {
-	MatchId  *int
-	CutIndex string
-}
-
 type MatchDetailsResponse struct {
-	MatchId   *int
-	PlayerId  *int
+	MatchID   *int
+	PlayerID  *int
 	GameState queries.Gamestate
 }
 
-type Meow struct {
-	Matchid  int
-	Playerid int
-	Details  HandModifier
-}
-
 type HandModifier struct {
-	CardIds []int
+	CardIDs []int
 }
 
 type ScoreResults struct {
@@ -120,30 +81,17 @@ const (
 
 type StateChangeMsg struct {
 	NewState  ViewStateName
-	AccountId *int
-	MatchId   *int
-}
-
-type GameStateChangeMsg struct {
-	NewState queries.Gamestate
-	PlayerId *int
-	MatchId  *int
+	AccountID *int
+	MatchID   *int
 }
 
 type ChangeTabMsg struct {
 	TabIndex int
 }
 
-type UIFooterVO struct {
-	ActivePlayerId *int
-	MatchId        *int
-	GameState      queries.Gamestate
-	LocalPlayerID  *int
-}
-
 type PlayerReady struct {
-	MatchId  *int // MatchId
-	PlayerId *int // PlayerId
+	MatchID  *int
+	PlayerID *int
 }
 
 type Hand struct {

@@ -1,15 +1,10 @@
 package match
 
 import (
-	"context"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
-
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/route/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -28,43 +23,31 @@ import (
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/{matchId}/cut/{cutId} [put]
-func CutDeck(c echo.Context) error {
+func (h *Handler) CutDeck(c echo.Context) error {
 	matchId, err := strconv.Atoi(c.Param("matchId"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	cutIndex, err := strconv.Atoi(c.Param("cutIndex"))
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err = q.UpdateMatchCut(ctx, queries.UpdateMatchCutParams{
+	err = h.MatchStore.UpdateMatchCut(c, queries.UpdateMatchCutParams{
 		ID:            &matchId,
 		Cutgamecardid: &cutIndex,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = helpers.UpdateGameState(&matchId, queries.GamestatePlay)
-
+	err = UpdateGameState(&matchId, queries.GamestatePlay)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m, err := helpers.GetMatch(&matchId)
-
+	m, err := GetMatch(&matchId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

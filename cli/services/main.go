@@ -1,8 +1,9 @@
-// Services are the CLIs connection to the backend. If you look in server/route you'll see a coorsponding package for each service.
+// Package services are the CLIs connection to the backend. If you look in server/route you'll see a coorsponding package for each service.
 package services
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 
@@ -10,40 +11,29 @@ import (
 )
 
 const (
-	BaseUrl = "http://localhost:1323/v1"
-	//Game
-	EndPointGame = BaseUrl + "/game/playCard"
-	//Player
-	EndPointPlayer                     = BaseUrl + "/match/%s/player"
-	EndPointKitty                      = BaseUrl + "/match/%s/player/%s/to/%s/kitty"
-	EndPointPlayerByForMatchAndAccount = BaseUrl + "/match/%s/account/%s"
-	EndPointPlay                       = BaseUrl + "/match/%s/player/%s/to/%s/play"
-	EndPointPlayerReady                = BaseUrl + "/match/%s/player/%s/ready"
-	//Match
-	EndPointMatch                  = BaseUrl + "/match"
-	EndPointMatchState             = BaseUrl + "/match/%s/state"
-	EndPointJoinMatch              = BaseUrl + "/match/%v/join/%v"
-	EndPointOpenMatch              = BaseUrl + "/open"
-	EndPointMatchCard              = BaseUrl + "/match/%s/card"
-	EndPointGameplayCardsByMatch   = BaseUrl + "/match/%s/cards?id=%s"
-	EndPointMatchCutDeck           = BaseUrl + "/match/%s/cut/%s"
-	EndPointDeckById               = BaseUrl + "/match/%s/deck"
-	EndPointDeckByPlayerAndMatchId = BaseUrl + "/match/%s/player/%s/deck"
-	//Deck
-	EndPointDeck = BaseUrl + "/deck"
-	//Account
-	EndPointLogin = BaseUrl + "/account/login"
+	BaseURL                            = "http://localhost:1323/v1"
+	EndPointKitty                      = BaseURL + "/match/%s/player/%s/to/%s/kitty"
+	EndPointPlay                       = BaseURL + "/match/%s/player/%s/to/%s/play"
+	EndPointPlayerByForMatchAndAccount = BaseURL + "/match/%s/account/%s"
+	EndPointMatch                      = BaseURL + "/match/%s"
+	EndPointOpenMatch                  = BaseURL + "/open"
+	EndPointMatchState                 = BaseURL + "/match/%s/state"
+	EndPointMatchCutDeck               = BaseURL + "/match/%s/cut/%s"
+	EndPointDeckByPlayerAndMatchID     = BaseURL + "/match/%s/player/%s/deck"
+	EndPointJoinMatch                  = BaseURL + "/match/%s/join/%s"
+	EndPointLogin                      = BaseURL + "/account/login/%s"
 )
 
 func url(url string, method string, json string) tea.Msg {
 	var buf *bytes.Buffer
-	buf = bytes.NewBuffer([]byte(json))
+	buf = bytes.NewBufferString(json)
 
 	if json == "" {
 		buf = bytes.NewBuffer(nil)
 	}
 
-	req, err := http.NewRequest(method, url, buf)
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, method, url, buf)
 	if err != nil {
 		return err
 	}
@@ -58,11 +48,9 @@ func url(url string, method string, json string) tea.Msg {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		return err
 	}
 
 	return body
-
 }

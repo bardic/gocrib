@@ -1,4 +1,4 @@
-package game
+package core
 
 import (
 	"cmp"
@@ -92,8 +92,8 @@ func countPegs(scoreVO vo.ScoreMatch) (vo.ScoreResults, error) {
 	}
 	res.Results = append(res.Results, r...)
 
-	if scoreVO.ActivePlayerId != nil && scoreVO.Players != nil {
-		r, err = scanForLastCard(*scoreVO.ActivePlayerId, *scoreVO.CardsInPlay, *scoreVO.Players)
+	if scoreVO.ActivePlayerID != nil && scoreVO.Players != nil {
+		r, err = scanForLastCard(*scoreVO.ActivePlayerID, *scoreVO.CardsInPlay, *scoreVO.Players)
 		if err != nil {
 			return vo.ScoreResults{}, err
 		}
@@ -164,7 +164,6 @@ func countHand(m vo.GameMatch) (vo.ScoreResults, error) {
 
 func getCut(m vo.GameMatch) (vo.GameCard, error) {
 	return vo.GameCard{
-
 		Card: queries.Card{
 			Value: queries.CardvalueAce,
 			Suit:  queries.CardsuitClubs,
@@ -340,7 +339,6 @@ func cardDetails(cardValue queries.Cardvalue) vo.GameCardDetails {
 		Value: &Zero,
 		Order: &Zero,
 	}
-
 }
 
 func scanForMatchingKinds(gameplayCardsInPlay []vo.GameCard) ([]vo.Scores, error) {
@@ -425,7 +423,7 @@ func scanForFifteens(cardsInPlay []vo.GameCard) ([]vo.Scores, error) {
 
 	pointsFound := []vo.Scores{}
 
-	//find if any combination of cardsInPlay equals 15
+	// find if any combination of cardsInPlay equals 15
 	for i := 0; i < len(cardsInPlay); i++ {
 		for j := i; j < len(cardsInPlay); j++ {
 			details1 := cardDetails(cardsInPlay[i].Card.Value)
@@ -466,7 +464,6 @@ func scanForFifteens(cardsInPlay []vo.GameCard) ([]vo.Scores, error) {
 }
 
 func scanRightJackCut(cardsInPlay []vo.GameCard, cutCard vo.GameCard) ([]vo.Scores, error) {
-
 	// cardsInPlay, err := getGameplayCardsForIds(gameplayCardsIdsInPlay)
 	// if err != nil {
 	// 	return []vo.Scores{}, err
@@ -577,7 +574,6 @@ func sum(cards []vo.GameCard) int {
 }
 
 func scanForLastCard(currentPlayerTurn int, cardsInPlay []vo.GameCard, players []vo.GamePlayer) ([]vo.Scores, error) {
-
 	totalInPlay := sum(cardsInPlay)
 
 	if totalInPlay == 31 {
@@ -588,7 +584,7 @@ func scanForLastCard(currentPlayerTurn int, cardsInPlay []vo.GameCard, players [
 		}, nil
 	}
 
-	//sort array of players so that the current player is first
+	// sort array of players so that the current player is first
 	currnetPlayerIndex := slices.IndexFunc(players, func(i vo.GamePlayer) bool {
 		return *i.ID == currentPlayerTurn
 	})
@@ -597,9 +593,9 @@ func scanForLastCard(currentPlayerTurn int, cardsInPlay []vo.GameCard, players [
 
 	hasPlayableCard := false
 	for _, player := range players {
-		//if *player.ID == currentPlayerTurn {
-		//If if a card in this players hand can be added to the cards in play without xceeding 31
-		//then they get a point
+		// if *player.ID == currentPlayerTurn {
+		// If if a card in this players hand can be added to the cards in play without xceeding 31
+		// then they get a point
 
 		for _, card := range player.Hand {
 			details := cardDetails(card.Card.Value)
@@ -626,7 +622,6 @@ func scanForLastCard(currentPlayerTurn int, cardsInPlay []vo.GameCard, players [
 }
 
 func scanForAdditionalPlays(currentPlayerTurn int, cardsInPlay []vo.GameCard, players []vo.GamePlayer) ([]vo.Scores, error) {
-
 	totalInPlay := sum(cardsInPlay)
 
 	if totalInPlay == 31 {
@@ -637,7 +632,7 @@ func scanForAdditionalPlays(currentPlayerTurn int, cardsInPlay []vo.GameCard, pl
 		}, nil
 	}
 
-	//sort array of players so that the current player is first
+	// sort array of players so that the current player is first
 	currnetPlayerIndex := slices.IndexFunc(players, func(i vo.GamePlayer) bool {
 		return *i.ID == currentPlayerTurn
 	})
@@ -645,9 +640,9 @@ func scanForAdditionalPlays(currentPlayerTurn int, cardsInPlay []vo.GameCard, pl
 	players = append(players[currnetPlayerIndex:], players[:currnetPlayerIndex]...)
 
 	for _, player := range players {
-		//if *player.ID == currentPlayerTurn {
-		//If if a card in this players hand can be added to the cards in play without xceeding 31
-		//then they get a point
+		// if *player.ID == currentPlayerTurn {
+		// If if a card in this players hand can be added to the cards in play without xceeding 31
+		// then they get a point
 
 		for _, card := range player.Hand {
 			details := cardDetails(card.Card.Value)
@@ -668,14 +663,13 @@ func scanForAdditionalPlays(currentPlayerTurn int, cardsInPlay []vo.GameCard, pl
 		},
 	}, nil
 }
-func scanJackOnCut(cutCard vo.GameCard) ([]vo.Scores, error) {
 
+func scanJackOnCut(cutCard vo.GameCard) ([]vo.Scores, error) {
 	if cutCard.Card.Value == queries.CardvalueJack {
 		return []vo.Scores{{
 			Cards: []vo.GameCard{},
 			Point: &One,
 		}}, nil
-
 	}
 
 	// details := cardDetails(cutCard.Card.Value)

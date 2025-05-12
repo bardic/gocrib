@@ -43,7 +43,7 @@ func (view *View) Render() string {
 	renderedTabs := styles.RenderTabs([]string{"Open Matches", "Available Matches"}, 0)
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 	doc.WriteString(row)
-	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "─────────────────────────────────────────────────────────┐")
+	row = lipgloss.JoinHorizontal(lipgloss.Bottom, "───────────────────────────────────────┐")
 	doc.WriteString(row)
 	doc.WriteString("\n")
 
@@ -57,12 +57,12 @@ func (view *View) Render() string {
 		view.IsLobbyTableSet = true
 	}
 
-	doc.WriteString(styles.WindowStyle.Width(75).Height(12).Render(view.LobbyTable.View()))
+	doc.WriteString(styles.WithStyleWithTabs.Render(view.LobbyTable.View()))
 	return doc.String()
 }
 
 func (view *View) Update(msg tea.Msg) tea.Cmd {
-	view.Init()
+	// view.Init()
 	view.LobbyTable.Focus()
 
 	updatedField, cmd := view.LobbyTable.Update(msg)
@@ -85,7 +85,6 @@ func getActiveView() (table.Model, error) {
 
 	var matches []*vo.GameMatch
 	err := json.Unmarshal(m.([]byte), &matches)
-
 	if err != nil {
 		return table.Model{}, err
 	}
@@ -94,7 +93,7 @@ func getActiveView() (table.Model, error) {
 	for _, m := range matches {
 		rows = append(rows, table.Row{
 			fmt.Sprintf("%v", *m.ID),
-			fmt.Sprintf("%v", utils.GetPlayerIds(m.Players)),
+			fmt.Sprintf("%v", utils.GetPlayerIDs(m.Players)),
 			fmt.Sprintf("%v", m.Privatematch),
 			m.Creationdate.Time.String(),
 			fmt.Sprintf("%v", m.Currentplayerturn),

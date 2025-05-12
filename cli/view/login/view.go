@@ -10,8 +10,8 @@ import (
 )
 
 type View struct {
-	loginIdField      textinput.Model
-	isLoginIdFieldSet bool
+	loginIDField      textinput.Model
+	isLoginIDFieldSet bool
 }
 
 func NewLoginView() *View {
@@ -21,21 +21,21 @@ func NewLoginView() *View {
 }
 
 func (view *View) Init() {
-	if view.isLoginIdFieldSet {
+	if view.isLoginIDFieldSet {
 		return
 	}
 
-	view.loginIdField = textinput.New()
-	view.loginIdField.CharLimit = 20
-	view.loginIdField.Width = 30
-	view.loginIdField.Placeholder = "id"
-	view.isLoginIdFieldSet = true
+	view.loginIDField = textinput.New()
+	view.loginIDField.CharLimit = 20
+	view.loginIDField.Width = 30
+	view.loginIDField.Placeholder = "id"
+	view.isLoginIDFieldSet = true
 }
 
 func (view *View) Render() string {
 	doc := strings.Builder{}
 	doc.WriteString("Login \n")
-	doc.WriteString(view.loginIdField.View())
+	doc.WriteString(view.loginIDField.View())
 
 	return styles.WindowStyle.Align(lipgloss.Center, lipgloss.Center).Render(doc.String())
 }

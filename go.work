@@ -1,9 +1,9 @@
-go 1.23.2
+go 1.23.6
 
 use (
-	./.dagger
-	./cli
-	./server
-	./sql
-	./vo
+	.dagger
+	cli
+	server
+	sql
+	vo
 )

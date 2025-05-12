@@ -1,21 +1,16 @@
 package player
 
 import (
-	"context"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
 	"github.com/bardic/gocrib/vo"
 
-	conn "github.com/bardic/gocrib/server/db"
-	"github.com/bardic/gocrib/server/route/helpers"
-
 	"github.com/labstack/echo/v4"
 )
 
-// Create godoc
+// UpdateKitty route
 //
 //	@Summary	Update kitty with ids
 //	@Description
@@ -31,63 +26,54 @@ import (
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
 //	@Router		/match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/kitty [put]
-func UpdateKitty(c echo.Context) error {
-	matchId, err := strconv.Atoi(c.Param("matchId"))
-
+func (h *PlayerHandler) UpdateKitty(c echo.Context) error {
+	matchID, err := strconv.Atoi(c.Param("matchId"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	fromPlayerId, err := strconv.Atoi(c.Param("playerId"))
-
+	fromPlayerID, err := strconv.Atoi(c.Param("playerId"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	toPlayerId, err := strconv.Atoi(c.Param("toPlayerId"))
-
+	toPlayerID, err := strconv.Atoi(c.Param("toPlayerId"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	details := &vo.HandModifier{}
-	if err := c.Bind(details); err != nil {
+	if err = c.Bind(details); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	for _, cardId := range details.CardIds {
-		q.UpdateMatchCardState(ctx, queries.UpdateMatchCardStateParams{
-			ID:        &cardId,
+	for _, cardID := range details.CardIDs {
+		err = h.CardStore.UpdateMatchCardState(c, queries.UpdateMatchCardStateParams{
+			ID:        &cardID,
 			State:     queries.CardstateKitty,
-			Origowner: &fromPlayerId,
-			Currowner: &toPlayerId,
+			Origowner: &fromPlayerID,
+			Currowner: &toPlayerID,
 		})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
 	}
 
-	err = q.MarkPlayerReady(ctx, queries.MarkPlayerReadyParams{
+	err = h.PlayerStore.UpdatePlayerReady(c, queries.UpdatePlayerReadyParams{
 		Isready: true,
-		ID:      &fromPlayerId,
+		ID:      &fromPlayerID,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	m, err := helpers.GetMatch(&matchId)
-
+	match, err := h.MatchStore.GetMatch(c, &matchID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	allReady := true
-	for _, player := range m.Players {
+	for _, player := range match.Players {
 		if !player.Isready {
 			allReady = false
 			break
@@ -95,15 +81,14 @@ func UpdateKitty(c echo.Context) error {
 	}
 
 	if allReady {
-		err = q.UpdateMatchState(ctx, queries.UpdateMatchStateParams{
+		_, err = h.MatchStore.UpdateMatchState(c, queries.UpdateMatchStateParams{
 			Gamestate: queries.GamestateCut,
-			ID:        &matchId,
+			ID:        &matchID,
 		})
-
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 	}
 
-	return c.JSON(http.StatusOK, m)
+	return c.JSON(http.StatusOK, match)
 }

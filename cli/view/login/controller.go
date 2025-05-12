@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 
 	"github.com/bardic/gocrib/queries/queries"
+	"github.com/bardic/gocrib/vo"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
+	logger "github.com/bardic/gocrib/cli/utils/log"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -39,35 +40,45 @@ func (ctrl *Controller) Render() string {
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
+	l := logger.Get()
+	defer l.Sync()
+
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "enter", "view_update":
-		utils.Logger.Info("Enter")
-		idStr := ctrl.view.loginIdField.Value()
+		l.Sugar().Info("Enter")
+		idStr := ctrl.view.loginIDField.Value()
 
 		var accountDetails queries.Account
 		msg := services.Login(idStr)
-		json.Unmarshal(msg.([]byte), &accountDetails)
+		err := json.Unmarshal(msg.([]byte), &accountDetails)
+		if err != nil {
+			return nil
+		}
 
-		return accountDetails
+		return vo.StateChangeMsg{
+			NewState:  vo.LobbyView,
+			AccountID: accountDetails.ID,
+		}
+
+		// return accountDetails
 	}
 
 	return nil
 }
 
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
-
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
-	ctrl.view.loginIdField.Focus()
-	ctrl.view.loginIdField, cmd = ctrl.view.loginIdField.Update(msg)
+	ctrl.view.loginIDField.Focus()
+	ctrl.view.loginIDField, cmd = ctrl.view.loginIDField.Update(msg)
 
 	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg: //User input
+	case tea.KeyMsg: // User input
 		resp := ctrl.ParseInput(msg)
 
 		if resp == nil {
@@ -77,7 +88,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		cmds = append(cmds, func() tea.Msg {
 			return resp
 		})
-
 	}
 
 	return tea.Batch(cmds...)

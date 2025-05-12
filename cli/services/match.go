@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,39 +10,38 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func GetPlayerMatchState(matchId *int) tea.Msg {
-	id := strconv.Itoa(*matchId)
-	return url(EndPointMatchState+"/?id="+id, http.MethodGet, "")
-}
+func GetMatchByID(matchID *int) tea.Msg {
+	matchIDStr := ""
+	if matchID != nil {
+		matchIDStr = strconv.Itoa(*matchID)
+	}
 
-func GetMatchById(matchId *int) tea.Msg {
-	id := strconv.Itoa(*matchId)
-	return url(EndPointMatch+"/"+id, http.MethodGet, "")
+	endpoint := utils.EndPointBuilder(EndPointMatch, matchIDStr)
+	return url(endpoint, http.MethodGet, "")
 }
 
 func GetOpenMatches() tea.Msg {
 	return url(EndPointOpenMatch, http.MethodGet, "")
 }
 
-func JoinMatch(accountId, activeMatchId int) tea.Msg {
-	u := fmt.Sprintf(EndPointJoinMatch, activeMatchId, accountId)
-
-	return url(u, http.MethodPut, "")
+func JoinMatch(accountID, activeMatchID int) tea.Msg {
+	endpoint := utils.EndPointBuilder(EndPointJoinMatch, strconv.Itoa(activeMatchID), strconv.Itoa(accountID))
+	return url(endpoint, http.MethodPut, "")
 }
 
-func PostPlayerMatch(accountId *int) tea.Msg {
-	return sendReq(EndPointMatch+"/"+strconv.Itoa(*accountId), http.MethodPost, nil)
+func PostPlayerMatch(accountID *int) tea.Msg {
+	endpoint := utils.EndPointBuilder(EndPointMatch, strconv.Itoa(*accountID))
+	return sendReq(endpoint, http.MethodPost, nil)
 }
 
-func CutDeck(matchId int, cutIndex string) tea.Msg {
-	endpoint := utils.EndPointBuilder(EndPointMatchCutDeck, strconv.Itoa(matchId), cutIndex)
+func CutDeck(matchID int, cutIndex string) tea.Msg {
+	endpoint := utils.EndPointBuilder(EndPointMatchCutDeck, strconv.Itoa(matchID), cutIndex)
 
 	return sendReq(endpoint, http.MethodPut, "")
 }
 
-func sendReq(endPoint string, method string, body interface{}) tea.Msg {
+func sendReq(endPoint string, method string, body any) tea.Msg {
 	b, err := json.Marshal(body)
-
 	if err != nil {
 		return err
 	}

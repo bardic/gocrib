@@ -19,21 +19,20 @@ type Controller struct {
 }
 
 func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Controller {
-
 	ctrl := &Controller{
 		model: &Model{
 			ActiveSlotIndex: 0,
-			SelectedCardIds: []int{},
-			State:           match.Match.Gamestate,
+			SelectedCardIDs: []int{},
+			State:           match.Gamestate,
 			HandVO:          &cliVO.HandVO{},
 			LocalPlayer:     player,
-			ActivePlayerId:  match.Match.Dealerid,
+			ActivePlayerID:  match.Dealerid,
 			Name:            name,
-			GameMatchId:     match.Match.ID,
+			GameMatchID:     match.ID,
 		},
 	}
 
-	v := NewCardView(match, player, ctrl.model.HandVO.Deck, name)
+	v := NewCardView(player, name)
 
 	ctrl.view = v
 
@@ -49,83 +48,82 @@ func (ctrl *Controller) GetName() string {
 }
 
 func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) string {
-	ctrl.model.State = gameMatch.Match.Gamestate
-	ctrl.model.HandVO.Deck = gameDeck
-	ctrl.model.ActivePlayerId = gameMatch.Match.Dealerid
+	ctrl.model.State = gameMatch.Gamestate
+	ctrl.model.Deck = gameDeck
+	ctrl.model.ActivePlayerID = gameMatch.Dealerid
 
-	p := utils.GetPlayerForAccountId(ctrl.model.LocalPlayer.Accountid, gameMatch)
+	p := utils.GetPlayerForAccountID(ctrl.model.LocalPlayer.Accountid, gameMatch)
 
 	var hand []int
 	switch ctrl.model.Name {
 	case "Play":
-		hand = utils.IdFromCards(p.Play)
+		hand = utils.IDFromCards(p.Play)
 	case "Hand":
-		hand = utils.IdFromCards(p.Hand)
+		hand = utils.IDFromCards(p.Hand)
 	case "Kitty":
-		hand = utils.IdFromCards(p.Kitty)
+		hand = utils.IDFromCards(p.Kitty)
 	default:
 		return "Error: Unknown tabname"
 	}
 
-	ctrl.model.CardIds = hand
+	ctrl.model.CardIDs = hand
 
 	return ctrl.view.Render(gameMatch, gameDeck, hand)
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
-
 	switch msg.String() {
-	//Highlight card to the right
+	// Highlight card to the right
 	case "right":
 		ctrl.updateActiveSlotIndex(1)
-	//Highlight card to the left
+	// Highlight card to the left
 	case "left":
 		ctrl.updateActiveSlotIndex(-1)
-	//Select card
+	// Select card
 	case " ":
 		idx := slices.Index(
-			ctrl.model.SelectedCardIds,
-			ctrl.model.CardIds[ctrl.model.ActiveSlotIndex])
+			ctrl.model.SelectedCardIDs,
+			ctrl.model.CardIDs[ctrl.model.ActiveSlotIndex])
 		if idx > -1 {
-			ctrl.model.SelectedCardIds = slices.Delete(ctrl.model.SelectedCardIds, 0, idx+1)
+			ctrl.model.SelectedCardIDs = slices.Delete(ctrl.model.SelectedCardIDs, 0, idx+1)
 		} else {
-			ctrl.model.SelectedCardIds = append(ctrl.model.SelectedCardIds, ctrl.model.CardIds[ctrl.model.ActiveSlotIndex])
+			ctrl.model.SelectedCardIDs = append(ctrl.model.SelectedCardIDs, ctrl.model.CardIDs[ctrl.model.ActiveSlotIndex])
 		}
 
-		ctrl.view.SelectedCardIds = ctrl.model.SelectedCardIds
+		ctrl.view.SelectedCardIDs = ctrl.model.SelectedCardIDs
 	case "enter":
 		switch ctrl.model.State {
 		case queries.GamestateDiscard:
 			services.PutKitty(
-				ctrl.model.GameMatchId,
+				ctrl.model.GameMatchID,
 				ctrl.model.LocalPlayer.ID,
-				ctrl.model.ActivePlayerId,
+				ctrl.model.ActivePlayerID,
 				vo.HandModifier{
-					CardIds: ctrl.model.SelectedCardIds,
+					CardIDs: ctrl.model.SelectedCardIDs,
 				},
 			)
 
-			ctrl.model.SelectedCardIds = []int{}
+			ctrl.model.SelectedCardIDs = []int{}
 		case queries.GamestatePlay:
 			services.PutPlay(
-				ctrl.model.GameMatchId,
+				ctrl.model.GameMatchID,
 				ctrl.model.LocalPlayer.ID,
-				ctrl.model.ActivePlayerId,
+				ctrl.model.ActivePlayerID,
 				vo.HandModifier{
-					CardIds: ctrl.model.SelectedCardIds,
+					CardIDs: ctrl.model.SelectedCardIDs,
 				},
 			)
 
-			ctrl.model.SelectedCardIds = []int{}
+			ctrl.model.SelectedCardIDs = []int{}
 		}
 	}
 
 	return nil
 }
 
-func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+func (ctrl *Controller) Update(_ tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
-	//ctrl.view.Update(msg)
+	// ctrl.view.Update(msg)
 	return cmd
 }
 
@@ -134,10 +132,10 @@ func (ctrl *Controller) updateActiveSlotIndex(delta int) {
 	cardModel.ActiveSlotIndex += delta
 
 	if cardModel.ActiveSlotIndex < 0 {
-		cardModel.ActiveSlotIndex = int(len(cardModel.CardIds)) - 1
-	} else if cardModel.ActiveSlotIndex > int(len(cardModel.CardIds))-1 {
+		cardModel.ActiveSlotIndex = len(cardModel.CardIDs) - 1
+	} else if cardModel.ActiveSlotIndex > len(cardModel.CardIDs)-1 {
 		cardModel.ActiveSlotIndex = 0
 	}
 
-	ctrl.view.ActiveCardId = cardModel.ActiveSlotIndex
+	ctrl.view.ActiveCardID = cardModel.ActiveSlotIndex
 }

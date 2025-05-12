@@ -11,9 +11,9 @@ type Model struct {
 	*cliVO.HandVO
 	State           queries.Gamestate
 	ActiveSlotIndex int
-	SelectedCardIds []int
+	SelectedCardIDs []int
 	Name            string
 	LocalPlayer     *vo.GamePlayer
-	ActivePlayerId  *int
-	GameMatchId     *int
+	ActivePlayerID  *int
+	GameMatchID     *int
 }

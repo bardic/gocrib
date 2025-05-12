@@ -1,33 +1,27 @@
 {
-    "version": "0.2.0",
-    "compounds": [
-        {
-            "name": "server+client",
-            "configurations": ["server", "cli + debugger"]
-        }
-    ],  
-    "configurations": [
-        {
-            "name": "cli + debugger",
-            "type": "go",
-            "debugAdapter": "dlv-dap",
-            "request": "attach",
-            "mode": "remote",
-            "remotePath": "${workspaceFolder}/cli",
-            "port": 43000,
-            "host": "localhost",
-            "preLaunchTask": "dlv",
-        },
-        {
-            "preLaunchTask": "swag",
-            "name": "server",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "env": {
-                "GOCRIB_HOST" : "localhost",
-            },
-            "program": "${workspaceFolder}/server"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "cli",
+      "type": "go",
+      "debugAdapter": "dlv-dap",
+      "request": "attach",
+      "mode": "remote",
+      "remotePath": "${workspaceFolder}/cli",
+      "port": 43000,
+      "host": "localhost",
+      "preLaunchTask": "dlv"
+    },
+    {
+      "preLaunchTask": "swag",
+      "name": "server",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "env": {
+        "GOCRIB_HOST": "localhost"
+      },
+      "program": "${workspaceFolder}/server"
+    }
+  ]
 }

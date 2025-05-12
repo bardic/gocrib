@@ -1,47 +1,32 @@
-// Desc: Login route for account
 package account
 
 import (
-	"context"
 	"net/http"
-	"time"
-
-	"github.com/bardic/gocrib/queries/queries"
-	conn "github.com/bardic/gocrib/server/db"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
-// Login user via id
-//
-//	@Summary	Login
-//	@Description
-//	@Tags		account
-//	@Accept		json
-//	@Produce	json
-//	@Param		details	body		int	true	"id to login with"
-//	@Success	200		{object}	queries.Account
-//	@Failure	400		{object}	error
-//	@Failure	500		{object}	error
-//	@Router		/account/login/ [post]
-func Login(c echo.Context) error {
-	id := new(int)
-	if err := c.Bind(id); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+// Login route
+// @Description Login route for account - takes an account id and returns the account details
+// @Tags		account
+// @Accept		json
+// @Produce	json
+// @Param		accountId		path		int	true	"account id"'
+// @Success	200		{object}	queries.Account
+// @Failure	400		{object}	error
+// @Failure	500		{object}	error
+// @Router		/account/login/{accountId} [post]
+func (h *Handler) Login(c echo.Context) error {
+	accountID, err := strconv.Atoi(c.Param("accountId"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	db := conn.Pool()
-	defer db.Close()
-	q := queries.New(db)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	a, err := q.GetAccount(ctx, id)
-
+	account, err := h.AccountStore.GetAccountByID(c, &accountID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, a)
+	return c.JSON(http.StatusOK, account)
 }

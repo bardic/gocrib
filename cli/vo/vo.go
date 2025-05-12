@@ -33,7 +33,7 @@ type IGameController interface {
 
 type HandVO struct {
 	LocalPlayerID int
-	CardIds       []int
+	CardIDs       []int
 	Deck          *vo.GameDeck
 }
 

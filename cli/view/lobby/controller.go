@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
+	logger "github.com/bardic/gocrib/cli/utils/log"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -20,7 +20,7 @@ type Controller struct {
 func NewLobby(msg vo.StateChangeMsg) *Controller {
 	return &Controller{
 		model: &Model{
-			playerAccountId: msg.AccountId,
+			playerAccountID: msg.AccountID,
 		},
 		view: &View{
 			ActiveLandingTab: 0,
@@ -37,7 +37,6 @@ func (ctrl *Controller) GetName() string {
 }
 
 func (ctrl *Controller) Init() {
-
 }
 
 func (ctrl *Controller) Render() string {
@@ -45,6 +44,8 @@ func (ctrl *Controller) Render() string {
 }
 
 func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
+	l := logger.Get()
+	defer l.Sync()
 	lobbyView := ctrl.view
 	lobbyModel := ctrl.model
 
@@ -52,7 +53,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "enter", "view_update":
-		utils.Logger.Info("Enter")
+		l.Sugar().Info("Enter")
 		if len(lobbyView.LobbyTable.Rows()) == 0 {
 			return nil
 		}
@@ -63,28 +64,27 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 		var matchDetails vo.MatchDetailsResponse
-		msg := services.JoinMatch(*lobbyModel.playerAccountId, int(id))
+		msg := services.JoinMatch(*lobbyModel.playerAccountID, id)
 		err = json.Unmarshal(msg.([]byte), &matchDetails)
-
 		if err != nil {
 			return tea.Quit
 		}
 
 		return vo.StateChangeMsg{
 			NewState: vo.JoinGameView,
-			MatchId:  &id,
+			MatchID:  &id,
 		}
 	case "n":
-		match := CreateGame(lobbyModel.playerAccountId)
+		match := CreateGame(lobbyModel.playerAccountID)
 
 		return vo.StateChangeMsg{
 			NewState:  vo.CreateGameView,
-			AccountId: lobbyModel.playerAccountId,
-			MatchId:   match.MatchId,
+			AccountID: lobbyModel.playerAccountID,
+			MatchID:   match.MatchID,
 		}
 	case "tab":
 
-		lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab + 1
+		lobbyView.ActiveLandingTab++
 
 		switch lobbyView.ActiveLandingTab {
 		case 0:
@@ -93,7 +93,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			lobbyView.LobbyViewState = vo.AvailableMatches
 		}
 	case "shift+tab":
-		lobbyView.ActiveLandingTab = lobbyView.ActiveLandingTab - 1
+		lobbyView.ActiveLandingTab--
 
 		switch lobbyView.ActiveLandingTab {
 		case 0:
@@ -106,11 +106,14 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func CreateGame(accountId *int) vo.MatchDetailsResponse {
-	newMatch := services.PostPlayerMatch(accountId).([]byte)
+func CreateGame(accountID *int) vo.MatchDetailsResponse {
+	newMatch := services.PostPlayerMatch(accountID).([]byte)
 
 	var matchDetails vo.MatchDetailsResponse
-	json.Unmarshal(newMatch, &matchDetails)
+	err := json.Unmarshal(newMatch, &matchDetails)
+	if err != nil {
+		return vo.MatchDetailsResponse{}
+	}
 
 	return matchDetails
 }
@@ -128,7 +131,7 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg: //User input
+	case tea.KeyMsg: // User input
 		resp := ctrl.ParseInput(msg)
 
 		if resp == nil {
@@ -138,7 +141,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		cmds = append(cmds, func() tea.Msg {
 			return resp
 		})
-
 	}
 
 	return tea.Batch(cmds...)

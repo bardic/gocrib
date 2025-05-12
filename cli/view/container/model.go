@@ -7,7 +7,7 @@ import (
 )
 
 type Model struct {
-	AccountId     *int
+	AccountID     *int
 	Gamematch     *vo.GameMatch
 	GameDeck      *vo.GameDeck
 	Tabs          []cliVO.Tab
@@ -20,7 +20,7 @@ type Model struct {
 func NewModel(match *vo.GameMatch, player *vo.GamePlayer, gameDeck *vo.GameDeck) *Model {
 	return &Model{
 		GameDeck:  gameDeck,
-		AccountId: player.Accountid,
+		AccountID: player.Accountid,
 		Gamematch: match,
 		Tabs: []cliVO.Tab{
 			{
@@ -53,5 +53,5 @@ func (m *Model) GetMatch() *vo.GameMatch {
 }
 
 func (m *Model) GetPlayer() *vo.GamePlayer {
-	return utils.GetPlayerForAccountId(m.AccountId, m.Gamematch)
+	return utils.GetPlayerForAccountID(m.AccountID, m.Gamematch)
 }

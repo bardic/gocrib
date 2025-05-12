@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/bardic/gocrib/cli/styles"
@@ -10,13 +10,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/bardic/gocrib/vo"
-
-	"go.uber.org/zap"
 )
 
-var Logger *zap.Logger
-
-func GetCardById(id int, deck *vo.GameDeck) *vo.GameCard {
+func GetCardByID(id int, deck *vo.GameDeck) *vo.GameCard {
 	for _, card := range deck.Cards {
 		gameCard := &vo.GameCard{
 			Match: card.Match,
@@ -30,36 +26,7 @@ func GetCardById(id int, deck *vo.GameDeck) *vo.GameCard {
 	return nil
 }
 
-func GetIdsFromCards(c []queries.Card) []*int {
-	ids := []*int{}
-	for _, card := range c {
-		ids = append(ids, card.ID)
-	}
-
-	return ids
-}
-
-func GetCardInHandById(id *int, hand []queries.Card) queries.Card {
-	idx := slices.IndexFunc(hand, func(c queries.Card) bool {
-		return c.ID == id
-	})
-
-	if idx == -1 {
-		return queries.Card{}
-	}
-
-	return hand[idx]
-}
-
-func NewLogger() (*zap.Logger, error) {
-	cfg := zap.NewProductionConfig()
-	cfg.OutputPaths = []string{
-		"crib.log",
-	}
-	return cfg.Build()
-}
-
-func GetPlayerForAccountId(id *int, match *vo.GameMatch) *vo.GamePlayer {
+func GetPlayerForAccountID(id *int, match *vo.GameMatch) *vo.GamePlayer {
 	for _, player := range match.Players {
 		if *player.Accountid == *id {
 			return player
@@ -73,7 +40,7 @@ func BuildCommonFooter(match *vo.GameMatch, localplayer *vo.GamePlayer) string {
 	currentPlayerTurn := "-"
 
 	if match.Currentplayerturn != nil {
-		currentPlayerTurn = fmt.Sprintf("%d", *match.Currentplayerturn)
+		currentPlayerTurn = strconv.Itoa(*match.Currentplayerturn)
 	}
 
 	f := fmt.Sprintf("State: %v\nActive Player: %v\nMatch ID: %d\n", match.Gamestate, currentPlayerTurn, *match.ID)
@@ -82,7 +49,6 @@ func BuildCommonFooter(match *vo.GameMatch, localplayer *vo.GamePlayer) string {
 	for i, v := range match.Players {
 		playerString += styles.PlayerStyles[i].Render(fmt.Sprintf("%d:%d", *v.ID, *v.Score))
 		playerString += "\n"
-
 	}
 
 	controls := "tab/shift+tab: navigate screens • space: select • enter: submit • q: exit\n"
@@ -94,10 +60,6 @@ func BuildCommonFooter(match *vo.GameMatch, localplayer *vo.GamePlayer) string {
 	cols = fmt.Sprintf("\n\n%s\n%s", cols, controls)
 
 	return cols
-}
-
-func IsPlayerTurn(playerId, matchId int) bool {
-	return playerId == matchId
 }
 
 func GetCardSuit(card *queries.Card) string {
@@ -144,15 +106,15 @@ func DrawRow(players []*vo.GamePlayer, pegsToDraw, scoreOffet int) string {
 	return viewBuilder.String()
 }
 
-func GetPlayerIds(players []*vo.GamePlayer) []*int {
-	var playIds []*int
+func GetPlayerIDs(players []*vo.GamePlayer) []*int {
+	var playIDs []*int
 	for _, p := range players {
-		playIds = append(playIds, p.ID)
+		playIDs = append(playIDs, p.ID)
 	}
-	return playIds
+	return playIDs
 }
 
-func IdFromCards(cards []vo.GameCard) []int {
+func IDFromCards(cards []vo.GameCard) []int {
 	var ids []int
 	for _, c := range cards {
 		ids = append(ids, *c.Match.Cardid)

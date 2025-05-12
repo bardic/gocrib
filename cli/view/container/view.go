@@ -22,7 +22,6 @@ func NewView(activeTab int, tabs map[int]cliVO.IGameController) *View {
 }
 
 func (view *View) Init() {
-
 }
 
 func (view *View) Render() string {

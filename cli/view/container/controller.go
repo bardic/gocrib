@@ -6,7 +6,7 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/utils"
+	logger "github.com/bardic/gocrib/cli/utils/log"
 	"github.com/bardic/gocrib/cli/view/board"
 	"github.com/bardic/gocrib/cli/view/card"
 	cliVO "github.com/bardic/gocrib/cli/vo"
@@ -25,14 +25,36 @@ type Controller struct {
 	tabs         map[int]cliVO.IGameController
 }
 
-func (ctrl *Controller) Init() {
+func NewController(msg vo.StateChangeMsg) *Controller {
+	l := logger.Get()
+	defer l.Sync()
 
-}
+	var match *vo.GameMatch
 
-func NewController(match *vo.GameMatch, player *vo.GamePlayer, gameDeck *vo.GameDeck) *Controller {
+	resp := services.GetMatchByID(msg.MatchID)
+	err := json.Unmarshal(resp.([]byte), &match)
+	if err != nil {
+		l.Sugar().Error(err)
+	}
+
+	player := &vo.GamePlayer{}
+
+	var gameDeck vo.GameDeck
+	resp = services.GetPlayerByForMatchAndAccount(match.ID, msg.AccountID)
+	err = json.Unmarshal(resp.([]byte), player)
+	if err != nil {
+		l.Sugar().Error(err)
+	}
+
+	resp = services.GetDeckByPlayIDAndMatchID(*player.ID, *match.ID)
+	err = json.Unmarshal(resp.([]byte), &gameDeck)
+	if err != nil {
+		l.Sugar().Error(err)
+	}
+
 	tabs := createTabs(match, player)
 	ctrl := &Controller{
-		model: NewModel(match, player, gameDeck),
+		model: NewModel(match, player, &gameDeck),
 		view:  NewView(0, tabs),
 	}
 
@@ -42,6 +64,9 @@ func NewController(match *vo.GameMatch, player *vo.GamePlayer, gameDeck *vo.Game
 		TabIndex: 0,
 	})
 	return ctrl
+}
+
+func (ctrl *Controller) Init() {
 }
 
 func (ctrl *Controller) GetName() string {
@@ -59,6 +84,9 @@ func (ctrl *Controller) Render() string {
 }
 
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
+	l := logger.Get()
+	defer l.Sync()
+
 	var cmds []tea.Cmd
 
 	if !ctrl.timerStarted {
@@ -89,19 +117,17 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 
 		ctrl.timer, cmd = ctrl.timer.Update(msg)
 
-		resp := services.GetMatchById(ctrl.model.GetMatch().ID)
+		resp := services.GetMatchByID(ctrl.model.GetMatch().ID)
 		err := json.Unmarshal(resp.([]byte), &gameMatch)
-
 		if err != nil {
-			utils.Logger.Sugar().Error(err)
+			l.Sugar().Error(err)
 		}
 
-		resp = services.GetDeckByPlayIdAndMatchId(*ctrl.model.GetPlayer().ID, *ctrl.model.GetMatch().ID)
+		resp = services.GetDeckByPlayIDAndMatchID(*ctrl.model.GetPlayer().ID, *ctrl.model.GetMatch().ID)
 
 		err = json.Unmarshal(resp.([]byte), &gameDeck)
-
 		if err != nil {
-			utils.Logger.Sugar().Error(err)
+			l.Sugar().Error(err)
 		}
 
 		ctrl.model.Gamematch = gameMatch
@@ -109,7 +135,6 @@ func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {
 		cmds = append(cmds, cmd)
 	case vo.ChangeTabMsg:
 		ctrl.ChangeTab(msg)
-
 	}
 
 	cmds = append(cmds, ctrl.model.Subcontroller.Update(msg))
@@ -122,7 +147,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	case "ctrl+c", "q":
 		return tea.Quit()
 	case "tab":
-		ctrl.view.ActiveTab = ctrl.view.ActiveTab + 1
+		ctrl.view.ActiveTab++
 		if ctrl.view.ActiveTab >= len(ctrl.view.Tabs) {
 			ctrl.view.ActiveTab = 0
 		}
@@ -131,7 +156,7 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		}
 
 	case "shift+tab":
-		ctrl.view.ActiveTab = ctrl.view.ActiveTab - 1
+		ctrl.view.ActiveTab--
 
 		if ctrl.view.ActiveTab < 0 {
 			ctrl.view.ActiveTab = len(ctrl.view.Tabs) - 1
@@ -159,7 +184,6 @@ func (ctrl *Controller) ChangeTab(msg tea.Msg) {
 		// val.Update(msg)
 		return
 	}
-
 }
 
 func createTabs(gameMatch *vo.GameMatch, player *vo.GamePlayer) map[int]cliVO.IGameController {

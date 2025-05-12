@@ -11,26 +11,17 @@ import (
 )
 
 type View struct {
-	ActiveCardId    int
-	SelectedCardIds []int
-	// Match           *vo.GameMatch
-	LocalPlayer *vo.GamePlayer
-	// Deck            *vo.GameDeck
-	Tabname string
-	*vo.UIFooterVO
+	ActiveCardID    int
+	SelectedCardIDs []int
+	LocalPlayer     *vo.GamePlayer
+	Tabname         string
 }
 
-func NewCardView(match *vo.GameMatch, localPlayer *vo.GamePlayer, deck *vo.GameDeck, tabName string) *View {
+func NewCardView(localPlayer *vo.GamePlayer, tabName string) *View {
 	return &View{
-		// Match:       match,
 		LocalPlayer: localPlayer,
-		// Deck:        deck,
-		Tabname: tabName,
+		Tabname:     tabName,
 	}
-}
-
-func (view *View) Init() {
-	// view.ActiveCardId = 0
 }
 
 func (view *View) Update(gameMatch *vo.GameMatch) error {
@@ -42,8 +33,8 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 	var cardViews []string
 
 	s += view.BuildHeader()
-	for i := 0; i < len(hand); i++ {
-		c := utils.GetCardById(hand[i], gameDeck)
+	for i := range hand {
+		c := utils.GetCardByID(hand[i], gameDeck)
 
 		if c == nil {
 			continue
@@ -58,23 +49,22 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 
 		styledCard = styles.ModelStyle.Render(top, bottom)
 
-		if i == view.ActiveCardId {
+		if i == view.ActiveCardID {
 			styledCard = styles.SelectedFocusedStyle.Render(top, bottom)
 		}
 
-		for _, v := range view.SelectedCardIds {
+		for _, v := range view.SelectedCardIDs {
 			if v == hand[i] {
 				styledCard = styles.FocusedModelStyle.Render(top, bottom)
 			}
 		}
 
-		//Original owner seems to be account id and not match player id
+		// Original owner seems to be account id and not match player id
 
 		if c.Match.Origowner != nil {
 			styledCard = styles.PlayerStyles[*c.Match.Origowner].Render(styledCard)
 		} else {
 			styledCard = styles.PlayerStyles[*c.Match.Currowner].Render(styledCard)
-
 		}
 
 		cardViews = append(cardViews, styledCard)

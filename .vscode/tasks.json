@@ -1,68 +1,43 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "dlv",
-            "type": "shell",
-            "isBackground": true,
-            "command": [
-                "dlv",
-            ],
-            "args": [
-                "debug",
-                "--headless",
-                "--listen=127.0.0.1:43000",
-                "--api-version=2",
-                "${workspaceFolder}/cli"
-            ],
-            "problemMatcher": {
-                "owner": "go",
-                "fileLocation": "relative",
-                "pattern": {
-                    "regexp": "^couldn't start listener:",
-                },
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^API server listening at:",
-                    "endsPattern": "43000"
-                }
-            },
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dlv",
+      "type": "shell",
+      "isBackground": true,
+      "command": "dlv",
+      "args": [
+        "debug",
+        "--headless",
+        "--listen=127.0.0.1:43000",
+        "--api-version=2",
+        "${workspaceFolder}/cli"
+      ],
+      "problemMatcher": {
+        "owner": "go",
+        "fileLocation": "relative",
+        "pattern": {
+          "regexp": "^couldn't start listener:"
         },
-        {
-            "label": "swag",
-            "options": {
-                "cwd": "${workspaceFolder}/server"
-            },
-            "command": "swag",
-            "args": [
-                "init",
-                "--parseDependency",
-                "--parseInternal"
-            ],
-            "type": "shell"
-        },
-        {
-            "label": "player1",
-            "type": "shell",
-            "command": "go run ${workspaceFolder}/cli",
-            "isBackground": true,
-            "problemMatcher": []
-        },
-        {
-            "label": "player2",
-            "type": "shell",
-            "command": "go run ${workspaceFolder}/cli",
-            "isBackground": true,
-            "problemMatcher": []
-        },
-        {
-            "label": "debug_2players",
-            "dependsOn": [
-                "player1",
-                "dlv",
-                "player2"
-            ],
-            "problemMatcher": []
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^API server listening at:",
+          "endsPattern": "43000"
         }
-    ]
+      }
+    },
+    {
+      "label": "swag",
+      "options": {
+        "cwd": "${workspaceFolder}/server"
+      },
+      "command": "swag",
+      "args": [
+        "init",
+        "--parseDependency",
+        "--parseInternal"
+      ],
+      "type": "shell"
+    }
+  ]
 }

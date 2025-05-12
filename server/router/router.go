@@ -1,7 +1,8 @@
-// Description: Main router for the server, sets up the echo server and routes
 package router
 
 import (
+	"net/http"
+
 	_ "github.com/bardic/gocrib/server/docs"
 
 	"github.com/bardic/gocrib/server/route/account"
@@ -12,90 +13,60 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
-// Router struct
-type Router struct {
-}
-
-// Creates new Router for grocitcdn boycot, configs middleware and API paths
-func (r *Router) New() *echo.Echo {
+func NewRouter() *echo.Echo {
 	e := echo.New()
 	e.Logger.SetLevel(log.DEBUG)
+
+	// Add middleware to remove trailing slashes
 	e.Pre(middleware.RemoveTrailingSlash())
 
-	/******
-	*
-	* Admin
-	*
-	********/
-	v1 := e.Group("/v1")
-	v1Routes(v1)
-
-	/******
-	*
-	* SWAGGER
-	*
-	********/
-
+	// Add swaggger router
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
+	// Add index router to return the version
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Cribbage  v0.0.1")
 	})
 
+	// Register v1 routes
+	v1Routes(e.Group("/v1"))
+
+	// Start Server
 	e.Logger.Fatal(e.Start(":1323"))
 
 	return e
 }
 
 func v1Routes(g *echo.Group) {
-	adminGroup := g.Group("/admin")
-	adminGroup.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-		if username == "judohippo" && password == "meow" {
-			return true, nil
-		}
-		return false, nil
-	}))
+	matchHandler := match.NewHandler()
+	deckHandler := deck.NewHandler()
+	playerHandler := player.NewHandler()
+	accountHandler := account.NewHandler()
 
-	g.GET("/open", match.GetOpenMatches)
-	g.GET("/match/:matchId", match.GetMatch)
-	// g.GET("/deck/", deck.GetDeckByMatchId)
+	g.GET("/open", matchHandler.GetOpenMatches)
+	g.GET("/match/:matchId", matchHandler.GetMatch)
+	g.POST("/match/:accountId", matchHandler.NewMatch)
 
-	g.POST("/match/:accountId", match.NewMatch)
-
-	//Match
+	// Match
 	matchGroup := g.Group("/match/:matchId")
-	matchGroup.GET("/cards", match.GetMatchCardsForMatchId)
-	matchGroup.GET("/account/:accountId", match.GetPlayerIdForMatchAndAccount)
-	matchGroup.PUT("/cut/:cutIndex", match.CutDeck)
-	matchGroup.PUT("/join/:accountId", match.JoinMatch)
-	matchGroup.PUT("/deal", match.Deal)
-	matchGroup.PUT("/determinefirst", match.DetermineFirst)
-	matchGroup.PUT("/pass", match.Pass)
-	matchGroup.GET("/deck", deck.GetDeckByMatchId)
-	matchGroup.PUT("/currentPlayer/:playerId", match.UpdateCurrentPLayer)
-	// matchGroup.GET("/kitty", match.GetKitty)
+	matchGroup.GET("/cards", matchHandler.GetMatchCardsForMatchID)
+	matchGroup.GET("/account/:accountId", matchHandler.GetPlayerIDForMatchAndAccount)
+	matchGroup.PUT("/cut/:cutIndex", matchHandler.CutDeck)
+	matchGroup.PUT("/join/:accountId", matchHandler.JoinMatch)
 
-	//Player
-	matchGroup.GET("/player/:playerId", player.GetPlayer)
-	playerGroup := matchGroup.Group("/player/:playerId")
-	playerGroup.PUT("/to/:toPlayerId/kitty", player.UpdateKitty)
-	playerGroup.GET("/deck", deck.GetDeckByPlayerIdAndMatchId)
+	// Player
+	playerGroup := g.Group("/player/:playerId")
+	playerGroup.PUT("/to/:toPlayerId/kitty", playerHandler.UpdateKitty)
+	playerGroup.PUT("/to/:toPlayerId/play", playerHandler.UpdatePlay)
 
-	playerGroup.PUT("/to/:toPlayerId/play", player.UpdatePlay)
-	playerGroup.PUT("/ready", player.PlayerReady)
+	// Deck
+	matchGroup.GET("/deck", deckHandler.GetDeckByMatchID)
 
-	//Deck
-	deckGroup := matchGroup.Group("/deck")
-	deckGroup.GET("/kitty", deck.GetKitty)
-	deckGroup.PUT("/shuffle", deck.PutShuffle)
-
-	//Account
+	// Account
 	accountGroup := g.Group("/account")
-	accountGroup.POST("/login", account.Login)
+	accountGroup.POST("/login/:accountId", accountHandler.Login)
 }

@@ -1,13 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-
-	"github.com/bardic/gocrib/queries/queries"
-
-	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
-	"github.com/bardic/gocrib/cli/utils"
+	logger "github.com/bardic/gocrib/cli/utils/log"
 	"github.com/bardic/gocrib/cli/view/container"
 	"github.com/bardic/gocrib/cli/view/lobby"
 	"github.com/bardic/gocrib/cli/view/login"
@@ -19,18 +14,21 @@ import (
 )
 
 type CLI struct {
-	account           *queries.Account
 	currentController cliVO.IUIController
 }
 
 func main() {
-	utils.Logger, _ = utils.NewLogger()
-	defer utils.Logger.Sync()
+	l := logger.Get()
+	defer l.Sync()
 
-	p := tea.NewProgram(newCLIModel(login.NewLogin()))
+	p := tea.NewProgram(
+		newCLIModel(
+			login.NewLogin(),
+		),
+	)
 
 	if _, err := p.Run(); err != nil {
-		utils.Logger.Sugar().Error(err)
+		l.Sugar().Error(err)
 	}
 }
 
@@ -45,18 +43,12 @@ func (cli *CLI) Init() tea.Cmd {
 }
 
 func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	l := logger.Get()
+	defer l.Sync()
+
 	var cmds []tea.Cmd
-	var match *vo.GameMatch
 
 	switch msg := msg.(type) {
-	case queries.Account:
-		cli.account = &msg
-		cmds = append(cmds, func() tea.Msg {
-			return vo.StateChangeMsg{
-				NewState:  vo.LobbyView,
-				AccountId: msg.ID,
-			}
-		})
 	case vo.StateChangeMsg:
 		switch msg.NewState {
 		case vo.LobbyView:
@@ -64,13 +56,7 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case vo.JoinGameView:
 			fallthrough
 		case vo.CreateGameView:
-			resp := services.GetMatchById(msg.MatchId)
-			err := json.Unmarshal(resp.([]byte), &match)
-			if err != nil {
-				utils.Logger.Sugar().Error(err)
-			}
-
-			cli.createMatchView(match)
+			cli.currentController = container.NewController(msg)
 		}
 	}
 
@@ -78,35 +64,14 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return cli, tea.Batch(cmds...)
 }
 
-func (cli *CLI) createMatchView(match *vo.GameMatch) {
-	player := &vo.GamePlayer{}
-
-	var gameDeck vo.GameDeck
-	resp := services.GetPlayerByForMatchAndAccount(match.ID, cli.account.ID)
-	err := json.Unmarshal(resp.([]byte), player)
-
-	if err != nil {
-		utils.Logger.Sugar().Error(err)
-	}
-
-	resp = services.GetDeckByPlayIdAndMatchId(*player.ID, *match.ID)
-	err = json.Unmarshal(resp.([]byte), &gameDeck)
-
-	if err != nil {
-		utils.Logger.Sugar().Error(err)
-	}
-
-	cli.currentController = container.NewController(match, player, &gameDeck)
-}
-
-func (m *CLI) View() string {
-	switch m.currentController.(type) {
+func (cli *CLI) View() string {
+	switch cli.currentController.(type) {
 	case *login.Controller:
-		return styles.ViewStyle.Render(m.currentController.Render())
+		return styles.ViewStyle.Render(cli.currentController.Render())
 	case *lobby.Controller:
-		return styles.ViewStyle.Render(m.currentController.Render())
+		return cli.currentController.Render()
 	case *container.Controller:
-		return styles.ViewStyle.Render(m.currentController.Render())
+		return styles.ViewStyle.Render(cli.currentController.Render())
 	default:
 		return "No view"
 	}
