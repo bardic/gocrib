@@ -128,3 +128,11 @@ func (p *MatchStore) GetOpenMatches(ctx echo.Context) ([]queries.Match, error) {
 
 	return matchesData, nil
 }
+
+func (p *MatchStore) GetMatchState(ctx echo.Context, matchId *int) (string, error) {
+	return "", nil
+}
+
+func (p *MatchStore) GetDeck(ctx echo.Context, matchId *int) (*queries.Deck, error) {
+	return nil, nil
+}

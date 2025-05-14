@@ -11,7 +11,7 @@ import "github.com/bardic/gocrib/server/router"
 //	@host						localhost
 //	@securityDefinitions.basic	BasicAuth
 //	@host						localhost:1323
-//	@BasePath					/v1
+//	@BasePath					/v2
 func main() {
 	router.NewRouter()
 }

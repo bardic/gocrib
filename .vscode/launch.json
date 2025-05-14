@@ -13,7 +13,6 @@
       "preLaunchTask": "dlv"
     },
     {
-      "preLaunchTask": "swag",
       "name": "server",
       "type": "go",
       "request": "launch",

@@ -16,7 +16,7 @@ import (
 // @Success	200		{object}	queries.Account
 // @Failure	400		{object}	error
 // @Failure	500		{object}	error
-// @Router		/account/login/{accountId} [post]
+// @Router		/account/{accountId} [post]
 func (h *Handler) Login(c echo.Context) error {
 	accountID, err := strconv.Atoi(c.Param("accountId"))
 	if err != nil {
