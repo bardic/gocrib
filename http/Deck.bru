@@ -1,0 +1,11 @@
+meta {
+  name: Deck
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{host}}/match/{{matchId}}/deck
+  body: none
+  auth: inherit
+}

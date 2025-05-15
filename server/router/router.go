@@ -79,7 +79,7 @@ func v2Routes(g *echo.Group) {
 	a.POST("/:accountId", accountHandler.Login)
 
 	m := g.Group("/match")
-	m.GET("/", matchHandler.GetOpenMatches)
+	m.GET("/open", matchHandler.GetOpenMatches)
 	m.POST("/:accountId", matchHandler.NewMatch)
 	m.GET("/:matchId/state", matchHandler.GetMatchState)
 	m.GET("/:matchId", matchHandler.GetMatch)

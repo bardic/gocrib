@@ -68,8 +68,6 @@ func (h *Handler) NewMatch(c echo.Context) error {
 	matchCards := make([]queries.CreateMatchCardParams, len(cards))
 
 	for i, card := range cards {
-		l.Log(zapcore.DebugLevel, "Card"+strconv.Itoa(*card.ID))
-
 		matchCards[i] = queries.CreateMatchCardParams{
 			Cardid: card.ID,
 			State:  queries.CardstateDeck,

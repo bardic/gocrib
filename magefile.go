@@ -109,3 +109,24 @@ func BuildGame() error {
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
+
+func Swag() error {
+	fmt.Println("Build swagger")
+	cmd := exec.Command("swag", "init", "--parseDependency", "--parseInternal")
+	cmd.Dir = "./server/"
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func Server() error {
+	Swag()
+	fmt.Println("Run Server")
+	cmd := exec.Command("go", "run", "main.go")
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "GOCRIB_HOST=localhost")
+	cmd.Dir = "./server/"
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}

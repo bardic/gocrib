@@ -1,6 +1,8 @@
 package account
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,7 +27,7 @@ func (h *Handler) Login(c echo.Context) error {
 
 	account, err := h.AccountStore.GetAccountByID(c, &accountID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return c.JSON(http.StatusInternalServerError, errors.New(fmt.Sprintf("failed to get account by id: %v", err)))
 	}
 
 	return c.JSON(http.StatusOK, account)

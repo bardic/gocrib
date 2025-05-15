@@ -1,0 +1,11 @@
+meta {
+  name: MatchState
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{host}}/match/{{matchId}}/state
+  body: none
+  auth: inherit
+}

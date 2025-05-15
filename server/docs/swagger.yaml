@@ -1,4 +1,4 @@
-basePath: /v1
+basePath: /v2
 definitions:
   pgtype.InfinityModifier:
     enum:
@@ -318,7 +318,7 @@ info:
   title: cribbage server
   version: 0.0.4
 paths:
-  /account/login/{accountId}:
+  /account/{accountId}:
     post:
       consumes:
       - application/json
@@ -493,6 +493,32 @@ paths:
       summary: Cut deck by index of card selected
       tags:
       - match
+  /match/{matchId}/deck:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Match ID
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get match by id
+      tags:
+      - match
   /match/{matchId}/deck/:
     get:
       consumes:
@@ -554,6 +580,40 @@ paths:
       summary: Join match by id
       tags:
       - match
+  /match/{matchId}/play:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      - description: cut id
+        in: path
+        name: cutIndex
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Cut deck by index of card selected
+      tags:
+      - match
   /match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/kitty:
     put:
       consumes:
@@ -599,6 +659,32 @@ paths:
       summary: Update kitty with ids
       tags:
       - match
+  /match/{matchId}/state:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Match ID
+        in: path
+        name: matchId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/queries.Match'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      summary: Get match by id
+      tags:
+      - match
   /open:
     get:
       consumes:
@@ -615,8 +701,8 @@ paths:
         "404":
           description: Not Found
           schema: {}
-        "422":
-          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
           schema: {}
       summary: Get match by id
       tags:
