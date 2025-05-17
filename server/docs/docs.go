@@ -171,10 +171,6 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {}
                     },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {}

@@ -1,6 +1,6 @@
 module github.com/bardic/gocrib/server
 
-go 1.23.6
+go 1.24.2
 
 require (
 	github.com/labstack/echo/v4 v4.13.3

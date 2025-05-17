@@ -1,6 +1,6 @@
 module github.com/bardic/gocrib/cli
 
-go 1.23.6
+go 1.24.2
 
 require github.com/charmbracelet/bubbletea v1.3.4
 

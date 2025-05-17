@@ -1,8 +1,5 @@
 module github.com/bardic/gocrib/vo
 
-go 1.23.6
+go 1.24.2
 
-require (
-	github.com/jackc/pgx v3.6.2+incompatible // indirect
-	github.com/pkg/errors v0.9.1 // indirect
-)
+require github.com/jackc/pgx/v5 v5.7.4

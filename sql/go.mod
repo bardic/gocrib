@@ -1,6 +1,6 @@
 module github.com/bardic/gocrib/queries
 
-go 1.23.6
+go 1.24.2
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
