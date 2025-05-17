@@ -2,7 +2,6 @@ package vo
 
 import (
 	"github.com/bardic/gocrib/vo"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -28,16 +27,26 @@ type IUIController interface {
 
 type IGameController interface {
 	IController
-	Render(*vo.GameMatch, *vo.GameDeck) string
+	Render(*vo.Match, *vo.Deck) string
 }
 
 type HandVO struct {
 	LocalPlayerID int
 	CardIDs       []int
-	Deck          *vo.GameDeck
+	Deck          *vo.Deck
 }
 
 type Tab struct {
 	Title    string
 	TabState vo.ViewState
+}
+
+type ChangeState struct {
+	NewState  string
+	AccountID int
+	MatchID   int
+}
+
+type ChangeTab struct {
+	TabIndex int
 }

@@ -10,17 +10,17 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func GetPlayerByForMatchAndAccount(matchID, playerID *int) tea.Msg {
+func GetPlayerByForMatchAndAccount(matchID, playerID int) tea.Msg {
 	endpoint := utils.EndPointBuilder(
 		EndPointPlayerByForMatchAndAccount,
-		strconv.Itoa(*matchID),
-		strconv.Itoa(*playerID),
+		strconv.Itoa(matchID),
+		strconv.Itoa(playerID),
 	)
 
 	return url(endpoint, http.MethodGet, "")
 }
 
-func PutKitty(matchID, fromPlayerID, toPlayerID *int, cards vo.HandModifier) tea.Msg {
+func PutKitty(matchID, fromPlayerID, toPlayerID int, cards vo.HandModifier) tea.Msg {
 	b, err := json.Marshal(cards)
 	if err != nil {
 		return err
@@ -28,15 +28,15 @@ func PutKitty(matchID, fromPlayerID, toPlayerID *int, cards vo.HandModifier) tea
 
 	endpoint := utils.EndPointBuilder(
 		EndPointKitty,
-		strconv.Itoa(*matchID),
-		strconv.Itoa(*fromPlayerID),
-		strconv.Itoa(*toPlayerID),
+		strconv.Itoa(matchID),
+		strconv.Itoa(fromPlayerID),
+		strconv.Itoa(toPlayerID),
 	)
 
 	return url(endpoint, http.MethodPut, string(b))
 }
 
-func PutPlay(matchID, fromPlayerID, toPlayerID *int, cards vo.HandModifier) tea.Msg {
+func PutPlay(matchID, fromPlayerID, toPlayerID int, cards vo.HandModifier) tea.Msg {
 	b, err := json.Marshal(cards)
 	if err != nil {
 		return err
@@ -44,9 +44,9 @@ func PutPlay(matchID, fromPlayerID, toPlayerID *int, cards vo.HandModifier) tea.
 
 	endpoint := utils.EndPointBuilder(
 		EndPointPlay,
-		strconv.Itoa(*matchID),
-		strconv.Itoa(*fromPlayerID),
-		strconv.Itoa(*toPlayerID),
+		strconv.Itoa(matchID),
+		strconv.Itoa(fromPlayerID),
+		strconv.Itoa(toPlayerID),
 	)
 
 	return url(endpoint, http.MethodPut, string(b))

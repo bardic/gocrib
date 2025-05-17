@@ -10,13 +10,6 @@ definitions:
     - Infinity
     - Finite
     - NegativeInfinity
-  pgtype.Text:
-    properties:
-      string:
-        type: string
-      valid:
-        type: boolean
-    type: object
   pgtype.Timestamptz:
     properties:
       infinityModifier:
@@ -26,80 +19,6 @@ definitions:
       valid:
         type: boolean
     type: object
-  queries.Account:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
-  queries.Card:
-    properties:
-      art:
-        type: string
-      id:
-        type: integer
-      suit:
-        $ref: '#/definitions/queries.Cardsuit'
-      value:
-        $ref: '#/definitions/queries.Cardvalue'
-    type: object
-  queries.Cardstate:
-    enum:
-    - Deck
-    - Hand
-    - Play
-    - Kitty
-    type: string
-    x-enum-varnames:
-    - CardstateDeck
-    - CardstateHand
-    - CardstatePlay
-    - CardstateKitty
-  queries.Cardsuit:
-    enum:
-    - Spades
-    - Clubs
-    - Hearts
-    - Diamonds
-    type: string
-    x-enum-varnames:
-    - CardsuitSpades
-    - CardsuitClubs
-    - CardsuitHearts
-    - CardsuitDiamonds
-  queries.Cardvalue:
-    enum:
-    - Ace
-    - Two
-    - Three
-    - Four
-    - Five
-    - Six
-    - Seven
-    - Eight
-    - Nine
-    - Ten
-    - Jack
-    - Queen
-    - King
-    - Joker
-    type: string
-    x-enum-varnames:
-    - CardvalueAce
-    - CardvalueTwo
-    - CardvalueThree
-    - CardvalueFour
-    - CardvalueFive
-    - CardvalueSix
-    - CardvalueSeven
-    - CardvalueEight
-    - CardvalueNine
-    - CardvalueTen
-    - CardvalueJack
-    - CardvalueQueen
-    - CardvalueKing
-    - CardvalueJoker
   queries.Gamestate:
     enum:
     - New
@@ -130,35 +49,6 @@ definitions:
     - GamestateKitty
     - GamestateWon
     - GamestateLost
-  queries.GetCardsForMatchIdRow:
-    properties:
-      art:
-        $ref: '#/definitions/pgtype.Text'
-      cardid:
-        type: integer
-      currowner:
-        type: integer
-      cutmatchcardid:
-        type: integer
-      deckid:
-        type: integer
-      id:
-        type: integer
-      id_2:
-        type: integer
-      id_3:
-        type: integer
-      matchcardid:
-        type: integer
-      origowner:
-        type: integer
-      state:
-        $ref: '#/definitions/queries.Cardstate'
-      suit:
-        $ref: '#/definitions/queries.NullCardsuit'
-      value:
-        $ref: '#/definitions/queries.NullCardvalue'
-    type: object
   queries.Match:
     properties:
       art:
@@ -171,8 +61,6 @@ definitions:
         type: integer
       dealerid:
         type: integer
-      deckid:
-        type: integer
       elorangemax:
         type: integer
       elorangemin:
@@ -188,54 +76,50 @@ definitions:
           $ref: '#/definitions/pgtype.Timestamptz'
         type: array
     type: object
-  queries.Matchcard:
+  vo.Account:
     properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  vo.Card:
+    properties:
+      art:
+        type: string
       cardid:
         type: integer
       currowner:
         type: integer
       id:
         type: integer
+      name:
+        type: string
       origowner:
         type: integer
+      rank:
+        type: integer
       state:
-        $ref: '#/definitions/queries.Cardstate'
+        type: string
+      suit:
+        type: string
+      value:
+        type: integer
     type: object
-  queries.NullCardsuit:
-    properties:
-      cardsuit:
-        $ref: '#/definitions/queries.Cardsuit'
-      valid:
-        description: Valid is true if Cardsuit is not NULL
-        type: boolean
-    type: object
-  queries.NullCardvalue:
-    properties:
-      cardvalue:
-        $ref: '#/definitions/queries.Cardvalue'
-      valid:
-        description: Valid is true if Cardvalue is not NULL
-        type: boolean
-    type: object
-  vo.GameCard:
-    properties:
-      card:
-        $ref: '#/definitions/queries.Card'
-      match:
-        $ref: '#/definitions/queries.Matchcard'
-    type: object
-  vo.GameDeck:
+  vo.Deck:
     properties:
       cards:
         items:
-          $ref: '#/definitions/vo.GameCard'
+          $ref: '#/definitions/vo.Card'
         type: array
       cutmatchcardid:
         type: integer
       id:
         type: integer
+      matchid:
+        type: integer
     type: object
-  vo.GameMatch:
+  vo.Match:
     properties:
       art:
         type: string
@@ -247,19 +131,17 @@ definitions:
         type: integer
       dealerid:
         type: integer
-      deckid:
-        type: integer
       elorangemax:
         type: integer
       elorangemin:
         type: integer
       gamestate:
-        $ref: '#/definitions/queries.Gamestate'
+        type: string
       id:
         type: integer
       players:
         items:
-          $ref: '#/definitions/vo.GamePlayer'
+          $ref: '#/definitions/vo.Player'
         type: array
       privatematch:
         type: boolean
@@ -268,7 +150,7 @@ definitions:
           $ref: '#/definitions/pgtype.Timestamptz'
         type: array
     type: object
-  vo.GamePlayer:
+  vo.Player:
     properties:
       accountid:
         type: integer
@@ -276,7 +158,7 @@ definitions:
         type: string
       hand:
         items:
-          $ref: '#/definitions/vo.GameCard'
+          $ref: '#/definitions/vo.Card'
         type: array
       id:
         type: integer
@@ -284,31 +166,15 @@ definitions:
         type: boolean
       kitty:
         items:
-          $ref: '#/definitions/vo.GameCard'
+          $ref: '#/definitions/vo.Card'
         type: array
       play:
         items:
-          $ref: '#/definitions/vo.GameCard'
+          $ref: '#/definitions/vo.Card'
         type: array
       score:
         type: integer
       turnOrder:
-        type: integer
-    type: object
-  vo.HandModifier:
-    properties:
-      cardIDs:
-        items:
-          type: integer
-        type: array
-    type: object
-  vo.MatchDetailsResponse:
-    properties:
-      gameState:
-        $ref: '#/definitions/queries.Gamestate'
-      matchID:
-        type: integer
-      playerID:
         type: integer
     type: object
 host: localhost:1323
@@ -336,7 +202,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/queries.Account'
+            $ref: '#/definitions/vo.Account'
         "400":
           description: Bad Request
           schema: {}
@@ -365,13 +231,10 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-        "404":
-          description: Not Found
-          schema: {}
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Create new match
+      summary: Create new match with accountId
       tags:
       - match
   /match/{matchId}:
@@ -390,73 +253,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/queries.Match'
-        "404":
-          description: Not Found
+            $ref: '#/definitions/vo.Match'
+        "400":
+          description: Bad Request
           schema: {}
-        "422":
-          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
           schema: {}
       summary: Get match by id
-      tags:
-      - match
-  /match/{matchId}/account/{accountId}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      - description: account id
-        in: path
-        name: accountId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.GamePlayer'
-        "404":
-          description: Not Found
-          schema: {}
-        "422":
-          description: Unprocessable Entity
-          schema: {}
-      summary: Get match card by match id
-      tags:
-      - match
-  /match/{matchId}/cards:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/queries.GetCardsForMatchIdRow'
-            type: array
-        "404":
-          description: Not Found
-          schema: {}
-        "422":
-          description: Unprocessable Entity
-          schema: {}
-      summary: Get match card by match id
       tags:
       - match
   /match/{matchId}/cut/{cutId}:
@@ -497,6 +301,7 @@ paths:
     get:
       consumes:
       - application/json
+      description: Returns vo.Match object when given a matchId
       parameters:
       - description: Match ID
         in: path
@@ -509,43 +314,16 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/queries.Match'
-        "404":
-          description: Not Found
+            $ref: '#/definitions/vo.Deck'
+        "400":
+          description: Bad Request
           schema: {}
-        "422":
-          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
           schema: {}
-      summary: Get match by id
+      summary: Get decks by matchDd
       tags:
       - match
-  /match/{matchId}/deck/:
-    get:
-      consumes:
-      - application/json
-      description: Get vo.GameDeck by match id
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/vo.GameDeck'
-        "404":
-          description: Not Found
-          schema: {}
-        "422":
-          description: Unprocessable Entity
-          schema: {}
-      summary: Get deck
-      tags:
-      - deck
   /match/{matchId}/join/{accountId}:
     put:
       consumes:
@@ -567,7 +345,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/vo.MatchDetailsResponse'
+            $ref: '#/definitions/vo.Match'
         "400":
           description: Bad Request
           schema: {}
@@ -605,58 +383,10 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-        "404":
-          description: Not Found
-          schema: {}
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Cut deck by index of card selected
-      tags:
-      - match
-  /match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/kitty:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: match id
-        in: path
-        name: matchId
-        required: true
-        type: integer
-      - description: from player id
-        in: path
-        name: playerId
-        required: true
-        type: integer
-      - description: to player id
-        in: path
-        name: toPlayerId
-        required: true
-        type: integer
-      - description: array of ids to add to kitty
-        in: body
-        name: details
-        required: true
-        schema:
-          $ref: '#/definitions/vo.HandModifier'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/queries.Match'
-        "400":
-          description: Bad Request
-          schema: {}
-        "404":
-          description: Not Found
-          schema: {}
-        "500":
-          description: Internal Server Error
-          schema: {}
-      summary: Update kitty with ids
+      summary: Update the state of several cards
       tags:
       - match
   /match/{matchId}/state:
@@ -676,13 +406,13 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/queries.Match'
-        "404":
-          description: Not Found
+        "400":
+          description: Bad Request
           schema: {}
-        "422":
-          description: Unprocessable Entity
+        "500":
+          description: Internal Server Error
           schema: {}
-      summary: Get match by id
+      summary: Get state by matchId
       tags:
       - match
   /open:
@@ -696,7 +426,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/vo.GameMatch'
+              $ref: '#/definitions/vo.Match'
             type: array
         "404":
           description: Not Found
@@ -704,7 +434,7 @@ paths:
         "500":
           description: Internal Server Error
           schema: {}
-      summary: Get match by id
+      summary: Get list of open matches
       tags:
       - match
 securityDefinitions:

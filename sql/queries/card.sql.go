@@ -12,9 +12,9 @@ import (
 )
 
 type CreateMatchCardParams struct {
-	Cardid    *int
-	Origowner *int
-	Currowner *int
+	Cardid    int
+	Origowner int
+	Currowner int
 	State     Cardstate
 }
 
@@ -50,7 +50,7 @@ func (q *Queries) GetCards(ctx context.Context) ([]Card, error) {
 const getCardsForMatchId = `-- name: GetCardsForMatchId :many
 SELECT 
     deck_matchcard.deckid, deck_matchcard.matchcardid, 
-    deck.id, deck.cutmatchcardid,
+    deck.id, deck.cutmatchcardid, deck.matchid,
     matchcard.id, matchcard.cardid, matchcard.origowner, matchcard.currowner, matchcard.state,
     card.id, card.value, card.suit, card.art
 FROM
@@ -68,22 +68,23 @@ WHERE
 `
 
 type GetCardsForMatchIdRow struct {
-	Deckid         *int
-	Matchcardid    *int
-	ID             *int
-	Cutmatchcardid *int
-	ID_2           *int
-	Cardid         *int
-	Origowner      *int
-	Currowner      *int
+	Deckid         int
+	Matchcardid    int
+	ID             int
+	Cutmatchcardid int
+	Matchid        int
+	ID_2           int
+	Cardid         int
+	Origowner      int
+	Currowner      int
 	State          Cardstate
-	ID_3           *int
+	ID_3           int
 	Value          NullCardvalue
 	Suit           NullCardsuit
 	Art            pgtype.Text
 }
 
-func (q *Queries) GetCardsForMatchId(ctx context.Context, id *int) ([]GetCardsForMatchIdRow, error) {
+func (q *Queries) GetCardsForMatchId(ctx context.Context, id int) ([]GetCardsForMatchIdRow, error) {
 	rows, err := q.db.Query(ctx, getCardsForMatchId, id)
 	if err != nil {
 		return nil, err
@@ -97,6 +98,7 @@ func (q *Queries) GetCardsForMatchId(ctx context.Context, id *int) ([]GetCardsFo
 			&i.Matchcardid,
 			&i.ID,
 			&i.Cutmatchcardid,
+			&i.Matchid,
 			&i.ID_2,
 			&i.Cardid,
 			&i.Origowner,
@@ -120,7 +122,7 @@ func (q *Queries) GetCardsForMatchId(ctx context.Context, id *int) ([]GetCardsFo
 const getCardsForMatchIdAndState = `-- name: GetCardsForMatchIdAndState :many
 SELECT 
     deck_matchcard.deckid, deck_matchcard.matchcardid, 
-    deck.id, deck.cutmatchcardid,
+    deck.id, deck.cutmatchcardid, deck.matchid,
     matchcard.id, matchcard.cardid, matchcard.origowner, matchcard.currowner, matchcard.state,
     card.id, card.value, card.suit, card.art
 FROM
@@ -138,21 +140,22 @@ WHERE
 `
 
 type GetCardsForMatchIdAndStateParams struct {
-	ID    *int
+	ID    int
 	State Cardstate
 }
 
 type GetCardsForMatchIdAndStateRow struct {
-	Deckid         *int
-	Matchcardid    *int
-	ID             *int
-	Cutmatchcardid *int
-	ID_2           *int
-	Cardid         *int
-	Origowner      *int
-	Currowner      *int
+	Deckid         int
+	Matchcardid    int
+	ID             int
+	Cutmatchcardid int
+	Matchid        int
+	ID_2           int
+	Cardid         int
+	Origowner      int
+	Currowner      int
 	State          Cardstate
-	ID_3           *int
+	ID_3           int
 	Value          NullCardvalue
 	Suit           NullCardsuit
 	Art            pgtype.Text
@@ -172,6 +175,7 @@ func (q *Queries) GetCardsForMatchIdAndState(ctx context.Context, arg GetCardsFo
 			&i.Matchcardid,
 			&i.ID,
 			&i.Cutmatchcardid,
+			&i.Matchid,
 			&i.ID_2,
 			&i.Cardid,
 			&i.Origowner,
@@ -207,19 +211,19 @@ WHERE
 `
 
 type GetCardsForPlayerIdFromDeckIdParams struct {
-	Deckid    *int
-	Origowner *int
+	Deckid    int
+	Origowner int
 }
 
 type GetCardsForPlayerIdFromDeckIdRow struct {
-	ID        *int
+	ID        int
 	Value     Cardvalue
 	Suit      Cardsuit
 	Art       string
-	ID_2      *int
-	Cardid    *int
-	Origowner *int
-	Currowner *int
+	ID_2      int
+	Cardid    int
+	Origowner int
+	Currowner int
 	State     NullCardstate
 }
 
@@ -259,9 +263,9 @@ UPDATE matchcard SET state = $1, origowner = $2, currowner = $3 WHERE id = $4
 
 type UpdateMatchCardStateParams struct {
 	State     Cardstate
-	Origowner *int
-	Currowner *int
-	ID        *int
+	Origowner int
+	Currowner int
+	ID        int
 }
 
 func (q *Queries) UpdateMatchCardState(ctx context.Context, arg UpdateMatchCardStateParams) error {

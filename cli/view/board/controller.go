@@ -1,8 +1,6 @@
 package board
 
 import (
-	"github.com/bardic/gocrib/queries/queries"
-
 	"github.com/bardic/gocrib/cli/services"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
@@ -15,7 +13,7 @@ type Controller struct {
 	model *Model
 }
 
-func NewBoard(gameMatch *vo.GameMatch, player *vo.GamePlayer) *Controller {
+func NewBoard(gameMatch *vo.Match, player *vo.Player) *Controller {
 	ctrl := &Controller{
 		model: &Model{
 			AccountID:   player.Accountid,
@@ -23,12 +21,11 @@ func NewBoard(gameMatch *vo.GameMatch, player *vo.GamePlayer) *Controller {
 			Gamestate:   gameMatch.Gamestate,
 		},
 		view: &View{
-			State:         queries.GamestateCut,
+			State:         "Cut",
 			Match:         gameMatch,
 			LocalPlayerID: player.Accountid,
 		},
 	}
-
 	ctrl.view.Init()
 
 	return ctrl
@@ -46,7 +43,7 @@ func (ctrl *Controller) GetName() string {
 	return "Board"
 }
 
-func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) string {
+func (ctrl *Controller) Render(gameMatch *vo.Match, gameDeck *vo.Deck) string {
 	ctrl.model.Gamestate = gameMatch.Gamestate
 	return ctrl.view.Render()
 }
@@ -71,8 +68,8 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 
 func (ctrl *Controller) Enter() tea.Msg {
 	switch ctrl.model.Gamestate {
-	case queries.GamestateCut:
-		resp := services.CutDeck(*ctrl.model.GameMatchID, ctrl.view.CutInput.Value())
+	case "Cut":
+		resp := services.CutDeck(ctrl.model.GameMatchID, ctrl.view.CutInput.Value())
 		return resp
 	}
 

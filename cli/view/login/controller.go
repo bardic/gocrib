@@ -3,13 +3,10 @@ package login
 import (
 	"encoding/json"
 
-	"github.com/bardic/gocrib/queries/queries"
-	"github.com/bardic/gocrib/vo"
-
 	"github.com/bardic/gocrib/cli/services"
 	logger "github.com/bardic/gocrib/cli/utils/log"
 	cliVO "github.com/bardic/gocrib/cli/vo"
-
+	"github.com/bardic/gocrib/vo"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -50,15 +47,15 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		l.Sugar().Info("Enter")
 		idStr := ctrl.view.loginIDField.Value()
 
-		var accountDetails queries.Account
+		var accountDetails *vo.Account
 		msg := services.Login(idStr)
 		err := json.Unmarshal(msg.([]byte), &accountDetails)
 		if err != nil {
 			return nil
 		}
 
-		return vo.StateChangeMsg{
-			NewState:  vo.LobbyView,
+		return cliVO.ChangeState{
+			NewState:  "Lobby",
 			AccountID: accountDetails.ID,
 		}
 

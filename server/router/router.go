@@ -4,14 +4,10 @@ import (
 	"net/http"
 
 	_ "github.com/bardic/gocrib/server/docs"
-
-	"github.com/bardic/gocrib/server/route/account"
-	"github.com/bardic/gocrib/server/route/match"
-
+	"github.com/bardic/gocrib/server/route"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-
-	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -39,52 +35,19 @@ func NewRouter() *echo.Echo {
 	return e
 }
 
-// func v1Routes(g *echo.Group) {
-// 	matchHandler := match.NewHandler()
-// 	deckHandler := deck.NewHandler()
-// 	playerHandler := player.NewHandler()
-// 	accountHandler := account.NewHandler()
-//
-// 	g.GET("/open", matchHandler.GetOpenMatches)
-// 	g.GET("/match/:matchId", matchHandler.GetMatch)
-// 	g.POST("/match/:accountId", matchHandler.NewMatch)
-//
-// 	// Match
-// 	matchGroup := g.Group("/match/:matchId")
-// 	matchGroup.GET("/cards", matchHandler.GetMatchCardsForMatchID)
-// 	matchGroup.GET("/account/:accountId", matchHandler.GetPlayerIDForMatchAndAccount)
-// 	matchGroup.PUT("/cut/:cutIndex", matchHandler.CutDeck)
-// 	matchGroup.PUT("/join/:accountId", matchHandler.JoinMatch)
-//
-// 	// Player
-// 	playerGroup := g.Group("/player/:playerId")
-// 	playerGroup.PUT("/to/:toPlayerId/kitty", playerHandler.UpdateKitty)
-// 	playerGroup.PUT("/to/:toPlayerId/play", playerHandler.UpdatePlay)
-//
-// 	// Deck
-// 	matchGroup.GET("/deck", deckHandler.GetDeckByMatchID)
-//
-// 	// Account
-// 	accountGroup := g.Group("/account")
-// 	accountGroup.POST("/login/:accountId", accountHandler.Login)
-// }
-
 func v2Routes(g *echo.Group) {
-	matchHandler := match.NewHandler()
-	// deckHandler := deck.NewHandler()
-	// playerHandler := player.NewHandler()
-	accountHandler := account.NewHandler()
+	h := route.NewHandler()
 
 	a := g.Group("/account")
-	a.POST("/:accountId", accountHandler.Login)
+	a.POST("/:accountId", h.Login)
 
 	m := g.Group("/match")
-	m.GET("/open", matchHandler.GetOpenMatches)
-	m.POST("/:accountId", matchHandler.NewMatch)
-	m.GET("/:matchId/state", matchHandler.GetMatchState)
-	m.GET("/:matchId", matchHandler.GetMatch)
-	m.PUT("/:matchId/join/:accountId", matchHandler.JoinMatch)
-	m.PUT("/:matchId/play", matchHandler.Play)
-	m.PUT("/:matchId/cut/:deckIndex", matchHandler.CutDeck)
-	m.GET("/:matchId/deck", matchHandler.GetDeck)
+	m.GET("/open", h.GetOpenMatches)
+	m.POST("/:accountId", h.NewMatch)
+	m.GET("/:matchId/state", h.GetMatchState)
+	m.GET("/:matchId", h.GetMatch)
+	m.PUT("/:matchId/join/:accountId", h.JoinMatch)
+	m.PUT("/:matchId/play", h.Play)
+	m.PUT("/:matchId/cut/:deckIndex", h.CutDeck)
+	m.GET("/:matchId/deck", h.GetDeck)
 }

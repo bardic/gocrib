@@ -4,13 +4,9 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/bardic/gocrib/vo"
-
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/utils"
-
-	"github.com/bardic/gocrib/queries/queries"
-
+	"github.com/bardic/gocrib/vo"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -18,9 +14,9 @@ import (
 type View struct {
 	CutInput      textinput.Model
 	isLoading     bool
-	State         queries.Gamestate
-	LocalPlayerID *int
-	Match         *vo.GameMatch
+	State         string
+	LocalPlayerID int
+	Match         *vo.Match
 }
 
 var (
@@ -30,7 +26,7 @@ var (
 
 func (view *View) Init() {
 	matchMsg := services.GetMatchByID(view.Match.ID)
-	var match *queries.Match
+	var match *vo.Match
 	if err := json.Unmarshal(matchMsg.([]byte), &match); err != nil {
 		return
 	}
@@ -56,7 +52,7 @@ func (view *View) Render() string {
 	doc := strings.Builder{}
 	viewBuilder := strings.Builder{}
 
-	if view.State == queries.GamestateCut {
+	if view.State == "Cut" {
 		viewBuilder.WriteString(view.CutInput.View() + " \n")
 	} else {
 		viewBuilder.WriteString("\n")
@@ -89,10 +85,8 @@ func (view *View) BuildHeader() string {
 }
 
 func (view *View) BuildFooter() string {
-	p := utils.GetPlayerForAccountID(view.LocalPlayerID, view.Match)
 	f := utils.BuildCommonFooter(
 		view.Match,
-		p,
 	)
 	return f
 }

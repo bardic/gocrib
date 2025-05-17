@@ -5,7 +5,6 @@ import (
 
 	"github.com/bardic/gocrib/cli/styles"
 	cliVO "github.com/bardic/gocrib/cli/vo"
-
 	"github.com/charmbracelet/lipgloss"
 )
 

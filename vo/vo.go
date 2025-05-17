@@ -1,46 +1,71 @@
 package vo
 
-import "github.com/bardic/gocrib/queries/queries"
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
-type GamePlayer struct {
-	*queries.Player
+type Account struct {
+	ID   int
+	Name string
+}
+
+type MatchState struct {
+	ID    int
+	State string
+}
+
+type Player struct {
+	ID        int
+	Accountid int
+	Score     int
+	Isready   bool
+	Art       string
 	TurnOrder int
-	Hand      []GameCard
-	Play      []GameCard
-	Kitty     []GameCard
+	Hand      []*Card
+	Play      []*Card
+	Kitty     []*Card
 }
 
-type GameMatch struct {
-	*queries.Match
-	Players []*GamePlayer
+type Match struct {
+	ID                 int
+	Creationdate       pgtype.Timestamptz
+	Privatematch       bool
+	Elorangemin        int
+	Elorangemax        int
+	Cutgamecardid      int
+	Dealerid           int
+	Currentplayerturn  int
+	Turnpasstimestamps []pgtype.Timestamptz
+	Gamestate          string
+	Art                string
+	Players            []*Player
 }
 
-type ScoreMatch struct {
-	ActivePlayerID *int
-	PlayerSeekID   *int
-	CardsInPlay    *[]GameCard
-	Players        *[]GamePlayer
+type HandScore struct {
+	ActivePlayerID int
+	PlayerSeekID   int
+	CardsInPlay    []*Card
+	Players        []*Player
 }
 
-type GameDeck struct {
-	*queries.Deck
-	Cards []*GameCard
+type Deck struct {
+	ID             int
+	Cutmatchcardid int
+	Matchid        int
+	Cards          []*Card
 }
 
-type GameCard struct {
-	Match queries.Matchcard
-	Card  queries.Card
-}
-
-type GameCardDetails struct {
-	Value *int
-	Order *int
-}
-
-type MatchDetailsResponse struct {
-	MatchID   *int
-	PlayerID  *int
-	GameState queries.Gamestate
+type Card struct {
+	ID        int
+	Cardid    int
+	Origowner int
+	Currowner int
+	State     string
+	Name      string
+	Rank      int
+	Value     int
+	Suit      string
+	Art       string
 }
 
 type HandModifier struct {
@@ -48,12 +73,12 @@ type HandModifier struct {
 }
 
 type ScoreResults struct {
-	Results []Scores
+	Results []*Scores
 }
 
 type Scores struct {
-	Cards []GameCard
-	Point *int
+	Cards []*Card
+	Point int
 }
 
 type ViewStateName uint
@@ -78,22 +103,3 @@ const (
 	HandView
 	KittyView
 )
-
-type StateChangeMsg struct {
-	NewState  ViewStateName
-	AccountID *int
-	MatchID   *int
-}
-
-type ChangeTabMsg struct {
-	TabIndex int
-}
-
-type PlayerReady struct {
-	MatchID  *int
-	PlayerID *int
-}
-
-type Hand struct {
-	Cards []queries.Matchcard
-}

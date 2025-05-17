@@ -1,7 +1,6 @@
-package account
+package route
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -15,19 +14,19 @@ import (
 // @Accept		json
 // @Produce	json
 // @Param		accountId		path		int	true	"account id"'
-// @Success	200		{object}	queries.Account
+// @Success	200		{object}	vo.Account
 // @Failure	400		{object}	error
 // @Failure	500		{object}	error
 // @Router		/account/{accountId} [post]
 func (h *Handler) Login(c echo.Context) error {
 	accountID, err := strconv.Atoi(c.Param("accountId"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, fmt.Errorf("can't convert param accountId: %w", err))
 	}
 
-	account, err := h.AccountStore.GetAccountByID(c, &accountID)
+	account, err := h.AccountStore.GetAccountByID(c, accountID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, errors.New(fmt.Sprintf("failed to get account by id: %v", err)))
+		return c.JSON(http.StatusInternalServerError, fmt.Errorf("failed to get account by id: %w", err))
 	}
 
 	return c.JSON(http.StatusOK, account)

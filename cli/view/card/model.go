@@ -1,7 +1,6 @@
 package card
 
 import (
-	"github.com/bardic/gocrib/queries/queries"
 	"github.com/bardic/gocrib/vo"
 
 	cliVO "github.com/bardic/gocrib/cli/vo"
@@ -9,11 +8,11 @@ import (
 
 type Model struct {
 	*cliVO.HandVO
-	State           queries.Gamestate
+	State           string
 	ActiveSlotIndex int
 	SelectedCardIDs []int
 	Name            string
-	LocalPlayer     *vo.GamePlayer
-	ActivePlayerID  *int
-	GameMatchID     *int
+	LocalPlayer     *vo.Player
+	ActivePlayerID  int
+	GameMatchID     int
 }

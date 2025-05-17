@@ -13,22 +13,22 @@ import (
 type View struct {
 	ActiveCardID    int
 	SelectedCardIDs []int
-	LocalPlayer     *vo.GamePlayer
+	LocalPlayer     *vo.Player
 	Tabname         string
 }
 
-func NewCardView(localPlayer *vo.GamePlayer, tabName string) *View {
+func NewCardView(localPlayer *vo.Player, tabName string) *View {
 	return &View{
 		LocalPlayer: localPlayer,
 		Tabname:     tabName,
 	}
 }
 
-func (view *View) Update(gameMatch *vo.GameMatch) error {
+func (view *View) Update(gameMatch *vo.Match) error {
 	return nil
 }
 
-func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []int) string {
+func (view *View) Render(gameMatch *vo.Match, gameDeck *vo.Deck, hand []int) string {
 	var s string
 	var cardViews []string
 
@@ -40,7 +40,7 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 			continue
 		}
 
-		cardStr := fmt.Sprintf("%v%v", utils.GetCardSuit(&c.Card), c.Card.Value)
+		cardStr := fmt.Sprintf("%v%v", c.Suit, c.Value)
 		var styledCard string
 
 		top := lipgloss.Place(0, 0, lipgloss.Right, lipgloss.Bottom, cardStr)
@@ -61,10 +61,10 @@ func (view *View) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck, hand []
 
 		// Original owner seems to be account id and not match player id
 
-		if c.Match.Origowner != nil {
-			styledCard = styles.PlayerStyles[*c.Match.Origowner].Render(styledCard)
+		if c.Origowner != view.LocalPlayer.ID {
+			styledCard = styles.PlayerStyles[c.Origowner].Render(styledCard)
 		} else {
-			styledCard = styles.PlayerStyles[*c.Match.Currowner].Render(styledCard)
+			styledCard = styles.PlayerStyles[c.Currowner].Render(styledCard)
 		}
 
 		cardViews = append(cardViews, styledCard)
@@ -81,8 +81,8 @@ func (view *View) BuildHeader() string {
 	return ""
 }
 
-func (view *View) BuildFooter(gameMatch *vo.GameMatch) string {
-	f := utils.BuildCommonFooter(gameMatch, view.LocalPlayer)
+func (view *View) BuildFooter(gameMatch *vo.Match) string {
+	f := utils.BuildCommonFooter(gameMatch)
 
 	return f
 }

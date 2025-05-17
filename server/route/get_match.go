@@ -1,4 +1,4 @@
-package match
+package route
 
 import (
 	"net/http"
@@ -15,9 +15,9 @@ import (
 //	@Accept		json
 //	@Produce		json
 //	@Param		matchId	path		int	true	"Match ID"'
-//	@Success	200	{object}	queries.Match
-//	@Failure	404	{object}	error
-//	@Failure	422	{object}	error
+//	@Success	200	{object}	vo.Match
+//	@Failure	400	{object}	error
+//	@Failure	500	{object}	error
 //	@Router		/match/{matchId} [get]
 func (h *Handler) GetMatch(c echo.Context) error {
 	p := c.Param("matchId")
@@ -26,7 +26,7 @@ func (h *Handler) GetMatch(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	m, err := h.MatchStore.GetMatch(c, &matchID)
+	m, err := h.MatchStore.GetMatch(c, matchID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

@@ -12,8 +12,8 @@ sql:
           - db_type: "pg_catalog.int4"
             nullable: true
             go_type:
-              type:  "*int"
+              type:  "int"
           - db_type: "pg_catalog.int4"
             nullable: false
             go_type:
-              type:  "*int"
+              type:  "int"

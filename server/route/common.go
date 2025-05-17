@@ -1,4 +1,4 @@
-package match
+package route
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/bardic/gocrib/queries/queries"
-
 	conn "github.com/bardic/gocrib/server/db"
 	"github.com/bardic/gocrib/vo"
 )
@@ -15,7 +14,7 @@ const (
 	CtxTimeout = 5 * time.Second
 )
 
-func UpdateGameState(matchID *int, state queries.Gamestate) error {
+func UpdateGameState(matchID int, state queries.Gamestate) error {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -34,7 +33,7 @@ func UpdateGameState(matchID *int, state queries.Gamestate) error {
 	return nil
 }
 
-func GetMatch(id *int) (*vo.GameMatch, error) {
+func GetMatch(id int) (*vo.Match, error) {
 	db := conn.Pool()
 	defer db.Close()
 	q := queries.New(db)
@@ -50,7 +49,7 @@ func GetMatch(id *int) (*vo.GameMatch, error) {
 		return nil, err
 	}
 
-	var match *vo.GameMatch
+	var match *vo.Match
 	err = json.Unmarshal(m, &match)
 	if err != nil {
 		return nil, err

@@ -10,31 +10,17 @@ import (
 )
 
 type AddCardToDeckParams struct {
-	Deckid      *int
-	Matchcardid *int
+	Deckid      int
+	Matchcardid int
 }
 
 const createDeck = `-- name: CreateDeck :one
-INSERT INTO deck(cutmatchcardid) VALUES (null) RETURNING id, cutmatchcardid
+INSERT INTO deck(cutmatchcardid) VALUES (null) RETURNING id, cutmatchcardid, matchid
 `
 
 func (q *Queries) CreateDeck(ctx context.Context) (Deck, error) {
 	row := q.db.QueryRow(ctx, createDeck)
 	var i Deck
-	err := row.Scan(&i.ID, &i.Cutmatchcardid)
-	return i, err
-}
-
-const getDeckForMatchId = `-- name: GetDeckForMatchId :one
-SELECT deck.id, deck.cutmatchcardid FROM deck
-LEFT JOIN
-    match ON deck.id=match.deckid
-WHERE match.id=$1 LIMIT 1
-`
-
-func (q *Queries) GetDeckForMatchId(ctx context.Context, id *int) (Deck, error) {
-	row := q.db.QueryRow(ctx, getDeckForMatchId, id)
-	var i Deck
-	err := row.Scan(&i.ID, &i.Cutmatchcardid)
+	err := row.Scan(&i.ID, &i.Cutmatchcardid, &i.Matchid)
 	return i, err
 }

@@ -7,9 +7,9 @@ import (
 )
 
 type Model struct {
-	AccountID     *int
-	Gamematch     *vo.GameMatch
-	GameDeck      *vo.GameDeck
+	AccountID     int
+	Gamematch     *vo.Match
+	GameDeck      *vo.Deck
 	Tabs          []cliVO.Tab
 	State         vo.ViewState
 	States        []vo.ViewState
@@ -17,7 +17,7 @@ type Model struct {
 	ActiveTab     int
 }
 
-func NewModel(match *vo.GameMatch, player *vo.GamePlayer, gameDeck *vo.GameDeck) *Model {
+func NewModel(match *vo.Match, player *vo.Player, gameDeck *vo.Deck) *Model {
 	return &Model{
 		GameDeck:  gameDeck,
 		AccountID: player.Accountid,
@@ -48,10 +48,10 @@ func (m *Model) GetSubcontroller() cliVO.IController {
 	return m.Subcontroller
 }
 
-func (m *Model) GetMatch() *vo.GameMatch {
+func (m *Model) GetMatch() *vo.Match {
 	return m.Gamematch
 }
 
-func (m *Model) GetPlayer() *vo.GamePlayer {
+func (m *Model) GetPlayer() *vo.Player {
 	return utils.GetPlayerForAccountID(m.AccountID, m.Gamematch)
 }

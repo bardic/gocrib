@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/bardic/gocrib/cli/styles"
-
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )

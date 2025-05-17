@@ -1,24 +1,21 @@
-package match
+package route
 
 import (
 	"net/http"
 	"strconv"
 
+	logger "github.com/bardic/gocrib/cli/utils/log"
 	"github.com/bardic/gocrib/queries/queries"
-	"go.uber.org/zap/zapcore"
-
-	"github.com/bardic/gocrib/vo"
-
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
-
-	logger "github.com/bardic/gocrib/cli/utils/log"
+	"go.uber.org/zap/zapcore"
 )
 
 var zero = 0
 
 // NewMatch route
-// @Summary	Create new match
+//
+// @Summary	Create new match with accountId
 // @Description
 // @Tags		match
 // @Accept		json
@@ -26,7 +23,6 @@ var zero = 0
 // @Param		accountId	path		int	true	"account id"'
 // @Success	200		{object}	int
 // @Failure	400		{object}	error
-// @Failure	404		{object}	error
 // @Failure	500		{object}	error
 // @Router		/match/{accountId} [post]
 func (h *Handler) NewMatch(c echo.Context) error {
@@ -45,10 +41,9 @@ func (h *Handler) NewMatch(c echo.Context) error {
 
 	match, err := h.MatchStore.CreateMatch(c, queries.CreateMatchParams{
 		Privatematch:       false,
-		Elorangemin:        &zero,
-		Elorangemax:        &zero,
-		Deckid:             deck.ID,
-		Cutgamecardid:      &zero,
+		Elorangemin:        zero,
+		Elorangemax:        zero,
+		Cutgamecardid:      zero,
 		Turnpasstimestamps: []pgtype.Timestamptz{},
 		Gamestate:          queries.GamestateNew,
 		Art:                "default.png",
@@ -73,7 +68,7 @@ func (h *Handler) NewMatch(c echo.Context) error {
 			State:  queries.CardstateDeck,
 		}
 
-		deckCards[i] = queries.AddCardToDeckParams{
+		deckCards[i] = queries.AddCardToDeckParams{ // TODO: Get rid of referencs to queries in here
 			Deckid:      deck.ID,
 			Matchcardid: card.ID, // TODO: This is wrong. should get the id from the matchcards table, not the card id
 		}
@@ -92,8 +87,8 @@ func (h *Handler) NewMatch(c echo.Context) error {
 	score := 0
 
 	player, err := h.PlayerStore.CreatePlayer(c, queries.CreatePlayerParams{
-		Accountid: &accountID,
-		Score:     &score,
+		Accountid: accountID,
+		Score:     score,
 		Isready:   false,
 		Art:       "default.png",
 	})
@@ -101,7 +96,7 @@ func (h *Handler) NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = h.MatchStore.PlayerJoinMatch(c, queries.PlayerJoinMatchParams{
+	match, err = h.MatchStore.PlayerJoinMatch(c, queries.PlayerJoinMatchParams{
 		Matchid:  match.ID,
 		Playerid: player.ID,
 	})
@@ -109,9 +104,5 @@ func (h *Handler) NewMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, vo.MatchDetailsResponse{
-		MatchID:   match.ID,
-		PlayerID:  player.ID,
-		GameState: match.Gamestate,
-	})
+	return c.JSON(http.StatusOK, match)
 }

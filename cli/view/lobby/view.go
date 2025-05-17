@@ -9,21 +9,20 @@ import (
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/cli/utils"
 	"github.com/bardic/gocrib/vo"
-
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type View struct {
-	AccountId        int
+	AccountID        int
 	ActiveLandingTab int
 	LobbyViewState   vo.ViewState
 	LobbyTabNames    []string
 	LobbyTable       table.Model
 	IsLobbyTableSet  bool
 	lobbyViewInitd   bool
-	ActiveMatchId    int
+	ActiveMatchID    int
 }
 
 func (view *View) Init() {
@@ -83,7 +82,7 @@ func getActiveView() (table.Model, error) {
 
 	m := getOpenMatches()
 
-	var matches []*vo.GameMatch
+	var matches []*vo.Match
 	err := json.Unmarshal(m.([]byte), &matches)
 	if err != nil {
 		return table.Model{}, err
@@ -92,7 +91,7 @@ func getActiveView() (table.Model, error) {
 	rows := []table.Row{}
 	for _, m := range matches {
 		rows = append(rows, table.Row{
-			fmt.Sprintf("%v", *m.ID),
+			fmt.Sprintf("%v", m.ID),
 			fmt.Sprintf("%v", utils.GetPlayerIDs(m.Players)),
 			fmt.Sprintf("%v", m.Privatematch),
 			m.Creationdate.Time.String(),

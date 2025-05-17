@@ -21,10 +21,6 @@ CREATE TABLE IF NOT EXISTS match (
   privateMatch boolean NOT NULL,
   eloRangeMin int NOT NULL,
   eloRangeMax int NOT NULL,
-  deckId integer NOT NULL,
-  CONSTRAINT fk_deck
-    FOREIGN KEY(deckId) 
-      REFERENCES deck(id),
   cutGameCardId integer NOT NULL,
   dealerId integer,
   CONSTRAINT fk_dealer

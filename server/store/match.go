@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/bardic/gocrib/queries/queries"
 	"github.com/bardic/gocrib/vo"
@@ -12,7 +13,7 @@ type MatchStore struct {
 	Store
 }
 
-func (p *MatchStore) GetMatch(ctx echo.Context, matchID *int) (*vo.GameMatch, error) {
+func (p *MatchStore) GetMatch(ctx echo.Context, matchID int) (*vo.Match, error) {
 	m, err := p.q().GetMatchById(ctx.Request().Context(), matchID)
 
 	defer p.Close()
@@ -21,7 +22,7 @@ func (p *MatchStore) GetMatch(ctx echo.Context, matchID *int) (*vo.GameMatch, er
 		return nil, err
 	}
 
-	var match *vo.GameMatch
+	var match *vo.Match
 	err = json.Unmarshal(m, &match)
 	if err != nil {
 		return nil, err
@@ -30,15 +31,22 @@ func (p *MatchStore) GetMatch(ctx echo.Context, matchID *int) (*vo.GameMatch, er
 	return match, nil
 }
 
-func (p *MatchStore) UpdateMatchState(ctx echo.Context, params queries.UpdateMatchStateParams) (queries.Match, error) {
+func (p *MatchStore) UpdateMatchState(ctx echo.Context, params queries.UpdateMatchStateParams) (*vo.Match, error) {
 	match, err := p.q().UpdateMatchState(ctx.Request().Context(), params)
 	if err != nil {
-		return queries.Match{}, err
+		return nil, err
 	}
 
 	defer p.Close()
 
-	return match, nil
+	return &vo.Match{
+		ID:            match.ID,
+		Creationdate:  match.Creationdate,
+		Privatematch:  match.Privatematch,
+		Elorangemin:   match.Elorangemax,
+		Elorangemax:   match.Elorangemax,
+		Cutgamecardid: match.Cutgamecardid,
+	}, nil
 }
 
 func (p *MatchStore) UpateMatchCurrentPlayerTurn(
@@ -54,8 +62,8 @@ func (p *MatchStore) UpateMatchCurrentPlayerTurn(
 	return nil
 }
 
-func (p *MatchStore) GetCardsForMatchID(ctx echo.Context, id int) ([]queries.GetCardsForMatchIdRow, error) {
-	cards, err := p.q().GetCardsForMatchId(ctx.Request().Context(), &id)
+func (p *MatchStore) CreateMatch(ctx echo.Context, params queries.CreateMatchParams) (*vo.Match, error) {
+	m, err := p.q().CreateMatch(ctx.Request().Context(), params)
 
 	defer p.Close()
 
@@ -63,31 +71,21 @@ func (p *MatchStore) GetCardsForMatchID(ctx echo.Context, id int) ([]queries.Get
 		return nil, err
 	}
 
-	return cards, nil
+	return &vo.Match{
+		ID: m.ID,
+	}, nil
 }
 
-func (p *MatchStore) CreateMatch(ctx echo.Context, params queries.CreateMatchParams) (queries.Match, error) {
-	m, err := p.q().CreateMatch(ctx.Request().Context(), params)
-
-	defer p.Close()
-
-	if err != nil {
-		return queries.Match{}, err
-	}
-
-	return m, nil
-}
-
-func (p *MatchStore) PlayerJoinMatch(ctx echo.Context, params queries.PlayerJoinMatchParams) error {
+func (p *MatchStore) PlayerJoinMatch(ctx echo.Context, params queries.PlayerJoinMatchParams) (*vo.Match, error) {
 	err := p.q().PlayerJoinMatch(ctx.Request().Context(), params)
 
 	defer p.Close()
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &vo.Match{}, nil
 }
 
 func (p *MatchStore) UpdateMatchCut(ctx echo.Context, params queries.UpdateMatchCutParams) error {
@@ -120,19 +118,49 @@ func (p *MatchStore) UpdateDealerForMatch(ctx echo.Context, params queries.Updat
 	return nil
 }
 
-func (p *MatchStore) GetOpenMatches(ctx echo.Context) ([]queries.Match, error) {
+func (p *MatchStore) GetOpenMatches(ctx echo.Context) ([]*vo.Match, error) {
 	matchesData, err := p.q().GetOpenMatches(ctx.Request().Context(), queries.GamestateNew)
 	if err != nil {
 		return nil, err
 	}
 
-	return matchesData, nil
+	matches := make([]*vo.Match, len(matchesData))
+	for i, m := range matchesData {
+		matches[i] = &vo.Match{
+			ID: m.ID,
+		}
+	}
+
+	return matches, nil
 }
 
-func (p *MatchStore) GetMatchState(ctx echo.Context, matchId *int) (string, error) {
-	return "", nil
+func (p *MatchStore) GetMatchState(ctx echo.Context, matchID int) (string, error) {
+	matchState, err := p.q().GetMatchStateById(ctx.Request().Context(), matchID)
+	if err != nil {
+		return "", fmt.Errorf("[MATCH][GetMatchState] Can't find state: %w", err)
+	}
+	return string(matchState), nil
 }
 
-func (p *MatchStore) GetDeck(ctx echo.Context, matchId *int) (*queries.Deck, error) {
-	return nil, nil
+func (p *MatchStore) GetDeck(ctx echo.Context, matchID int) ([]*vo.Deck, error) {
+	deck, err := p.q().GetDeckForMatchId(ctx.Request().Context(), matchID)
+
+	defer p.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	gameDecks := make([]*vo.Deck, len(deck))
+
+	for i, d := range deck {
+		gameDecks[i] = &vo.Deck{
+			ID:             d.ID,
+			Cutmatchcardid: d.Cutmatchcardid,
+			Matchid:        d.Matchid,
+			Cards:          []*vo.Card{}, // TODO fix this,
+		}
+	}
+
+	return gameDecks, nil
 }

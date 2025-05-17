@@ -8,7 +8,6 @@ import (
 	logger "github.com/bardic/gocrib/cli/utils/log"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -17,10 +16,10 @@ type Controller struct {
 	view  *View
 }
 
-func NewLobby(msg vo.StateChangeMsg) *Controller {
+func NewLobby(accountID int) *Controller {
 	return &Controller{
 		model: &Model{
-			playerAccountID: msg.AccountID,
+			playerAccountID: accountID,
 		},
 		view: &View{
 			ActiveLandingTab: 0,
@@ -63,24 +62,24 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 			return tea.Quit
 		}
 
-		var matchDetails vo.MatchDetailsResponse
-		msg := services.JoinMatch(*lobbyModel.playerAccountID, id)
-		err = json.Unmarshal(msg.([]byte), &matchDetails)
+		var match *vo.Match
+		msg := services.JoinMatch(lobbyModel.playerAccountID, id)
+		err = json.Unmarshal(msg.([]byte), &match)
 		if err != nil {
 			return tea.Quit
 		}
 
-		return vo.StateChangeMsg{
-			NewState: vo.JoinGameView,
-			MatchID:  &id,
+		return cliVO.ChangeState{
+			NewState: "Join",
+			MatchID:  id,
 		}
 	case "n":
 		match := CreateGame(lobbyModel.playerAccountID)
 
-		return vo.StateChangeMsg{
-			NewState:  vo.CreateGameView,
+		return cliVO.ChangeState{
+			NewState:  "Create",
 			AccountID: lobbyModel.playerAccountID,
-			MatchID:   match.MatchID,
+			MatchID:   match.ID,
 		}
 	case "tab":
 
@@ -106,16 +105,16 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 	return nil
 }
 
-func CreateGame(accountID *int) vo.MatchDetailsResponse {
+func CreateGame(accountID int) *vo.Match {
 	newMatch := services.PostPlayerMatch(accountID).([]byte)
 
-	var matchDetails vo.MatchDetailsResponse
-	err := json.Unmarshal(newMatch, &matchDetails)
+	var match *vo.Match
+	err := json.Unmarshal(newMatch, &match)
 	if err != nil {
-		return vo.MatchDetailsResponse{}
+		return nil
 	}
 
-	return matchDetails
+	return match
 }
 
 func (ctrl *Controller) Update(msg tea.Msg) tea.Cmd {

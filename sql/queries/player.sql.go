@@ -25,8 +25,8 @@ RETURNING id, accountid, score, isready, art
 `
 
 type CreatePlayerParams struct {
-	Accountid *int
-	Score     *int
+	Accountid int
+	Score     int
 	Isready   bool
 	Art       string
 }
@@ -53,7 +53,7 @@ const getPlayerById = `-- name: GetPlayerById :one
 SELECT player.id, player.accountid, player.score, player.isready, player.art FROM player WHERE id=$1 LIMIT 1
 `
 
-func (q *Queries) GetPlayerById(ctx context.Context, id *int) (Player, error) {
+func (q *Queries) GetPlayerById(ctx context.Context, id int) (Player, error) {
 	row := q.db.QueryRow(ctx, getPlayerById, id)
 	var i Player
 	err := row.Scan(
@@ -78,8 +78,8 @@ WHERE
 `
 
 type GetPlayerByMatchAndAccountIdParams struct {
-	Matchid   *int
-	Accountid *int
+	Matchid   int
+	Accountid int
 }
 
 func (q *Queries) GetPlayerByMatchAndAccountId(ctx context.Context, arg GetPlayerByMatchAndAccountIdParams) (Player, error) {
@@ -103,8 +103,8 @@ VALUES
 `
 
 type PlayerJoinMatchParams struct {
-	Matchid  *int
-	Playerid *int
+	Matchid  int
+	Playerid int
 }
 
 func (q *Queries) PlayerJoinMatch(ctx context.Context, arg PlayerJoinMatchParams) error {
@@ -123,10 +123,10 @@ UPDATE player SET
 `
 
 type UpdatePlayerParams struct {
-	Score   *int
+	Score   int
 	Isready bool
 	Art     string
-	ID      *int
+	ID      int
 }
 
 func (q *Queries) UpdatePlayer(ctx context.Context, arg UpdatePlayerParams) (Player, error) {
@@ -153,7 +153,7 @@ UPDATE player SET isReady = $1 WHERE id = $2
 
 type UpdatePlayerReadyParams struct {
 	Isready bool
-	ID      *int
+	ID      int
 }
 
 func (q *Queries) UpdatePlayerReady(ctx context.Context, arg UpdatePlayerReadyParams) error {
@@ -166,9 +166,9 @@ UPDATE match_player SET turnorder = $1 WHERE matchid = $2 AND playerid = $3
 `
 
 type UpdatePlayerTurnOrderParams struct {
-	Turnorder *int
-	Matchid   *int
-	Playerid  *int
+	Turnorder int
+	Matchid   int
+	Playerid  int
 }
 
 func (q *Queries) UpdatePlayerTurnOrder(ctx context.Context, arg UpdatePlayerTurnOrderParams) error {

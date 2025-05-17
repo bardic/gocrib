@@ -2,6 +2,7 @@ package store
 
 import (
 	"github.com/bardic/gocrib/queries/queries"
+	"github.com/bardic/gocrib/vo"
 	"github.com/labstack/echo/v4"
 )
 
@@ -9,8 +10,8 @@ type DeckStore struct {
 	Store
 }
 
-func (p *DeckStore) GetDeckForMatchID(ctx echo.Context, matchID *int) (*queries.Deck, error) {
-	deck, err := p.q().GetDeckForMatchId(ctx.Request().Context(), matchID)
+func (p *DeckStore) CreateDeck(ctx echo.Context) (*vo.Deck, error) {
+	deck, err := p.q().CreateDeck(ctx.Request().Context())
 
 	defer p.Close()
 
@@ -18,24 +19,15 @@ func (p *DeckStore) GetDeckForMatchID(ctx echo.Context, matchID *int) (*queries.
 		return nil, err
 	}
 
-	return &deck, nil
-}
-
-func (p *DeckStore) CreateDeck(ctx echo.Context) (queries.Deck, error) {
-	deck, err := p.q().CreateDeck(ctx.Request().Context())
-
-	defer p.Close()
-
-	if err != nil {
-		return queries.Deck{}, err
-	}
-
-	return deck, nil
+	return &vo.Deck{
+		ID:             deck.ID,
+		Cutmatchcardid: deck.Cutmatchcardid,
+		Matchid:        deck.Matchid,
+		Cards:          []*vo.Card{},
+	}, nil
 }
 
 func (p *DeckStore) AddCardToDeck(ctx echo.Context, params []queries.AddCardToDeckParams) error {
-	// err := p.q().AddardToDeck(ctx.Request().Context(), params)
-
 	_, err := p.q().AddCardToDeck(ctx.Request().Context(), params)
 
 	defer p.Close()
@@ -47,7 +39,7 @@ func (p *DeckStore) AddCardToDeck(ctx echo.Context, params []queries.AddCardToDe
 	return nil
 }
 
-func (p *DeckStore) ResetDeckForMatchID(ctx echo.Context, matchID *int) error {
+func (p *DeckStore) ResetDeckForMatchID(ctx echo.Context, matchID int) error {
 	err := p.q().ResetDeckForMatchId(ctx.Request().Context(), matchID)
 
 	defer p.Close()

@@ -8,7 +8,6 @@ import (
 	"github.com/bardic/gocrib/cli/view/login"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
-
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -49,15 +48,16 @@ func (cli *CLI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
-	case vo.StateChangeMsg:
-		switch msg.NewState {
-		case vo.LobbyView:
-			cli.currentController = lobby.NewLobby(msg)
-		case vo.JoinGameView:
-			fallthrough
-		case vo.CreateGameView:
-			cli.currentController = container.NewController(msg)
-		}
+	case vo.MatchState:
+		// switch msg.NewState {
+		// case vo.LobbyView:
+		// 	cli.currentController = lobby.NewLobby(msg)
+		// case vo.JoinGameView:
+		// 	fallthrough
+		// case vo.CreateGameView:
+		// 	cli.currentController = container.NewController(msg)
+		// }
+		cli.currentController = lobby.NewLobby(msg.ID)
 	}
 
 	cmds = append(cmds, cli.currentController.Update(msg))

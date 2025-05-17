@@ -1,12 +1,11 @@
-package match
+package route
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
 	logger "github.com/bardic/gocrib/cli/utils/log"
-	"github.com/bardic/gocrib/queries/queries"
+	"github.com/bardic/gocrib/vo"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -14,12 +13,12 @@ import (
 
 // GetOpenMatches route
 //
-//	@Summary	Get match by id
+//	@Summary	Get list of open matches
 //	@Description
 //	@Tags		match
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{object}	[]vo.GameMatch
+//	@Success	200	{object}	[]vo.Match
 //	@Failure	404	{object}	error
 //	@Failure	500	{object}	error
 //	@Router		/open [get]
@@ -29,13 +28,13 @@ func (h *Handler) GetOpenMatches(c echo.Context) error {
 	l.Log(zapcore.DebugLevel, "Get Open Matches")
 	v, err := h.MatchStore.GetOpenMatches(c)
 	if err != nil {
-		e := errors.New(fmt.Sprintf("failed to get open matches: %v", err))
+		e := fmt.Errorf("failed to get open matches: %w", err)
 		l.Log(zapcore.ErrorLevel, e.Error())
 		return c.JSON(http.StatusInternalServerError, e)
 	}
 
 	if v == nil {
-		v = []queries.Match{}
+		v = []*vo.Match{}
 	}
 
 	l.Log(zapcore.DebugLevel, "Open Matches", zap.Field{

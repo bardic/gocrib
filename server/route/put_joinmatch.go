@@ -1,4 +1,4 @@
-package match
+package route
 
 import (
 	"net/http"
@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Return match details if the player is able to join the match
+// Join a matchs
 //
 //	@Summary	Join match by id
 //	@Description
@@ -18,7 +18,7 @@ import (
 //	@Produce	json
 //	@Param		matchId	path		int	true	"match id"'
 //	@Param		accountId	path		int	true	"account id"'
-//	@Success	200		{object}	vo.MatchDetailsResponse
+//	@Success	200		{object}	vo.Match
 //	@Failure	400		{object}	error
 //	@Failure	404		{object}	error
 //	@Failure	500		{object}	error
@@ -37,8 +37,8 @@ func (h *Handler) JoinMatch(c echo.Context) error {
 	score := 0
 
 	player, err := h.PlayerStore.CreatePlayer(c, queries.CreatePlayerParams{
-		Accountid: &accountId,
-		Score:     &score,
+		Accountid: accountId,
+		Score:     score,
 		Isready:   false,
 		Art:       "default.png",
 	})
@@ -46,20 +46,20 @@ func (h *Handler) JoinMatch(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	err = h.BaseHandler.PlayerStore.PlayerJoinMatch(c, queries.PlayerJoinMatchParams{
-		Matchid:  &matchId,
+	err = h.PlayerStore.PlayerJoinMatch(c, queries.PlayerJoinMatchParams{
+		Matchid:  matchId,
 		Playerid: player.ID,
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	_, err = GetMatch(&matchId)
+	_, err = GetMatch(matchId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	match, err := h.MatchStore.GetMatch(c, &matchId)
+	match, err := h.MatchStore.GetMatch(c, matchId)
 	if err != nil {
 		return err
 	}
@@ -67,14 +67,14 @@ func (h *Handler) JoinMatch(c echo.Context) error {
 	turnOrder := 1
 	for _, player := range match.Players {
 		h.MatchStore.UpdatePlayerTurnOrder(c, queries.UpdatePlayerTurnOrderParams{
-			Turnorder: &turnOrder,
-			Matchid:   &matchId,
+			Turnorder: turnOrder,
+			Matchid:   matchId,
 			Playerid:  player.ID,
 		})
 
 		if turnOrder == 1 {
 			err = h.MatchStore.UpateMatchCurrentPlayerTurn(c, queries.UpateMatchCurrentPlayerTurnParams{
-				ID:                &matchId,
+				ID:                matchId,
 				Currentplayerturn: player.ID,
 			})
 			if err != nil {
@@ -82,7 +82,7 @@ func (h *Handler) JoinMatch(c echo.Context) error {
 			}
 
 			err = h.MatchStore.UpdateDealerForMatch(c, queries.UpdateDealerForMatchParams{
-				ID:       &matchId,
+				ID:       matchId,
 				Dealerid: player.ID,
 			})
 			if err != nil {
@@ -93,35 +93,35 @@ func (h *Handler) JoinMatch(c echo.Context) error {
 		turnOrder++
 	}
 
-	numOfPlayers := len(match.Players)
+	// numOfPlayers := len(match.Players)
 
-	cardsToDealPerPlayer := 6
-	if numOfPlayers > 2 {
-		cardsToDealPerPlayer = 5
-	}
+	// cardsToDealPerPlayer := 6
+	// if numOfPlayers > 2 {
+	// 	cardsToDealPerPlayer = 5
+	// }
 
 	// Deal cards
 
-	cards, err := h.MatchStore.GetCardsForMatchID(c, matchId)
-	if err != nil {
-		return err
-	}
-
-	for i := range numOfPlayers {
-		for j := range cardsToDealPerPlayer {
-			card := cards[(i*cardsToDealPerPlayer)+j]
-			h.CardStore.UpdateMatchCardState(c, queries.UpdateMatchCardStateParams{
-				State:     queries.CardstateHand,
-				Origowner: match.Players[i].ID,
-				Currowner: match.Players[i].ID,
-				ID:        card.ID_2,
-			})
-
-		}
-	}
+	// cards, err := h.MatchStore.GetCardsForMatchID(c, matchId)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// for i := range numOfPlayers {
+	// 	for j := range cardsToDealPerPlayer {
+	// 		card := cards[(i*cardsToDealPerPlayer)+j]
+	// 		h.CardStore.UpdateMatchCardState(c, queries.UpdateMatchCardStateParams{
+	// 			State:     queries.CardstateHand,
+	// 			Origowner: match.Players[i].ID,
+	// 			Currowner: match.Players[i].ID,
+	// 			ID:        card.ID_2,
+	// 		})
+	//
+	// 	}
+	// }
 
 	_, err = h.MatchStore.UpdateMatchState(c, queries.UpdateMatchStateParams{
-		ID:        &matchId,
+		ID:        matchId,
 		Gamestate: queries.GamestateDiscard,
 	})
 	if err != nil {

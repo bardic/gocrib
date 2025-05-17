@@ -7,28 +7,27 @@ import (
 
 	"github.com/bardic/gocrib/cli/styles"
 	"github.com/bardic/gocrib/queries/queries"
-	"github.com/charmbracelet/lipgloss"
-
 	"github.com/bardic/gocrib/vo"
+	"github.com/charmbracelet/lipgloss"
 )
 
-func GetCardByID(id int, deck *vo.GameDeck) *vo.GameCard {
-	for _, card := range deck.Cards {
-		gameCard := &vo.GameCard{
-			Match: card.Match,
-			Card:  card.Card,
-		}
-
-		if *card.Match.ID == id {
-			return gameCard
-		}
-	}
+func GetCardByID(id int, deck *vo.Deck) *vo.Card {
+	// for _, card := range deck.Cards {
+	// gameCard := &vo.Card{
+	// 	Match: card.Match,
+	// 	Card:  card.Card,
+	// }
+	//
+	// if card.Match.ID == id {
+	// 	return gameCard
+	// }
+	// }
 	return nil
 }
 
-func GetPlayerForAccountID(id *int, match *vo.GameMatch) *vo.GamePlayer {
+func GetPlayerForAccountID(id int, match *vo.Match) *vo.Player {
 	for _, player := range match.Players {
-		if *player.Accountid == *id {
+		if player.Accountid == id {
 			return player
 		}
 	}
@@ -36,18 +35,14 @@ func GetPlayerForAccountID(id *int, match *vo.GameMatch) *vo.GamePlayer {
 	return nil
 }
 
-func BuildCommonFooter(match *vo.GameMatch, localplayer *vo.GamePlayer) string {
-	currentPlayerTurn := "-"
+func BuildCommonFooter(match *vo.Match) string {
+	currentPlayerTurn := strconv.Itoa(match.Currentplayerturn)
 
-	if match.Currentplayerturn != nil {
-		currentPlayerTurn = strconv.Itoa(*match.Currentplayerturn)
-	}
-
-	f := fmt.Sprintf("State: %v\nActive Player: %v\nMatch ID: %d\n", match.Gamestate, currentPlayerTurn, *match.ID)
+	f := fmt.Sprintf("State: %v\nActive Player: %v\nMatch ID: %d\n", match.Gamestate, currentPlayerTurn, match.ID)
 	playerString := "Players: \n"
 
 	for i, v := range match.Players {
-		playerString += styles.PlayerStyles[i].Render(fmt.Sprintf("%d:%d", *v.ID, *v.Score))
+		playerString += styles.PlayerStyles[i].Render(fmt.Sprintf("%d:%d", v.ID, v.Score))
 		playerString += "\n"
 	}
 
@@ -84,13 +79,13 @@ const (
 	Empty  PegState = "○"
 )
 
-func DrawRow(players []*vo.GamePlayer, pegsToDraw, scoreOffet int) string {
+func DrawRow(players []*vo.Player, pegsToDraw, scoreOffet int) string {
 	viewBuilder := strings.Builder{}
 	for _, player := range players {
 		viewBuilder.WriteString("\n")
 
 		for i := range pegsToDraw {
-			if i+scoreOffet == *player.Score {
+			if i+scoreOffet == player.Score {
 				viewBuilder.WriteString(string(Filled))
 			} else {
 				viewBuilder.WriteString(string(Empty))
@@ -106,18 +101,18 @@ func DrawRow(players []*vo.GamePlayer, pegsToDraw, scoreOffet int) string {
 	return viewBuilder.String()
 }
 
-func GetPlayerIDs(players []*vo.GamePlayer) []*int {
-	var playIDs []*int
+func GetPlayerIDs(players []*vo.Player) []int {
+	var playIDs []int
 	for _, p := range players {
 		playIDs = append(playIDs, p.ID)
 	}
 	return playIDs
 }
 
-func IDFromCards(cards []vo.GameCard) []int {
+func IDFromCards(cards []vo.Card) []int {
 	var ids []int
 	for _, c := range cards {
-		ids = append(ids, *c.Match.Cardid)
+		ids = append(ids, c.Cardid)
 	}
 
 	return ids

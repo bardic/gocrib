@@ -3,7 +3,6 @@ INSERT INTO match(
     privateMatch,
     eloRangeMin,
     eloRangeMax,
-    deckId,
     cutGameCardId,
     turnPassTimestamps,
     gameState,
@@ -15,8 +14,7 @@ VALUES (
     $4,
     $5,
     $6,
-    $7,
-    $8)
+    $7)
 RETURNING *;
 
 -- name: UpdateMatchCut :exec
@@ -31,14 +29,13 @@ UPDATE match SET
 	privateMatch = $2,
 	eloRangeMin = $3,
 	eloRangeMax = $4,
-	deckId = $5,
-	cutGameCardId = $6,
-    dealerId = $7,
-	currentPlayerTurn = $8,
-	turnPassTimestamps = $9,
-	gameState= $10,
-	art = $11
-WHERE id=$12;
+	cutGameCardId = $5,
+  dealerId = $6,
+	currentPlayerTurn = $7,
+	turnPassTimestamps = $8,
+	gameState= $9,
+	art = $10
+WHERE id=$11;
 
 -- name: UpateMatchCurrentPlayerTurn :exec
 UPDATE match SET currentplayerturn = $1 WHERE id = $2;
@@ -172,3 +169,47 @@ LEFT JOIN
     match_player ON p.id=match_player.playerid
 WHERE
     match_player.matchid = $1;
+
+-- name: GetMatchStateById :one
+SELECT 
+    match.gameState
+FROM
+    match
+WHERE
+    match.id = $1;
+
+-- name: GetDeckForMatchId :many
+SELECT 
+    deck_matchcard.*, 
+    deck.*,
+    matchcard.*,
+    card.*
+FROM
+    matchcard
+LEFT JOIN
+    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
+LEFT JOIN
+    deck ON deck_matchcard.deckid=deck.id
+LEFT JOIN
+    match ON deck.id=match.deckid
+left join 
+	card on card.id=matchcard.cardid
+WHERE
+    match.id = $1;
+
+
+SELECT
+  deck_matchcard.*, 
+  deck.*,
+  matchcard.*,
+  card.*
+FROM 
+  deck
+LEFT JOIN
+  deck_matchcard ON deck_matchcard.deckid = deck.id
+LEFT JOIN
+  matchcard ON matchcard.id = deck_matchcard.matchcardid
+LEFT JOIN 
+	card ON card.id=matchcard.cardid
+WHERE deck.matchId = $1;
+

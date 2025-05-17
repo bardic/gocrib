@@ -6,15 +6,11 @@ import (
 	"strconv"
 
 	"github.com/bardic/gocrib/cli/utils"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func GetMatchByID(matchID *int) tea.Msg {
-	matchIDStr := ""
-	if matchID != nil {
-		matchIDStr = strconv.Itoa(*matchID)
-	}
+func GetMatchByID(matchID int) tea.Msg {
+	matchIDStr := strconv.Itoa(matchID)
 
 	endpoint := utils.EndPointBuilder(EndPointMatch, matchIDStr)
 	return url(endpoint, http.MethodGet, "")
@@ -29,8 +25,8 @@ func JoinMatch(accountID, activeMatchID int) tea.Msg {
 	return url(endpoint, http.MethodPut, "")
 }
 
-func PostPlayerMatch(accountID *int) tea.Msg {
-	endpoint := utils.EndPointBuilder(EndPointMatch, strconv.Itoa(*accountID))
+func PostPlayerMatch(accountID int) tea.Msg {
+	endpoint := utils.EndPointBuilder(EndPointMatch, strconv.Itoa(accountID))
 	return sendReq(endpoint, http.MethodPost, nil)
 }
 

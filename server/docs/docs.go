@@ -40,7 +40,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/queries.Account"
+                            "$ref": "#/definitions/vo.Account"
                         }
                     },
                     "400": {
@@ -65,7 +65,7 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Create new match",
+                "summary": "Create new match with accountId",
                 "parameters": [
                     {
                         "type": "integer",
@@ -84,10 +84,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {}
                     },
                     "500": {
@@ -122,103 +118,15 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/queries.Match"
+                            "$ref": "#/definitions/vo.Match"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {}
                     },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/match/{matchId}/account/{accountId}": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Get match card by match id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "match id",
-                        "name": "matchId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "account id",
-                        "name": "accountId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/vo.GamePlayer"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/match/{matchId}/cards": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Get match card by match id",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "match id",
-                        "name": "matchId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/queries.GetCardsForMatchIdRow"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -276,6 +184,7 @@ const docTemplate = `{
         },
         "/match/{matchId}/deck": {
             "get": {
+                "description": "Returns vo.Match object when given a matchId",
                 "consumes": [
                     "application/json"
                 ],
@@ -285,7 +194,7 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Get match by id",
+                "summary": "Get decks by matchDd",
                 "parameters": [
                     {
                         "type": "integer",
@@ -299,55 +208,15 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/queries.Match"
+                            "$ref": "#/definitions/vo.Deck"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {}
                     },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/match/{matchId}/deck/": {
-            "get": {
-                "description": "Get vo.GameDeck by match id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "deck"
-                ],
-                "summary": "Get deck",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "match id",
-                        "name": "matchId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/vo.GameDeck"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -385,7 +254,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/vo.MatchDetailsResponse"
+                            "$ref": "#/definitions/vo.Match"
                         }
                     },
                     "400": {
@@ -414,7 +283,7 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Cut deck by index of card selected",
+                "summary": "Update the state of several cards",
                 "parameters": [
                     {
                         "type": "integer",
@@ -442,76 +311,6 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {}
                     },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/match/{matchId}/player/{fromPlayerId}/to/{toPlayerId}/kitty": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "match"
-                ],
-                "summary": "Update kitty with ids",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "match id",
-                        "name": "matchId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "from player id",
-                        "name": "playerId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "to player id",
-                        "name": "toPlayerId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "array of ids to add to kitty",
-                        "name": "details",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/vo.HandModifier"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/queries.Match"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {}
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {}
@@ -530,7 +329,7 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Get match by id",
+                "summary": "Get state by matchId",
                 "parameters": [
                     {
                         "type": "integer",
@@ -547,12 +346,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/queries.Match"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {}
                     },
-                    "422": {
-                        "description": "Unprocessable Entity",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -569,14 +368,14 @@ const docTemplate = `{
                 "tags": [
                     "match"
                 ],
-                "summary": "Get match by id",
+                "summary": "Get list of open matches",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/vo.GameMatch"
+                                "$ref": "#/definitions/vo.Match"
                             }
                         }
                     },
@@ -606,17 +405,6 @@ const docTemplate = `{
                 "NegativeInfinity"
             ]
         },
-        "pgtype.Text": {
-            "type": "object",
-            "properties": {
-                "string": {
-                    "type": "string"
-                },
-                "valid": {
-                    "type": "boolean"
-                }
-            }
-        },
         "pgtype.Timestamptz": {
             "type": "object",
             "properties": {
@@ -630,99 +418,6 @@ const docTemplate = `{
                     "type": "boolean"
                 }
             }
-        },
-        "queries.Account": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "queries.Card": {
-            "type": "object",
-            "properties": {
-                "art": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "suit": {
-                    "$ref": "#/definitions/queries.Cardsuit"
-                },
-                "value": {
-                    "$ref": "#/definitions/queries.Cardvalue"
-                }
-            }
-        },
-        "queries.Cardstate": {
-            "type": "string",
-            "enum": [
-                "Deck",
-                "Hand",
-                "Play",
-                "Kitty"
-            ],
-            "x-enum-varnames": [
-                "CardstateDeck",
-                "CardstateHand",
-                "CardstatePlay",
-                "CardstateKitty"
-            ]
-        },
-        "queries.Cardsuit": {
-            "type": "string",
-            "enum": [
-                "Spades",
-                "Clubs",
-                "Hearts",
-                "Diamonds"
-            ],
-            "x-enum-varnames": [
-                "CardsuitSpades",
-                "CardsuitClubs",
-                "CardsuitHearts",
-                "CardsuitDiamonds"
-            ]
-        },
-        "queries.Cardvalue": {
-            "type": "string",
-            "enum": [
-                "Ace",
-                "Two",
-                "Three",
-                "Four",
-                "Five",
-                "Six",
-                "Seven",
-                "Eight",
-                "Nine",
-                "Ten",
-                "Jack",
-                "Queen",
-                "King",
-                "Joker"
-            ],
-            "x-enum-varnames": [
-                "CardvalueAce",
-                "CardvalueTwo",
-                "CardvalueThree",
-                "CardvalueFour",
-                "CardvalueFive",
-                "CardvalueSix",
-                "CardvalueSeven",
-                "CardvalueEight",
-                "CardvalueNine",
-                "CardvalueTen",
-                "CardvalueJack",
-                "CardvalueQueen",
-                "CardvalueKing",
-                "CardvalueJoker"
-            ]
         },
         "queries.Gamestate": {
             "type": "string",
@@ -757,50 +452,6 @@ const docTemplate = `{
                 "GamestateLost"
             ]
         },
-        "queries.GetCardsForMatchIdRow": {
-            "type": "object",
-            "properties": {
-                "art": {
-                    "$ref": "#/definitions/pgtype.Text"
-                },
-                "cardid": {
-                    "type": "integer"
-                },
-                "currowner": {
-                    "type": "integer"
-                },
-                "cutmatchcardid": {
-                    "type": "integer"
-                },
-                "deckid": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "id_2": {
-                    "type": "integer"
-                },
-                "id_3": {
-                    "type": "integer"
-                },
-                "matchcardid": {
-                    "type": "integer"
-                },
-                "origowner": {
-                    "type": "integer"
-                },
-                "state": {
-                    "$ref": "#/definitions/queries.Cardstate"
-                },
-                "suit": {
-                    "$ref": "#/definitions/queries.NullCardsuit"
-                },
-                "value": {
-                    "$ref": "#/definitions/queries.NullCardvalue"
-                }
-            }
-        },
         "queries.Match": {
             "type": "object",
             "properties": {
@@ -819,9 +470,6 @@ const docTemplate = `{
                 "dealerid": {
                     "type": "integer"
                 },
-                "deckid": {
-                    "type": "integer"
-                },
                 "elorangemax": {
                     "type": "integer"
                 },
@@ -845,9 +493,23 @@ const docTemplate = `{
                 }
             }
         },
-        "queries.Matchcard": {
+        "vo.Account": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "vo.Card": {
+            "type": "object",
+            "properties": {
+                "art": {
+                    "type": "string"
+                },
                 "cardid": {
                     "type": "integer"
                 },
@@ -857,56 +519,33 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "origowner": {
                     "type": "integer"
                 },
+                "rank": {
+                    "type": "integer"
+                },
                 "state": {
-                    "$ref": "#/definitions/queries.Cardstate"
-                }
-            }
-        },
-        "queries.NullCardsuit": {
-            "type": "object",
-            "properties": {
-                "cardsuit": {
-                    "$ref": "#/definitions/queries.Cardsuit"
+                    "type": "string"
                 },
-                "valid": {
-                    "description": "Valid is true if Cardsuit is not NULL",
-                    "type": "boolean"
-                }
-            }
-        },
-        "queries.NullCardvalue": {
-            "type": "object",
-            "properties": {
-                "cardvalue": {
-                    "$ref": "#/definitions/queries.Cardvalue"
+                "suit": {
+                    "type": "string"
                 },
-                "valid": {
-                    "description": "Valid is true if Cardvalue is not NULL",
-                    "type": "boolean"
+                "value": {
+                    "type": "integer"
                 }
             }
         },
-        "vo.GameCard": {
-            "type": "object",
-            "properties": {
-                "card": {
-                    "$ref": "#/definitions/queries.Card"
-                },
-                "match": {
-                    "$ref": "#/definitions/queries.Matchcard"
-                }
-            }
-        },
-        "vo.GameDeck": {
+        "vo.Deck": {
             "type": "object",
             "properties": {
                 "cards": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/vo.GameCard"
+                        "$ref": "#/definitions/vo.Card"
                     }
                 },
                 "cutmatchcardid": {
@@ -914,10 +553,13 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "matchid": {
+                    "type": "integer"
                 }
             }
         },
-        "vo.GameMatch": {
+        "vo.Match": {
             "type": "object",
             "properties": {
                 "art": {
@@ -935,9 +577,6 @@ const docTemplate = `{
                 "dealerid": {
                     "type": "integer"
                 },
-                "deckid": {
-                    "type": "integer"
-                },
                 "elorangemax": {
                     "type": "integer"
                 },
@@ -945,7 +584,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "gamestate": {
-                    "$ref": "#/definitions/queries.Gamestate"
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -953,7 +592,7 @@ const docTemplate = `{
                 "players": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/vo.GamePlayer"
+                        "$ref": "#/definitions/vo.Player"
                     }
                 },
                 "privatematch": {
@@ -967,7 +606,7 @@ const docTemplate = `{
                 }
             }
         },
-        "vo.GamePlayer": {
+        "vo.Player": {
             "type": "object",
             "properties": {
                 "accountid": {
@@ -979,7 +618,7 @@ const docTemplate = `{
                 "hand": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/vo.GameCard"
+                        "$ref": "#/definitions/vo.Card"
                     }
                 },
                 "id": {
@@ -991,44 +630,19 @@ const docTemplate = `{
                 "kitty": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/vo.GameCard"
+                        "$ref": "#/definitions/vo.Card"
                     }
                 },
                 "play": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/vo.GameCard"
+                        "$ref": "#/definitions/vo.Card"
                     }
                 },
                 "score": {
                     "type": "integer"
                 },
                 "turnOrder": {
-                    "type": "integer"
-                }
-            }
-        },
-        "vo.HandModifier": {
-            "type": "object",
-            "properties": {
-                "cardIDs": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                }
-            }
-        },
-        "vo.MatchDetailsResponse": {
-            "type": "object",
-            "properties": {
-                "gameState": {
-                    "$ref": "#/definitions/queries.Gamestate"
-                },
-                "matchID": {
-                    "type": "integer"
-                },
-                "playerID": {
                     "type": "integer"
                 }
             }

@@ -3,10 +3,6 @@ package card
 import (
 	"slices"
 
-	"github.com/bardic/gocrib/queries/queries"
-
-	"github.com/bardic/gocrib/cli/services"
-	"github.com/bardic/gocrib/cli/utils"
 	cliVO "github.com/bardic/gocrib/cli/vo"
 	"github.com/bardic/gocrib/vo"
 
@@ -18,7 +14,7 @@ type Controller struct {
 	view  *View
 }
 
-func NewController(name string, match *vo.GameMatch, player *vo.GamePlayer) *Controller {
+func NewController(name string, match *vo.Match, player *vo.Player) *Controller {
 	ctrl := &Controller{
 		model: &Model{
 			ActiveSlotIndex: 0,
@@ -47,24 +43,24 @@ func (ctrl *Controller) GetName() string {
 	return ctrl.model.Name
 }
 
-func (ctrl *Controller) Render(gameMatch *vo.GameMatch, gameDeck *vo.GameDeck) string {
+func (ctrl *Controller) Render(gameMatch *vo.Match, gameDeck *vo.Deck) string {
 	ctrl.model.State = gameMatch.Gamestate
 	ctrl.model.Deck = gameDeck
 	ctrl.model.ActivePlayerID = gameMatch.Dealerid
 
-	p := utils.GetPlayerForAccountID(ctrl.model.LocalPlayer.Accountid, gameMatch)
+	// p := utils.GetPlayerForAccountID(ctrl.model.LocalPlayer.Accountid, gameMatch)
 
 	var hand []int
-	switch ctrl.model.Name {
-	case "Play":
-		hand = utils.IDFromCards(p.Play)
-	case "Hand":
-		hand = utils.IDFromCards(p.Hand)
-	case "Kitty":
-		hand = utils.IDFromCards(p.Kitty)
-	default:
-		return "Error: Unknown tabname"
-	}
+	// switch ctrl.model.Name {
+	// case "Play":
+	// 	hand = utils.IDFromCards(p.Play)
+	// case "Hand":
+	// 	hand = utils.IDFromCards(p.Hand)
+	// case "Kitty":
+	// 	hand = utils.IDFromCards(p.Kitty)
+	// default:
+	// 	return "Error: Unknown tabname"
+	// }
 
 	ctrl.model.CardIDs = hand
 
@@ -93,28 +89,28 @@ func (ctrl *Controller) ParseInput(msg tea.KeyMsg) tea.Msg {
 		ctrl.view.SelectedCardIDs = ctrl.model.SelectedCardIDs
 	case "enter":
 		switch ctrl.model.State {
-		case queries.GamestateDiscard:
-			services.PutKitty(
-				ctrl.model.GameMatchID,
-				ctrl.model.LocalPlayer.ID,
-				ctrl.model.ActivePlayerID,
-				vo.HandModifier{
-					CardIDs: ctrl.model.SelectedCardIDs,
-				},
-			)
+		// case queries.GamestateDiscard:
+		// 	services.PutKitty(
+		// 		ctrl.model.GameMatchID,
+		// 		ctrl.model.LocalPlayer.ID,
+		// 		ctrl.model.ActivePlayerID,
+		// 		vo.HandModifier{
+		// 			CardIDs: ctrl.model.SelectedCardIDs,
+		// 		},
+		// 	)
 
-			ctrl.model.SelectedCardIDs = []int{}
-		case queries.GamestatePlay:
-			services.PutPlay(
-				ctrl.model.GameMatchID,
-				ctrl.model.LocalPlayer.ID,
-				ctrl.model.ActivePlayerID,
-				vo.HandModifier{
-					CardIDs: ctrl.model.SelectedCardIDs,
-				},
-			)
-
-			ctrl.model.SelectedCardIDs = []int{}
+		// 	ctrl.model.SelectedCardIDs = []int{}
+		// case queries.GamestatePlay:
+		// 	services.PutPlay(
+		// 		ctrl.model.GameMatchID,
+		// 		ctrl.model.LocalPlayer.ID,
+		// 		ctrl.model.ActivePlayerID,
+		// 		vo.HandModifier{
+		// 			CardIDs: ctrl.model.SelectedCardIDs,
+		// 		},
+		// 	)
+		//
+		// 	ctrl.model.SelectedCardIDs = []int{}
 		}
 	}
 

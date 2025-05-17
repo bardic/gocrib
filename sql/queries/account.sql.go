@@ -13,7 +13,7 @@ const getAccountForId = `-- name: GetAccountForId :one
 SELECT account.id, account.name FROM account WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetAccountForId(ctx context.Context, id *int) (Account, error) {
+func (q *Queries) GetAccountForId(ctx context.Context, id int) (Account, error) {
 	row := q.db.QueryRow(ctx, getAccountForId, id)
 	var i Account
 	err := row.Scan(&i.ID, &i.Name)
