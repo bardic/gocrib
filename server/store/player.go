@@ -10,8 +10,10 @@ type PlayerStore struct {
 	Store
 }
 
-func (p *PlayerStore) CreatePlayer(ctx echo.Context, params queries.CreatePlayerParams) (*vo.Player, error) {
-	player, err := p.q().CreatePlayer(ctx.Request().Context(), params)
+func (p *PlayerStore) CreatePlayer(ctx echo.Context, accountID int) (*vo.Player, error) {
+	player, err := p.q().CreatePlayer(ctx.Request().Context(), queries.CreatePlayerParams{
+		Accountid: accountID,
+	})
 	defer p.Close()
 	if err != nil {
 		return nil, err
@@ -58,8 +60,11 @@ func (p *PlayerStore) GetPlayerByMatchAndAccountID(
 	}, nil
 }
 
-func (p *PlayerStore) PlayerJoinMatch(ctx echo.Context, params queries.PlayerJoinMatchParams) error {
-	err := p.q().PlayerJoinMatch(ctx.Request().Context(), params)
+func (p *PlayerStore) PlayerJoinMatch(ctx echo.Context, matchID, playerID int) error {
+	err := p.q().PlayerJoinMatch(ctx.Request().Context(), queries.PlayerJoinMatchParams{
+		Matchid:  matchID,
+		Playerid: playerID,
+	})
 	defer p.Close()
 	if err != nil {
 		return err

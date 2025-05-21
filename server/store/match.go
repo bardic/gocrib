@@ -6,6 +6,7 @@ import (
 
 	"github.com/bardic/gocrib/queries/queries"
 	"github.com/bardic/gocrib/vo"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,8 +32,11 @@ func (p *MatchStore) GetMatch(ctx echo.Context, matchID int) (*vo.Match, error) 
 	return match, nil
 }
 
-func (p *MatchStore) UpdateMatchState(ctx echo.Context, params queries.UpdateMatchStateParams) (*vo.Match, error) {
-	match, err := p.q().UpdateMatchState(ctx.Request().Context(), params)
+func (p *MatchStore) UpdateMatchState(ctx echo.Context, matchID int, matchState string) (*vo.Match, error) {
+	match, err := p.q().UpdateMatchState(ctx.Request().Context(), queries.UpdateMatchStateParams{
+		Gamestate: matchState,
+		ID:        matchID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -49,11 +53,11 @@ func (p *MatchStore) UpdateMatchState(ctx echo.Context, params queries.UpdateMat
 	}, nil
 }
 
-func (p *MatchStore) UpateMatchCurrentPlayerTurn(
-	ctx echo.Context,
-	params queries.UpateMatchCurrentPlayerTurnParams,
-) error {
-	err := p.q().UpateMatchCurrentPlayerTurn(ctx.Request().Context(), params)
+func (p *MatchStore) UpateMatchCurrentPlayerTurn(ctx echo.Context, matchID, currentPlayereturnID int) error {
+	err := p.q().UpateMatchCurrentPlayerTurn(ctx.Request().Context(), queries.UpateMatchCurrentPlayerTurnParams{
+		Currentplayerturn: currentPlayereturnID,
+		ID:                matchID,
+	})
 	defer p.Close()
 	if err != nil {
 		return err
@@ -62,8 +66,28 @@ func (p *MatchStore) UpateMatchCurrentPlayerTurn(
 	return nil
 }
 
-func (p *MatchStore) CreateMatch(ctx echo.Context, params queries.CreateMatchParams) (*vo.Match, error) {
-	m, err := p.q().CreateMatch(ctx.Request().Context(), params)
+type NewMatchParam struct {
+	Privatematch       bool
+	Elorangemin        int
+	Elorangemax        int
+	Cutgamecardid      int
+	Turnpasstimestamps []pgtype.Timestamptz
+	Gamestate          string
+	DealerID           int
+	Art                string
+}
+
+func (p *MatchStore) CreateMatch(ctx echo.Context, params NewMatchParam) (*vo.Match, error) {
+	m, err := p.q().CreateMatch(ctx.Request().Context(), queries.CreateMatchParams{
+		Privatematch:       params.Privatematch,
+		Elorangemin:        params.Elorangemin,
+		Elorangemax:        params.Elorangemax,
+		Cutgamecardid:      params.Cutgamecardid,
+		Turnpasstimestamps: params.Turnpasstimestamps,
+
+		Gamestate: "'New'",
+		Art:       params.Art,
+	})
 
 	defer p.Close()
 
@@ -76,8 +100,11 @@ func (p *MatchStore) CreateMatch(ctx echo.Context, params queries.CreateMatchPar
 	}, nil
 }
 
-func (p *MatchStore) PlayerJoinMatch(ctx echo.Context, params queries.PlayerJoinMatchParams) (*vo.Match, error) {
-	err := p.q().PlayerJoinMatch(ctx.Request().Context(), params)
+func (p *MatchStore) PlayerJoinMatch(ctx echo.Context, matchID, playerID int) (*vo.Match, error) {
+	err := p.q().PlayerJoinMatch(ctx.Request().Context(), queries.PlayerJoinMatchParams{
+		Matchid:  matchID,
+		Playerid: playerID,
+	})
 
 	defer p.Close()
 
@@ -88,8 +115,11 @@ func (p *MatchStore) PlayerJoinMatch(ctx echo.Context, params queries.PlayerJoin
 	return &vo.Match{}, nil
 }
 
-func (p *MatchStore) UpdateMatchCut(ctx echo.Context, params queries.UpdateMatchCutParams) error {
-	err := p.q().UpdateMatchCut(ctx.Request().Context(), params)
+func (p *MatchStore) UpdateMatchCut(ctx echo.Context, matchID, cutIndex int) error {
+	err := p.q().UpdateMatchCut(ctx.Request().Context(), queries.UpdateMatchCutParams{
+		ID:            matchID,
+		Cutgamecardid: cutIndex,
+	})
 	defer p.Close()
 
 	if err != nil {
@@ -99,8 +129,12 @@ func (p *MatchStore) UpdateMatchCut(ctx echo.Context, params queries.UpdateMatch
 	return nil
 }
 
-func (p *MatchStore) UpdatePlayerTurnOrder(ctx echo.Context, params queries.UpdatePlayerTurnOrderParams) error {
-	err := p.q().UpdatePlayerTurnOrder(ctx.Request().Context(), params)
+func (p *MatchStore) UpdatePlayerTurnOrder(ctx echo.Context, matchID, playerID, turnOrder int) error {
+	err := p.q().UpdatePlayerTurnOrder(ctx.Request().Context(), queries.UpdatePlayerTurnOrderParams{
+		Turnorder: turnOrder,
+		Matchid:   matchID,
+		Playerid:  playerID,
+	})
 	defer p.Close()
 	if err != nil {
 		return err
@@ -109,8 +143,11 @@ func (p *MatchStore) UpdatePlayerTurnOrder(ctx echo.Context, params queries.Upda
 	return nil
 }
 
-func (p *MatchStore) UpdateDealerForMatch(ctx echo.Context, params queries.UpdateDealerForMatchParams) error {
-	err := p.q().UpdateDealerForMatch(ctx.Request().Context(), params)
+func (p *MatchStore) UpdateDealerForMatch(ctx echo.Context, matchID, dealerID int) error {
+	err := p.q().UpdateDealerForMatch(ctx.Request().Context(), queries.UpdateDealerForMatchParams{
+		Dealerid: dealerID,
+		ID:       matchID,
+	})
 	defer p.Close()
 	if err != nil {
 		return err
@@ -119,7 +156,7 @@ func (p *MatchStore) UpdateDealerForMatch(ctx echo.Context, params queries.Updat
 }
 
 func (p *MatchStore) GetOpenMatches(ctx echo.Context) ([]*vo.Match, error) {
-	matchesData, err := p.q().GetOpenMatches(ctx.Request().Context(), queries.GamestateNew)
+	matchesData, err := p.q().GetOpenMatches(ctx.Request().Context(), "'New'")
 	if err != nil {
 		return nil, err
 	}
@@ -140,6 +177,21 @@ func (p *MatchStore) GetMatchState(ctx echo.Context, matchID int) (string, error
 		return "", fmt.Errorf("[MATCH][GetMatchState] Can't find state: %w", err)
 	}
 	return string(matchState), nil
+}
+
+func (p *MatchStore) SetMatchState(ctx echo.Context, matchID int, state string) error {
+	_, err := p.q().UpdateMatchState(
+		ctx.Request().Context(),
+		queries.UpdateMatchStateParams{
+			Gamestate: state,
+			ID:        matchID,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *MatchStore) GetDeck(ctx echo.Context, matchID int) ([]*vo.Deck, error) {

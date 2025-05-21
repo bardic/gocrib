@@ -4,87 +4,67 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bardic/gocrib/queries/queries"
-
 	"github.com/labstack/echo/v4"
 )
 
-// Join a matchs
+// JoinMatch route
 //
-//	@Summary	Join match by id
+//	@Summary			Join match by id
 //	@Description
-//	@Tags		match
-//	@Accept		json
-//	@Produce	json
-//	@Param		matchId	path		int	true	"match id"'
-//	@Param		accountId	path		int	true	"account id"'
-//	@Success	200		{object}	vo.Match
-//	@Failure	400		{object}	error
-//	@Failure	404		{object}	error
-//	@Failure	500		{object}	error
-//	@Router		/match/{matchId}/join/{accountId} [put]
+//	@Tags					match
+//	@Accept				json
+//	@Produce			json
+//	@Param				matchId			path			int				true	"match id"'
+//	@Param				accountId		path			int				true	"account id"'
+//	@Success			200					{object}	vo.Match
+//	@Failure			400					{object}	error
+//	@Failure			500					{object}	error
+//	@Router				/match/{matchId}/join/{accountId} [put]
 func (h *Handler) JoinMatch(c echo.Context) error {
-	matchId, err := strconv.Atoi(c.Param("matchId"))
+	matchID, err := strconv.Atoi(c.Param("matchId"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	accountId, err := strconv.Atoi(c.Param("accountId"))
+	accountID, err := strconv.Atoi(c.Param("accountId"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	score := 0
-
-	player, err := h.PlayerStore.CreatePlayer(c, queries.CreatePlayerParams{
-		Accountid: accountId,
-		Score:     score,
-		Isready:   false,
-		Art:       "default.png",
-	})
+	player, err := h.PlayerStore.CreatePlayer(c, accountID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return h.InternalError(c, "", err)
 	}
 
-	err = h.PlayerStore.PlayerJoinMatch(c, queries.PlayerJoinMatchParams{
-		Matchid:  matchId,
-		Playerid: player.ID,
-	})
+	err = h.PlayerStore.PlayerJoinMatch(c, matchID, player.ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return h.InternalError(c, "", err)
 	}
 
-	_, err = GetMatch(matchId)
+	_, err = h.MatchStore.GetMatch(c, matchID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return h.InternalError(c, "", err)
 	}
 
-	match, err := h.MatchStore.GetMatch(c, matchId)
+	match, err := h.MatchStore.GetMatch(c, matchID)
 	if err != nil {
 		return err
 	}
 
 	turnOrder := 1
 	for _, player := range match.Players {
-		h.MatchStore.UpdatePlayerTurnOrder(c, queries.UpdatePlayerTurnOrderParams{
-			Turnorder: turnOrder,
-			Matchid:   matchId,
-			Playerid:  player.ID,
-		})
+		err = h.MatchStore.UpdatePlayerTurnOrder(c, turnOrder, matchID, player.ID)
+		if err != nil {
+			return err
+		}
 
 		if turnOrder == 1 {
-			err = h.MatchStore.UpateMatchCurrentPlayerTurn(c, queries.UpateMatchCurrentPlayerTurnParams{
-				ID:                matchId,
-				Currentplayerturn: player.ID,
-			})
+			err = h.MatchStore.UpateMatchCurrentPlayerTurn(c, matchID, player.ID)
 			if err != nil {
 				return err
 			}
 
-			err = h.MatchStore.UpdateDealerForMatch(c, queries.UpdateDealerForMatchParams{
-				ID:       matchId,
-				Dealerid: player.ID,
-			})
+			err = h.MatchStore.UpdateDealerForMatch(c, matchID, player.ID)
 			if err != nil {
 				return err
 			}
@@ -120,12 +100,9 @@ func (h *Handler) JoinMatch(c echo.Context) error {
 	// 	}
 	// }
 
-	_, err = h.MatchStore.UpdateMatchState(c, queries.UpdateMatchStateParams{
-		ID:        matchId,
-		Gamestate: queries.GamestateDiscard,
-	})
+	_, err = h.MatchStore.UpdateMatchState(c, matchID, "Discard")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return h.InternalError(c, "", err)
 	}
 
 	return c.JSON(http.StatusOK, match)

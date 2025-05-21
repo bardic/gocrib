@@ -25,8 +25,8 @@ func (c *CribService) BuildGame(src *dagger.Directory) *dagger.Directory {
 }
 
 func (c *CribService) DbUp(ctx context.Context, src *dagger.Directory, withPort bool) (*dagger.Service, error) {
-	p := c.postgresService(withPort)
-	_, err := c.migrationService(src, p).Start(ctx)
+	p, err := c.postgresService(withPort).Start(ctx)
+	// _, err := c.migrationService(src, p).Start(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,6 @@ func (i *CribService) TestHttp(ctx context.Context, src *dagger.Directory,
 		e = "ci"
 
 		s, err := i.serverService(ctx, src, true)
-
 		if err != nil {
 			return "", err
 		}
@@ -64,7 +63,6 @@ func (i *CribService) TestHttp(ctx context.Context, src *dagger.Directory,
 	}
 
 	entries, err := httpDir.Entries(context.Background())
-
 	if err != nil {
 		return "", nil
 	}

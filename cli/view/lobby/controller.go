@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/bardic/gocrib/cli/services"
-	logger "github.com/bardic/gocrib/cli/utils/log"
 	cliVO "github.com/bardic/gocrib/cli/vo"
+	logger "github.com/bardic/gocrib/log"
 	"github.com/bardic/gocrib/vo"
 	tea "github.com/charmbracelet/bubbletea"
 )

@@ -5,6 +5,7 @@ INSERT INTO match(
     eloRangeMax,
     cutGameCardId,
     turnPassTimestamps,
+    dealerId,
     gameState,
     art)
 VALUES (
@@ -14,7 +15,8 @@ VALUES (
     $4,
     $5,
     $6,
-    $7)
+    $7,
+  $8)
 RETURNING *;
 
 -- name: UpdateMatchCut :exec
@@ -45,12 +47,10 @@ UPDATE match SET dealerid = $1 WHERE id = $2;
 
 -- name: ResetDeckForMatchId :exec
 UPDATE matchcard m SET state = 'Deck', origowner = null, currowner = null FROM matchcard
-LEFT JOIN 
-    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
 LEFT JOIN
-    deck ON deck_matchcard.deckid=deck.id
+    deck ON matchcard.deckid=deck.id
 LEFT JOIN
-    match ON deck.id=match.deckid
+    match ON deck.matchId=match.id
 WHERE
     match.id = $1;
 
@@ -180,36 +180,17 @@ WHERE
 
 -- name: GetDeckForMatchId :many
 SELECT 
-    deck_matchcard.*, 
     deck.*,
     matchcard.*,
     card.*
 FROM
     matchcard
 LEFT JOIN
-    deck_matchcard ON matchcard.id=deck_matchcard.matchcardid
+    deck ON matchcard.deckid=deck.id
 LEFT JOIN
-    deck ON deck_matchcard.deckid=deck.id
-LEFT JOIN
-    match ON deck.id=match.deckid
+    match ON deck.matchid=match.id
 left join 
 	card on card.id=matchcard.cardid
 WHERE
     match.id = $1;
-
-
-SELECT
-  deck_matchcard.*, 
-  deck.*,
-  matchcard.*,
-  card.*
-FROM 
-  deck
-LEFT JOIN
-  deck_matchcard ON deck_matchcard.deckid = deck.id
-LEFT JOIN
-  matchcard ON matchcard.id = deck_matchcard.matchcardid
-LEFT JOIN 
-	card ON card.id=matchcard.cardid
-WHERE deck.matchId = $1;
 

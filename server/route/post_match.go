@@ -4,104 +4,95 @@ import (
 	"net/http"
 	"strconv"
 
-	logger "github.com/bardic/gocrib/cli/utils/log"
-	"github.com/bardic/gocrib/queries/queries"
+	"github.com/bardic/gocrib/server/store"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
-	"go.uber.org/zap/zapcore"
 )
-
-var zero = 0
 
 // NewMatch route
 //
-// @Summary	Create new match with accountId
-// @Description
-// @Tags		match
-// @Accept		json
-// @Produce	json
-// @Param		accountId	path		int	true	"account id"'
-// @Success	200		{object}	int
-// @Failure	400		{object}	error
-// @Failure	500		{object}	error
-// @Router		/match/{accountId} [post]
+//	@Summary			Create new match with accountId
+//	@Description
+//	@Tags					match
+//	@Accept				json
+//	@Produce			json
+//	@Param				accountId		path			int		true	"account id"'
+//	@Success			200					{object}	int
+//	@Failure			400					{object}	error
+//	@Failure			500					{object}	error
+//	@Router				/match/{accountId} 	[post]
 func (h *Handler) NewMatch(c echo.Context) error {
-	l := logger.Get()
-	defer l.Sync()
-
 	accountID, err := strconv.Atoi(c.Param("accountId"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return h.BadParams(c, "error parsing accountID for NewMatch", err)
 	}
 
-	deck, err := h.DeckStore.CreateDeck(c)
+	player, err := h.PlayerStore.CreatePlayer(c, accountID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return h.InternalError(c, "failed to create player", err)
 	}
 
-	match, err := h.MatchStore.CreateMatch(c, queries.CreateMatchParams{
+	zero := 0
+
+	match, err := h.MatchStore.CreateMatch(c, store.NewMatchParam{
 		Privatematch:       false,
 		Elorangemin:        zero,
 		Elorangemax:        zero,
 		Cutgamecardid:      zero,
 		Turnpasstimestamps: []pgtype.Timestamptz{},
-		Gamestate:          queries.GamestateNew,
+		DealerID:           player.ID,
+		Gamestate:          "'New'",
 		Art:                "default.png",
 	})
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return h.InternalError(c, "failed to create match in NewMatch", err)
 	}
+
+	// deck, err := h.DeckStore.CreateDeck(c)
+	// if err != nil {
+	// 	return h.InternalError(c, "", err)
+	// }
 
 	cards, err := h.CardStore.GetCards(c)
 	if err != nil {
-		return err
+		return h.InternalError(c, "failed to retreive base cards from DB", err)
 	}
 
-	l.Log(zapcore.DebugLevel, "Cards")
+	// // deckCards := make([]int, len(cards))
+	// matchCards := make([]queries.CreateMatchCardParams, len(cards))
+	//
+	// for i, card := range cards {
+	// 	matchCards[i] = queries.CreateMatchCardParams{
+	// 		Cardid: card.ID,
+	// 		State:  queries.CardstateDeck,
+	// 	}
+	//
+	// 	// deckCards[i] = queries.AddCardToDeckParams{ // TODO: Get rid of referencs to queries in here
+	// 	// 	Deckid:      deck.ID,
+	// 	// 	Matchcardid: card.ID, // TODO: This is wrong. should get the id from the matchcards table, not the card id
+	// 	// }
+	//}
 
-	deckCards := make([]queries.AddCardToDeckParams, len(cards))
-	matchCards := make([]queries.CreateMatchCardParams, len(cards))
+	cardIds := make([]int, len(cards))
 
 	for i, card := range cards {
-		matchCards[i] = queries.CreateMatchCardParams{
-			Cardid: card.ID,
-			State:  queries.CardstateDeck,
-		}
-
-		deckCards[i] = queries.AddCardToDeckParams{ // TODO: Get rid of referencs to queries in here
-			Deckid:      deck.ID,
-			Matchcardid: card.ID, // TODO: This is wrong. should get the id from the matchcards table, not the card id
-		}
+		cardIds[i] = card.ID
 	}
 
-	err = h.CardStore.CreateMatchCard(c, matchCards)
+	err = h.CardStore.CreateMatchCard(c, cardIds)
 	if err != nil {
-		return err
+		return h.InternalError(c, "failed to create match cards", err)
 	}
 
-	err = h.DeckStore.AddCardToDeck(c, deckCards)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
+	// err = h.DeckStore.AddCardToDeck(c, deckCards)
+	// if err != nil {
+	// 	return h.InternalError(c, "", err)
+	// }
+	//
 
-	score := 0
-
-	player, err := h.PlayerStore.CreatePlayer(c, queries.CreatePlayerParams{
-		Accountid: accountID,
-		Score:     score,
-		Isready:   false,
-		Art:       "default.png",
-	})
+	match, err = h.MatchStore.PlayerJoinMatch(c, match.ID, player.ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-
-	match, err = h.MatchStore.PlayerJoinMatch(c, queries.PlayerJoinMatchParams{
-		Matchid:  match.ID,
-		Playerid: player.ID,
-	})
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return h.InternalError(c, "failed to have player join match", err)
 	}
 
 	return c.JSON(http.StatusOK, match)

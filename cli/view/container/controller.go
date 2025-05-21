@@ -6,10 +6,10 @@ import (
 
 	"github.com/bardic/gocrib/cli/services"
 	"github.com/bardic/gocrib/cli/styles"
-	logger "github.com/bardic/gocrib/cli/utils/log"
 	"github.com/bardic/gocrib/cli/view/board"
 	"github.com/bardic/gocrib/cli/view/card"
 	cliVO "github.com/bardic/gocrib/cli/vo"
+	logger "github.com/bardic/gocrib/log"
 	"github.com/bardic/gocrib/vo"
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"

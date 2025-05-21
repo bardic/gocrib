@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/bardic/gocrib/cli/styles"
-	logger "github.com/bardic/gocrib/cli/utils/log"
 	"github.com/bardic/gocrib/cli/view/container"
 	"github.com/bardic/gocrib/cli/view/lobby"
 	"github.com/bardic/gocrib/cli/view/login"
 	cliVO "github.com/bardic/gocrib/cli/vo"
+	logger "github.com/bardic/gocrib/log"
 	"github.com/bardic/gocrib/vo"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
