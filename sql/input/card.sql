@@ -1,5 +1,5 @@
 -- name: CreateMatchCard :copyfrom
-INSERT INTO matchcard (cardid, origowner, currowner, state) VALUES ($1, $2, $3, $4);
+INSERT INTO matchcard (cardid, origowner, currowner, state, deckid) VALUES ($1, $2, $3, $4, $5);
 
 -- name: UpdateMatchCardState :exec
 UPDATE matchcard SET state = $1, origowner = $2, currowner = $3 WHERE id = $4;

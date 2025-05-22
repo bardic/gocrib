@@ -9,8 +9,8 @@ type DeckStore struct {
 	Store
 }
 
-func (p *DeckStore) CreateDeck(ctx echo.Context) (*vo.Deck, error) {
-	deck, err := p.q().CreateDeck(ctx.Request().Context())
+func (p *DeckStore) CreateDeck(ctx echo.Context, matchID int) (*vo.Deck, error) {
+	deck, err := p.q().CreateDeck(ctx.Request().Context(), matchID)
 
 	defer p.Close()
 

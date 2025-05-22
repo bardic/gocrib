@@ -16,6 +16,7 @@ type CreateMatchCardParams struct {
 	Origowner int
 	Currowner int
 	State     string
+	Deckid    int
 }
 
 const getCards = `-- name: GetCards :many

@@ -33,6 +33,7 @@ func (r iteratorForCreateMatchCard) Values() ([]interface{}, error) {
 		r.rows[0].Origowner,
 		r.rows[0].Currowner,
 		r.rows[0].State,
+		r.rows[0].Deckid,
 	}, nil
 }
 
@@ -41,5 +42,5 @@ func (r iteratorForCreateMatchCard) Err() error {
 }
 
 func (q *Queries) CreateMatchCard(ctx context.Context, arg []CreateMatchCardParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"matchcard"}, []string{"cardid", "origowner", "currowner", "state"}, &iteratorForCreateMatchCard{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"matchcard"}, []string{"cardid", "origowner", "currowner", "state", "deckid"}, &iteratorForCreateMatchCard{rows: arg})
 }

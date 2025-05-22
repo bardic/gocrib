@@ -74,12 +74,15 @@ func (p *CardStore) GetCards(ctx echo.Context) ([]*vo.Card, error) {
 	return matchCards, nil
 }
 
-func (p *CardStore) CreateMatchCard(ctx echo.Context, cardIDs []int) error {
+func (p *CardStore) CreateMatchCard(ctx echo.Context, deckID int, cardIDs []int) error {
 	params := make([]queries.CreateMatchCardParams, len(cardIDs))
 	for i, cID := range cardIDs {
 		params[i] = queries.CreateMatchCardParams{
-			Cardid: cID,
-			State:  "Deck",
+			Cardid:    cID,
+			Origowner: 1,
+			Currowner: 1,
+			State:     "Deck",
+			Deckid:    deckID,
 		}
 	}
 	_, err := p.q().CreateMatchCard(ctx.Request().Context(), params)

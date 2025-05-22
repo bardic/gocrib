@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	// swagger docs.
 	_ "github.com/bardic/gocrib/server/docs"
 	"github.com/bardic/gocrib/server/route"
 	"github.com/labstack/echo/v4"

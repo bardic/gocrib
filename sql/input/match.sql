@@ -6,6 +6,7 @@ INSERT INTO match(
     cutGameCardId,
     turnPassTimestamps,
     dealerId,
+    currentPlayerTurn,
     gameState,
     art)
 VALUES (
@@ -16,7 +17,8 @@ VALUES (
     $5,
     $6,
     $7,
-  $8)
+    $8,
+    $9)
 RETURNING *;
 
 -- name: UpdateMatchCut :exec

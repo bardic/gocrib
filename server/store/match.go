@@ -74,6 +74,7 @@ type NewMatchParam struct {
 	Turnpasstimestamps []pgtype.Timestamptz
 	Gamestate          string
 	DealerID           int
+	CurrentPlayerID    int
 	Art                string
 }
 
@@ -84,9 +85,10 @@ func (p *MatchStore) CreateMatch(ctx echo.Context, params NewMatchParam) (*vo.Ma
 		Elorangemax:        params.Elorangemax,
 		Cutgamecardid:      params.Cutgamecardid,
 		Turnpasstimestamps: params.Turnpasstimestamps,
-
-		Gamestate: "'New'",
-		Art:       params.Art,
+		Dealerid:           params.DealerID,
+		Currentplayerturn:  params.CurrentPlayerID,
+		Gamestate:          "'New'",
+		Art:                params.Art,
 	})
 
 	defer p.Close()

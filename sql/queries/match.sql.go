@@ -19,6 +19,7 @@ INSERT INTO match(
     cutGameCardId,
     turnPassTimestamps,
     dealerId,
+    currentPlayerTurn,
     gameState,
     art)
 VALUES (
@@ -29,7 +30,8 @@ VALUES (
     $5,
     $6,
     $7,
-  $8)
+    $8,
+    $9)
 RETURNING id, creationdate, privatematch, elorangemin, elorangemax, cutgamecardid, dealerid, currentplayerturn, turnpasstimestamps, gamestate, art
 `
 
@@ -40,6 +42,7 @@ type CreateMatchParams struct {
 	Cutgamecardid      int
 	Turnpasstimestamps []pgtype.Timestamptz
 	Dealerid           int
+	Currentplayerturn  int
 	Gamestate          string
 	Art                string
 }
@@ -52,6 +55,7 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) (Match
 		arg.Cutgamecardid,
 		arg.Turnpasstimestamps,
 		arg.Dealerid,
+		arg.Currentplayerturn,
 		arg.Gamestate,
 		arg.Art,
 	)

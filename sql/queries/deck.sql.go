@@ -10,11 +10,11 @@ import (
 )
 
 const createDeck = `-- name: CreateDeck :one
-INSERT INTO deck(cutmatchcardid) VALUES (null) RETURNING id, cutmatchcardid, matchid
+INSERT INTO deck(cutmatchcardid, matchid) VALUES (-1, $1) RETURNING id, cutmatchcardid, matchid
 `
 
-func (q *Queries) CreateDeck(ctx context.Context) (Deck, error) {
-	row := q.db.QueryRow(ctx, createDeck)
+func (q *Queries) CreateDeck(ctx context.Context, matchid int) (Deck, error) {
+	row := q.db.QueryRow(ctx, createDeck, matchid)
 	var i Deck
 	err := row.Scan(&i.ID, &i.Cutmatchcardid, &i.Matchid)
 	return i, err

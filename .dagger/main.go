@@ -33,6 +33,15 @@ func (c *CribService) DbUp(ctx context.Context, src *dagger.Directory, withPort 
 	return p, nil
 }
 
+func (c *CribService) DbSown(ctx context.Context, src *dagger.Directory, withPort bool) (*dagger.Service, error) {
+	p := c.postgresService(withPort)
+	_, err := c.migrationService(src, p).Start(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
 func (i *CribService) Server(ctx context.Context, src *dagger.Directory, migrate bool) (*dagger.Service, error) {
 	return i.serverService(ctx, src, migrate)
 }

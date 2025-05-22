@@ -29,6 +29,16 @@ func DbUp() error {
 	return err
 }
 
+func DbSown() error {
+	fmt.Println("Starting Server...")
+	cmd := exec.Command("dagger", "call", "db-sown", "--src=.", "--with-port", "up", "--progress", "plain")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	return err
+}
+
 func GenQueries() error {
 	fmt.Println("Building Queries...")
 	cmd := exec.Command("dagger", "call", "build-queries", "--src=.", "export", "--path=sql/queries")
